@@ -188,10 +188,10 @@ export default function App() {
 
     axios
       .get("/categories/tree")
-      .then((res) => {
+      .then((res: any) => {
         setCategories(Array.isArray(res.data) ? res.data : []);
       })
-      .catch((err) => console.error("Kategori yükleme hatası:", err));
+       .catch((err: any) => {console.error("Kategori yükleme hatası:", err));
   }, []);
 
   const authHeaders = () => {
