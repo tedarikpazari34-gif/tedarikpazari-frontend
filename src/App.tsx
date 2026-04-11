@@ -191,7 +191,9 @@ export default function App() {
       .then((res: any) => {
         setCategories(Array.isArray(res.data) ? res.data : []);
       })
-       .catch((err: any) => {console.error("Kategori yükleme hatası:", err));
+       .catch((err: any) => {
+  console.error("Kategori yükleme hatası", err);
+});
   }, []);
 
   const authHeaders = () => {
