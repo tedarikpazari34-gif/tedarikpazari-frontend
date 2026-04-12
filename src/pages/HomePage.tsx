@@ -1,27 +1,30 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import PopularSectors from "../components/PopularSectors";
 
 export default function HomePage() {
   return (
     <>
       <Helmet>
-  <title>
-    Tedarik Pazarı | İşletmeler için B2B Toptan Tedarik Platformu
-  </title>
+        <title>
+          Tedarik Pazarı | İşletmeler için B2B Toptan Tedarik Platformu
+        </title>
 
-  <meta
-    name="description"
-    content="Tedarik Pazarı ile işletmeniz için toptan ürünleri keşfedin, tedarikçilerden teklif alın ve B2B satın alma sürecinizi tek platformdan yönetin."
-  />
+        <meta
+          name="description"
+          content="Tedarik Pazarı ile işletmeniz için toptan ürünleri keşfedin, tedarikçilerden teklif alın ve B2B satın alma sürecinizi tek platformdan yönetin."
+        />
 
-  <link rel="canonical" href="https://tedarikpazarı.com/" />
+        <link rel="canonical" href="https://tedarikpazarı.com/" />
 
-  {/* Open Graph */}
-  <meta property="og:title" content="Tedarik Pazarı" />
-  <meta property="og:description" content="B2B tedarik platformu" />
-  <meta property="og:url" content="https://tedarikpazarı.com/" />
-  <meta property="og:type" content="website" />
-</Helmet>
+        <meta property="og:title" content="Tedarik Pazarı" />
+        <meta
+          property="og:description"
+          content="B2B tedarik platformu"
+        />
+        <meta property="og:url" content="https://tedarikpazarı.com/" />
+        <meta property="og:type" content="website" />
+      </Helmet>
 
       <div
         style={{
@@ -213,6 +216,8 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+
+          <PopularSectors />
         </div>
       </div>
     </>

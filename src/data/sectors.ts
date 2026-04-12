@@ -1,0 +1,178 @@
+export type Sector = {
+  id: string;
+  name: string;
+  slug: string;
+  shortDescription: string;
+  iconLetter: string;
+};
+
+export const sectors: Sector[] = [
+  {
+    id: "ambalaj-paketleme",
+    name: "Ambalaj ve Paketleme",
+    slug: "ambalaj-ve-paketleme",
+    shortDescription: "Koli, bant, streç film, paketleme çözümleri",
+    iconLetter: "A",
+  },
+  {
+    id: "elektrik-aydinlatma",
+    name: "Elektrik ve Aydınlatma",
+    slug: "elektrik-ve-aydinlatma",
+    shortDescription: "Kablo, priz, anahtar, LED ve aydınlatma ürünleri",
+    iconLetter: "E",
+  },
+  {
+    id: "gida-horeca",
+    name: "Gıda ve Horeca",
+    slug: "gida-ve-horeca",
+    shortDescription: "Otel, restoran, kafe ve toplu tüketim ürünleri",
+    iconLetter: "G",
+  },
+  {
+    id: "hirdavat",
+    name: "Hırdavat",
+    slug: "hirdavat",
+    shortDescription: "El aletleri, bağlantı elemanları ve sarf malzemeler",
+    iconLetter: "H",
+  },
+  {
+    id: "otomotiv-yedek-parca",
+    name: "Otomotiv ve Yedek Parça",
+    slug: "otomotiv-ve-yedek-parca",
+    shortDescription: "Servis, bakım ve araç yedek parça ürünleri",
+    iconLetter: "O",
+  },
+  {
+    id: "temizlik-hijyen",
+    name: "Temizlik ve Hijyen",
+    slug: "temizlik-ve-hijyen",
+    shortDescription: "Endüstriyel temizlik, kağıt ürünleri ve hijyen çözümleri",
+    iconLetter: "T",
+  },
+  {
+    id: "insaat-yapi-malzemeleri",
+    name: "İnşaat ve Yapı Malzemeleri",
+    slug: "insaat-ve-yapi-malzemeleri",
+    shortDescription: "Çimento, boya, yapı kimyasalları ve saha ekipmanları",
+    iconLetter: "İ",
+  },
+  {
+    id: "metal-celik",
+    name: "Metal ve Çelik",
+    slug: "metal-ve-celik",
+    shortDescription: "Sac, profil, boru, paslanmaz ve metal işleme ürünleri",
+    iconLetter: "M",
+  },
+  {
+    id: "mobilya-ofis",
+    name: "Mobilya ve Ofis",
+    slug: "mobilya-ve-ofis",
+    shortDescription: "Ofis mobilyaları, sandalye, masa ve arşiv çözümleri",
+    iconLetter: "M",
+  },
+  {
+    id: "tekstil-is-guvenligi",
+    name: "Tekstil ve İş Güvenliği",
+    slug: "tekstil-ve-is-guvenligi",
+    shortDescription: "İş eldiveni, iş kıyafeti, ayakkabı ve koruyucu ekipman",
+    iconLetter: "T",
+  },
+  {
+    id: "makine-ekipman",
+    name: "Makine ve Ekipman",
+    slug: "makine-ve-ekipman",
+    shortDescription: "Üretim hatları, makineler ve endüstriyel ekipmanlar",
+    iconLetter: "M",
+  },
+  {
+    id: "sanayi-sarf",
+    name: "Sanayi Sarf Malzemeleri",
+    slug: "sanayi-sarf-malzemeleri",
+    shortDescription: "Kesici takım, disk, kaynak ve bakım sarfları",
+    iconLetter: "S",
+  },
+  {
+    id: "plastik-kimya",
+    name: "Plastik ve Kimya",
+    slug: "plastik-ve-kimya",
+    shortDescription: "Hammadde, granül, solvent ve kimyasal ürünler",
+    iconLetter: "P",
+  },
+  {
+    id: "medikal-saglik",
+    name: "Medikal ve Sağlık",
+    slug: "medikal-ve-saglik",
+    shortDescription: "Medikal sarf, cihaz ve sağlık ekipmanları",
+    iconLetter: "M",
+  },
+  {
+    id: "tarim-hayvancilik",
+    name: "Tarım ve Hayvancılık",
+    slug: "tarim-ve-hayvancilik",
+    shortDescription: "Sulama, yem, ekipman ve tarımsal ürünler",
+    iconLetter: "T",
+  },
+  {
+    id: "lojistik-depolama",
+    name: "Lojistik ve Depolama",
+    slug: "lojistik-ve-depolama",
+    shortDescription: "Raf sistemleri, palet, taşıma ve depo çözümleri",
+    iconLetter: "L",
+  },
+  {
+    id: "elektronik-teknoloji",
+    name: "Elektronik ve Teknoloji",
+    slug: "elektronik-ve-teknoloji",
+    shortDescription: "Bilgisayar, çevre birimleri ve teknoloji ürünleri",
+    iconLetter: "E",
+  },
+  {
+    id: "iklimlendirme",
+    name: "İklimlendirme ve HVAC",
+    slug: "iklimlendirme-ve-hvac",
+    shortDescription: "Klima, havalandırma ve soğutma sistemleri",
+    iconLetter: "İ",
+  },
+  {
+    id: "su-tesisat",
+    name: "Su ve Tesisat",
+    slug: "su-ve-tesisat",
+    shortDescription: "Vana, boru, fittings ve sıhhi tesisat ürünleri",
+    iconLetter: "S",
+  },
+  {
+    id: "guvenlik-yangin",
+    name: "Güvenlik ve Yangın Sistemleri",
+    slug: "guvenlik-ve-yangin-sistemleri",
+    shortDescription: "Kamera, alarm, yangın tüpü ve güvenlik çözümleri",
+    iconLetter: "G",
+  },
+  {
+    id: "reklam-promosyon",
+    name: "Reklam ve Promosyon",
+    slug: "reklam-ve-promosyon",
+    shortDescription: "Kurumsal baskı, promosyon ve tanıtım ürünleri",
+    iconLetter: "R",
+  },
+  {
+    id: "kirtasiye-matbaa",
+    name: "Kırtasiye ve Matbaa",
+    slug: "kirtasiye-ve-matbaa",
+    shortDescription: "Ofis kırtasiye, baskı ve matbaa çözümleri",
+    iconLetter: "K",
+  },
+  {
+    id: "enerji-gunes",
+    name: "Enerji ve Güneş Sistemleri",
+    slug: "enerji-ve-gunes-sistemleri",
+    shortDescription: "Solar panel, inverter, enerji ekipmanları",
+    iconLetter: "E",
+  },
+  {
+    id: "maden-endustriyel-uretim",
+    name: "Maden ve Endüstriyel Üretim",
+    slug: "maden-ve-endustriyel-uretim",
+    shortDescription: "Ağır sanayi, üretim ve saha ekipmanları",
+    iconLetter: "M",
+  },
+];
