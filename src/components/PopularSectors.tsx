@@ -4,10 +4,14 @@ export default function PopularSectors() {
   return (
     <section className="w-full py-10">
       <div className="mx-auto max-w-7xl px-4">
+        
+        {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500">Kategoriler</p>
-            <h2 className="text-3xl font-bold text-white">Popüler tedarik alanları</h2>
+            <p className="text-sm text-gray-400">Kategoriler</p>
+            <h2 className="text-2xl font-bold text-white">
+              Popüler tedarik alanları
+            </h2>
           </div>
 
           <a
@@ -18,27 +22,25 @@ export default function PopularSectors() {
           </a>
         </div>
 
+        {/* Grid */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
           {sectors.map((sector) => (
-            <a
+            <div
               key={sector.id}
-              href={`/kategori/${sector.slug}`}
-              className="rounded-2xl border border-white/10 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              className="rounded-2xl bg-white/5 border border-white/10 p-4 hover:bg-white/10 transition"
             >
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-sm font-bold text-indigo-600">
-                {sector.iconLetter}
+              {/* ICON yerine ilk harf */}
+              <div className="text-blue-400 text-xl mb-2">
+                {sector.name.charAt(0)}
               </div>
 
-              <h3 className="mb-2 text-base font-semibold text-gray-900">
+              <div className="text-white font-semibold text-sm">
                 {sector.name}
-              </h3>
-
-              <p className="text-sm leading-5 text-gray-500">
-                {sector.shortDescription}
-              </p>
-            </a>
+              </div>
+            </div>
           ))}
         </div>
+
       </div>
     </section>
   );
