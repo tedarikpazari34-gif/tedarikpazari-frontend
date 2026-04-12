@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tedarikpazari.com/sitemap.xml
+Sitemap: https://tedarikpazarı.com/sitemap.xml
