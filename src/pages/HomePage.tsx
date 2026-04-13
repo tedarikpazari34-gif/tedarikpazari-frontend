@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 
 const sectors = [
   "Ambalaj ve Paketleme",
@@ -37,21 +38,21 @@ const highlights = [
 const steps = [
   {
     step: "1",
-    title: "Ürünü veya kategoriyi ara",
+    title: "İhtiyacını ara",
     description:
-      "İhtiyacın olan ürünleri kategori bazında hızlıca keşfet.",
+      "Ürün veya kategori bazında ihtiyacına uygun tedarik seçeneklerini hızlıca bul.",
   },
   {
     step: "2",
     title: "Tedarikçileri karşılaştır",
     description:
-      "Fiyat, minimum sipariş, teslim süresi ve güven durumuna göre değerlendir.",
+      "Fiyat, minimum sipariş, teslim süresi ve güven durumuna göre en doğru seçimi yap.",
   },
   {
     step: "3",
-    title: "Teklif al ve süreci yönet",
+    title: "Teklif al ve yönet",
     description:
-      "RFQ ile teklif topla, sipariş sürecini daha kontrollü ilerlet.",
+      "RFQ ile teklif topla, süreci takip et ve kurumsal satın almanı tek yerden yönet.",
   },
 ];
 
@@ -79,11 +80,18 @@ export default function HomePage() {
       <div
         style={{
           minHeight: "100vh",
-          background: "#081120",
+          background:
+            "radial-gradient(circle at top left, rgba(37,99,235,0.18), transparent 30%), #081120",
           color: "#ffffff",
         }}
       >
-        <div style={{ maxWidth: 1240, margin: "0 auto", padding: "28px 20px 72px" }}>
+        <div
+          style={{
+            maxWidth: 1240,
+            margin: "0 auto",
+            padding: "28px 20px 72px",
+          }}
+        >
           <header
             style={{
               display: "flex",
@@ -105,14 +113,26 @@ export default function HomePage() {
               >
                 TEDARİKÇİ
               </div>
-              <div style={{ color: "#94a3b8", marginTop: 6, fontSize: 14 }}>
+              <div
+                style={{
+                  color: "#94a3b8",
+                  marginTop: 6,
+                  fontSize: 14,
+                }}
+              >
                 Türkiye B2B tedarik ve toptan satın alma platformu
               </div>
             </div>
 
-            <nav style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <a
-                href="/uyelik"
+            <nav
+              style={{
+                display: "flex",
+                gap: 12,
+                flexWrap: "wrap",
+              }}
+            >
+              <Link
+                to="/uyelik"
                 style={{
                   textDecoration: "none",
                   background: "#22c55e",
@@ -123,9 +143,10 @@ export default function HomePage() {
                 }}
               >
                 Üye Ol
-              </a>
-              <a
-                href="/panel"
+              </Link>
+
+              <Link
+                to="/panel"
                 style={{
                   textDecoration: "none",
                   background: "#2563eb",
@@ -136,7 +157,7 @@ export default function HomePage() {
                 }}
               >
                 Giriş Yap
-              </a>
+              </Link>
             </nav>
           </header>
 
@@ -205,8 +226,8 @@ export default function HomePage() {
                   marginBottom: 20,
                 }}
               >
-                <a
-                  href="/uyelik"
+                <Link
+                  to="/uyelik"
                   style={{
                     textDecoration: "none",
                     background: "#84cc16",
@@ -217,9 +238,10 @@ export default function HomePage() {
                   }}
                 >
                   Hemen Başla
-                </a>
-                <a
-                  href="/panel"
+                </Link>
+
+                <Link
+                  to="/panel"
                   style={{
                     textDecoration: "none",
                     background: "#ffffff",
@@ -230,7 +252,7 @@ export default function HomePage() {
                   }}
                 >
                   Tedarik Paneli
-                </a>
+                </Link>
               </div>
 
               <div
@@ -338,7 +360,13 @@ export default function HomePage() {
               }}
             >
               <div>
-                <div style={{ color: "#38bdf8", fontWeight: 700, marginBottom: 8 }}>
+                <div
+                  style={{
+                    color: "#38bdf8",
+                    fontWeight: 700,
+                    marginBottom: 8,
+                  }}
+                >
                   POPÜLER TEDARİK ALANLARI
                 </div>
                 <h2 style={{ margin: 0, fontSize: 30 }}>
@@ -346,8 +374,8 @@ export default function HomePage() {
                 </h2>
               </div>
 
-              <a
-                href="/panel"
+              <Link
+                to="/panel"
                 style={{
                   textDecoration: "none",
                   color: "#93c5fd",
@@ -355,7 +383,7 @@ export default function HomePage() {
                 }}
               >
                 Tüm kategorileri incele
-              </a>
+              </Link>
             </div>
 
             <div
@@ -430,7 +458,9 @@ export default function HomePage() {
                 >
                   {item.step}
                 </div>
-                <h3 style={{ margin: "0 0 10px", fontSize: 20 }}>{item.title}</h3>
+                <h3 style={{ margin: "0 0 10px", fontSize: 20 }}>
+                  {item.title}
+                </h3>
                 <p style={{ margin: 0, color: "#6b7280", lineHeight: 1.65 }}>
                   {item.description}
                 </p>
@@ -463,9 +493,16 @@ export default function HomePage() {
               karşılaştırın ve satın alma sürecini daha planlı yönetin.
             </p>
 
-            <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
-              <a
-                href="/uyelik"
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: 12,
+                flexWrap: "wrap",
+              }}
+            >
+              <Link
+                to="/uyelik"
                 style={{
                   textDecoration: "none",
                   background: "#22c55e",
@@ -476,9 +513,10 @@ export default function HomePage() {
                 }}
               >
                 Ücretsiz Başla
-              </a>
-              <a
-                href="/panel"
+              </Link>
+
+              <Link
+                to="/panel"
                 style={{
                   textDecoration: "none",
                   background: "#ffffff",
@@ -489,7 +527,7 @@ export default function HomePage() {
                 }}
               >
                 Panele Git
-              </a>
+              </Link>
             </div>
           </section>
         </div>
