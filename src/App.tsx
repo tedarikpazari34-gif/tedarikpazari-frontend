@@ -1,5 +1,7 @@
-import HomePage from "./pages/HomePage";
-
 export default function App() {
-  return <HomePage />;
+  return (
+    <div style={{ background: "red", color: "#fff", padding: 50 }}>
+      APP ÇALIŞIYOR 🔥
+    </div>
+  );
 }

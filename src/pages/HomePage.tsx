@@ -47,7 +47,11 @@ export default function HomePage() {
           </div>
 
           {/* 🔥 BURASI KRİTİK */}
-          <PopularSectors />
+          <div style={{ background: "red", padding: 20 }}>
+  TEST ÇALIŞIYOR
+</div>
+
+<PopularSectors />
 
         </div>
       </div>
