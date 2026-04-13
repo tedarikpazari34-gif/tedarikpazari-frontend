@@ -27,17 +27,7 @@ export default function HomePage() {
         }}
       >
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div
-            style={{
-              background: "red",
-              color: "#fff",
-              padding: 12,
-              fontWeight: 700,
-              marginBottom: 24,
-            }}
-          >
-            HOMEPAGE ÇALIŞIYOR
-          </div>
+          
 
           <div
             style={{
