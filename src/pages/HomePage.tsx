@@ -232,7 +232,7 @@ export default function HomePage() {
           <section
             style={{
               display: "grid",
-              gridTemplateColumns: "1.35fr 0.95fr",
+              gridTemplateColumns: "1fr",
               gap: 24,
               alignItems: "stretch",
               marginBottom: 28,
@@ -244,6 +244,7 @@ export default function HomePage() {
                 overflow: "hidden",
                 borderRadius: 28,
                 minHeight: 560,
+                width: "100%",
                 backgroundImage:
                   "linear-gradient(90deg, rgba(8,15,30,0.92) 0%, rgba(8,15,30,0.72) 42%, rgba(8,15,30,0.28) 100%), url('/images/hero-b2b.jpg')",
                 backgroundSize: "cover",
@@ -272,15 +273,9 @@ export default function HomePage() {
                   TÜRKİYE B2B MARKETPLACE
                 </div>
 
-                <h1
-                  style={{
-                    fontSize: 58,
-                    lineHeight: 1.03,
-                    margin: "0 0 18px",
-                    fontWeight: 800,
-                    textShadow: "0 8px 30px rgba(0,0,0,0.38)",
-                  }}
-                >
+                
+                  <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
+                
                   İşletmeler için güvenli toptan tedarik platformu
                 </h1>
 
@@ -383,6 +378,7 @@ export default function HomePage() {
                 color: "#0f172a",
                 borderRadius: 28,
                 padding: 28,
+                width: "100%",
                 boxShadow: "0 20px 40px rgba(15, 23, 42, 0.16)",
                 border: "1px solid rgba(226,232,240,0.8)",
               }}
