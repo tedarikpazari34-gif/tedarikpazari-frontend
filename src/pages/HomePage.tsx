@@ -1,7 +1,67 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-const sectors = [
+type Sector = {
+  title: string;
+  image: string;
+};
+
+type Highlight = {
+  title: string;
+  description: string;
+};
+
+type StepItem = {
+  step: string;
+  title: string;
+  description: string;
+};
+
+type SupplierCard = {
+  name: string;
+  category: string;
+  badge: string;
+  image: string;
+};
+
+type StatItem = {
+  value: string;
+  label: string;
+};
+
+type ProductCategory = {
+  id?: string;
+  name: string;
+};
+
+type ProductImageObject = {
+  url?: string;
+  imageUrl?: string;
+};
+
+type ApiProduct = {
+  id: string;
+  title?: string;
+  name?: string;
+  price?: number | string;
+  basePrice?: number | string;
+  imageUrl?: string;
+  thumbnail?: string;
+  images?: Array<string | ProductImageObject>;
+  category?: ProductCategory | string | null;
+  categoryName?: string;
+};
+
+type ProductCard = {
+  id: string;
+  title: string;
+  category: string;
+  price: string;
+  image: string;
+};
+
+const sectors: Sector[] = [
   { title: "Ambalaj ve Paketleme", image: "/images/category-ambalaj.jpg" },
   { title: "Temizlik ve Hijyen", image: "/images/category-temizlik.jpg" },
   { title: "Gıda ve Horeca", image: "/images/category-gida.jpg" },
@@ -12,7 +72,7 @@ const sectors = [
   { title: "Lojistik ve Depolama", image: "/images/category-lojistik.jpg" },
 ];
 
-const highlights = [
+const highlights: Highlight[] = [
   {
     title: "Doğrulanmış tedarikçiler",
     description:
@@ -35,7 +95,7 @@ const highlights = [
   },
 ];
 
-const steps = [
+const steps: StepItem[] = [
   {
     step: "1",
     title: "İhtiyacını ara",
@@ -56,20 +116,23 @@ const steps = [
   },
 ];
 
-const featuredProducts = [
+const fallbackFeaturedProducts: ProductCard[] = [
   {
+    id: "fallback-1",
     title: "Endüstriyel Koli Bandı",
     category: "Ambalaj",
     price: "₺100+",
     image: "/images/product-1.jpg",
   },
   {
+    id: "fallback-2",
     title: "Hijyenik Kağıt Ürünleri",
     category: "Temizlik",
     price: "₺250+",
     image: "/images/product-2.jpg",
   },
   {
+    id: "fallback-3",
     title: "LED Armatür Seti",
     category: "Elektrik",
     price: "₺450+",
@@ -77,7 +140,7 @@ const featuredProducts = [
   },
 ];
 
-const featuredSuppliers = [
+const featuredSuppliers: SupplierCard[] = [
   {
     name: "Marmara Ambalaj",
     category: "Ambalaj ve Paketleme",
@@ -98,7 +161,7 @@ const featuredSuppliers = [
   },
 ];
 
-const statItems = [
+const statItems: StatItem[] = [
   { value: "250+", label: "Doğrulanmış tedarikçi" },
   { value: "1.000+", label: "Listeleme ve ürün" },
   { value: "20+", label: "Popüler kategori" },
@@ -125,7 +188,110 @@ const secondaryButtonStyle: React.CSSProperties = {
   boxShadow: "0 10px 24px rgba(15, 23, 42, 0.16)",
 };
 
+function formatPrice(value?: number | string, fallback = "Teklif Al"): string {
+  if (value === undefined || value === null || value === "") return fallback;
+
+  if (typeof value === "number") return `₺${value}`;
+
+  const numeric = Number(value);
+  if (!Number.isNaN(numeric)) return `₺${numeric}`;
+
+  return String(value);
+}
+
+function getCategoryName(product: ApiProduct): string {
+  if (typeof product.category === "string" && product.category.trim()) {
+    return product.category;
+  }
+
+  if (
+    product.category &&
+    typeof product.category === "object" &&
+    "name" in product.category &&
+    product.category.name
+  ) {
+    return product.category.name;
+  }
+
+  if (product.categoryName) return product.categoryName;
+
+  return "Kategori";
+}
+
+function getImageUrl(product: ApiProduct): string {
+  if (Array.isArray(product.images) && product.images.length > 0) {
+    const img = product.images[0];
+
+    if (typeof img === "string") {
+      return img.trim() && img.startsWith("http")
+        ? img
+        : `http://localhost:3002${img}`;
+    }
+
+    if (img && typeof img === "object") {
+      if (img.url) {
+        return img.url.startsWith("http")
+          ? img.url
+          : `http://localhost:3002${img.url}`;
+      }
+
+      if (img.imageUrl) {
+        return img.imageUrl.startsWith("http")
+          ? img.imageUrl
+          : `http://localhost:3002${img.imageUrl}`;
+      }
+    }
+  }
+
+  if (product.imageUrl) {
+    return product.imageUrl.startsWith("http")
+      ? product.imageUrl
+      : `http://localhost:3002${product.imageUrl}`;
+  }
+
+  const title = (product.title || product.name || "").toLowerCase();
+
+  if (title.includes("eldiven")) return "/images/product-4.jpg";
+  if (title.includes("ampul")) return "/images/product-5.jpg";
+  if (title.includes("koli")) return "/images/product-1.jpg";
+
+  return "/images/product-1.jpg";
+}
+
+function mapApiProductToCard(product: ApiProduct): ProductCard {
+  return {
+    id: product.id,
+    title: product.title || product.name || "Ürün",
+    category: getCategoryName(product),
+    price: formatPrice(product.price ?? product.basePrice),
+    image: getImageUrl(product),
+  };
+}
+
 export default function HomePage() {
+  const [featuredProducts, setFeaturedProducts] =
+    useState<ProductCard[]>(fallbackFeaturedProducts);
+
+  useEffect(() => {
+    fetch("http://localhost:3002/api/products")
+      .then((res) => {
+        if (!res.ok) throw new Error(`Ürünler alınamadı: ${res.status}`);
+        return res.json();
+      })
+      .then((data: unknown) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = (data as ApiProduct[])
+            .slice(0, 3)
+            .map(mapApiProductToCard);
+
+          setFeaturedProducts(mapped);
+        }
+      })
+      .catch((err) => {
+        console.error("products error:", err);
+      });
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -200,7 +366,7 @@ export default function HomePage() {
               }}
             >
               <Link
-                to="/uyelik"
+                to="/register"
                 style={{
                   textDecoration: "none",
                   background: "#22c55e",
@@ -214,7 +380,7 @@ export default function HomePage() {
               </Link>
 
               <Link
-                to="/panel"
+                to="/login"
                 style={{
                   textDecoration: "none",
                   background: "#2563eb",
@@ -273,9 +439,15 @@ export default function HomePage() {
                   TÜRKİYE B2B MARKETPLACE
                 </div>
 
-                
-                  <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
-                
+                <h1
+                  style={{
+                    fontSize: 36,
+                    lineHeight: 1.1,
+                    margin: "0 0 18px",
+                    fontWeight: 800,
+                    textShadow: "0 8px 30px rgba(0,0,0,0.38)",
+                  }}
+                >
                   İşletmeler için güvenli toptan tedarik platformu
                 </h1>
 
@@ -301,7 +473,7 @@ export default function HomePage() {
                     marginBottom: 22,
                   }}
                 >
-                  <Link to="/uyelik" style={primaryButtonStyle}>
+                  <Link to="/register" style={primaryButtonStyle}>
                     Hemen Başla
                   </Link>
 
@@ -576,7 +748,7 @@ export default function HomePage() {
             >
               {featuredProducts.map((item) => (
                 <div
-                  key={item.title}
+                  key={item.id}
                   style={{
                     background: "#ffffff",
                     color: "#111827",
@@ -594,6 +766,7 @@ export default function HomePage() {
                       backgroundPosition: "center",
                     }}
                   />
+
                   <div style={{ padding: 20 }}>
                     <div
                       style={{
@@ -605,12 +778,15 @@ export default function HomePage() {
                     >
                       {item.category}
                     </div>
+
                     <h3 style={{ margin: "0 0 8px", fontSize: 22 }}>
                       {item.title}
                     </h3>
+
                     <div style={{ color: "#6b7280", marginBottom: 14 }}>
                       Toptan alım için uygun
                     </div>
+
                     <div
                       style={{
                         display: "flex",
@@ -620,6 +796,7 @@ export default function HomePage() {
                       }}
                     >
                       <strong style={{ fontSize: 20 }}>{item.price}</strong>
+
                       <Link
                         to="/panel"
                         style={{
@@ -675,9 +852,11 @@ export default function HomePage() {
                 >
                   {item.step}
                 </div>
+
                 <h3 style={{ margin: "0 0 10px", fontSize: 20 }}>
                   {item.title}
                 </h3>
+
                 <p style={{ margin: 0, color: "#6b7280", lineHeight: 1.65 }}>
                   {item.description}
                 </p>
@@ -793,7 +972,40 @@ export default function HomePage() {
               İşletmenize uygun ürünler için teklif toplayın, tedarikçileri
               karşılaştırın ve satın alma sürecini daha planlı yönetin.
             </p>
+            <div
+  style={{
+    display: "flex",
+    gap: 10,
+    marginBottom: 18,
+    maxWidth: 560,
+  }}
+>
+  <input
+    placeholder="Ürün ara... örn: temizlik bezi, ambalaj, gıda"
+    style={{
+      flex: 1,
+      height: 48,
+      borderRadius: 12,
+      border: "none",
+      padding: "0 14px",
+      fontSize: 15,
+    }}
+  />
 
+  <Link
+    to="/panel"
+    style={{
+      textDecoration: "none",
+      background: "#1d4ed8",
+      color: "#fff",
+      padding: "13px 22px",
+      borderRadius: 12,
+      fontWeight: 700,
+    }}
+  >
+    Ara
+  </Link>
+</div>
             <div
               style={{
                 display: "flex",
@@ -803,7 +1015,7 @@ export default function HomePage() {
               }}
             >
               <Link
-                to="/uyelik"
+                to="/register"
                 style={{
                   textDecoration: "none",
                   background: "#22c55e",

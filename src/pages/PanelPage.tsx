@@ -33,7 +33,12 @@ ChartJS.register(
   Legend
 );
 
-axios.defaults.baseURL = "http://localhost:3002/api";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3002/api";
+
+const APP_TITLE = import.meta.env.VITE_PLATFORM_NAME || "TEDARİK PAZARI";
+
+axios.defaults.baseURL = API_BASE_URL;
 
 interface Category {
   id: string;
@@ -123,6 +128,16 @@ interface DisputeItem {
   status: string;
 }
 
+function resolveAssetUrl(path?: string | null) {
+  if (!path) return "https://placehold.co/800x600?text=No+Image";
+  if (path.startsWith("http")) return path;
+  if (path.startsWith("/")) {
+    const origin = API_BASE_URL.replace("/api", "");
+    return `${origin}${path}`;
+  }
+  return path;
+}
+
 export default function PanelPage() {
   const getStoredToken = () =>
     typeof window !== "undefined" ? localStorage.getItem("token") || "" : "";
@@ -166,20 +181,15 @@ export default function PanelPage() {
     const storedToken = getStoredToken();
     const storedRole = getStoredRole();
 
-    if (storedToken && !token) {
-      setToken(storedToken);
-    }
-
-    if (storedRole && !role) {
-      setRole(storedRole);
-    }
+    if (storedToken && !token) setToken(storedToken);
+    if (storedRole && !role) setRole(storedRole);
   }, []);
 
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      axios.defaults.headers.common.Authorization = `Bearer ${token}`;
     } else {
-      delete axios.defaults.headers.common["Authorization"];
+      delete axios.defaults.headers.common.Authorization;
     }
   }, [token]);
 
@@ -188,12 +198,12 @@ export default function PanelPage() {
 
     axios
       .get("/categories/tree")
-      .then((res: any) => {
+      .then((res) => {
         setCategories(Array.isArray(res.data) ? res.data : []);
       })
-       .catch((err: any) => {
-  console.error("Kategori yükleme hatası", err);
-});
+      .catch((err) => {
+        console.error("Kategori yükleme hatası", err);
+      });
   }, []);
 
   const authHeaders = () => {
@@ -227,7 +237,7 @@ export default function PanelPage() {
       alert("Ürün yükleme hatası");
     }
   }
-  
+
   const login = async () => {
     try {
       const res = await axios.post("/auth/login", {
@@ -291,7 +301,7 @@ export default function PanelPage() {
     if (!rfqProduct) return;
 
     try {
-      const res = await fetch("http://localhost:3002/api/rfqs", {
+      const res = await fetch(`${API_BASE_URL}/rfqs`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({
@@ -323,7 +333,7 @@ export default function PanelPage() {
 
   const loadMyRFQs = async () => {
     try {
-      const res = await fetch("http://localhost:3002/api/rfqs/mine", {
+      const res = await fetch(`${API_BASE_URL}/rfqs/mine`, {
         headers: authHeaders(),
       });
 
@@ -343,7 +353,7 @@ export default function PanelPage() {
 
   const loadOpenRFQs = async () => {
     try {
-      const res = await fetch("http://localhost:3002/api/rfqs/open", {
+      const res = await fetch(`${API_BASE_URL}/rfqs/open`, {
         headers: authHeaders(),
       });
 
@@ -368,7 +378,7 @@ export default function PanelPage() {
     sellerNote: string
   ) => {
     try {
-      const res = await fetch("http://localhost:3002/api/quotes", {
+      const res = await fetch(`${API_BASE_URL}/quotes`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({
@@ -401,8 +411,8 @@ export default function PanelPage() {
 
       const url =
         currentRole === "SELLER"
-          ? "http://localhost:3002/api/quotes/mine"
-          : "http://localhost:3002/api/quotes/buyer";
+          ? `${API_BASE_URL}/quotes/mine`
+          : `${API_BASE_URL}/quotes/buyer`;
 
       const res = await fetch(url, {
         headers: authHeaders(),
@@ -424,13 +434,10 @@ export default function PanelPage() {
 
   const acceptQuote = async (id: string) => {
     try {
-      const res = await fetch(
-        `http://localhost:3002/api/orders/from-quote/${id}`,
-        {
-          method: "POST",
-          headers: authHeaders(),
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/orders/from-quote/${id}`, {
+        method: "POST",
+        headers: authHeaders(),
+      });
 
       const data = await res.json();
 
@@ -451,7 +458,7 @@ export default function PanelPage() {
 
   const loadOrders = async () => {
     try {
-      const res = await fetch("http://localhost:3002/api/orders", {
+      const res = await fetch(`${API_BASE_URL}/orders`, {
         headers: authHeaders(),
       });
 
@@ -479,7 +486,7 @@ export default function PanelPage() {
 
   const payOrder = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:3002/api/orders/${id}/pay`, {
+      const res = await fetch(`${API_BASE_URL}/orders/${id}/pay`, {
         method: "POST",
         headers: authHeaders(),
       });
@@ -501,7 +508,7 @@ export default function PanelPage() {
 
   const prepareOrder = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:3002/api/orders/${id}/prepare`, {
+      const res = await fetch(`${API_BASE_URL}/orders/${id}/prepare`, {
         method: "POST",
         headers: authHeaders(),
       });
@@ -523,7 +530,7 @@ export default function PanelPage() {
 
   const shipOrder = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:3002/api/orders/${id}/ship`, {
+      const res = await fetch(`${API_BASE_URL}/orders/${id}/ship`, {
         method: "POST",
         headers: authHeaders(),
       });
@@ -545,7 +552,7 @@ export default function PanelPage() {
 
   const completeOrder = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:3002/api/orders/${id}/complete`, {
+      const res = await fetch(`${API_BASE_URL}/orders/${id}/complete`, {
         method: "POST",
         headers: authHeaders(),
       });
@@ -567,7 +574,7 @@ export default function PanelPage() {
 
   const loadDisputes = async () => {
     try {
-      const res = await fetch("http://localhost:3002/api/disputes/mine", {
+      const res = await fetch(`${API_BASE_URL}/disputes/mine`, {
         headers: authHeaders(),
       });
 
@@ -590,7 +597,7 @@ export default function PanelPage() {
     if (!reason) return;
 
     try {
-      const res = await fetch(`http://localhost:3002/api/disputes/${orderId}`, {
+      const res = await fetch(`${API_BASE_URL}/disputes/${orderId}`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({ reason }),
@@ -763,6 +770,27 @@ export default function PanelPage() {
     }
   };
 
+  useEffect(() => {
+    if (!token) return;
+
+    loadOrders();
+    loadQuotes();
+    loadMyRFQs();
+    loadDisputes();
+
+    if (role === "SELLER") {
+      loadOpenRFQs();
+    }
+
+    if (role === "ADMIN") {
+      loadCompanies();
+      loadAdminMetricsOverview();
+      loadAdminMetricsTimeseries();
+      loadAdminLedger();
+      loadPendingProducts();
+    }
+  }, [token, role]);
+
   const totalSales = useMemo(() => {
     return orders.reduce(
       (sum, order) => sum + (Number(order.totalAmount) || 0),
@@ -804,14 +832,8 @@ export default function PanelPage() {
 
   const selectedProductImage =
     selectedProduct?.images && selectedProduct.images.length > 0
-      ? selectedProduct.images[0].url.startsWith("http")
-        ? selectedProduct.images[0].url
-        : `http://localhost:3002${selectedProduct.images[0].url}`
-      : selectedProduct?.imageUrl
-      ? selectedProduct.imageUrl.startsWith("http")
-        ? selectedProduct.imageUrl
-        : `http://localhost:3002${selectedProduct.imageUrl}`
-      : "https://placehold.co/800x600?text=No+Image";
+      ? resolveAssetUrl(selectedProduct.images[0].url)
+      : resolveAssetUrl(selectedProduct?.imageUrl);
 
   const adminOverviewCards = useMemo(() => {
     if (!adminMetrics) return [];
@@ -896,574 +918,627 @@ export default function PanelPage() {
   };
 
   return (
-  <div style={pageStyle}>
-    <div style={{ background: "red", color: "#fff", padding: 10, fontWeight: 700 }}>
-  YENI APP CALISIYOR
-</div>
-    {role === "ADMIN" && (
-      <div style={{ ...sectionCardStyle, marginTop: 24 }}>
-        <h2 style={{ marginBottom: 20 }}>Admin Dashboard</h2>
+    <div style={pageStyle}>
+      {role === "ADMIN" && (
+        <div style={{ ...sectionCardStyle, marginTop: 24 }}>
+          <h2 style={{ marginBottom: 20 }}>Admin Dashboard</h2>
 
-        {adminOverviewCards.length > 0 && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-              gap: 16,
-              marginBottom: 24,
-            }}
-          >
-            {adminOverviewCards.map((card) => (
-              <div
-                key={card.title}
-                style={{
-                  background: "#0f172a",
-                  color: "#fff",
-                  borderRadius: 14,
-                  padding: 18,
-                  border: "1px solid #1e293b",
-                }}
-              >
-                <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 8 }}>
-                  {card.title}
-                </div>
-                <div style={{ fontSize: 28, fontWeight: 700 }}>
-                  {card.value}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {timeseriesChartData && (
-          <div style={{ marginBottom: 24 }}>
-            <h3 style={{ marginBottom: 12 }}>Sipariş / Dispute Grafiği</h3>
-            <div
-              style={{
-                background: "#0f172a",
-                borderRadius: 16,
-                padding: 20,
-              }}
-            >
-              <Line data={timeseriesChartData} options={chartOptions} />
-            </div>
-          </div>
-        )}
-
-        {adminPendingProducts.length > 0 && (
-          <div style={{ marginBottom: 24 }}>
-            <h3 style={{ marginBottom: 12 }}>Bekleyen Ürünler</h3>
-
+          {adminOverviewCards.length > 0 && (
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
                 gap: 16,
+                marginBottom: 24,
               }}
             >
-              {adminPendingProducts.map((product: any) => {
-                const imageUrl = product?.imageUrl
-                  ? product.imageUrl.startsWith("http")
-                    ? product.imageUrl
-                    : `http://localhost:3002${product.imageUrl}`
-                  : product?.images?.[0]?.url
-                  ? product.images[0].url.startsWith("http")
-                    ? product.images[0].url
-                    : `http://localhost:3002${product.images[0].url}`
-                  : "https://placehold.co/600x400?text=No+Image";
+              {adminOverviewCards.map((card) => (
+                <div
+                  key={card.title}
+                  style={{
+                    background: "#0f172a",
+                    color: "#fff",
+                    borderRadius: 14,
+                    padding: 18,
+                    border: "1px solid #1e293b",
+                  }}
+                >
+                  <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 8 }}>
+                    {card.title}
+                  </div>
+                  <div style={{ fontSize: 28, fontWeight: 700 }}>
+                    {card.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-                return (
-                  <div
-                    key={product.id}
-                    style={{
-                      background: "#fff",
-                      border: "1px solid #e5e7eb",
-                      borderRadius: 16,
-                      overflow: "hidden",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    }}
-                  >
-                    <img
-                      src={imageUrl}
-                      alt={product.title}
+          {timeseriesChartData && (
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 12 }}>Sipariş / Dispute Grafiği</h3>
+              <div
+                style={{
+                  background: "#0f172a",
+                  borderRadius: 16,
+                  padding: 20,
+                }}
+              >
+                <Line data={timeseriesChartData} options={chartOptions} />
+              </div>
+            </div>
+          )}
+
+          {adminPendingProducts.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 12 }}>Bekleyen Ürünler</h3>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                  gap: 16,
+                }}
+              >
+                {adminPendingProducts.map((product: any) => {
+                  const imageUrl = product?.imageUrl
+                    ? resolveAssetUrl(product.imageUrl)
+                    : product?.images?.[0]?.url
+                    ? resolveAssetUrl(product.images[0].url)
+                    : "https://placehold.co/600x400?text=No+Image";
+
+                  return (
+                    <div
+                      key={product.id}
                       style={{
-                        width: "100%",
-                        height: 180,
-                        objectFit: "cover",
-                        background: "#f3f4f6",
+                        background: "#fff",
+                        border: "1px solid #e5e7eb",
+                        borderRadius: 16,
+                        overflow: "hidden",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                       }}
-                    />
-
-                    <div style={{ padding: 16 }}>
-                      <div
-                        style={{
-                          background: "#facc15",
-                          color: "#111827",
-                          padding: "4px 10px",
-                          borderRadius: 8,
-                          display: "inline-block",
-                          fontSize: 12,
-                          fontWeight: 700,
-                          marginBottom: 10,
-                        }}
-                      >
-                        PENDING
-                      </div>
-
-                      <div
-                        style={{
-                          fontSize: 18,
-                          fontWeight: 700,
-                          marginBottom: 8,
-                          color: "#111827",
-                        }}
-                      >
-                        {product.title}
-                      </div>
-
-                      <div
-                        style={{
-                          fontSize: 14,
-                          color: "#6b7280",
-                          marginBottom: 8,
-                        }}
-                      >
-                        {product.description || "Açıklama yok"}
-                      </div>
-
-                      <div
-                        style={{
-                          display: "grid",
-                          gap: 6,
-                          marginBottom: 14,
-                        }}
-                      >
-                        <div>
-                          <strong>Kategori:</strong> {product.category?.name || "-"}
-                        </div>
-                        <div>
-                          <strong>Satıcı:</strong> {product.seller?.name || "-"}
-                        </div>
-                        <div>
-                          <strong>Fiyat:</strong> {product.basePrice} ₺
-                        </div>
-                        <div>
-                          <strong>MOQ:</strong> {product.moq}
-                        </div>
-                        <div>
-                          <strong>Birim:</strong> {product.unitType}
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => approveProduct(product.id)}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={product.title}
                         style={{
                           width: "100%",
-                          background: "#16a34a",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: 10,
-                          padding: "12px 14px",
-                          cursor: "pointer",
-                          fontWeight: 700,
+                          height: 180,
+                          objectFit: "cover",
+                          background: "#f3f4f6",
                         }}
-                      >
-                        Approve Product
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+                      />
 
-        {adminCompanies.length > 0 && (
-          <div style={{ marginBottom: 24 }}>
-            <h3 style={{ marginBottom: 12 }}>Şirketler</h3>
-
-            <div style={{ overflowX: "auto" }}>
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  background: "#fff",
-                  borderRadius: 12,
-                  overflow: "hidden",
-                }}
-              >
-                <thead>
-                  <tr style={{ background: "#f3f4f6", textAlign: "left" }}>
-                    <th style={tableHeadStyle}>Ad</th>
-                    <th style={tableHeadStyle}>E-posta</th>
-                    <th style={tableHeadStyle}>Rol</th>
-                    <th style={tableHeadStyle}>Durum</th>
-                    <th style={tableHeadStyle}>Verified</th>
-                    <th style={tableHeadStyle}>İşlem</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {adminCompanies.map((company: any) => (
-                    <tr
-                      key={company.id}
-                      style={{ borderTop: "1px solid #e5e7eb" }}
-                    >
-                      <td style={tableCellStyle}>{company.name}</td>
-                      <td style={tableCellStyle}>{company.email || "-"}</td>
-                      <td style={tableCellStyle}>{company.role || "-"}</td>
-                      <td style={tableCellStyle}>{company.status || "-"}</td>
-                      <td style={tableCellStyle}>
-                        {company.verified ? "Evet" : "Hayır"}
-                      </td>
-                      <td style={tableCellStyle}>
-                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                          <button
-                            onClick={() => approveCompany(company.id)}
-                            style={{
-                              background: "#16a34a",
-                              color: "#fff",
-                              border: "none",
-                              borderRadius: 8,
-                              padding: "8px 10px",
-                              cursor: "pointer",
-                              fontWeight: 600,
-                            }}
-                          >
-                            Approve
-                          </button>
-
-                          <button
-                            onClick={() => blockCompany(company.id)}
-                            style={{
-                              background: "#dc2626",
-                              color: "#fff",
-                              border: "none",
-                              borderRadius: 8,
-                              padding: "8px 10px",
-                              cursor: "pointer",
-                              fontWeight: 600,
-                            }}
-                          >
-                            Block
-                          </button>
+                      <div style={{ padding: 16 }}>
+                        <div
+                          style={{
+                            background: "#facc15",
+                            color: "#111827",
+                            padding: "4px 10px",
+                            borderRadius: 8,
+                            display: "inline-block",
+                            fontSize: 12,
+                            fontWeight: 700,
+                            marginBottom: 10,
+                          }}
+                        >
+                          PENDING
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+                        <div
+                          style={{
+                            fontSize: 18,
+                            fontWeight: 700,
+                            marginBottom: 8,
+                            color: "#111827",
+                          }}
+                        >
+                          {product.title}
+                        </div>
+
+                        <div
+                          style={{
+                            fontSize: 14,
+                            color: "#6b7280",
+                            marginBottom: 8,
+                          }}
+                        >
+                          {product.description || "Açıklama yok"}
+                        </div>
+
+                        <div
+                          style={{
+                            display: "grid",
+                            gap: 6,
+                            marginBottom: 14,
+                          }}
+                        >
+                          <div>
+                            <strong>Kategori:</strong> {product.category?.name || "-"}
+                          </div>
+                          <div>
+                            <strong>Satıcı:</strong> {product.seller?.name || "-"}
+                          </div>
+                          <div>
+                            <strong>Fiyat:</strong> {product.basePrice} ₺
+                          </div>
+                          <div>
+                            <strong>MOQ:</strong> {product.moq}
+                          </div>
+                          <div>
+                            <strong>Birim:</strong> {product.unitType}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => approveProduct(product.id)}
+                          style={{
+                            width: "100%",
+                            background: "#16a34a",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: 10,
+                            padding: "12px 14px",
+                            cursor: "pointer",
+                            fontWeight: 700,
+                          }}
+                        >
+                          Approve Product
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {adminLedger.length > 0 && (
-          <div style={{ marginBottom: 24 }}>
-            <h3 style={{ marginBottom: 12 }}>Ledger Kayıtları</h3>
+          {adminCompanies.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 12 }}>Şirketler</h3>
 
-            <div style={{ overflowX: "auto" }}>
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  background: "#fff",
-                  borderRadius: 12,
-                  overflow: "hidden",
-                }}
-              >
-                <thead>
-                  <tr style={{ background: "#f3f4f6", textAlign: "left" }}>
-                    <th style={tableHeadStyle}>Tip</th>
-                    <th style={tableHeadStyle}>Order ID</th>
-                    <th style={tableHeadStyle}>Tutar</th>
-                    <th style={tableHeadStyle}>Para Birimi</th>
-                    <th style={tableHeadStyle}>Not</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {adminLedger.map((item: any) => (
-                    <tr
-                      key={item.id}
-                      style={{ borderTop: "1px solid #e5e7eb" }}
-                    >
-                      <td style={tableCellStyle}>{item.type}</td>
-                      <td style={tableCellStyle}>{item.orderId || "-"}</td>
-                      <td style={tableCellStyle}>{item.amount}</td>
-                      <td style={tableCellStyle}>{item.currency}</td>
-                      <td style={tableCellStyle}>{item.note || "-"}</td>
+              <div style={{ overflowX: "auto" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    background: "#fff",
+                    borderRadius: 12,
+                    overflow: "hidden",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ background: "#f3f4f6", textAlign: "left" }}>
+                      <th style={tableHeadStyle}>Ad</th>
+                      <th style={tableHeadStyle}>E-posta</th>
+                      <th style={tableHeadStyle}>Rol</th>
+                      <th style={tableHeadStyle}>Durum</th>
+                      <th style={tableHeadStyle}>Verified</th>
+                      <th style={tableHeadStyle}>İşlem</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {adminCompanies.map((company: any) => (
+                      <tr
+                        key={company.id}
+                        style={{ borderTop: "1px solid #e5e7eb" }}
+                      >
+                        <td style={tableCellStyle}>{company.name}</td>
+                        <td style={tableCellStyle}>{company.email || "-"}</td>
+                        <td style={tableCellStyle}>{company.role || "-"}</td>
+                        <td style={tableCellStyle}>{company.status || "-"}</td>
+                        <td style={tableCellStyle}>
+                          {company.verified ? "Evet" : "Hayır"}
+                        </td>
+                        <td style={tableCellStyle}>
+                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                            <button
+                              onClick={() => approveCompany(company.id)}
+                              style={{
+                                background: "#16a34a",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: 8,
+                                padding: "8px 10px",
+                                cursor: "pointer",
+                                fontWeight: 600,
+                              }}
+                            >
+                              Approve
+                            </button>
+
+                            <button
+                              onClick={() => blockCompany(company.id)}
+                              style={{
+                                background: "#dc2626",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: 8,
+                                padding: "8px 10px",
+                                cursor: "pointer",
+                                fontWeight: 600,
+                              }}
+                            >
+                              Block
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    )}
+          )}
 
-    <div
-      style={{
-        background: "#0b1120",
-        color: "#fff",
-        borderRadius: 24,
-        padding: 32,
-        marginBottom: 32,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 28,
-          flexWrap: "wrap",
-          gap: 16,
-        }}
-      >
-        <h2 style={{ margin: 0, color: "#2563eb", fontSize: 38 }}>TEDARİKÇİ</h2>
+          {adminLedger.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 12 }}>Ledger Kayıtları</h3>
 
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <button
-            style={{
-              background: "#22c55e",
-              color: "#fff",
-              border: "none",
-              borderRadius: 12,
-              padding: "12px 18px",
-              cursor: "pointer",
-              fontWeight: 700,
-            }}
-          >
-            Üye Ol
-          </button>
-
-          <button
-            onClick={login}
-            style={{
-              background: "#1d4ed8",
-              color: "#fff",
-              border: "none",
-              borderRadius: 12,
-              padding: "12px 18px",
-              cursor: "pointer",
-              fontWeight: 700,
-            }}
-          >
-            Giriş Yap
-          </button>
+              <div style={{ overflowX: "auto" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    background: "#fff",
+                    borderRadius: 12,
+                    overflow: "hidden",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ background: "#f3f4f6", textAlign: "left" }}>
+                      <th style={tableHeadStyle}>Tip</th>
+                      <th style={tableHeadStyle}>Order ID</th>
+                      <th style={tableHeadStyle}>Tutar</th>
+                      <th style={tableHeadStyle}>Para Birimi</th>
+                      <th style={tableHeadStyle}>Not</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {adminLedger.map((item: any) => (
+                      <tr
+                        key={item.id}
+                        style={{ borderTop: "1px solid #e5e7eb" }}
+                      >
+                        <td style={tableCellStyle}>{item.type}</td>
+                        <td style={tableCellStyle}>{item.orderId || "-"}</td>
+                        <td style={tableCellStyle}>{item.amount}</td>
+                        <td style={tableCellStyle}>{item.currency}</td>
+                        <td style={tableCellStyle}>{item.note || "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "1.5fr 1fr",
-          gap: 24,
+          background: "#0b1120",
+          color: "#fff",
+          borderRadius: 24,
+          padding: 32,
+          marginBottom: 32,
         }}
       >
         <div
           style={{
-            borderRadius: 28,
-            padding: 36,
-            background: "linear-gradient(135deg,#1d4ed8,#22d3ee)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 28,
+            flexWrap: "wrap",
+            gap: 16,
           }}
         >
-          <div style={{ letterSpacing: 2, opacity: 0.9, marginBottom: 16 }}>
-            TÜRKİYE B2B MARKETPLACE
+          <h2 style={{ margin: 0, color: "#2563eb", fontSize: 38 }}>
+            {APP_TITLE}
+          </h2>
+
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            {!token ? (
+              <>
+                <button
+                  style={{
+                    background: "#22c55e",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 12,
+                    padding: "12px 18px",
+                    cursor: "pointer",
+                    fontWeight: 700,
+                  }}
+                >
+                  Üye Ol
+                </button>
+
+                <button
+                  onClick={login}
+                  style={{
+                    background: "#1d4ed8",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 12,
+                    padding: "12px 18px",
+                    cursor: "pointer",
+                    fontWeight: 700,
+                  }}
+                >
+                  Giriş Yap
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={logout}
+                style={{
+                  background: "#ef4444",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 12,
+                  padding: "12px 18px",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                }}
+              >
+                Çıkış Yap
+              </button>
+            )}
           </div>
+        </div>
 
-          <h1
+        {!token && (
+          <div
             style={{
-              fontSize: 56,
-              lineHeight: 1.05,
-              margin: "0 0 18px 0",
-              fontWeight: 800,
-            }}
-          >
-            İşletmeler için güvenli
-            <br />
-            toptan tedarik platformu
-          </h1>
-
-          <p
-            style={{
-              fontSize: 22,
-              lineHeight: 1.5,
-              opacity: 0.95,
-              maxWidth: 780,
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
               marginBottom: 20,
             }}
           >
-            Tedarikçileri keşfedin, ürünleri inceleyin, teklif isteyin ve
-            ticaretinizi tek platformdan yönetin.
-          </p>
-
-          <div style={{ opacity: 0.9, marginBottom: 22 }}>
-            10.000+ ürün • 500+ tedarikçi • RFQ destekli güvenli ticaret
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: 12,
-              marginBottom: 18,
-              flexWrap: "wrap",
-            }}
-          >
             <input
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              placeholder="Ürün ara... örn: temizlik bezi, ambalaj, gıda"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="E-posta"
               style={{
-                flex: 1,
-                minWidth: 260,
                 border: "none",
-                borderRadius: 14,
-                padding: "16px 18px",
+                borderRadius: 12,
+                padding: "14px 16px",
                 outline: "none",
-                fontSize: 16,
+                fontSize: 15,
               }}
             />
-
-            <button
-              onClick={searchProducts}
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Şifre"
               style={{
-                background: "#1d4ed8",
-                color: "#fff",
-                border: "none",
-                borderRadius: 14,
-                padding: "16px 24px",
-                cursor: "pointer",
-                fontWeight: 700,
-                minWidth: 90,
-              }}
-            >
-              Ara
-            </button>
-          </div>
-
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>
-            <button
-              style={{
-                background: "#84cc16",
-                color: "#fff",
                 border: "none",
                 borderRadius: 12,
-                padding: "12px 18px",
-                fontWeight: 700,
-                cursor: "pointer",
+                padding: "14px 16px",
+                outline: "none",
+                fontSize: 15,
               }}
-            >
-              Üye Ol
-            </button>
-
-            <button
-              onClick={login}
-              style={{
-                background: "#fff",
-                color: "#111827",
-                border: "none",
-                borderRadius: 12,
-                padding: "12px 18px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              Giriş Yap
-            </button>
-
-            <button
-              style={{
-                background: "transparent",
-                color: "#fff",
-                border: "1px solid rgba(255,255,255,0.5)",
-                borderRadius: 12,
-                padding: "12px 18px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              Satıcı Ol
-            </button>
+            />
           </div>
-
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            {["Verified Suppliers", "RFQ Destekli", "Türkiye + Avrupa"].map((item) => (
-              <div
-                key={item}
-                style={{
-                  background: "rgba(255,255,255,0.15)",
-                  padding: "10px 14px",
-                  borderRadius: 999,
-                  fontWeight: 600,
-                  fontSize: 14,
-                }}
-              >
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
 
         <div
           style={{
-            background: "#fff",
-            color: "#111827",
-            borderRadius: 28,
-            padding: 28,
+            display: "grid",
+            gridTemplateColumns: "1.5fr 1fr",
+            gap: 24,
           }}
         >
           <div
             style={{
-              color: "#4f46e5",
-              fontWeight: 700,
-              marginBottom: 10,
+              borderRadius: 28,
+              padding: 36,
+              background: "linear-gradient(135deg,#1d4ed8,#22d3ee)",
             }}
           >
-            Öne Çıkan Avantajlar
-          </div>
+            <div style={{ letterSpacing: 2, opacity: 0.9, marginBottom: 16 }}>
+              TÜRKİYE B2B MARKETPLACE
+            </div>
 
-          <h3 style={{ marginTop: 0, fontSize: 24, marginBottom: 20 }}>
-            Tedarik sürecinizi hızlandırın
-          </h3>
+            <h1
+              style={{
+                fontSize: 56,
+                lineHeight: 1.05,
+                margin: "0 0 18px 0",
+                fontWeight: 800,
+              }}
+            >
+              İşletmeler için güvenli
+              <br />
+              toptan tedarik platformu
+            </h1>
 
-          <div style={{ display: "grid", gap: 14 }}>
-            {[
-              [
-                "Tedarikçi doğrulama",
-                "Platform dışı iletişimi azaltan güvenli tedarik modeli.",
-              ],
-              [
-                "Teklif toplama",
-                "RFQ sistemi ile çoklu satıcıdan fiyat alabilme altyapısı.",
-              ],
-              [
-                "Kategori bazlı keşif",
-                "Temizlikten ambalaja kadar işletmeler için organize tedarik.",
-              ],
-              [
-                "Kurumsal alım deneyimi",
-                "Sipariş, teklif ve ürün yönetimini tek panelde toplayın.",
-              ],
-            ].map(([title, desc]) => (
-              <div
-                key={title}
+            <p
+              style={{
+                fontSize: 22,
+                lineHeight: 1.5,
+                opacity: 0.95,
+                maxWidth: 780,
+                marginBottom: 20,
+              }}
+            >
+              Tedarikçileri keşfedin, ürünleri inceleyin, teklif isteyin ve
+              ticaretinizi tek platformdan yönetin.
+            </p>
+
+            <div style={{ opacity: 0.9, marginBottom: 22 }}>
+              10.000+ ürün • 500+ tedarikçi • RFQ destekli güvenli ticaret
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 12,
+                marginBottom: 18,
+                flexWrap: "wrap",
+              }}
+            >
+              <input
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                placeholder="Ürün ara... örn: temizlik bezi, ambalaj, gıda"
                 style={{
-                  background: "#f8fafc",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: 16,
-                  padding: 16,
+                  flex: 1,
+                  minWidth: 260,
+                  border: "none",
+                  borderRadius: 14,
+                  padding: "16px 18px",
+                  outline: "none",
+                  fontSize: 16,
+                }}
+              />
+
+              <button
+                onClick={searchProducts}
+                style={{
+                  background: "#1d4ed8",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 14,
+                  padding: "16px 24px",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                  minWidth: 90,
                 }}
               >
-                <div style={{ fontWeight: 700, marginBottom: 6 }}>{title}</div>
-                <div style={{ color: "#6b7280", lineHeight: 1.5 }}>{desc}</div>
-              </div>
-            ))}
+                Ara
+              </button>
+            </div>
+
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>
+              <button
+                style={{
+                  background: "#84cc16",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 12,
+                  padding: "12px 18px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Üye Ol
+              </button>
+
+              {!token && (
+                <button
+                  onClick={login}
+                  style={{
+                    background: "#fff",
+                    color: "#111827",
+                    border: "none",
+                    borderRadius: 12,
+                    padding: "12px 18px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Giriş Yap
+                </button>
+              )}
+
+              <button
+                style={{
+                  background: "transparent",
+                  color: "#fff",
+                  border: "1px solid rgba(255,255,255,0.5)",
+                  borderRadius: 12,
+                  padding: "12px 18px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Satıcı Ol
+              </button>
+            </div>
+
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              {["Verified Suppliers", "RFQ Destekli", "Türkiye + Avrupa"].map((item) => (
+                <div
+                  key={item}
+                  style={{
+                    background: "rgba(255,255,255,0.15)",
+                    padding: "10px 14px",
+                    borderRadius: 999,
+                    fontWeight: 600,
+                    fontSize: 14,
+                  }}
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "#fff",
+              color: "#111827",
+              borderRadius: 28,
+              padding: 28,
+            }}
+          >
+            <div
+              style={{
+                color: "#4f46e5",
+                fontWeight: 700,
+                marginBottom: 10,
+              }}
+            >
+              Öne Çıkan Avantajlar
+            </div>
+
+            <h3 style={{ marginTop: 0, fontSize: 24, marginBottom: 20 }}>
+              Tedarik sürecinizi hızlandırın
+            </h3>
+
+            <div style={{ display: "grid", gap: 14 }}>
+              {[
+                [
+                  "Tedarikçi doğrulama",
+                  "Platform dışı iletişimi azaltan güvenli tedarik modeli.",
+                ],
+                [
+                  "Teklif toplama",
+                  "RFQ sistemi ile çoklu satıcıdan fiyat alabilme altyapısı.",
+                ],
+                [
+                  "Kategori bazlı keşif",
+                  "Temizlikten ambalaja kadar işletmeler için organize tedarik.",
+                ],
+                [
+                  "Kurumsal alım deneyimi",
+                  "Sipariş, teklif ve ürün yönetimini tek panelde toplayın.",
+                ],
+              ].map(([title, desc]) => (
+                <div
+                  key={title}
+                  style={{
+                    background: "#f8fafc",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: 16,
+                    padding: 16,
+                  }}
+                >
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>{title}</div>
+                  <div style={{ color: "#6b7280", lineHeight: 1.5 }}>{desc}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <h2 style={{ marginBottom: 20 }}>Popüler Kategoriler</h2>
+      <h2 style={{ marginBottom: 20 }}>Popüler Kategoriler</h2>
 
       <div
         style={{
@@ -1682,7 +1757,7 @@ export default function PanelPage() {
                 </div>
 
                 <div>
-                  <strong>Satıcı:</strong> Onaylı Tedarikçi
+                  <strong>Satıcı:</strong> {selectedProduct.seller?.name || "Onaylı Tedarikçi"}
                 </div>
 
                 {selectedProduct.seller?.verified && (
