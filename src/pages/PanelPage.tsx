@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import {
   Chart as ChartJS,
@@ -1241,34 +1242,33 @@ export default function PanelPage() {
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             {!token ? (
               <>
-                <button
-                  style={{
-                    background: "#22c55e",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 12,
-                    padding: "12px 18px",
-                    cursor: "pointer",
-                    fontWeight: 700,
-                  }}
-                >
-                  Üye Ol
-                </button>
+                <Link
+  to="/register"
+  style={{
+    background: "#22c55e",
+    color: "#fff",
+    borderRadius: 12,
+    padding: "12px 18px",
+    fontWeight: 700,
+    textDecoration: "none",
+  }}
+>
+  Üye Ol
+</Link>
 
-                <button
-                  onClick={login}
-                  style={{
-                    background: "#1d4ed8",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 12,
-                    padding: "12px 18px",
-                    cursor: "pointer",
-                    fontWeight: 700,
-                  }}
-                >
-                  Giriş Yap
-                </button>
+<Link
+  to="/login"
+  style={{
+    background: "#1d4ed8",
+    color: "#fff",
+    borderRadius: 12,
+    padding: "12px 18px",
+    fontWeight: 700,
+    textDecoration: "none",
+  }}
+>
+  Giriş Yap
+</Link>
               </>
             ) : (
               <button
@@ -1415,36 +1415,34 @@ export default function PanelPage() {
             </div>
 
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>
-              <button
-                style={{
-                  background: "#84cc16",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 12,
-                  padding: "12px 18px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
-              >
-                Üye Ol
-              </button>
+              <Link
+  to="/register"
+  style={{
+    background: "#84cc16",
+    color: "#fff",
+    borderRadius: 12,
+    padding: "12px 18px",
+    fontWeight: 700,
+    textDecoration: "none",
+  }}
+>
+  Üye Ol
+</Link>
 
-              {!token && (
-                <button
-                  onClick={login}
-                  style={{
-                    background: "#fff",
-                    color: "#111827",
-                    border: "none",
-                    borderRadius: 12,
-                    padding: "12px 18px",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
-                >
-                  Giriş Yap
-                </button>
-              )}
+<Link
+  to="/login"
+  style={{
+    background: "#fff",
+    color: "#111827",
+    borderRadius: 12,
+    padding: "12px 18px",
+    fontWeight: 700,
+    textDecoration: "none",
+  }}
+>
+  Giriş Yap
+</Link>
+              
 
               <button
                 style={{
