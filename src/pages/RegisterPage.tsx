@@ -1,23 +1,36 @@
 import { useState, type CSSProperties } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
+
+type MembershipType = "BUYER" | "SELLER" | "LOGISTICS";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
 
   const [companyName, setCompanyName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [membershipType, setMembershipType] =
+    useState<MembershipType>("BUYER");
+  const [companyType, setCompanyType] = useState("Şahıs");
+  const [category, setCategory] = useState("Gıda");
+  const [city, setCity] = useState("");
+  const [district, setDistrict] = useState("");
+  const [taxNumber, setTaxNumber] = useState("");
+  const [taxOffice, setTaxOffice] = useState("");
+  const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"BUYER" | "SELLER" | "LOGISTICS">("BUYER");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const register = async () => {
-    if (!companyName.trim() || !email.trim() || !password.trim()) {
-      setError("Firma adı, email ve şifre zorunlu");
+    if (!companyName.trim() || !email.trim() || !password.trim() || !phone.trim()) {
+      setError("Firma, email, telefon ve şifre zorunlu");
       return;
     }
 
@@ -27,316 +40,314 @@ export default function RegisterPage() {
 
       await axios.post(`${API}/auth/register`, {
         companyName: companyName.trim(),
+        name: fullName.trim(),
+        phone: phone.trim(),
         email: email.trim(),
         password: password.trim(),
-        role,
+        role: membershipType,
+        companyType,
+        category,
+        city: city.trim(),
+        district: district.trim(),
+        taxNumber: taxNumber.trim(),
+        taxOffice: taxOffice.trim(),
+        address: address.trim(),
       });
 
-      alert("Kayıt başarılı");
+      alert("Kayıt başarılı. Şimdi giriş yapabilirsiniz.");
       navigate("/login");
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Kayıt sırasında hata oluştu");
+      console.error("REGISTER ERROR =>", err?.response || err);
+      setError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "Kayıt sırasında hata oluştu"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main style={page}>
-      <section style={left}>
-        <div style={badge}>B2B TEDARİK PLATFORMU</div>
-
-        <h1 style={headline}>
-          Tedarik, teklif ve sipariş süreçlerini tek panelden yönetin.
-        </h1>
-
-        <p style={desc}>
-          Toptancılar ve satıcılar için hızlı RFQ, teklif, sipariş ve lojistik
-          yönetimi.
-        </p>
-
-        <div style={stats}>
-          <div style={statCard}>
-            <strong>RFQ</strong>
-            <span>Hızlı teklif akışı</span>
-          </div>
-          <div style={statCard}>
-            <strong>Order</strong>
-            <span>Sipariş yönetimi</span>
-          </div>
-          <div style={statCard}>
-            <strong>Logistics</strong>
-            <span>Nakliye takibi</span>
-          </div>
-        </div>
-      </section>
-
-      <section style={right}>
-        <div style={card}>
-          <div style={cardTop}>
-            <h2 style={title}>Ücretsiz Başla</h2>
-            <p style={subtitle}>Dakikalar içinde hesabını oluştur.</p>
+    <main style={pageStyle}>
+      <div style={overlayStyle}>
+        <div style={formWrapStyle}>
+          <div style={{ marginBottom: 18 }}>
+            <Link to="/" style={backLinkStyle}>
+              ← Ana sayfaya dön
+            </Link>
           </div>
 
-          {error && <div style={errorBox}>{error}</div>}
+          <h1 style={titleStyle}>Üye Ol</h1>
 
-          <label style={label}>Firma Adı</label>
-          <input
-            style={input}
-            placeholder="Örn: ABC Tedarik Ltd."
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-          />
+          {error && <div style={errorBoxStyle}>{error}</div>}
 
-          <label style={label}>Email</label>
-          <input
-            style={input}
-            placeholder="firma@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <div style={gridStyle}>
+            <div>
+              <label style={labelStyle}>Firma *</label>
+              <input
+                style={inputStyle}
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+              />
+            </div>
 
-          <label style={label}>Şifre</label>
-          <input
-            type="password"
-            style={input}
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+            <div>
+              <label style={labelStyle}>Ad Soyad</label>
+              <input
+                style={inputStyle}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
 
-          <label style={label}>Üyelik Türü</label>
-          <div style={roleGrid}>
-            <button
-              type="button"
-              onClick={() => setRole("BUYER")}
-              style={role === "BUYER" ? roleActive : roleButton}
-            >
-              <span style={roleIcon}>🛒</span>
-              <span>Toptancı</span>
-            </button>
+            <div>
+              <label style={labelStyle}>Telefon *</label>
+              <input
+                style={inputStyle}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
 
-            <button
-              type="button"
-              onClick={() => setRole("SELLER")}
-              style={role === "SELLER" ? roleActive : roleButton}
-            >
-              <span style={roleIcon}>🏪</span>
-              <span>Satıcı</span>
-            </button>
+            <div>
+              <label style={labelStyle}>Email *</label>
+              <input
+                type="email"
+                style={inputStyle}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Üyelik Türü *</label>
+              <select
+                style={inputStyle}
+                value={membershipType}
+                onChange={(e) =>
+                  setMembershipType(e.target.value as MembershipType)
+                }
+              >
+                <option value="BUYER">Toptancı</option>
+                <option value="SELLER">Satıcı</option>
+                <option value="LOGISTICS">Nakliyeci</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Şirket Türü</label>
+              <select
+                style={inputStyle}
+                value={companyType}
+                onChange={(e) => setCompanyType(e.target.value)}
+              >
+                <option>Şahıs</option>
+                <option>Limited</option>
+                <option>Anonim</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Kategori</label>
+              <select
+                style={inputStyle}
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option>Gıda</option>
+                <option>Temizlik</option>
+                <option>Ambalaj</option>
+                <option>Elektrik</option>
+                <option>İş Güvenliği</option>
+                <option>Lojistik</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={labelStyle}>İl</label>
+              <input
+                style={inputStyle}
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>İlçe</label>
+              <input
+                style={inputStyle}
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Vergi No</label>
+              <input
+                style={inputStyle}
+                value={taxNumber}
+                onChange={(e) => setTaxNumber(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Vergi Dairesi</label>
+              <input
+                style={inputStyle}
+                value={taxOffice}
+                onChange={(e) => setTaxOffice(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Şifre *</label>
+              <input
+                type="password"
+                style={inputStyle}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <label style={labelStyle}>Adres</label>
+            <textarea
+              style={textareaStyle}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
           </div>
 
           <button
             type="button"
             onClick={register}
             disabled={loading}
-            style={submitButton}
+            style={{
+              ...buttonStyle,
+              opacity: loading ? 0.7 : 1,
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
           >
-            {loading ? "Başvuru gönderiliyor..." : "Başvuruyu Gönder"}
+            {loading ? "Kaydediliyor..." : "Başvuruyu Gönder"}
           </button>
 
-          <button
-  type="button"
-  onClick={() => setRole("LOGISTICS")}
-  style={role === "LOGISTICS" ? roleActive : roleButton}
->
-  <span style={roleIcon}>🚚</span>
-  <span>Nakliyeci</span>
-</button>
-
-          <p style={loginText}>
+          <p style={loginTextStyle}>
             Zaten hesabın var mı?{" "}
-            <span style={loginLink} onClick={() => navigate("/login")}>
+            <Link to="/login" style={loginLinkStyle}>
               Giriş yap
-            </span>
+            </Link>
           </p>
         </div>
-      </section>
+      </div>
     </main>
   );
 }
 
-const page: CSSProperties = {
+const pageStyle: CSSProperties = {
   minHeight: "100vh",
-  display: "grid",
-  gridTemplateColumns: "1.2fr 0.8fr",
-  background:
-    "radial-gradient(circle at top left, #1d4ed8 0, transparent 32%), linear-gradient(135deg, #020617 0%, #0f172a 55%, #111827 100%)",
-  color: "white",
+  backgroundImage:
+    "linear-gradient(rgba(8,15,35,0.78), rgba(8,15,35,0.78)), url('/images/hero-b2b.jpg')",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
 };
 
-const left: CSSProperties = {
-  padding: "80px",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-};
-
-const badge: CSSProperties = {
-  width: "fit-content",
-  padding: "8px 14px",
-  borderRadius: 999,
-  background: "rgba(37,99,235,0.18)",
-  color: "#93c5fd",
-  fontWeight: 900,
-  fontSize: 13,
-  letterSpacing: 1,
-  marginBottom: 28,
-};
-
-const headline: CSSProperties = {
-  fontSize: 56,
-  lineHeight: 1.05,
-  maxWidth: 760,
-  margin: 0,
-  fontWeight: 950,
-};
-
-const desc: CSSProperties = {
-  marginTop: 24,
-  maxWidth: 560,
-  color: "#cbd5e1",
-  fontSize: 18,
-  lineHeight: 1.7,
-};
-
-const stats: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-  gap: 14,
-  maxWidth: 720,
-  marginTop: 42,
-};
-
-const statCard: CSSProperties = {
-  padding: 18,
-  borderRadius: 18,
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  display: "flex",
-  flexDirection: "column",
-  gap: 6,
-  color: "#cbd5e1",
-};
-
-const right: CSSProperties = {
-  padding: 40,
+const overlayStyle: CSSProperties = {
+  minHeight: "100vh",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
+  padding: 24,
 };
 
-const card: CSSProperties = {
+const formWrapStyle: CSSProperties = {
   width: "100%",
-  maxWidth: 460,
-  padding: 34,
-  borderRadius: 26,
-  background: "rgba(15, 23, 42, 0.88)",
-  border: "1px solid rgba(148, 163, 184, 0.25)",
-  boxShadow: "0 28px 90px rgba(0,0,0,0.45)",
-  backdropFilter: "blur(18px)",
+  maxWidth: 980,
+  color: "#fff",
 };
 
-const cardTop: CSSProperties = {
-  marginBottom: 24,
-};
-
-const title: CSSProperties = {
-  fontSize: 34,
-  margin: 0,
-  fontWeight: 950,
-};
-
-const subtitle: CSSProperties = {
-  marginTop: 8,
-  marginBottom: 0,
-  color: "#94a3b8",
-};
-
-const label: CSSProperties = {
-  display: "block",
-  marginBottom: 7,
-  color: "#e5e7eb",
-  fontSize: 13,
-  fontWeight: 800,
-};
-
-const input: CSSProperties = {
-  width: "100%",
-  height: 48,
-  marginBottom: 16,
-  borderRadius: 14,
-  border: "1px solid #334155",
-  background: "#020617",
-  color: "white",
-  padding: "0 15px",
-  boxSizing: "border-box",
-  outline: "none",
-};
-
-const roleGrid: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr 1fr",
-  gap: 12,
-  marginBottom: 18,
-};
-
-const roleButton: CSSProperties = {
-  height: 58,
-  borderRadius: 16,
-  border: "1px solid #334155",
-  background: "#0f172a",
-  color: "#cbd5e1",
-  fontWeight: 900,
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 8,
-};
-
-const roleActive: CSSProperties = {
-  ...roleButton,
-  background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
-  border: "1px solid #60a5fa",
-  color: "white",
-};
-
-const roleIcon: CSSProperties = {
-  fontSize: 18,
-};
-
-const submitButton: CSSProperties = {
-  width: "100%",
-  height: 52,
-  borderRadius: 16,
-  border: "none",
-  background: "linear-gradient(135deg, #22c55e, #16a34a)",
-  color: "white",
-  fontWeight: 950,
-  cursor: "pointer",
-  boxShadow: "0 14px 35px rgba(34,197,94,0.25)",
-};
-
-const errorBox: CSSProperties = {
-  background: "rgba(127, 29, 29, 0.9)",
-  border: "1px solid #ef4444",
-  color: "white",
-  padding: 12,
-  borderRadius: 14,
-  marginBottom: 18,
-};
-
-const loginText: CSSProperties = {
-  textAlign: "center",
-  color: "#cbd5e1",
-  marginTop: 20,
-  marginBottom: 0,
+const backLinkStyle: CSSProperties = {
+  color: "#c7d2fe",
+  textDecoration: "none",
+  fontWeight: 600,
   fontSize: 14,
 };
 
-const loginLink: CSSProperties = {
-  color: "#60a5fa",
-  cursor: "pointer",
-  fontWeight: 900,
+const titleStyle: CSSProperties = {
+  fontSize: 54,
+  lineHeight: 1,
+  margin: "0 0 20px 0",
+  fontWeight: 800,
+};
+
+const errorBoxStyle: CSSProperties = {
+  background: "rgba(127,29,29,0.88)",
+  color: "#fff",
+  border: "1px solid rgba(252,165,165,0.5)",
+  borderRadius: 10,
+  padding: 12,
+  marginBottom: 16,
+};
+
+const gridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 14,
+};
+
+const labelStyle: CSSProperties = {
+  display: "block",
+  marginBottom: 6,
+  fontWeight: 700,
+  fontSize: 15,
+};
+
+const inputStyle: CSSProperties = {
+  width: "100%",
+  height: 42,
+  borderRadius: 8,
+  border: "none",
+  outline: "none",
+  padding: "0 12px",
+  fontSize: 14,
+  boxSizing: "border-box",
+};
+
+const textareaStyle: CSSProperties = {
+  width: "100%",
+  minHeight: 110,
+  borderRadius: 8,
+  border: "none",
+  outline: "none",
+  padding: 12,
+  fontSize: 14,
+  resize: "vertical",
+  boxSizing: "border-box",
+};
+
+const buttonStyle: CSSProperties = {
+  marginTop: 18,
+  width: "100%",
+  height: 48,
+  borderRadius: 10,
+  border: "none",
+  background: "#4ade80",
+  color: "#fff",
+  fontWeight: 800,
+  fontSize: 16,
+};
+
+const loginTextStyle: CSSProperties = {
+  marginTop: 16,
+  textAlign: "center",
+  color: "#dbeafe",
+  fontWeight: 600,
+};
+
+const loginLinkStyle: CSSProperties = {
+  color: "#93c5fd",
+  textDecoration: "none",
+  fontWeight: 800,
 };

@@ -13,6 +13,14 @@ import LogisticsShippingPage from "./pages/LogisticsShippingPage";
 import BuyerShippingQuotesPage from "./pages/BuyerShippingQuotesPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminCompaniesPage from "./pages/AdminCompaniesPage";
+import SellerProductCreatePage from "./pages/SellerProductCreatePage";
+import CategoryPage from "./pages/CategoryPage";
+import Navbar from "./components/Navbar";
+import ProductDetailPage from "./pages/ProductDetailPage";
+import BuyerQuotesPage from "./pages/BuyerQuotesPage";
+import SellerProductsPage from "./pages/SellerProductsPage";
+import SellerQuotesPage from "./pages/SellerQuotesPage";
+import SellerQuoteCreatePage from "./pages/SellerQuoteCreatePage";
 function PrivateRoute({
   children,
   role,
@@ -37,12 +45,20 @@ function PrivateRoute({
 export default function App() {
   return (
     <BrowserRouter>
+      <Navbar />
+
       <Routes>
+        {/* PUBLIC */}
         <Route path="/" element={<HomePage />} />
         <Route path="/panel" element={<PanelPage />} />
         <Route path="/uyelik" element={<RegisterPage />} />
-        <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* CATEGORY */}
+        <Route path="/category/:id" element={<CategoryPage />} />
+
+        {/* BUYER */}
         <Route
           path="/buyer/orders"
           element={
@@ -51,7 +67,39 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
+        <Route
+          path="/buyer/rfqs"
+          element={
+            <PrivateRoute role="BUYER">
+              <BuyerRfqsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/buyer/rfqs/:id"
+          element={
+            <PrivateRoute role="BUYER">
+              <BuyerRfqDetailPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/buyer/shipping"
+          element={
+            <PrivateRoute role="BUYER">
+              <BuyerShippingQuotesPage />
+            </PrivateRoute>
+          }
+        />
+         <Route
+  path="/tekliflerim"
+  element={
+    <PrivateRoute role="BUYER">
+      <BuyerQuotesPage />
+    </PrivateRoute>
+  }
+/>
+        {/* SELLER */}
         <Route
           path="/seller/orders"
           element={
@@ -61,61 +109,78 @@ export default function App() {
           }
         />
         <Route
-  path="/buyer/rfqs/:id"
-  element={
-    <PrivateRoute role="BUYER">
-      <BuyerRfqDetailPage />
-    </PrivateRoute>
-  }
-/>
+          path="/seller/rfqs"
+          element={
+            <PrivateRoute role="SELLER">
+              <SellerRfqsPage />
+            </PrivateRoute>
+          }
+        />
         <Route
-  path="/buyer/rfqs"
-  element={
-    <PrivateRoute role="BUYER">
-      <BuyerRfqsPage />
-    </PrivateRoute>
-  }
-/>
-         <Route
-  path="/seller/rfqs"
+          path="/seller/products/new"
+          element={
+            <PrivateRoute role="SELLER">
+              <SellerProductCreatePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+  path="/seller/products"
   element={
     <PrivateRoute role="SELLER">
-      <SellerRfqsPage />
+      <SellerProductsPage />
     </PrivateRoute>
   }
 />
-        <Route
-  path="/logistics/shipping"
+
+<Route
+  path="/seller/quotes"
   element={
-    <PrivateRoute role="LOGISTICS">
-      <LogisticsShippingPage />
+    <PrivateRoute role="SELLER">
+      <SellerQuotesPage />
     </PrivateRoute>
   }
 />
-        <Route
-  path="/admin/dashboard"
+
+<Route
+  path="/seller/quotes/create"
   element={
-    <PrivateRoute role="ADMIN">
-      <AdminDashboardPage />
+    <PrivateRoute role="SELLER">
+      <SellerQuoteCreatePage />
     </PrivateRoute>
   }
 />
+
+        {/* LOGISTICS */}
         <Route
-  path="/buyer/shipping"
-  element={
-    <PrivateRoute role="BUYER">
-      <BuyerShippingQuotesPage />
-    </PrivateRoute>
-  }
-/>
+          path="/logistics/shipping"
+          element={
+            <PrivateRoute role="LOGISTICS">
+              <LogisticsShippingPage />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ADMIN */}
         <Route
-  path="/admin/companies"
-  element={
-    <PrivateRoute role="ADMIN">
-      <AdminCompaniesPage />
-    </PrivateRoute>
-  }
-/>
+          path="/admin/dashboard"
+          element={
+            <PrivateRoute role="ADMIN">
+              <AdminDashboardPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/companies"
+          element={
+            <PrivateRoute role="ADMIN">
+              <AdminCompaniesPage />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
+
+        {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
