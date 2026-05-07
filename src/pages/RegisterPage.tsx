@@ -29,44 +29,36 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
 
   const register = async () => {
-    if (!companyName.trim() || !email.trim() || !password.trim() || !phone.trim()) {
-      setError("Firma, email, telefon ve şifre zorunlu");
-      return;
-    }
+  if (!companyName.trim() || !email.trim() || !password.trim()) {
+    setError("Firma, email ve şifre zorunlu");
+    return;
+  }
 
-    try {
-      setLoading(true);
-      setError("");
+  try {
+    setLoading(true);
+    setError("");
 
-      await axios.post(`${API}/auth/register`, {
-        companyName: companyName.trim(),
-        name: fullName.trim(),
-        phone: phone.trim(),
-        email: email.trim(),
-        password: password.trim(),
-        role: membershipType,
-        companyType,
-        category,
-        city: city.trim(),
-        district: district.trim(),
-        taxNumber: taxNumber.trim(),
-        taxOffice: taxOffice.trim(),
-        address: address.trim(),
-      });
+    await axios.post(`${API}/auth/register`, {
+      companyName: companyName.trim(),
+      email: email.trim(),
+      password: password.trim(),
+      role: membershipType,
+    });
 
-      alert("Kayıt başarılı. Şimdi giriş yapabilirsiniz.");
-      navigate("/login");
-    } catch (err: any) {
-      console.error("REGISTER ERROR =>", err?.response || err);
-      setError(
-        err?.response?.data?.message ||
-          err?.response?.data?.error ||
-          "Kayıt sırasında hata oluştu"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    alert("Kayıt başarılı. Şimdi giriş yapabilirsiniz.");
+    navigate("/login");
+  } catch (err: any) {
+    console.error("REGISTER ERROR =>", err?.response || err);
+
+    setError(
+      err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Kayıt sırasında hata oluştu"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <main style={pageStyle}>
