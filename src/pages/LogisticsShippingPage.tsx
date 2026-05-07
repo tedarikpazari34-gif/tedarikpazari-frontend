@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = "http://localhost:3002/api";
+const API = "http://https://tedarik-backend.onrender.com/api";
 
 export default function ShippingPage() {
   const [rfqs, setRfqs] = useState<any[]>([]);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const BASE_URL = "http://localhost:3002";
+const BASE_URL = "http://https://tedarik-backend.onrender.com";
 
 type Category = {
   id: string;

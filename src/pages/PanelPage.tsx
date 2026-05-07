@@ -35,7 +35,7 @@ ChartJS.register(
 );
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3002/api";
+  import.meta.env.VITE_API_URL || "http://https://tedarik-backend.onrender.com/api";
 
 const APP_TITLE = import.meta.env.VITE_PLATFORM_NAME || "TEDARİK PAZARI";
 

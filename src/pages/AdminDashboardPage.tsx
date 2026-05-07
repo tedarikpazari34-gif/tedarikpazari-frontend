@@ -12,7 +12,7 @@ type RFQ = {
   status?: string;
 };
 
-const API = "http://localhost:3002/api";
+const API = "http://https://tedarik-backend.onrender.com/api";
 
 export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);

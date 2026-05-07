@@ -9,7 +9,7 @@ export default function CreateQuotePage() {
   const handleSubmit = async () => {
     const token = localStorage.getItem("token");
 
-    const res = await fetch("http://localhost:3002/api/quotes", {
+    const res = await fetch("http://https://tedarik-backend.onrender.com/api/quotes", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

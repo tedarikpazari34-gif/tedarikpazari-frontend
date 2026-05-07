@@ -33,7 +33,7 @@ export default function BuyerRfqDetailPage() {
   const [rfq, setRfq] = useState<RFQ | null>(null);
 
   useEffect(() => {
-    fetch("http://localhost:3002/api/rfqs/mine", {
+    fetch("http://https://tedarik-backend.onrender.com/api/rfqs/mine", {
       headers: {
         Authorization: `Bearer ${TOKEN}`,
       },

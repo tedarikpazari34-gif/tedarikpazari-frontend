@@ -19,7 +19,7 @@ type Quote = {
   rfq?: { id?: string };
 };
 
-const API = "http://localhost:3002/api";
+const API = "http://https://tedarik-backend.onrender.com/api";
 
 export default function BuyerRfqDetailPage() {
   const { id } = useParams();

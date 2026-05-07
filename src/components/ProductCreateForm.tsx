@@ -45,7 +45,7 @@ export default function ProductCreateForm({
         const uploadFormData = new FormData();
         uploadFormData.append("file", image);
 
-        const uploadRes = await fetch("http://localhost:3002/api/upload", {
+        const uploadRes = await fetch("http://https://tedarik-backend.onrender.com/api/upload", {
           method: "POST",
           body: uploadFormData,
         });
@@ -60,7 +60,7 @@ export default function ProductCreateForm({
         uploadedImageUrl = uploadData.imageUrl || "";
       }
 
-      const res = await fetch("http://localhost:3002/api/products", {
+      const res = await fetch("http://https://tedarik-backend.onrender.com/api/products", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -92,7 +92,7 @@ export default function ProductCreateForm({
 
       if (uploadedImageUrl) {
         const imageRes = await fetch(
-          `http://localhost:3002/api/products/${product.id}/images`,
+          `http://https://tedarik-backend.onrender.com/api/products/${product.id}/images`,
           {
             method: "POST",
             headers: {

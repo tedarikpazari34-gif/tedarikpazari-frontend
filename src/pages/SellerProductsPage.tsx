@@ -36,7 +36,7 @@ export default function SellerProductsPage() {
 
       const token = localStorage.getItem("token") || TEST_TOKEN;
 
-      const res = await fetch("http://localhost:3002/api/products/mine", {
+      const res = await fetch("http://https://tedarik-backend.onrender.com/api/products/mine", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -110,7 +110,7 @@ export default function SellerProductsPage() {
               <div className="flex-1">
                 {product.imageUrl && (
                   <img
-                    src={`http://localhost:3002${product.imageUrl}`}
+                    src={`http://https://tedarik-backend.onrender.com${product.imageUrl}`}
                     alt={product.title}
                     className="w-full h-48 object-cover rounded-xl mb-4"
                   />
