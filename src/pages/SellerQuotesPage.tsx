@@ -20,7 +20,7 @@ type Quote = {
   };
 };
 
-const API = "http://https://tedarik-backend.onrender.com/api";
+const API = "https://tedarik-backend.onrender.com/api";
 
 export default function SellerQuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);

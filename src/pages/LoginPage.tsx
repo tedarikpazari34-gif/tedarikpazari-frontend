@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API = "http://https://tedarik-backend.onrender.com/api";
+const API = "https://tedarik-backend.onrender.com/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");

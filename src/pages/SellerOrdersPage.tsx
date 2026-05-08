@@ -25,7 +25,7 @@ type Order = {
 };
 };
 
-const API = "http://https://tedarik-backend.onrender.com/api";
+const API = "https://tedarik-backend.onrender.com/api";
 
 export default function SellerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);

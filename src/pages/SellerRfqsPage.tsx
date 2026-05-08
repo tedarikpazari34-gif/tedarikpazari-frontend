@@ -21,7 +21,7 @@ type RFQ = {
   quotes?: Quote[];
 };
 
-const API = "http://https://tedarik-backend.onrender.com/api";
+const API = "https://tedarik-backend.onrender.com/api";
 
 export default function SellerRfqsPage() {
   const [rfqs, setRfqs] = useState<RFQ[]>([]);

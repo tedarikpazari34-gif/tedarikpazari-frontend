@@ -43,8 +43,8 @@ export default function CategoryPage() {
         setLoading(true);
 
         const [productsRes, categoriesRes] = await Promise.all([
-          fetch(`http://https://tedarik-backend.onrender.com/api/products/category/${categoryId}`),
-          fetch("http://https://tedarik-backend.onrender.com/api/categories"),
+          fetch(`https://tedarik-backend.onrender.com/api/products/category/${categoryId}`),
+          fetch("https://tedarik-backend.onrender.com/api/categories"),
         ]);
 
         const productsData = await productsRes.json();
@@ -145,7 +145,7 @@ export default function CategoryPage() {
             >
               {product.imageUrl ? (
                 <img
-                  src={`http://https://tedarik-backend.onrender.com${product.imageUrl}`}
+                  src={`https://tedarik-backend.onrender.com${product.imageUrl}`}
                   alt={product.title}
                   className="w-full h-52 object-cover"
                 />

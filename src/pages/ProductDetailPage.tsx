@@ -45,7 +45,7 @@ function getCategoryIcon(categoryName?: string) {
 function resolveImageUrl(url?: string | null) {
   if (!url) return null;
   if (url.startsWith("http")) return url;
-  return `http://https://tedarik-backend.onrender.com${url}`;
+  return `https://tedarik-backend.onrender.com${url}`;
 }
 
 export default function ProductDetailPage() {
@@ -69,7 +69,7 @@ export default function ProductDetailPage() {
       try {
         setLoading(true);
 
-        const res = await fetch(`http://https://tedarik-backend.onrender.com/api/products/${productId}`);
+        const res = await fetch(`https://tedarik-backend.onrender.com/api/products/${productId}`);
         const data = await res.json();
 
         if (!res.ok) {

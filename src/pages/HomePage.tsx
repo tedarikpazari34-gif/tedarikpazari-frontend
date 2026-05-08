@@ -225,20 +225,20 @@ function getImageUrl(product: ApiProduct): string {
     if (typeof img === "string") {
       return img.trim() && img.startsWith("http")
         ? img
-        : `http://https://tedarik-backend.onrender.com${img}`;
+        : `https://tedarik-backend.onrender.com${img}`;
     }
 
     if (img && typeof img === "object") {
       if (img.url) {
         return img.url.startsWith("http")
           ? img.url
-          : `http://https://tedarik-backend.onrender.com${img.url}`;
+          : `https://tedarik-backend.onrender.com${img.url}`;
       }
 
       if (img.imageUrl) {
         return img.imageUrl.startsWith("http")
           ? img.imageUrl
-          : `http://https://tedarik-backend.onrender.com${img.imageUrl}`;
+          : `https://tedarik-backend.onrender.com${img.imageUrl}`;
       }
     }
   }
@@ -246,7 +246,7 @@ function getImageUrl(product: ApiProduct): string {
   if (product.imageUrl) {
     return product.imageUrl.startsWith("http")
       ? product.imageUrl
-      : `http://https://tedarik-backend.onrender.com${product.imageUrl}`;
+      : `https://tedarik-backend.onrender.com${product.imageUrl}`;
   }
 
   const title = (product.title || product.name || "").toLowerCase();
@@ -273,7 +273,7 @@ export default function HomePage() {
     useState<ProductCard[]>(fallbackFeaturedProducts);
 
   useEffect(() => {
-    fetch("http://https://tedarik-backend.onrender.com/api/products")
+    fetch("https://tedarik-backend.onrender.com/api/products")
       .then((res) => {
         if (!res.ok) throw new Error(`Ürünler alınamadı: ${res.status}`);
         return res.json();

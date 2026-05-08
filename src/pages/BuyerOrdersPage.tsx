@@ -21,7 +21,7 @@ type Order = {
 };
 
 const API =
-  import.meta.env.VITE_API_URL || "http://https://tedarik-backend.onrender.com/api";
+  import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
 export default function BuyerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);

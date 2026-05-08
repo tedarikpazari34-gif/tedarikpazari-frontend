@@ -35,11 +35,11 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
     product.images && product.images.length > 0
       ? product.images[0].url.startsWith("http")
         ? product.images[0].url
-        : `http://https://tedarik-backend.onrender.com${product.images[0].url}`
+        : `https://tedarik-backend.onrender.com${product.images[0].url}`
       : product.imageUrl
       ? product.imageUrl.startsWith("http")
         ? product.imageUrl
-        : `http://https://tedarik-backend.onrender.com${product.imageUrl}`
+        : `https://tedarik-backend.onrender.com${product.imageUrl}`
       : "https://placehold.co/300x200?text=No+Image";
 
   return (

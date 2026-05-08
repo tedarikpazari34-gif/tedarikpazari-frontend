@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = "http://https://tedarik-backend.onrender.com/api/admin";
+const API = "https://tedarik-backend.onrender.com/api/admin";
 
 type Company = {
   id: string;

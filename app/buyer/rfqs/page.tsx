@@ -19,7 +19,7 @@ export default function BuyerRfqsPage() {
   const [rfqs, setRfqs] = useState<RFQ[]>([]);
 
   useEffect(() => {
-    fetch("http://https://tedarik-backend.onrender.com/api/rfqs/mine", {
+    fetch("https://tedarik-backend.onrender.com/api/rfqs/mine", {
       headers: { Authorization: `Bearer ${TOKEN}` },
     })
       .then((res) => res.json())
