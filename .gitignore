@@ -26,3 +26,4 @@ dist-ssr
 .env.save
 dist
 tsconfig.tsbuildinfo
+.vercel
