@@ -5,6 +5,7 @@ const API = "https://tedarik-backend.onrender.com/api/admin";
 type Company = {
   id: string;
   name?: string | null;
+  companyName?: string | null;
   email?: string | null;
   role?: string | null;
   status?: string | null;
@@ -192,7 +193,7 @@ export default function AdminCompaniesPage() {
 
             return (
               <div key={c.id} style={row}>
-                <span>{c.name || "İsimsiz şirket"}</span>
+                <span>{c.companyName || c.name || "İsimsiz şirket"}</span>
                 <span>{c.email || "-"}</span>
                 <span>{role}</span>
                 <span>{c.status || "-"}</span>
@@ -269,7 +270,7 @@ function CompanyCard({
 
   return (
     <div style={card}>
-      <h3>{company.name || "İsimsiz şirket"}</h3>
+      <h3>{company.companyName || company.name || "İsimsiz şirket"}</h3>
 
       <p>
         <b>Email:</b> {company.email || "-"}

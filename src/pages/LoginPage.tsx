@@ -21,6 +21,8 @@ export default function LoginPage() {
 
       const token = res.data?.token;
       const role = res.data?.user?.role || res.data?.role;
+      console.log("LOGIN RESPONSE:", res.data);
+      console.log("ROLE:", role);
 
       if (!token) {
         setError("Token gelmedi");

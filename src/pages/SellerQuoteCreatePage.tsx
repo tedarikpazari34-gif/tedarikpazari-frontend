@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 export default function CreateQuotePage() {
-  const [rfqId, setRfqId] = useState("");
+  const [searchParams] = useSearchParams();
+  const rfqIdFromUrl = searchParams.get("rfqId") || "";
+  
+  const [rfqId, setRfqId] = useState(rfqIdFromUrl);
   const [price, setPrice] = useState("");
   const [days, setDays] = useState("");
   const [note, setNote] = useState("");
-
   const handleSubmit = async () => {
     const token = localStorage.getItem("token");
 

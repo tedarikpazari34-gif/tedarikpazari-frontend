@@ -188,9 +188,22 @@ export default function SellerRfqsPage() {
                 <b>Mevcut Teklif:</b> {rfq.quotes?.length || 0}
               </p>
 
-              <button onClick={() => openQuoteModal(rfq)} style={quoteButtonStyle}>
-                Teklif Ver
-              </button>
+              <button
+  onClick={() => {
+    window.location.href = `/seller/quotes/create?rfqId=${rfq.id}`;
+  }}
+  style={{
+    background: "#2563eb",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    padding: "10px 14px",
+    fontWeight: 700,
+    cursor: "pointer",
+  }}
+>
+  Teklif Ver
+</button>
             </div>
           ))}
         </div>

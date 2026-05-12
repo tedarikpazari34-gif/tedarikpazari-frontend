@@ -1,32 +1,36 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+import Navbar from "./components/Navbar";
+
 import HomePage from "./pages/HomePage";
-import PanelPage from "./pages/PanelPage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
+
+import CategoryPage from "./pages/CategoryPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
+
 import BuyerOrdersPage from "./pages/BuyerOrdersPage";
-import SellerOrdersPage from "./pages/SellerOrdersPage";
 import BuyerRfqDetailPage from "./pages/BuyerRfqDetailPage";
 import BuyerRfqsPage from "./pages/BuyerRfqsPage";
-import SellerRfqsPage from "./pages/SellerRfqsPage";
-import LogisticsShippingPage from "./pages/LogisticsShippingPage";
-import BuyerShippingQuotesPage from "./pages/BuyerShippingQuotesPage";
-import AdminDashboardPage from "./pages/AdminDashboardPage";
-import AdminCompaniesPage from "./pages/AdminCompaniesPage";
-import SellerProductCreatePage from "./pages/SellerProductCreatePage";
-import CategoryPage from "./pages/CategoryPage";
-import Navbar from "./components/Navbar";
-import ProductDetailPage from "./pages/ProductDetailPage";
 import BuyerQuotesPage from "./pages/BuyerQuotesPage";
+import CreateRfqPage from "./pages/CreateRfqPage";
+
+import SellerOrdersPage from "./pages/SellerOrdersPage";
+import SellerRfqsPage from "./pages/SellerRfqsPage";
 import SellerProductsPage from "./pages/SellerProductsPage";
+import SellerProductCreatePage from "./pages/SellerProductCreatePage";
 import SellerQuotesPage from "./pages/SellerQuotesPage";
 import SellerQuoteCreatePage from "./pages/SellerQuoteCreatePage";
+
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminCompaniesPage from "./pages/AdminCompaniesPage";
+
 function PrivateRoute({
   children,
   role,
 }: {
   children: React.ReactNode;
-  role?: "BUYER" | "SELLER" | "ADMIN" | "LOGISTICS";
+  role?: "BUYER" | "SELLER" | "ADMIN";
 }) {
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
@@ -50,13 +54,16 @@ export default function App() {
       <Routes>
         {/* PUBLIC */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/panel" element={<PanelPage />} />
+
         <Route path="/uyelik" element={<RegisterPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
 
         {/* CATEGORY */}
         <Route path="/category/:id" element={<CategoryPage />} />
+
+        {/* PRODUCT */}
+        <Route path="/product/:id" element={<ProductDetailPage />} />
 
         {/* BUYER */}
         <Route
@@ -67,6 +74,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/buyer/rfqs"
           element={
@@ -75,6 +83,16 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
+        <Route
+          path="/buyer/rfqs/new"
+          element={
+            <PrivateRoute role="BUYER">
+              <CreateRfqPage />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/buyer/rfqs/:id"
           element={
@@ -83,22 +101,16 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
         <Route
-          path="/buyer/shipping"
+          path="/tekliflerim"
           element={
             <PrivateRoute role="BUYER">
-              <BuyerShippingQuotesPage />
+              <BuyerQuotesPage />
             </PrivateRoute>
           }
         />
-         <Route
-  path="/tekliflerim"
-  element={
-    <PrivateRoute role="BUYER">
-      <BuyerQuotesPage />
-    </PrivateRoute>
-  }
-/>
+
         {/* SELLER */}
         <Route
           path="/seller/orders"
@@ -108,6 +120,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/seller/rfqs"
           element={
@@ -116,6 +129,16 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
+        <Route
+          path="/seller/products"
+          element={
+            <PrivateRoute role="SELLER">
+              <SellerProductsPage />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/seller/products/new"
           element={
@@ -124,39 +147,21 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
         <Route
-  path="/seller/products"
-  element={
-    <PrivateRoute role="SELLER">
-      <SellerProductsPage />
-    </PrivateRoute>
-  }
-/>
-
-<Route
-  path="/seller/quotes"
-  element={
-    <PrivateRoute role="SELLER">
-      <SellerQuotesPage />
-    </PrivateRoute>
-  }
-/>
-
-<Route
-  path="/seller/quotes/create"
-  element={
-    <PrivateRoute role="SELLER">
-      <SellerQuoteCreatePage />
-    </PrivateRoute>
-  }
-/>
-
-        {/* LOGISTICS */}
-        <Route
-          path="/logistics/shipping"
+          path="/seller/quotes"
           element={
-            <PrivateRoute role="LOGISTICS">
-              <LogisticsShippingPage />
+            <PrivateRoute role="SELLER">
+              <SellerQuotesPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/seller/quotes/create"
+          element={
+            <PrivateRoute role="SELLER">
+              <SellerQuoteCreatePage />
             </PrivateRoute>
           }
         />
@@ -170,6 +175,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/admin/companies"
           element={
@@ -178,7 +184,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/product/:id" element={<ProductDetailPage />} />
 
         {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/" replace />} />

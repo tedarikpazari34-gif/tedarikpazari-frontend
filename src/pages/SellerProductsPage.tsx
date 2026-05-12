@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import SellerLayout from "../components/SellerLayout";
+
+const BASE_URL = "https://tedarik-backend.onrender.com";
 
 type Product = {
   id: string;
@@ -21,9 +24,6 @@ type Product = {
   };
 };
 
-const TEST_TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1icnNjemMwMDA2amZ2eWJmcmw2NGF5IiwidXNlcklkIjoiY21tYnJzY3pjMDAwNmpmdnliZnJsNjRheSIsImVtYWlsIjoic2VsbGVyQHRlc3QuY29tIiwiY29tcGFueUlkIjoiY21tYnJzY3o4MDAwMmpmdnlzYjc3bm5hciIsInJvbGUiOiJTRUxMRVIiLCJjb21wYW55U3RhdHVzIjoiQVBQUk9WRUQiLCJpYXQiOjE3NzMyNjIwNzIsImV4cCI6MTc3Mzg2Njg3Mn0.C83EfSHk15qFLXTs7NMZ2GIzY2WGtHoOqmhZwvsIlu0";
-
 export default function SellerProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,9 +34,15 @@ export default function SellerProductsPage() {
       setLoading(true);
       setError("");
 
-      const token = localStorage.getItem("token") || TEST_TOKEN;
+      const token = localStorage.getItem("token");
 
-      const res = await fetch("https://tedarik-backend.onrender.com/api/products/mine", {
+      if (!token) {
+        setError("Lütfen tekrar giriş yapın");
+        setProducts([]);
+        return;
+      }
+
+      const res = await fetch(`${BASE_URL}/api/products/mine`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -50,11 +56,7 @@ export default function SellerProductsPage() {
         return;
       }
 
-      if (Array.isArray(data)) {
-        setProducts(data);
-      } else {
-        setProducts([]);
-      }
+      setProducts(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("SELLER PRODUCTS ERROR:", err);
       setError("Ürünler alınırken hata oluştu");
@@ -69,156 +71,324 @@ export default function SellerProductsPage() {
   }, []);
 
   return (
-    <main className="max-w-6xl mx-auto px-6 py-12">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-white">Ürünlerim</h1>
-          <p className="text-gray-300 mt-2">
-            Satıcı hesabınıza ait ürünleri buradan görüntüleyin.
-          </p>
-        </div>
-
-        <a
-          href="/seller/products/new"
-          className="bg-blue-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-blue-700"
-        >
-          Yeni Ürün Ekle
-        </a>
-      </div>
-
-      {loading && <p className="text-white text-lg">Yükleniyor...</p>}
-
-      {!loading && error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-4 mb-6">
-          {error}
-        </div>
-      )}
-
-      {!loading && !error && products.length === 0 && (
-        <div className="bg-white rounded-2xl p-8 shadow-sm">
-          <p className="text-gray-700 text-lg">Henüz ürününüz yok.</p>
-        </div>
-      )}
-
-      <div className="grid gap-6">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
-          >
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-              <div className="flex-1">
-                {product.imageUrl && (
-                  <img
-                    src={`https://tedarik-backend.onrender.com${product.imageUrl}`}
-                    alt={product.title}
-                    className="w-full h-48 object-cover rounded-xl mb-4"
-                  />
-                )}
-
-                <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                  {product.title}
-                </h2>
-
-                <div className="space-y-2 text-gray-800">
-                  <p>
-                    <strong>Kategori:</strong>{" "}
-                    {product.category?.name || "-"}
-                  </p>
-                  <p>
-                    <strong>Fiyat:</strong>{" "}
-                    {Number(product.basePrice).toLocaleString("tr-TR")} ₺
-                  </p>
-                  <p>
-                    <strong>Birim:</strong> {product.unitType}
-                  </p>
-                  <p>
-                    <strong>MOQ:</strong> {product.moq}
-                  </p>
-                  <p>
-                    <strong>Tedarik Süresi:</strong> {product.leadTimeDays} gün
-                  </p>
-                  <p>
-                    <strong>Stok Tipi:</strong> {product.stockType}
-                  </p>
-                  <p>
-                    <strong>KDV:</strong> %{product.vatRate}
-                  </p>
-                  <p>
-                    <strong>Oluşturulma:</strong>{" "}
-                    {new Date(product.createdAt).toLocaleDateString("tr-TR")}
-                  </p>
-                </div>
-              </div>
-
-              <div className="min-w-[220px] space-y-3">
-                <div>
-                  <p className="text-sm font-semibold text-gray-700 mb-2">
-                    Onay Durumu
-                  </p>
-                  <span
-                    className={`inline-block px-4 py-2 rounded-full text-sm font-bold ${
-                      product.isApproved
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {product.isApproved ? "APPROVED" : "PENDING APPROVAL"}
-                  </span>
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-gray-700 mb-2">
-                    RFQ Durumu
-                  </p>
-                  <span
-                    className={`inline-block px-4 py-2 rounded-full text-sm font-bold ${
-                      product.rfqEnabled
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    {product.rfqEnabled ? "RFQ AÇIK" : "RFQ KAPALI"}
-                  </span>
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-gray-700 mb-2">
-                    Aktivasyon
-                  </p>
-                  <span
-                    className={`inline-block px-4 py-2 rounded-full text-sm font-bold ${
-                      product.isActive
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {product.isActive ? "AKTİF" : "PASİF"}
-                  </span>
-                </div>
-
-                <div className="pt-2">
-                  <a
-                    href={`/product/${product.id}`}
-                    className="inline-block bg-gray-900 text-white px-4 py-2 rounded-xl font-semibold hover:bg-black"
-                  >
-                    Ürünü Gör
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {product.description && (
-              <div className="mt-5 border-t pt-4">
-                <p className="text-sm font-semibold text-gray-700 mb-2">
-                  Açıklama
-                </p>
-                <p className="text-gray-800">{product.description}</p>
-              </div>
-            )}
+    <SellerLayout title="Ürünlerim">
+      <main style={pageStyle}>
+        <div style={headerStyle}>
+          <div>
+            <h1 style={titleStyle}>Ürünlerim</h1>
+            <p style={subtitleStyle}>
+              Satıcı hesabınıza ait ürünleri buradan yönetin.
+            </p>
           </div>
-        ))}
-      </div>
-    </main>
+
+          <a href="/seller/products/new" style={addButtonStyle}>
+            + Yeni Ürün Ekle
+          </a>
+        </div>
+
+        {loading && <div style={infoBoxStyle}>Ürünler yükleniyor...</div>}
+
+        {!loading && error && <div style={errorBoxStyle}>{error}</div>}
+
+        {!loading && !error && products.length === 0 && (
+          <div style={emptyStyle}>
+            <h2 style={{ marginTop: 0 }}>Henüz ürününüz yok</h2>
+            <p>İlk ürününüzü ekleyerek satıcı panelinizi kullanmaya başlayın.</p>
+            <a href="/seller/products/new" style={addButtonStyle}>
+              İlk Ürünü Ekle
+            </a>
+          </div>
+        )}
+
+        {!loading && !error && products.length > 0 && (
+          <div style={gridStyle}>
+            {products.map((product) => (
+              <article key={product.id} style={cardStyle}>
+                <div style={imageWrapStyle}>
+                  {product.imageUrl ? (
+                    <img
+                      src={`${BASE_URL}${product.imageUrl}`}
+                      alt={product.title}
+                      style={imageStyle}
+                    />
+                  ) : (
+                    <div style={imagePlaceholderStyle}>Ürün Görseli Yok</div>
+                  )}
+
+                  <span
+                    style={{
+                      ...statusBadgeStyle,
+                      ...(product.isApproved
+                        ? approvedBadgeStyle
+                        : pendingBadgeStyle),
+                    }}
+                  >
+                    {product.isApproved ? "Onaylı" : "Onay Bekliyor"}
+                  </span>
+                </div>
+
+                <div style={contentStyle}>
+                  <div style={categoryStyle}>
+                    {product.category?.name || "Kategori yok"}
+                  </div>
+
+                  <h2 style={productTitleStyle}>{product.title}</h2>
+
+                  <p style={descriptionStyle}>
+                    {product.description || "Açıklama girilmemiş."}
+                  </p>
+
+                  <div style={priceStyle}>
+                    {Number(product.basePrice || 0).toLocaleString("tr-TR")} ₺
+                  </div>
+
+                  <div style={detailsGridStyle}>
+                    <Info label="Birim" value={product.unitType} />
+                    <Info label="MOQ" value={product.moq} />
+                    <Info label="Tedarik" value={`${product.leadTimeDays} gün`} />
+                    <Info label="KDV" value={`%${product.vatRate}`} />
+                  </div>
+
+                  <div style={badgeRowStyle}>
+                    <span
+                      style={{
+                        ...smallBadgeStyle,
+                        background: product.rfqEnabled ? "#dbeafe" : "#e5e7eb",
+                        color: product.rfqEnabled ? "#1d4ed8" : "#374151",
+                      }}
+                    >
+                      {product.rfqEnabled ? "RFQ Açık" : "RFQ Kapalı"}
+                    </span>
+
+                    <span
+                      style={{
+                        ...smallBadgeStyle,
+                        background: product.isActive ? "#dcfce7" : "#fee2e2",
+                        color: product.isActive ? "#166534" : "#991b1b",
+                      }}
+                    >
+                      {product.isActive ? "Aktif" : "Pasif"}
+                    </span>
+                  </div>
+
+                  <div style={actionsStyle}>
+                    <a href={`/product/${product.id}`} style={viewButtonStyle}>
+                      Ürünü Gör
+                    </a>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </main>
+    </SellerLayout>
   );
 }
+
+function Info({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div style={infoItemStyle}>
+      <span style={infoLabelStyle}>{label}</span>
+      <strong style={infoValueStyle}>{value}</strong>
+    </div>
+  );
+}
+
+const pageStyle: CSSProperties = {
+  padding: "10px 0 40px",
+};
+
+const headerStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  marginBottom: 26,
+  gap: 20,
+};
+
+const titleStyle: CSSProperties = {
+  margin: 0,
+  fontSize: 34,
+  fontWeight: 900,
+  color: "#0f172a",
+};
+
+const subtitleStyle: CSSProperties = {
+  marginTop: 8,
+  color: "#64748b",
+};
+
+const addButtonStyle: CSSProperties = {
+  background: "#2563eb",
+  color: "white",
+  textDecoration: "none",
+  padding: "13px 18px",
+  borderRadius: 14,
+  fontWeight: 800,
+  boxShadow: "0 10px 25px rgba(37,99,235,0.25)",
+};
+
+const gridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+  gap: 22,
+};
+
+const cardStyle: CSSProperties = {
+  background: "white",
+  borderRadius: 22,
+  overflow: "hidden",
+  border: "1px solid #e2e8f0",
+  boxShadow: "0 16px 35px rgba(15,23,42,0.08)",
+};
+
+const imageWrapStyle: CSSProperties = {
+  position: "relative",
+  height: 210,
+  background: "#e2e8f0",
+};
+
+const imageStyle: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+};
+
+const imagePlaceholderStyle: CSSProperties = {
+  height: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "#64748b",
+  fontWeight: 800,
+};
+
+const statusBadgeStyle: CSSProperties = {
+  position: "absolute",
+  top: 14,
+  right: 14,
+  padding: "7px 10px",
+  borderRadius: 999,
+  fontSize: 12,
+  fontWeight: 900,
+};
+
+const approvedBadgeStyle: CSSProperties = {
+  background: "#dcfce7",
+  color: "#166534",
+};
+
+const pendingBadgeStyle: CSSProperties = {
+  background: "#fef3c7",
+  color: "#92400e",
+};
+
+const contentStyle: CSSProperties = {
+  padding: 22,
+};
+
+const categoryStyle: CSSProperties = {
+  color: "#2563eb",
+  fontWeight: 800,
+  fontSize: 13,
+  marginBottom: 8,
+};
+
+const productTitleStyle: CSSProperties = {
+  fontSize: 22,
+  fontWeight: 900,
+  color: "#0f172a",
+  margin: "0 0 10px",
+};
+
+const descriptionStyle: CSSProperties = {
+  color: "#64748b",
+  fontSize: 14,
+  minHeight: 42,
+  lineHeight: 1.5,
+};
+
+const priceStyle: CSSProperties = {
+  fontSize: 26,
+  fontWeight: 900,
+  color: "#16a34a",
+  margin: "18px 0",
+};
+
+const detailsGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 10,
+};
+
+const infoItemStyle: CSSProperties = {
+  background: "#f8fafc",
+  padding: 12,
+  borderRadius: 12,
+};
+
+const infoLabelStyle: CSSProperties = {
+  display: "block",
+  color: "#64748b",
+  fontSize: 12,
+  marginBottom: 4,
+};
+
+const infoValueStyle: CSSProperties = {
+  color: "#0f172a",
+  fontSize: 14,
+};
+
+const badgeRowStyle: CSSProperties = {
+  display: "flex",
+  gap: 8,
+  marginTop: 16,
+  flexWrap: "wrap",
+};
+
+const smallBadgeStyle: CSSProperties = {
+  padding: "7px 10px",
+  borderRadius: 999,
+  fontSize: 12,
+  fontWeight: 900,
+};
+
+const actionsStyle: CSSProperties = {
+  marginTop: 18,
+  display: "flex",
+  justifyContent: "space-between",
+};
+
+const viewButtonStyle: CSSProperties = {
+  display: "inline-block",
+  width: "100%",
+  textAlign: "center",
+  background: "#0f172a",
+  color: "white",
+  textDecoration: "none",
+  padding: "12px 14px",
+  borderRadius: 12,
+  fontWeight: 800,
+};
+
+const infoBoxStyle: CSSProperties = {
+  background: "white",
+  padding: 22,
+  borderRadius: 16,
+  color: "#334155",
+};
+
+const errorBoxStyle: CSSProperties = {
+  background: "#fee2e2",
+  color: "#991b1b",
+  padding: 16,
+  borderRadius: 16,
+};
+
+const emptyStyle: CSSProperties = {
+  background: "white",
+  borderRadius: 20,
+  padding: 36,
+  boxShadow: "0 14px 30px rgba(15,23,42,0.08)",
+};

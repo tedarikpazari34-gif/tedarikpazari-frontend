@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+
+const BASE_URL = "https://tedarik-backend.onrender.com";
+
 type ProductImage = {
   id: string;
   url: string;
@@ -31,10 +34,11 @@ type Product = {
 
 function getCategoryIcon(categoryName?: string) {
   if (!categoryName) return "📦";
+
   const name = categoryName.toLowerCase();
 
   if (name.includes("elektrik") || name.includes("aydınlatma")) return "💡";
-  if (name.includes("temizlik") || name.includes("hijyen") || name.includes("kağıt")) return "🧴";
+  if (name.includes("temizlik") || name.includes("hijyen")) return "🧴";
   if (name.includes("gıda") || name.includes("kahve") || name.includes("horeca")) return "☕";
   if (name.includes("otomotiv") || name.includes("fren") || name.includes("motor")) return "🚗";
   if (name.includes("vida") || name.includes("alet") || name.includes("hırdavat")) return "🔩";
@@ -45,16 +49,14 @@ function getCategoryIcon(categoryName?: string) {
 function resolveImageUrl(url?: string | null) {
   if (!url) return null;
   if (url.startsWith("http")) return url;
-  return `https://tedarik-backend.onrender.com${url}`;
+  return `${BASE_URL}${url}`;
 }
 
 export default function ProductDetailPage() {
   const params = useParams();
   const navigate = useNavigate();
 
-  const productId = Array.isArray(params?.id)
-    ? params.id[0]
-    : (params?.id as string);
+  const productId = params.id as string;
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,13 +65,13 @@ export default function ProductDetailPage() {
   const [thumbErrors, setThumbErrors] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    if (!productId) return;
+    async function loadProduct() {
+      if (!productId) return;
 
-    const loadProduct = async () => {
       try {
         setLoading(true);
 
-        const res = await fetch(`https://tedarik-backend.onrender.com/api/products/${productId}`);
+        const res = await fetch(`${BASE_URL}/api/products/${productId}`);
         const data = await res.json();
 
         if (!res.ok) {
@@ -84,7 +86,7 @@ export default function ProductDetailPage() {
       } finally {
         setLoading(false);
       }
-    };
+    }
 
     loadProduct();
   }, [productId]);
@@ -94,11 +96,15 @@ export default function ProductDetailPage() {
 
     const imageSet = new Set<string>();
 
-    if (product.imageUrl) imageSet.add(product.imageUrl);
+    if (product.imageUrl) {
+      imageSet.add(product.imageUrl);
+    }
 
     if (Array.isArray(product.images)) {
       product.images.forEach((img) => {
-        if (img?.url) imageSet.add(img.url);
+        if (img?.url) {
+          imageSet.add(img.url);
+        }
       });
     }
 
@@ -117,24 +123,21 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <main className="max-w-7xl mx-auto px-6 py-10">
-        <div className="bg-white rounded-3xl p-8 shadow-sm border">
-          <p className="text-gray-700">Ürün yükleniyor...</p>
-        </div>
+      <main style={pageStyle}>
+        <div style={loadingCardStyle}>Ürün yükleniyor...</div>
       </main>
     );
   }
 
   if (!product) {
     return (
-      <main className="max-w-7xl mx-auto px-6 py-10">
-        <div className="bg-white rounded-3xl p-8 shadow-sm border">
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">
-            Ürün bulunamadı
-          </h1>
-          <p className="text-gray-600">
-            Bu ürün yayında olmayabilir veya kaldırılmış olabilir.
-          </p>
+      <main style={pageStyle}>
+        <div style={loadingCardStyle}>
+          <h1 style={{ marginTop: 0 }}>Ürün bulunamadı</h1>
+          <p>Bu ürün yayında olmayabilir veya kaldırılmış olabilir.</p>
+          <Link to="/" style={secondaryButtonStyle}>
+            Ana sayfaya dön
+          </Link>
         </div>
       </main>
     );
@@ -144,30 +147,31 @@ export default function ProductDetailPage() {
   const mainImageUrl = resolveImageUrl(selectedImage);
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-10">
-      <section className="grid lg:grid-cols-2 gap-8">
-        <div className="space-y-4">
-          <div className="bg-white rounded-3xl border shadow-sm overflow-hidden">
+    <main style={pageStyle}>
+      <section style={containerStyle}>
+        <div style={gallerySectionStyle}>
+          <div style={mainImageBoxStyle}>
             {mainImageUrl && !mainImageError ? (
               <img
                 src={mainImageUrl}
                 alt={product.title}
-                className="w-full h-[420px] object-cover"
+                style={mainImageStyle}
                 onError={() => setMainImageError(true)}
               />
             ) : (
-              <div className="w-full h-[420px] bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center text-gray-500">
-                <div className="text-7xl mb-3">{icon}</div>
-                <div className="text-lg font-medium">Test Görseli Yok</div>
+              <div style={emptyImageStyle}>
+                <div style={emptyIconStyle}>{icon}</div>
+                <div style={emptyTextStyle}>Ürün görseli yok</div>
               </div>
             )}
           </div>
 
           {galleryImages.length > 1 && (
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+            <div style={thumbGridStyle}>
               {galleryImages.map((img, index) => {
                 const thumbUrl = resolveImageUrl(img);
                 const thumbKey = `${img}-${index}`;
+                const active = selectedImage === img;
 
                 return (
                   <button
@@ -177,15 +181,16 @@ export default function ProductDetailPage() {
                       setSelectedImage(img);
                       setMainImageError(false);
                     }}
-                    className={`rounded-2xl overflow-hidden border-2 bg-white ${
-                      selectedImage === img ? "border-blue-600" : "border-gray-200"
-                    }`}
+                    style={{
+                      ...thumbButtonStyle,
+                      borderColor: active ? "#2563eb" : "#e2e8f0",
+                    }}
                   >
                     {thumbUrl && !thumbErrors[thumbKey] ? (
                       <img
                         src={thumbUrl}
                         alt={`${product.title} ${index + 1}`}
-                        className="w-full h-24 object-cover"
+                        style={thumbImageStyle}
                         onError={() =>
                           setThumbErrors((prev) => ({
                             ...prev,
@@ -194,9 +199,7 @@ export default function ProductDetailPage() {
                         }
                       />
                     ) : (
-                      <div className="w-full h-24 flex items-center justify-center bg-gray-100 text-2xl">
-                        {icon}
-                      </div>
+                      <div style={thumbFallbackStyle}>{icon}</div>
                     )}
                   </button>
                 );
@@ -205,40 +208,42 @@ export default function ProductDetailPage() {
           )}
         </div>
 
-        <div className="bg-white rounded-3xl border shadow-sm p-8">
-          <p className="text-sm font-semibold text-blue-600 mb-2">
+        <div style={infoSectionStyle}>
+          <div style={categoryStyle}>
             {product.category?.name || "Kategori"}
-          </p>
-
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
-              ✔ Verified Supplier
-            </span>
-
-            {product.rfqEnabled && (
-              <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
-                RFQ Uygun
-              </span>
-            )}
           </div>
 
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            {product.title}
-          </h1>
+          <div style={badgeRowStyle}>
+            <span style={verifiedBadgeStyle}>✔ Verified Supplier</span>
 
-          <p className="text-gray-600 text-lg mb-6">
+            {product.rfqEnabled && <span style={rfqBadgeStyle}>RFQ Uygun</span>}
+
+            <span
+              style={{
+                ...approvalBadgeStyle,
+                background: product.isApproved ? "#dcfce7" : "#fef3c7",
+                color: product.isApproved ? "#166534" : "#92400e",
+              }}
+            >
+              {product.isApproved ? "Onaylı" : "Onay Bekliyor"}
+            </span>
+          </div>
+
+          <h1 style={titleStyle}>{product.title}</h1>
+
+          <p style={descriptionStyle}>
             {product.description || "Bu ürün için açıklama eklenmemiş."}
           </p>
 
-          <div className="mb-6">
-            <p className="text-sm text-gray-500 mb-2">Başlangıç fiyatı</p>
-            <p className="text-3xl font-bold text-blue-600">
-              {Number(product.basePrice).toLocaleString("tr-TR")} ₺
-            </p>
-            <p className="text-sm text-gray-500 mt-1">/ {product.unitType}</p>
+          <div style={priceBlockStyle}>
+            <div style={priceLabelStyle}>Başlangıç fiyatı</div>
+            <div style={priceStyle}>
+              {Number(product.basePrice || 0).toLocaleString("tr-TR")} ₺
+            </div>
+            <div style={unitStyle}>/ {product.unitType}</div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div style={infoGridStyle}>
             <InfoBox label="Birim" value={product.unitType} />
             <InfoBox label="MOQ" value={product.moq} />
             <InfoBox
@@ -257,37 +262,34 @@ export default function ProductDetailPage() {
             <InfoBox label="Tedarikçi" value="Verified Supplier" green />
           </div>
 
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-6">
-            <p className="text-sm text-blue-700 font-semibold mb-2">
-              Platform Güvenceli Tedarik
-            </p>
-            <p className="text-sm text-gray-700">
-              Tedarikçi bilgileri, platform dışı iletişimi önlemek ve güvenli
-              ticaret akışını korumak amacıyla sipariş veya teklif sürecine kadar
-              gizlenir.
+          <div style={noticeStyle}>
+            <strong>Platform Güvenceli Tedarik</strong>
+            <p style={{ marginBottom: 0 }}>
+              Tedarikçi bilgileri, güvenli ticaret akışını korumak amacıyla
+              teklif veya sipariş sürecine kadar gizlenir.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-4">
+          <div style={actionsStyle}>
             <button
               type="button"
               onClick={() => {
                 if (!product.rfqEnabled) return;
                 navigate(`/buyer/rfqs/new?productId=${product.id}`);
               }}
-              className={`px-6 py-3 rounded-2xl font-semibold transition ${
-                product.rfqEnabled
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
-              }`}
               disabled={!product.rfqEnabled}
+              style={{
+                ...primaryButtonStyle,
+                opacity: product.rfqEnabled ? 1 : 0.55,
+                cursor: product.rfqEnabled ? "pointer" : "not-allowed",
+              }}
             >
               {product.rfqEnabled ? "Teklif İste (RFQ)" : "RFQ Kapalı"}
             </button>
 
             <Link
               to={product.category?.id ? `/category/${product.category.id}` : "/"}
-              className="px-6 py-3 rounded-2xl border font-semibold text-gray-800 hover:bg-gray-50 transition"
+              style={secondaryButtonStyle}
             >
               Kategoriye Dön
             </Link>
@@ -308,11 +310,267 @@ function InfoBox({
   green?: boolean;
 }) {
   return (
-    <div className="bg-gray-50 rounded-2xl p-4">
-      <p className="text-sm text-gray-500 mb-1">{label}</p>
-      <p className={`font-bold ${green ? "text-green-600" : "text-gray-900"}`}>
+    <div style={infoBoxStyle}>
+      <p style={infoLabelStyle}>{label}</p>
+      <p
+        style={{
+          ...infoValueStyle,
+          color: green ? "#16a34a" : "#0f172a",
+        }}
+      >
         {value}
       </p>
     </div>
   );
 }
+
+const pageStyle: CSSProperties = {
+  minHeight: "100vh",
+  background: "#f1f5f9",
+  padding: "40px 24px",
+};
+
+const containerStyle: CSSProperties = {
+  maxWidth: 1220,
+  margin: "0 auto",
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 28,
+};
+
+const gallerySectionStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 16,
+};
+
+const mainImageBoxStyle: CSSProperties = {
+  background: "white",
+  borderRadius: 28,
+  overflow: "hidden",
+  minHeight: 520,
+  boxShadow: "0 20px 50px rgba(15,23,42,0.1)",
+  border: "1px solid #e2e8f0",
+};
+
+const mainImageStyle: CSSProperties = {
+  width: "100%",
+  height: 520,
+  objectFit: "cover",
+  display: "block",
+};
+
+const emptyImageStyle: CSSProperties = {
+  height: 520,
+  background: "linear-gradient(135deg,#f8fafc,#e2e8f0)",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "#64748b",
+};
+
+const emptyIconStyle: CSSProperties = {
+  fontSize: 76,
+  marginBottom: 12,
+};
+
+const emptyTextStyle: CSSProperties = {
+  fontSize: 18,
+  fontWeight: 800,
+};
+
+const thumbGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill, minmax(90px, 1fr))",
+  gap: 12,
+};
+
+const thumbButtonStyle: CSSProperties = {
+  height: 96,
+  background: "white",
+  border: "3px solid #e2e8f0",
+  borderRadius: 18,
+  padding: 0,
+  overflow: "hidden",
+  cursor: "pointer",
+};
+
+const thumbImageStyle: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  display: "block",
+};
+
+const thumbFallbackStyle: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  background: "#f8fafc",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: 26,
+};
+
+const infoSectionStyle: CSSProperties = {
+  background: "white",
+  borderRadius: 28,
+  padding: 36,
+  boxShadow: "0 20px 50px rgba(15,23,42,0.1)",
+  border: "1px solid #e2e8f0",
+};
+
+const categoryStyle: CSSProperties = {
+  color: "#2563eb",
+  fontSize: 14,
+  fontWeight: 900,
+  marginBottom: 12,
+};
+
+const badgeRowStyle: CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 8,
+  marginBottom: 18,
+};
+
+const verifiedBadgeStyle: CSSProperties = {
+  background: "#dcfce7",
+  color: "#166534",
+  padding: "7px 11px",
+  borderRadius: 999,
+  fontSize: 12,
+  fontWeight: 900,
+};
+
+const rfqBadgeStyle: CSSProperties = {
+  background: "#dbeafe",
+  color: "#1d4ed8",
+  padding: "7px 11px",
+  borderRadius: 999,
+  fontSize: 12,
+  fontWeight: 900,
+};
+
+const approvalBadgeStyle: CSSProperties = {
+  padding: "7px 11px",
+  borderRadius: 999,
+  fontSize: 12,
+  fontWeight: 900,
+};
+
+const titleStyle: CSSProperties = {
+  fontSize: 40,
+  lineHeight: 1.1,
+  fontWeight: 900,
+  margin: "0 0 16px",
+  color: "#0f172a",
+};
+
+const descriptionStyle: CSSProperties = {
+  color: "#64748b",
+  fontSize: 17,
+  lineHeight: 1.7,
+  marginBottom: 26,
+};
+
+const priceBlockStyle: CSSProperties = {
+  marginBottom: 26,
+};
+
+const priceLabelStyle: CSSProperties = {
+  color: "#64748b",
+  fontSize: 14,
+  marginBottom: 6,
+};
+
+const priceStyle: CSSProperties = {
+  color: "#2563eb",
+  fontSize: 38,
+  fontWeight: 900,
+};
+
+const unitStyle: CSSProperties = {
+  color: "#64748b",
+  fontSize: 14,
+  marginTop: 4,
+};
+
+const infoGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 14,
+  marginBottom: 24,
+};
+
+const infoBoxStyle: CSSProperties = {
+  background: "#f8fafc",
+  borderRadius: 18,
+  padding: 16,
+};
+
+const infoLabelStyle: CSSProperties = {
+  margin: "0 0 6px",
+  color: "#64748b",
+  fontSize: 13,
+};
+
+const infoValueStyle: CSSProperties = {
+  margin: 0,
+  fontWeight: 900,
+  fontSize: 16,
+};
+
+const noticeStyle: CSSProperties = {
+  background: "#eff6ff",
+  border: "1px solid #bfdbfe",
+  color: "#1e3a8a",
+  borderRadius: 20,
+  padding: 18,
+  lineHeight: 1.6,
+  marginBottom: 24,
+};
+
+const actionsStyle: CSSProperties = {
+  display: "flex",
+  gap: 12,
+  flexWrap: "wrap",
+};
+
+const primaryButtonStyle: CSSProperties = {
+  flex: 1,
+  minWidth: 190,
+  height: 52,
+  border: "none",
+  borderRadius: 16,
+  background: "#2563eb",
+  color: "white",
+  fontSize: 16,
+  fontWeight: 900,
+};
+
+const secondaryButtonStyle: CSSProperties = {
+  flex: 1,
+  minWidth: 170,
+  height: 52,
+  borderRadius: 16,
+  border: "1px solid #cbd5e1",
+  background: "white",
+  color: "#0f172a",
+  fontSize: 16,
+  fontWeight: 900,
+  textDecoration: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+const loadingCardStyle: CSSProperties = {
+  maxWidth: 900,
+  margin: "0 auto",
+  background: "white",
+  borderRadius: 24,
+  padding: 32,
+  boxShadow: "0 20px 50px rgba(15,23,42,0.1)",
+};

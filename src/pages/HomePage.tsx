@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 type Sector = {
@@ -269,8 +269,9 @@ function mapApiProductToCard(product: ApiProduct): ProductCard {
 }
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] =
-    useState<ProductCard[]>(fallbackFeaturedProducts);
+  useState<ProductCard[]>([]);
 
   useEffect(() => {
     fetch("https://tedarik-backend.onrender.com/api/products")
@@ -660,8 +661,10 @@ export default function HomePage() {
             >
               {sectors.map((sector) => (
                 <div
-                  key={sector.title}
+  key={sector.title}
+  onClick={() => navigate("/panel")}
                   style={{
+                    cursor: "pointer",
                     position: "relative",
                     minHeight: 180,
                     overflow: "hidden",
@@ -746,6 +749,11 @@ export default function HomePage() {
                 gap: 18,
               }}
             >
+              {featuredProducts.length === 0 && (
+  <div style={{ color: "white" }}>
+    Ürün yükleniyor...
+  </div>
+)}
               {featuredProducts.map((item) => (
                 <div
                   key={item.id}
@@ -798,18 +806,18 @@ export default function HomePage() {
                       <strong style={{ fontSize: 20 }}>{item.price}</strong>
 
                       <Link
-                        to="/panel"
-                        style={{
-                          textDecoration: "none",
-                          background: "#2563eb",
-                          color: "#fff",
-                          padding: "10px 14px",
-                          borderRadius: 10,
-                          fontWeight: 700,
-                        }}
-                      >
-                        İncele
-                      </Link>
+  to={`/product/${item.id}`}
+  style={{
+    textDecoration: "none",
+    background: "#2563eb",
+    color: "#fff",
+    padding: "10px 14px",
+    borderRadius: 10,
+    fontWeight: 700,
+  }}
+>
+  İncele
+</Link>
                     </div>
                   </div>
                 </div>
