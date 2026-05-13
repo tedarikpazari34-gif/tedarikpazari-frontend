@@ -24,7 +24,7 @@ import SellerQuoteCreatePage from "./pages/SellerQuoteCreatePage";
 
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminCompaniesPage from "./pages/AdminCompaniesPage";
-
+import WalletPage from "./pages/WalletPage";
 function PrivateRoute({
   children,
   role,
@@ -184,7 +184,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
+        <Route path="/wallet" element={<WalletPage />} />
         {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

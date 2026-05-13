@@ -18,11 +18,11 @@ type Order = {
   };
 
   buyer?: {
-  id?: string;
-  name?: string;
-  companyName?: string;
-  email?: string;
-};
+    id?: string;
+    name?: string;
+    companyName?: string;
+    email?: string;
+  };
 };
 
 const API = "https://tedarik-backend.onrender.com/api";
@@ -59,14 +59,11 @@ export default function SellerOrdersPage() {
         return;
       }
 
-      // 🔥 SAFE ARRAY (backend farklı dönebilir)
       const safeOrders = Array.isArray(data)
         ? data
         : Array.isArray(data?.data)
         ? data.data
         : [];
-
-      console.log("ORDERS DATA:", safeOrders);
 
       setOrders(safeOrders);
     } catch (err) {
@@ -75,6 +72,58 @@ export default function SellerOrdersPage() {
       setOrders([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePrepare = async (orderId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API}/orders/${orderId}/prepare`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        alert(data?.message || "Hazırlama işlemi başarısız");
+        return;
+      }
+
+      alert("Sipariş hazırlanmaya alındı 🛠");
+      loadOrders();
+    } catch (err) {
+      console.error("PREPARE ERROR:", err);
+      alert("Hazırlama işlemi sırasında hata oluştu");
+    }
+  };
+
+  const handleShip = async (orderId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API}/orders/${orderId}/ship`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        alert(data?.message || "Kargo işlemi başarısız");
+        return;
+      }
+
+      alert("Sipariş kargoya verildi 🚚");
+      loadOrders();
+    } catch (err) {
+      console.error("SHIP ERROR:", err);
+      alert("Kargo işlemi sırasında hata oluştu");
     }
   };
 
@@ -139,6 +188,42 @@ export default function SellerOrdersPage() {
               <p>
                 <b>Durum:</b> {o.status}
               </p>
+
+              {o.status === "PAID" && (
+                <button
+                  onClick={() => handlePrepare(o.id)}
+                  style={{
+                    marginTop: 12,
+                    padding: "10px 14px",
+                    background: "#f59e0b",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontWeight: 700,
+                  }}
+                >
+                  🛠 Hazırlamaya Başla
+                </button>
+              )}
+
+              {o.status === "PREPARING" && (
+                <button
+                  onClick={() => handleShip(o.id)}
+                  style={{
+                    marginTop: 12,
+                    padding: "10px 14px",
+                    background: "#2563eb",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontWeight: 700,
+                  }}
+                >
+                  📦 Kargoya Ver
+                </button>
+              )}
             </div>
           ))}
         </div>

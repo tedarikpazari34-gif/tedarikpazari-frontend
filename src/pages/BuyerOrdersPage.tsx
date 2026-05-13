@@ -6,6 +6,10 @@ type Order = {
   totalAmount?: number | string;
   commissionAmount?: number | string;
 
+  shippingTrackingNo?: string | null;
+  shippingCompany?: string | null;
+  shippedAt?: string | null;
+
   rfq?: {
     quantity?: number;
     product?: {
@@ -84,8 +88,10 @@ export default function BuyerOrdersPage() {
         },
       });
 
+      const data = await res.json().catch(() => null);
+
       if (!res.ok) {
-        alert("İşlem başarısız");
+        alert(data?.message || "İşlem başarısız");
         return;
       }
 
@@ -97,34 +103,61 @@ export default function BuyerOrdersPage() {
     }
   };
 
+  const handleIyzicoPayment = async (orderId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API}/payments/iyzico/${orderId}/initialize`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.message || "Ödeme başlatılamadı");
+        return;
+      }
+
+      if (!data?.checkoutFormContent) {
+        alert("iyzico ödeme formu gelmedi");
+        return;
+      }
+
+      const paymentWindow = window.open("", "_blank");
+
+      if (!paymentWindow) {
+        alert("Popup engellendi. Tarayıcı popup iznini aç.");
+        return;
+      }
+
+      paymentWindow.document.open();
+      paymentWindow.document.write(`
+        <html>
+          <head>
+            <title>İyzico Ödeme</title>
+          </head>
+          <body>
+            ${data.checkoutFormContent}
+          </body>
+        </html>
+      `);
+      paymentWindow.document.close();
+    } catch (err) {
+      console.error("IYZICO PAYMENT ERROR:", err);
+      alert("Ödeme başlatılırken hata oluştu");
+    }
+  };
+
   if (loading) {
     return <p style={{ padding: 40 }}>Yükleniyor...</p>;
   }
 
   return (
     <main style={{ padding: 40 }}>
-  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-    
-    <h1 style={{ marginBottom: 30 }}>Siparişlerim</h1>
-
-    <button
-      onClick={() => {
-        localStorage.clear();
-        window.location.href = "/login";
-      }}
-      style={{
-        padding: "8px 14px",
-        background: "#ef4444",
-        color: "white",
-        border: "none",
-        borderRadius: 6,
-        cursor: "pointer"
-      }}
-    >
-      Çıkış Yap
-    </button>
-
-  </div>
+      <h1 style={{ marginBottom: 30 }}>Siparişlerim</h1>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
@@ -145,28 +178,40 @@ export default function BuyerOrdersPage() {
                 {Number(o.quote?.unitPrice || 0).toLocaleString("tr-TR")} ₺
               </p>
 
-              <p style={sub}>
-                Teslim: {o.quote?.deliveryDays || "-"} gün
-              </p>
+              <p style={sub}>Teslim: {o.quote?.deliveryDays || "-"} gün</p>
 
-              <p style={sub}>
-                Not: {o.quote?.sellerNote || "-"}
-              </p>
+              <p style={sub}>Not: {o.quote?.sellerNote || "-"}</p>
 
               <p style={price}>
-                Toplam:{" "}
-                {Number(o.totalAmount || 0).toLocaleString("tr-TR")} ₺
+                Toplam: {Number(o.totalAmount || 0).toLocaleString("tr-TR")} ₺
               </p>
 
-              <span style={statusBadge(o.status)}>
-                {o.status}
-              </span>
+              <span style={statusBadge(o.status)}>{o.status}</span>
+
+              {o.status === "SHIPPED" && (
+                <div style={trackingBox}>
+                  <p style={trackingText}>
+                    🚚 Kargo: {o.shippingCompany || "-"}
+                  </p>
+
+                  <p style={trackingText}>
+                    Takip No: {o.shippingTrackingNo || "-"}
+                  </p>
+
+                  <p style={trackingText}>
+                    Çıkış Tarihi:{" "}
+                    {o.shippedAt
+                      ? new Date(o.shippedAt).toLocaleString("tr-TR")
+                      : "-"}
+                  </p>
+                </div>
+              )}
 
               <div style={{ marginTop: 12 }}>
                 {o.status === "PENDING_PAYMENT" && (
                   <button
                     style={blueButton}
-                    onClick={() => handleAction(o.id, "pay")}
+                    onClick={() => handleIyzicoPayment(o.id)}
                   >
                     💳 Öde
                   </button>
@@ -188,14 +233,6 @@ export default function BuyerOrdersPage() {
     </main>
   );
 }
-
-/* STYLES */
-
-const page: CSSProperties = {
-  padding: 40,
-  minHeight: "100vh",
-  background: "#f8fafc",
-};
 
 const grid: CSSProperties = {
   display: "grid",
@@ -227,6 +264,20 @@ const price: CSSProperties = {
   fontWeight: 800,
   color: "#16a34a",
   marginTop: 10,
+};
+
+const trackingBox: CSSProperties = {
+  marginTop: 12,
+  padding: 12,
+  borderRadius: 12,
+  background: "#f8fafc",
+  border: "1px solid #e5e7eb",
+};
+
+const trackingText: CSSProperties = {
+  margin: "4px 0",
+  fontSize: 14,
+  color: "#334155",
 };
 
 const blueButton: CSSProperties = {
