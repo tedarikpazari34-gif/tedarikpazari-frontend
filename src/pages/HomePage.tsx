@@ -478,9 +478,9 @@ export default function HomePage() {
                     Hemen Başla
                   </Link>
 
-                  <Link to="/panel" style={secondaryButtonStyle}>
-                    Tedarik Paneli
-                  </Link>
+                  <Link to="/products" style={secondaryButtonStyle}>
+                  Tedarik Paneli
+                </Link>
                 </div>
 
                 <div
@@ -641,7 +641,7 @@ export default function HomePage() {
               </div>
 
               <Link
-                to="/panel"
+                to="/products"
                 style={{
                   textDecoration: "none",
                   color: "#93c5fd",
@@ -662,7 +662,7 @@ export default function HomePage() {
               {sectors.map((sector) => (
                 <div
   key={sector.title}
-  onClick={() => navigate("/panel")}
+  onClick={() => navigate("/products")}
                   style={{
                     cursor: "pointer",
                     position: "relative",
@@ -731,7 +731,7 @@ export default function HomePage() {
               </div>
 
               <Link
-                to="/panel"
+                to="/products"
                 style={{
                   textDecoration: "none",
                   color: "#93c5fd",
@@ -1001,7 +1001,7 @@ export default function HomePage() {
   />
 
   <Link
-    to="/panel"
+    to="/products"
     style={{
       textDecoration: "none",
       background: "#1d4ed8",
@@ -1038,7 +1038,7 @@ export default function HomePage() {
               </Link>
 
               <Link
-                to="/panel"
+                to="/products"
                 style={{
                   textDecoration: "none",
                   background: "#ffffff",
