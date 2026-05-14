@@ -660,13 +660,13 @@ export default function HomePage() {
               }}
             >
               {sectors.map((sector) => (
-                <div
-  key={sector.title}
-  onClick={() =>
-  navigate(`/buyer/rfqs/new?category=${encodeURIComponent(sector.title)}`)
-}
-                  style={{
-                    cursor: "pointer",
+  <div
+    key={sector.title}
+    onClick={() =>
+      navigate(`/category/${encodeURIComponent(sector.title)}`)
+    }
+    style={{
+      cursor: "pointer",
                     position: "relative",
                     minHeight: 180,
                     overflow: "hidden",
