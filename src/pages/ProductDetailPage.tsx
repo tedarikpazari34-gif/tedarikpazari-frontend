@@ -275,7 +275,9 @@ export default function ProductDetailPage() {
               type="button"
               onClick={() => {
                 if (!product.rfqEnabled) return;
-                navigate(`/buyer/rfqs/new?productId=${product.id}`);
+                navigate(
+                `/buyer/rfqs/new?productId=${product.id}&product=${encodeURIComponent(product.title)}`
+                );
               }}
               disabled={!product.rfqEnabled}
               style={{
