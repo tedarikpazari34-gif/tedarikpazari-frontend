@@ -478,7 +478,7 @@ export default function HomePage() {
                     Hemen Başla
                   </Link>
 
-                  <Link to="/products" style={secondaryButtonStyle}>
+                  <Link to="/buyer/rfqs/new" style={secondaryButtonStyle}>
                   Tedarik Paneli
                 </Link>
                 </div>
@@ -662,7 +662,7 @@ export default function HomePage() {
               {sectors.map((sector) => (
                 <div
   key={sector.title}
-  onClick={() => navigate("/products")}
+  onClick={() => navigate("/buyer/rfqs/new")}
                   style={{
                     cursor: "pointer",
                     position: "relative",
