@@ -474,6 +474,43 @@ export default function HomePage() {
                     marginBottom: 22,
                   }}
                 >
+                  <div
+  style={{
+    display: "flex",
+    gap: 10,
+    marginTop: 22,
+    maxWidth: 620,
+    background: "white",
+    padding: 8,
+    borderRadius: 18,
+  }}
+>
+  <input
+    placeholder="Ürün ara... örn: ambalaj, eldiven, ampul"
+    style={{
+      flex: 1,
+      border: "none",
+      outline: "none",
+      padding: "0 14px",
+      fontSize: 16,
+      borderRadius: 12,
+    }}
+  />
+
+  <Link
+    to="/products"
+    style={{
+      textDecoration: "none",
+      background: "#f97316",
+      color: "white",
+      padding: "13px 24px",
+      borderRadius: 14,
+      fontWeight: 900,
+    }}
+  >
+    Ara
+  </Link>
+</div>
                   <Link to="/register" style={primaryButtonStyle}>
                     Hemen Başla
                   </Link>
