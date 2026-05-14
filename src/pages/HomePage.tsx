@@ -449,7 +449,7 @@ export default function HomePage() {
                     textShadow: "0 8px 30px rgba(0,0,0,0.38)",
                   }}
                 >
-                  İşletmeler için güvenli toptan tedarik platformu
+                  Teklif toplayın, güvenli ödeyin, tedarik sürecinizi tek panelden yönetin
                 </h1>
 
                 <p
@@ -461,9 +461,9 @@ export default function HomePage() {
                     color: "rgba(255,255,255,0.96)",
                   }}
                 >
-                  Tedarikçileri keşfedin, ürünleri inceleyin, teklif isteyin ve
-                  satın alma sürecinizi tek platform üzerinden daha verimli
-                  yönetin.
+                  Tedarik Pazarı; alıcıların ürün ve hizmet için teklif topladığı,
+                  satıcıların hızlı teklif verdiği, ödeme ve sipariş sürecinin güvenli
+                  şekilde yönetildiği B2B tedarik platformudur.
                 </p>
 
                 <div
@@ -513,7 +513,7 @@ export default function HomePage() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
                     gap: 12,
                   }}
                 >
@@ -745,7 +745,7 @@ export default function HomePage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
                 gap: 18,
               }}
             >
@@ -828,7 +828,7 @@ export default function HomePage() {
           <section
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
+              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
               gap: 18,
               marginBottom: 28,
             }}
@@ -902,7 +902,7 @@ export default function HomePage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
                 gap: 18,
               }}
             >
