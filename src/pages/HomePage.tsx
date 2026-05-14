@@ -465,7 +465,40 @@ export default function HomePage() {
                   satıcıların hızlı teklif verdiği, ödeme ve sipariş sürecinin güvenli
                   şekilde yönetildiği B2B tedarik platformudur.
                 </p>
+                <div
+  style={{
+    display: "flex",
+    gap: 10,
+    marginBottom: 18,
+    maxWidth: 560,
+  }}
+>
+  <input
+    placeholder="Ürün ara... örn: temizlik bezi, ambalaj, gıda"
+    style={{
+      flex: 1,
+      height: 48,
+      borderRadius: 12,
+      border: "none",
+      padding: "0 14px",
+      fontSize: 15,
+    }}
+  />
 
+  <Link
+    to="/products"
+    style={{
+      textDecoration: "none",
+      background: "#1d4ed8",
+      color: "#fff",
+      padding: "13px 22px",
+      borderRadius: 12,
+      fontWeight: 700,
+    }}
+  >
+    Ara
+  </Link>
+</div>
                 <div
                   style={{
                     display: "flex",
@@ -1019,40 +1052,7 @@ export default function HomePage() {
               İşletmenize uygun ürünler için teklif toplayın, tedarikçileri
               karşılaştırın ve satın alma sürecini daha planlı yönetin.
             </p>
-            <div
-  style={{
-    display: "flex",
-    gap: 10,
-    marginBottom: 18,
-    maxWidth: 560,
-  }}
->
-  <input
-    placeholder="Ürün ara... örn: temizlik bezi, ambalaj, gıda"
-    style={{
-      flex: 1,
-      height: 48,
-      borderRadius: 12,
-      border: "none",
-      padding: "0 14px",
-      fontSize: 15,
-    }}
-  />
-
-  <Link
-    to="/products"
-    style={{
-      textDecoration: "none",
-      background: "#1d4ed8",
-      color: "#fff",
-      padding: "13px 22px",
-      borderRadius: 12,
-      fontWeight: 700,
-    }}
-  >
-    Ara
-  </Link>
-</div>
+            
             <div
               style={{
                 display: "flex",
