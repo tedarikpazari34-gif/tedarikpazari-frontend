@@ -15,6 +15,7 @@ export default function CreateRfqPage() {
   const [params] = useSearchParams();
 
   const productId = params.get("productId");
+  const category = params.get("category");
 
   const [product, setProduct] = useState<Product | null>(null);
 
@@ -68,13 +69,11 @@ export default function CreateRfqPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          productId,
-          quantity: Number(quantity),
-          targetPrice: targetPrice
-            ? Number(targetPrice)
-            : undefined,
-          note,
-        }),
+        productId,
+        quantity: Number(quantity),
+        targetPrice: targetPrice ? Number(targetPrice) : undefined,
+        note: category ? `Kategori: ${category}\n${note}` : note,
+    }),
       });
 
       const data = await res.json();
@@ -101,7 +100,11 @@ export default function CreateRfqPage() {
     <main style={pageStyle}>
       <div style={cardStyle}>
         <h1 style={titleStyle}>Teklif Talebi Oluştur</h1>
-
+        {category && (
+  <div style={productBoxStyle}>
+    <strong>Kategori:</strong> {category}
+  </div>
+)}
         {product && (
           <div style={productBoxStyle}>
             <strong>{product.title}</strong>
