@@ -476,6 +476,11 @@ export default function HomePage() {
   <input
   value={search}
   onChange={(e) => setSearch(e.target.value)}
+  onKeyDown={(e) => {
+  if (e.key === "Enter") {
+    navigate(`/products?q=${encodeURIComponent(search)}`);
+  }
+}}
   placeholder="Ürün ara... örn: temizlik bezi, ambalaj, gıda"
   style={{
     flex: 1,
