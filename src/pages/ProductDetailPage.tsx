@@ -350,7 +350,8 @@ const containerStyle: CSSProperties = {
   maxWidth: 1220,
   margin: "0 auto",
   display: "grid",
-  gridTemplateColumns: "1fr 1fr",
+  gridTemplateColumns:
+    window.innerWidth < 900 ? "1fr" : "1fr 1fr",
   gap: 28,
 };
 
@@ -515,7 +516,7 @@ const unitStyle: CSSProperties = {
 
 const infoGridStyle: CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "1fr 1fr",
+  gridTemplateColumns: window.innerWidth < 700 ? "1fr" : "1fr 1fr",
   gap: 14,
   marginBottom: 24,
 };
@@ -550,6 +551,7 @@ const noticeStyle: CSSProperties = {
 
 const actionsStyle: CSSProperties = {
   display: "flex",
+  flexDirection: window.innerWidth < 700 ? "column" : "row",
   gap: 12,
   flexWrap: "wrap",
 };
