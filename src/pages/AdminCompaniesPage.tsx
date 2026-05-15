@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 const API = "https://tedarik-backend.onrender.com/api/admin";
 
@@ -16,6 +16,42 @@ type Company = {
   }[];
 };
 
+function getRoleLabel(role?: string | null) {
+  if (role === "BUYER") return "Alıcı";
+  if (role === "SELLER") return "Satıcı";
+  if (role === "LOGISTICS") return "Nakliyeci";
+  if (role === "ADMIN") return "Admin";
+  return role || "-";
+}
+
+function getStatusLabel(status?: string | null) {
+  if (status === "PENDING") return "Bekliyor";
+  if (status === "APPROVED") return "Onaylı";
+  if (status === "BLOCKED") return "Bloklu";
+  return status || "-";
+}
+
+function statusStyle(status?: string | null): CSSProperties {
+  if (status === "APPROVED") {
+    return {
+      background: "#dcfce7",
+      color: "#166534",
+    };
+  }
+
+  if (status === "BLOCKED") {
+    return {
+      background: "#fee2e2",
+      color: "#991b1b",
+    };
+  }
+
+  return {
+    background: "#fef3c7",
+    color: "#92400e",
+  };
+}
+
 export default function AdminCompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +66,7 @@ export default function AdminCompaniesPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Token yok, admin olarak giriş yap");
+        setError("Admin olarak giriş yapmalısınız");
         setCompanies([]);
         return;
       }
@@ -66,6 +102,7 @@ export default function AdminCompaniesPage() {
   const approveCompany = async (id: string) => {
     try {
       setActionId(id);
+
       const token = localStorage.getItem("token");
 
       const res = await fetch(`${API}/companies/${id}/approve`, {
@@ -94,6 +131,7 @@ export default function AdminCompaniesPage() {
   const blockCompany = async (id: string) => {
     try {
       setActionId(id);
+
       const token = localStorage.getItem("token");
 
       const res = await fetch(`${API}/companies/${id}/block`, {
@@ -119,67 +157,117 @@ export default function AdminCompaniesPage() {
     }
   };
 
-  const pendingCompanies = companies.filter((c) => c.status === "PENDING");
-  const approvedCompanies = companies.filter((c) => c.status === "APPROVED");
-  const blockedCompanies = companies.filter((c) => c.status === "BLOCKED");
+  const pendingCompanies = companies.filter(
+    (c) => c.status === "PENDING"
+  );
+
+  const approvedCompanies = companies.filter(
+    (c) => c.status === "APPROVED"
+  );
+
+  const blockedCompanies = companies.filter(
+    (c) => c.status === "BLOCKED"
+  );
 
   if (loading) {
-    return <main style={{ padding: 40 }}>Yükleniyor...</main>;
+    return (
+      <main style={pageStyle}>
+        <div style={emptyCardStyle}>
+          Şirketler yükleniyor...
+        </div>
+      </main>
+    );
   }
 
   return (
-    <main style={{ padding: 40 }}>
-      <h1 style={{ marginBottom: 24 }}>Şirket Yönetimi</h1>
+    <main style={pageStyle}>
+      <section style={heroStyle}>
+        <div>
+          <div style={eyebrowStyle}>ADMIN PANELİ</div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+          <h1 style={titleStyle}>Şirket Yönetimi</h1>
 
-      <div style={statsGrid}>
-        <div style={statCard}>
-          <p>Toplam Şirket</p>
-          <h2>{companies.length}</h2>
+          <p style={descStyle}>
+            Platforma kayıt olan şirketleri
+            yönetin, onaylayın veya bloklayın.
+          </p>
         </div>
 
-        <div style={statCard}>
-          <p>Bekleyen</p>
-          <h2>{pendingCompanies.length}</h2>
+        <div style={heroStatStyle}>
+          <span>Toplam Şirket</span>
+          <strong>{companies.length}</strong>
         </div>
+      </section>
 
-        <div style={statCard}>
-          <p>Onaylı</p>
-          <h2>{approvedCompanies.length}</h2>
-        </div>
-
-        <div style={statCard}>
-          <p>Bloklu</p>
-          <h2>{blockedCompanies.length}</h2>
-        </div>
-      </div>
-
-      <h2 style={{ marginTop: 36, marginBottom: 16 }}>Bekleyen Şirketler</h2>
-
-      {pendingCompanies.length === 0 ? (
-        <p>Bekleyen şirket yok.</p>
-      ) : (
-        <div style={grid}>
-          {pendingCompanies.map((c) => (
-            <CompanyCard
-              key={c.id}
-              company={c}
-              actionId={actionId}
-              approveCompany={approveCompany}
-              blockCompany={blockCompany}
-            />
-          ))}
-        </div>
+      {error && (
+        <div style={errorCardStyle}>{error}</div>
       )}
 
-      <h2 style={{ marginTop: 36, marginBottom: 16 }}>Tüm Şirketler</h2>
+      <section style={statsGridStyle}>
+        <Stat
+          label="Toplam Şirket"
+          value={companies.length}
+        />
 
-      {companies.length === 0 ? (
-        <p>Şirket yok.</p>
-      ) : (
-        <div style={table}>
-          <div style={{ ...row, fontWeight: 700, background: "#f8fafc" }}>
+        <Stat
+          label="Bekleyen"
+          value={pendingCompanies.length}
+        />
+
+        <Stat
+          label="Onaylı"
+          value={approvedCompanies.length}
+        />
+
+        <Stat
+          label="Bloklu"
+          value={blockedCompanies.length}
+        />
+      </section>
+
+      <section style={sectionStyle}>
+        <div style={sectionHeaderStyle}>
+          <div style={eyebrowDarkStyle}>
+            ONAY BEKLEYENLER
+          </div>
+
+          <h2 style={sectionTitleStyle}>
+            Bekleyen Şirketler
+          </h2>
+        </div>
+
+        {pendingCompanies.length === 0 ? (
+          <div style={emptyInlineStyle}>
+            Bekleyen şirket yok.
+          </div>
+        ) : (
+          <div style={gridStyle}>
+            {pendingCompanies.map((company) => (
+              <CompanyCard
+                key={company.id}
+                company={company}
+                actionId={actionId}
+                approveCompany={approveCompany}
+                blockCompany={blockCompany}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section style={sectionStyle}>
+        <div style={sectionHeaderStyle}>
+          <div style={eyebrowDarkStyle}>
+            TÜM ŞİRKETLER
+          </div>
+
+          <h2 style={sectionTitleStyle}>
+            Şirket Listesi
+          </h2>
+        </div>
+
+        <div style={tableStyle}>
+          <div style={tableHeadStyle}>
             <span>Şirket</span>
             <span>Email</span>
             <span>Rol</span>
@@ -187,69 +275,120 @@ export default function AdminCompaniesPage() {
             <span>İşlem</span>
           </div>
 
-          {companies.map((c) => {
-            const role = c.role || c.users?.[0]?.role || "-";
+          {companies.map((company) => {
+            const role =
+              company.role ||
+              company.users?.[0]?.role ||
+              "-";
+
             const isAdmin = role === "ADMIN";
 
             return (
-              <div key={c.id} style={row}>
-                <span>{c.companyName || c.name || "İsimsiz şirket"}</span>
-                <span>{c.email || "-"}</span>
-                <span>{role}</span>
-                <span>{c.status || "-"}</span>
+              <div
+                key={company.id}
+                style={rowStyle}
+              >
+                <span style={companyNameStyle}>
+                  {company.companyName ||
+                    company.name ||
+                    "İsimsiz şirket"}
+                </span>
 
                 <span>
-                  {c.status === "PENDING" && !isAdmin && (
+                  {company.email ||
+                    company.users?.[0]?.email ||
+                    "-"}
+                </span>
+
+                <span>
+                  {getRoleLabel(role)}
+                </span>
+
+                <span>
+                  <span
+                    style={{
+                      ...badgeStyle,
+                      ...statusStyle(company.status),
+                    }}
+                  >
+                    {getStatusLabel(
+                      company.status
+                    )}
+                  </span>
+                </span>
+
+                <span style={miniActionsStyle}>
+                  {isAdmin ? (
+                    <span style={adminBadgeStyle}>
+                      Admin korunuyor
+                    </span>
+                  ) : company.status ===
+                    "PENDING" ? (
                     <>
                       <button
-                        onClick={() => approveCompany(c.id)}
-                        disabled={actionId === c.id}
-                        style={miniApproveButton}
+                        onClick={() =>
+                          approveCompany(company.id)
+                        }
+                        disabled={
+                          actionId === company.id
+                        }
+                        style={
+                          miniApproveButtonStyle
+                        }
                       >
-                        {actionId === c.id ? "..." : "Onayla"}
-                      </button>{" "}
+                        Onayla
+                      </button>
+
                       <button
-                        onClick={() => blockCompany(c.id)}
-                        disabled={actionId === c.id}
-                        style={miniBlockButton}
+                        onClick={() =>
+                          blockCompany(company.id)
+                        }
+                        disabled={
+                          actionId === company.id
+                        }
+                        style={
+                          miniBlockButtonStyle
+                        }
                       >
                         Blokla
                       </button>
                     </>
-                  )}
-
-                  {c.status === "APPROVED" && (
-                    <>
-                      <span style={approvedBadge}>Onaylı</span>{" "}
-                      {!isAdmin && (
-                        <button
-                          onClick={() => blockCompany(c.id)}
-                          disabled={actionId === c.id}
-                          style={miniBlockButton}
-                        >
-                          Blokla
-                        </button>
-                      )}
-                    </>
-                  )}
-
-                  {c.status === "BLOCKED" && !isAdmin && (
+                  ) : company.status ===
+                    "APPROVED" ? (
                     <button
-                      onClick={() => approveCompany(c.id)}
-                      disabled={actionId === c.id}
-                      style={miniApproveButton}
+                      onClick={() =>
+                        blockCompany(company.id)
+                      }
+                      disabled={
+                        actionId === company.id
+                      }
+                      style={
+                        miniBlockButtonStyle
+                      }
+                    >
+                      Blokla
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() =>
+                        approveCompany(company.id)
+                      }
+                      disabled={
+                        actionId === company.id
+                      }
+                      style={
+                        miniApproveButtonStyle
+                      }
                     >
                       Onayla
                     </button>
                   )}
-
-                  {isAdmin && <span style={adminBadge}>Admin korunuyor</span>}
                 </span>
               </div>
             );
           })}
         </div>
-      )}
+      </section>
     </main>
   );
 }
@@ -265,153 +404,371 @@ function CompanyCard({
   approveCompany: (id: string) => void;
   blockCompany: (id: string) => void;
 }) {
-  const role = company.role || company.users?.[0]?.role || "-";
+  const role =
+    company.role ||
+    company.users?.[0]?.role ||
+    "-";
+
   const isAdmin = role === "ADMIN";
 
   return (
-    <div style={card}>
-      <h3>{company.companyName || company.name || "İsimsiz şirket"}</h3>
+    <div style={cardStyle}>
+      <div style={cardTopStyle}>
+        <div>
+          <div style={smallLabelStyle}>
+            Şirket Başvurusu
+          </div>
 
-      <p>
-        <b>Email:</b> {company.email || "-"}
-      </p>
+          <h3 style={cardTitleStyle}>
+            {company.companyName ||
+              company.name ||
+              "İsimsiz şirket"}
+          </h3>
+        </div>
 
-      <p>
-  <b>Rol:</b>{" "}
-  <span>
-    {role === "BUYER" && "Alıcı"}
-    {role === "SELLER" && "Satıcı"}
-    {role === "LOGISTICS" && "Nakliyeci"}
-    {role === "ADMIN" && "Admin"}
-  </span>
-</p>
+        <span
+          style={{
+            ...badgeStyle,
+            ...statusStyle(company.status),
+          }}
+        >
+          {getStatusLabel(company.status)}
+        </span>
+      </div>
 
-      <p>
-        <b>Durum:</b> {company.status || "-"}
-      </p>
+      <div style={infoGridStyle}>
+        <Info
+          label="Email"
+          value={
+            company.email ||
+            company.users?.[0]?.email ||
+            "-"
+          }
+        />
+
+        <Info
+          label="Rol"
+          value={getRoleLabel(role)}
+        />
+      </div>
 
       {!isAdmin ? (
-        <div style={actions}>
+        <div style={actionsStyle}>
           <button
-            onClick={() => approveCompany(company.id)}
+            onClick={() =>
+              approveCompany(company.id)
+            }
             disabled={actionId === company.id}
-            style={approveButton}
+            style={approveButtonStyle}
           >
-            {actionId === company.id ? "İşleniyor..." : "Onayla"}
+            Onayla
           </button>
 
           <button
-            onClick={() => blockCompany(company.id)}
+            onClick={() =>
+              blockCompany(company.id)
+            }
             disabled={actionId === company.id}
-            style={blockButton}
+            style={blockButtonStyle}
           >
             Blokla
           </button>
         </div>
       ) : (
-        <span style={adminBadge}>Admin korunuyor</span>
+        <span style={adminBadgeStyle}>
+          Admin korunuyor
+        </span>
       )}
     </div>
   );
 }
 
-const statsGrid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-  gap: 16,
+function Stat({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div style={statCardStyle}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function Info({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div style={infoBoxStyle}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+const pageStyle: CSSProperties = {
+  minHeight: "100vh",
+  background: "#f8fafc",
+  padding: 40,
 };
 
-const statCard: React.CSSProperties = {
-  background: "#0f172a",
+const heroStyle: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto 24px",
+  background:
+    "linear-gradient(135deg, #020617, #1e3a8a)",
   color: "white",
-  borderRadius: 12,
-  padding: 20,
+  borderRadius: 28,
+  padding: 32,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 20,
 };
 
-const grid: React.CSSProperties = {
+const eyebrowStyle: CSSProperties = {
+  color: "#93c5fd",
+  fontSize: 13,
+  fontWeight: 900,
+  marginBottom: 8,
+};
+
+const titleStyle: CSSProperties = {
+  margin: "0 0 8px",
+  fontSize: 40,
+  fontWeight: 900,
+};
+
+const descStyle: CSSProperties = {
+  margin: 0,
+  color: "#cbd5e1",
+  maxWidth: 720,
+  lineHeight: 1.7,
+};
+
+const heroStatStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.12)",
+  padding: 20,
+  borderRadius: 20,
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+  gap: 8,
+  minWidth: 180,
+};
+
+const statsGridStyle: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto 24px",
+  display: "grid",
+  gridTemplateColumns:
+    "repeat(auto-fit, minmax(200px, 1fr))",
   gap: 16,
 };
 
-const card: React.CSSProperties = {
-  border: "1px solid #e5e7eb",
-  borderRadius: 12,
-  padding: 20,
+const statCardStyle: CSSProperties = {
   background: "white",
+  borderRadius: 20,
+  padding: 20,
+  border: "1px solid #e2e8f0",
+  display: "grid",
+  gap: 8,
 };
 
-const actions: React.CSSProperties = {
+const sectionStyle: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto 24px",
+};
+
+const sectionHeaderStyle: CSSProperties = {
+  marginBottom: 18,
+};
+
+const eyebrowDarkStyle: CSSProperties = {
+  color: "#2563eb",
+  fontSize: 13,
+  fontWeight: 900,
+  marginBottom: 8,
+};
+
+const sectionTitleStyle: CSSProperties = {
+  margin: 0,
+  fontSize: 28,
+  fontWeight: 900,
+};
+
+const gridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns:
+    "repeat(auto-fill, minmax(320px, 1fr))",
+  gap: 20,
+};
+
+const cardStyle: CSSProperties = {
+  background: "white",
+  borderRadius: 24,
+  padding: 24,
+  border: "1px solid #e2e8f0",
+};
+
+const cardTopStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "start",
+  gap: 12,
+  marginBottom: 18,
+};
+
+const smallLabelStyle: CSSProperties = {
+  color: "#2563eb",
+  fontSize: 12,
+  fontWeight: 900,
+  marginBottom: 6,
+};
+
+const cardTitleStyle: CSSProperties = {
+  margin: 0,
+  fontSize: 22,
+  fontWeight: 900,
+  color: "#0f172a",
+};
+
+const badgeStyle: CSSProperties = {
+  padding: "7px 10px",
+  borderRadius: 999,
+  fontSize: 12,
+  fontWeight: 900,
+};
+
+const infoGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 12,
+  marginBottom: 18,
+};
+
+const infoBoxStyle: CSSProperties = {
+  background: "#f8fafc",
+  borderRadius: 14,
+  padding: 14,
+  display: "grid",
+  gap: 4,
+};
+
+const actionsStyle: CSSProperties = {
   display: "flex",
   gap: 10,
-  marginTop: 16,
 };
 
-const approveButton: React.CSSProperties = {
-  padding: "10px 14px",
+const approveButtonStyle: CSSProperties = {
+  border: "none",
   background: "#16a34a",
   color: "white",
-  border: "none",
-  borderRadius: 8,
+  padding: "12px 16px",
+  borderRadius: 12,
   cursor: "pointer",
+  fontWeight: 900,
 };
 
-const blockButton: React.CSSProperties = {
-  padding: "10px 14px",
+const blockButtonStyle: CSSProperties = {
+  border: "none",
   background: "#dc2626",
   color: "white",
-  border: "none",
-  borderRadius: 8,
+  padding: "12px 16px",
+  borderRadius: 12,
   cursor: "pointer",
+  fontWeight: 900,
 };
 
-const table: React.CSSProperties = {
-  border: "1px solid #e5e7eb",
-  borderRadius: 10,
+const tableStyle: CSSProperties = {
+  background: "white",
+  borderRadius: 24,
   overflow: "hidden",
+  border: "1px solid #e2e8f0",
 };
 
-const row: React.CSSProperties = {
+const tableHeadStyle: CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "1.5fr 2fr 1fr 1fr 1.5fr",
+  gridTemplateColumns:
+    "1.5fr 2fr 1fr 1fr 1.5fr",
   gap: 12,
-  padding: 14,
-  borderBottom: "1px solid #e5e7eb",
-  alignItems: "center",
+  padding: 16,
+  background: "#f8fafc",
+  fontWeight: 900,
 };
 
-const miniApproveButton: React.CSSProperties = {
-  padding: "7px 10px",
+const rowStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns:
+    "1.5fr 2fr 1fr 1fr 1.5fr",
+  gap: 12,
+  padding: 16,
+  alignItems: "center",
+  borderTop: "1px solid #e2e8f0",
+};
+
+const companyNameStyle: CSSProperties = {
+  fontWeight: 800,
+};
+
+const miniActionsStyle: CSSProperties = {
+  display: "flex",
+  gap: 8,
+  flexWrap: "wrap",
+};
+
+const miniApproveButtonStyle: CSSProperties = {
+  border: "none",
   background: "#16a34a",
   color: "white",
-  border: "none",
-  borderRadius: 6,
+  padding: "8px 10px",
+  borderRadius: 8,
   cursor: "pointer",
+  fontWeight: 800,
 };
 
-const miniBlockButton: React.CSSProperties = {
-  padding: "7px 10px",
+const miniBlockButtonStyle: CSSProperties = {
+  border: "none",
   background: "#dc2626",
   color: "white",
-  border: "none",
-  borderRadius: 6,
+  padding: "8px 10px",
+  borderRadius: 8,
   cursor: "pointer",
+  fontWeight: 800,
 };
 
-const approvedBadge: React.CSSProperties = {
-  color: "#16a34a",
-  background: "#dcfce7",
-  padding: "4px 8px",
-  borderRadius: 6,
-  fontSize: 12,
-  fontWeight: 700,
-};
-
-const adminBadge: React.CSSProperties = {
-  color: "#2563eb",
+const adminBadgeStyle: CSSProperties = {
   background: "#dbeafe",
-  padding: "4px 8px",
-  borderRadius: 6,
+  color: "#1d4ed8",
+  padding: "7px 10px",
+  borderRadius: 999,
   fontSize: 12,
-  fontWeight: 700,
+  fontWeight: 900,
+};
+
+const emptyInlineStyle: CSSProperties = {
+  background: "white",
+  borderRadius: 20,
+  padding: 24,
+  border: "1px solid #e2e8f0",
+};
+
+const emptyCardStyle: CSSProperties = {
+  maxWidth: 720,
+  margin: "0 auto",
+  background: "white",
+  borderRadius: 24,
+  padding: 32,
+  border: "1px solid #e2e8f0",
+};
+
+const errorCardStyle: CSSProperties = {
+  ...emptyCardStyle,
+  color: "#991b1b",
+  marginBottom: 24,
 };
