@@ -1,31 +1,81 @@
-import { type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 
-const notifications = [
-  {
-    id: "1",
-    title: "Yeni RFQ talebi",
-    text: "Bir alıcı yeni teklif talebi oluşturdu.",
-    type: "RFQ",
-    time: "Bugün",
-  },
-  {
-    id: "2",
-    title: "Teklif gönderildi",
-    text: "Satıcı teklifinizi yanıtladı.",
-    type: "Teklif",
-    time: "Bugün",
-  },
-  {
-    id: "3",
-    title: "Sipariş güncellendi",
-    text: "Siparişiniz kargoya verildi.",
-    type: "Sipariş",
-    time: "Dün",
-  },
-];
+type Notification = {
+  id: string;
+  title: string;
+  message: string;
+  link?: string;
+  isRead: boolean;
+  createdAt: string;
+};
+
+const API =
+  import.meta.env.VITE_API_URL ||
+  "https://tedarik-backend.onrender.com/api";
 
 export default function NotificationsPage() {
+  const [items, setItems] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const unreadCount = items.filter((item) => !item.isRead).length;
+
+  const loadNotifications = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API}/notifications/mine`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      setItems(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const markRead = async (id: string) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await fetch(`${API}/notifications/${id}/read`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, isRead: true } : item
+        )
+      );
+
+      window.dispatchEvent(new Event("storage"));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
+  if (loading) {
+    return (
+      <main style={pageStyle}>
+        <div style={emptyCardStyle}>Bildirimler yükleniyor...</div>
+      </main>
+    );
+  }
+
   return (
     <main style={pageStyle}>
       <section style={heroStyle}>
@@ -33,33 +83,76 @@ export default function NotificationsPage() {
           <div style={eyebrowStyle}>BİLDİRİM MERKEZİ</div>
           <h1 style={titleStyle}>Bildirimler</h1>
           <p style={descStyle}>
-            RFQ, teklif, ödeme ve sipariş güncellemelerini buradan takip edin.
+            Teklif, sipariş, ödeme ve kargo güncellemelerini buradan takip edin.
           </p>
         </div>
 
-        <Link to="/" style={homeButtonStyle}>
-          Ana Sayfa
-        </Link>
+        <div style={heroStatStyle}>
+          <span>Okunmamış</span>
+          <strong>{unreadCount}</strong>
+        </div>
       </section>
 
-      <section style={listStyle}>
-        {notifications.map((item) => (
-          <article key={item.id} style={cardStyle}>
-            <div style={iconStyle}>{item.type.charAt(0)}</div>
+      {items.length === 0 ? (
+        <div style={emptyCardStyle}>
+          <h2 style={{ marginTop: 0 }}>Bildirim yok</h2>
+          <p style={{ color: "#64748b", lineHeight: 1.7 }}>
+            Yeni teklif, sipariş veya ödeme güncellemesi geldiğinde burada
+            görünecek.
+          </p>
+          <Link to="/" style={primaryLinkStyle}>
+            Ana Sayfaya Dön
+          </Link>
+        </div>
+      ) : (
+        <section style={listStyle}>
+          {items.map((item) => (
+            <article
+              key={item.id}
+              style={{
+                ...cardStyle,
+                borderColor: item.isRead ? "#e2e8f0" : "#2563eb",
+                background: item.isRead ? "white" : "#eff6ff",
+              }}
+            >
+              <div style={iconStyle}>{item.isRead ? "✓" : "🔔"}</div>
 
-            <div>
-              <div style={cardTopStyle}>
-                <h2 style={cardTitleStyle}>{item.title}</h2>
-                <span style={timeStyle}>{item.time}</span>
+              <div>
+                <div style={cardTopStyle}>
+                  <div>
+                    <h2 style={cardTitleStyle}>{item.title}</h2>
+                    <p style={dateStyle}>
+                      {new Date(item.createdAt).toLocaleString("tr-TR")}
+                    </p>
+                  </div>
+
+                  {!item.isRead && <span style={badgeStyle}>Yeni</span>}
+                </div>
+
+                <p style={messageStyle}>{item.message}</p>
+
+                <div style={actionsStyle}>
+                  {!item.isRead && (
+                    <button
+                      type="button"
+                      onClick={() => markRead(item.id)}
+                      style={buttonStyle}
+                    >
+                      Okundu İşaretle
+                    </button>
+                  )}
+
+                  {item.link && (
+                    <Link to={item.link} style={detailLinkStyle}>
+                      Detaya Git →
+                    </Link>
+                  )}
+                </div>
               </div>
-
-              <p style={textStyle}>{item.text}</p>
-
-              <span style={badgeStyle}>{item.type}</span>
-            </div>
-          </article>
-        ))}
-      </section>
+            </article>
+          ))}
+        </section>
+      )}
     </main>
   );
 }
@@ -79,8 +172,9 @@ const heroStyle: CSSProperties = {
   padding: 32,
   display: "flex",
   justifyContent: "space-between",
-  gap: 20,
   alignItems: "center",
+  gap: 20,
+  boxShadow: "0 24px 50px rgba(15,23,42,0.18)",
 };
 
 const eyebrowStyle: CSSProperties = {
@@ -98,17 +192,19 @@ const titleStyle: CSSProperties = {
 
 const descStyle: CSSProperties = {
   margin: 0,
+  maxWidth: 620,
   color: "#cbd5e1",
   lineHeight: 1.7,
 };
 
-const homeButtonStyle: CSSProperties = {
-  textDecoration: "none",
-  background: "white",
-  color: "#0f172a",
-  padding: "12px 16px",
-  borderRadius: 14,
-  fontWeight: 900,
+const heroStatStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.12)",
+  border: "1px solid rgba(255,255,255,0.14)",
+  borderRadius: 20,
+  padding: 20,
+  minWidth: 150,
+  display: "grid",
+  gap: 6,
 };
 
 const listStyle: CSSProperties = {
@@ -119,19 +215,18 @@ const listStyle: CSSProperties = {
 };
 
 const cardStyle: CSSProperties = {
-  background: "white",
   border: "1px solid #e2e8f0",
-  borderRadius: 20,
-  padding: 18,
+  borderRadius: 22,
+  padding: 20,
   display: "grid",
-  gridTemplateColumns: "48px 1fr",
-  gap: 14,
+  gridTemplateColumns: "52px 1fr",
+  gap: 16,
   boxShadow: "0 12px 28px rgba(15,23,42,0.08)",
 };
 
 const iconStyle: CSSProperties = {
-  width: 48,
-  height: 48,
+  width: 52,
+  height: 52,
   borderRadius: 16,
   background: "#dbeafe",
   color: "#1d4ed8",
@@ -143,32 +238,82 @@ const iconStyle: CSSProperties = {
 const cardTopStyle: CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
+  alignItems: "flex-start",
   gap: 12,
 };
 
 const cardTitleStyle: CSSProperties = {
   margin: 0,
   color: "#0f172a",
-  fontSize: 18,
+  fontSize: 19,
   fontWeight: 900,
 };
 
-const timeStyle: CSSProperties = {
+const dateStyle: CSSProperties = {
+  margin: "5px 0 0",
   color: "#64748b",
   fontSize: 13,
   fontWeight: 700,
 };
 
-const textStyle: CSSProperties = {
-  color: "#64748b",
-  margin: "6px 0 10px",
-};
-
 const badgeStyle: CSSProperties = {
-  background: "#eff6ff",
-  color: "#1d4ed8",
+  background: "#2563eb",
+  color: "white",
   padding: "6px 10px",
   borderRadius: 999,
   fontSize: 12,
   fontWeight: 900,
+};
+
+const messageStyle: CSSProperties = {
+  color: "#334155",
+  margin: "12px 0 14px",
+  lineHeight: 1.6,
+};
+
+const actionsStyle: CSSProperties = {
+  display: "flex",
+  gap: 10,
+  flexWrap: "wrap",
+};
+
+const buttonStyle: CSSProperties = {
+  border: "none",
+  background: "#2563eb",
+  color: "white",
+  padding: "10px 13px",
+  borderRadius: 12,
+  cursor: "pointer",
+  fontWeight: 900,
+};
+
+const detailLinkStyle: CSSProperties = {
+  textDecoration: "none",
+  background: "white",
+  color: "#1d4ed8",
+  border: "1px solid #bfdbfe",
+  padding: "10px 13px",
+  borderRadius: 12,
+  fontWeight: 900,
+};
+
+const emptyCardStyle: CSSProperties = {
+  maxWidth: 720,
+  margin: "0 auto",
+  background: "white",
+  border: "1px solid #e2e8f0",
+  borderRadius: 24,
+  padding: 32,
+  boxShadow: "0 14px 34px rgba(15,23,42,0.10)",
+};
+
+const primaryLinkStyle: CSSProperties = {
+  display: "inline-block",
+  textDecoration: "none",
+  background: "#2563eb",
+  color: "white",
+  padding: "12px 16px",
+  borderRadius: 12,
+  fontWeight: 900,
+  marginTop: 10,
 };
