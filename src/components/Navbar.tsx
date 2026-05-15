@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 type NavItem = {
@@ -26,13 +26,25 @@ const accountLinks: NavItem[] = [
 export default function Navbar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+  const syncToken = () => {
+    setToken(localStorage.getItem("token"));
+  };
 
-  const token = localStorage.getItem("token");
+  window.addEventListener("storage", syncToken);
+
+  return () => {
+    window.removeEventListener("storage", syncToken);
+  };
+}, []);
+
+  const [token, setToken] = useState(localStorage.getItem("token"));
 
   const logout = () => {
     localStorage.clear();
-    setOpen(false);
-    navigate("/login");
+setToken(null);
+setOpen(false);
+navigate("/login");
   };
 
   return (
@@ -176,8 +188,8 @@ const headerStyle: React.CSSProperties = {
   zIndex: 50,
   background: "rgba(15, 23, 42, 0.94)",
   backdropFilter: "blur(16px)",
-  borderBottom: "1px solid rgba(148,163,184,0.38)",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.22)",
+  borderBottom: "2px solid rgba(255,255,255,0.14)",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.28)",
 };
 
 const barStyle: React.CSSProperties = {
