@@ -272,7 +272,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] =
   useState<ProductCard[]>([]);
-
+  const [search, setSearch] = useState("");
   useEffect(() => {
     fetch("https://tedarik-backend.onrender.com/api/products")
       .then((res) => {
@@ -474,19 +474,21 @@ export default function HomePage() {
   }}
 >
   <input
-    placeholder="Ürün ara... örn: temizlik bezi, ambalaj, gıda"
-    style={{
-      flex: 1,
-      height: 48,
-      borderRadius: 12,
-      border: "none",
-      padding: "0 14px",
-      fontSize: 15,
-    }}
-  />
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  placeholder="Ürün ara... örn: temizlik bezi, ambalaj, gıda"
+  style={{
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    border: "none",
+    padding: "0 14px",
+    fontSize: 15,
+  }}
+/>
 
   <Link
-    to="/products"
+    to={`/products?q=${encodeURIComponent(search)}`}
     style={{
       textDecoration: "none",
       background: "#1d4ed8",
@@ -1048,7 +1050,7 @@ export default function HomePage() {
               Tedarik Paneli
               </Link>
               <Link
-                to="/products"
+                to={`/products?q=${search}`}
                 style={{
                   textDecoration: "none",
                   background: "#ffffff",
