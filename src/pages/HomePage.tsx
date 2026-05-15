@@ -519,9 +519,7 @@ export default function HomePage() {
   }}
   ></div> 
 </div>
-<Link to="/buyer/rfqs/new" style={secondaryButtonStyle}>
-  Tedarik Paneli
-</Link>
+
                 
 
                 <div
@@ -1046,7 +1044,9 @@ export default function HomePage() {
               >
                 Ücretsiz Başla
               </Link>
-
+              <Link to="/buyer/rfqs/new" style={secondaryButtonStyle}>
+              Tedarik Paneli
+              </Link>
               <Link
                 to="/products"
                 style={{
