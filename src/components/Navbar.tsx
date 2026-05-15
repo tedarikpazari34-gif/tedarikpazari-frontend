@@ -176,7 +176,8 @@ const headerStyle: React.CSSProperties = {
   zIndex: 50,
   background: "rgba(15, 23, 42, 0.94)",
   backdropFilter: "blur(16px)",
-  borderBottom: "1px solid rgba(148,163,184,0.18)",
+  borderBottom: "1px solid rgba(148,163,184,0.38)",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.22)",
 };
 
 const barStyle: React.CSSProperties = {
