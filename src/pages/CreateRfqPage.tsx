@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
 
@@ -16,6 +16,7 @@ export default function CreateRfqPage() {
 
   const productId = params.get("productId");
   const category = params.get("category");
+  const productName = params.get("product");
 
   const [product, setProduct] = useState<Product | null>(null);
 
@@ -32,10 +33,7 @@ export default function CreateRfqPage() {
       if (!productId) return;
 
       try {
-        const res = await fetch(
-          `${BASE_URL}/api/products/${productId}`
-        );
-
+        const res = await fetch(`${BASE_URL}/api/products/${productId}`);
         const data = await res.json();
 
         if (res.ok) {
@@ -58,9 +56,17 @@ export default function CreateRfqPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Lütfen giriş yapın");
+        setError("Teklif talebi oluşturmak için lütfen giriş yapın.");
         return;
       }
+
+      const finalNote = [
+        category ? `Kategori: ${category}` : "",
+        product?.title || productName ? `Ürün: ${product?.title || productName}` : "",
+        note,
+      ]
+        .filter(Boolean)
+        .join("\n");
 
       const res = await fetch(`${BASE_URL}/api/rfqs`, {
         method: "POST",
@@ -69,25 +75,25 @@ export default function CreateRfqPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-        productId,
-        quantity: Number(quantity),
-        targetPrice: targetPrice ? Number(targetPrice) : undefined,
-        note: category ? `Kategori: ${category}\n${note}` : note,
-    }),
+          productId,
+          quantity: Number(quantity),
+          targetPrice: targetPrice ? Number(targetPrice) : undefined,
+          note: finalNote,
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "RFQ oluşturulamadı");
+        setError(data?.message || "Teklif talebi oluşturulamadı");
         return;
       }
 
-      setSuccess("Teklif talebi başarıyla gönderildi");
+      setSuccess("Teklif talebi başarıyla gönderildi.");
 
       setTimeout(() => {
         navigate("/buyer/rfqs");
-      }, 1500);
+      }, 1200);
     } catch (err) {
       console.error(err);
       setError("İşlem sırasında hata oluştu");
@@ -96,130 +102,307 @@ export default function CreateRfqPage() {
     }
   };
 
+  const selectedTitle = product?.title || productName || category || "Genel teklif talebi";
+
   return (
     <main style={pageStyle}>
-      <div style={cardStyle}>
-        <h1 style={titleStyle}>Teklif Talebi Oluştur</h1>
-        {category && (
-  <div style={productBoxStyle}>
-    <strong>Kategori:</strong> {category}
-  </div>
-)}
-        {product && (
-          <div style={productBoxStyle}>
-            <strong>{product.title}</strong>
+      <section style={heroStyle}>
+        <Link to="/" style={backLinkStyle}>
+          ← Ana sayfaya dön
+        </Link>
 
-            {product.basePrice && (
-              <p style={{ marginTop: 8 }}>
-                Başlangıç fiyatı:
-                {" "}
-                {Number(product.basePrice).toLocaleString("tr-TR")} ₺
-              </p>
-            )}
+        <div style={heroBadgeStyle}>RFQ / TEKLİF TALEBİ</div>
+
+        <h1 style={heroTitleStyle}>Tedarikçilerden hızlı teklif alın</h1>
+
+        <p style={heroTextStyle}>
+          İhtiyacınızı belirtin, uygun satıcılardan fiyat ve teslim süresi teklifi toplayın.
+        </p>
+
+        <div style={benefitGridStyle}>
+          <div style={benefitStyle}>✓ Doğrulanmış tedarikçiler</div>
+          <div style={benefitStyle}>✓ Güvenli teklif süreci</div>
+          <div style={benefitStyle}>✓ Tek panelden takip</div>
+        </div>
+      </section>
+
+      <section style={cardStyle}>
+        <div style={cardHeaderStyle}>
+          <div>
+            <div style={eyebrowStyle}>TEKLİF FORMU</div>
+            <h2 style={titleStyle}>Teklif Talebi Oluştur</h2>
+          </div>
+
+          <Link to="/products" style={secondaryLinkStyle}>
+            Ürünlere dön
+          </Link>
+        </div>
+
+        <div style={summaryBoxStyle}>
+          <div>
+            <div style={summaryLabelStyle}>Seçilen ihtiyaç</div>
+            <strong style={summaryTitleStyle}>{selectedTitle}</strong>
+          </div>
+
+          {product?.basePrice && (
+            <div style={pricePillStyle}>
+              {Number(product.basePrice).toLocaleString("tr-TR")} ₺ başlangıç
+            </div>
+          )}
+        </div>
+
+        {category && (
+          <div style={infoBoxStyle}>
+            <strong>Kategori:</strong> {category}
           </div>
         )}
 
-        {success && (
-          <div style={successStyle}>{success}</div>
-        )}
+        {success && <div style={successStyle}>{success}</div>}
 
-        {error && (
-          <div style={errorStyle}>{error}</div>
-        )}
+        {error && <div style={errorStyle}>{error}</div>}
 
-        <div style={fieldStyle}>
-          <label>Miktar</label>
+        <div style={gridStyle}>
+          <label style={fieldStyle}>
+            <span style={labelStyle}>Miktar *</span>
+            <input
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              style={inputStyle}
+              placeholder="Örn: 100"
+            />
+          </label>
 
-          <input
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            style={inputStyle}
-          />
+          <label style={fieldStyle}>
+            <span style={labelStyle}>Hedef Fiyat</span>
+            <input
+              value={targetPrice}
+              onChange={(e) => setTargetPrice(e.target.value)}
+              style={inputStyle}
+              placeholder="Opsiyonel"
+            />
+          </label>
         </div>
 
-        <div style={fieldStyle}>
-          <label>Hedef Fiyat (Opsiyonel)</label>
-
-          <input
-            value={targetPrice}
-            onChange={(e) => setTargetPrice(e.target.value)}
-            style={inputStyle}
-          />
-        </div>
-
-        <div style={fieldStyle}>
-          <label>Not</label>
-
+        <label style={fieldStyle}>
+          <span style={labelStyle}>Ek Not</span>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             style={textareaStyle}
+            placeholder="Teslimat adresi, ürün özellikleri, marka tercihi, termin süresi gibi detayları yazın."
           />
+        </label>
+
+        <div style={noticeStyle}>
+          <strong>Platform güvenceli süreç</strong>
+          <span>
+            Talebiniz ilgili tedarikçilere yönlendirilir. Teklifleri panelinizden takip edebilirsiniz.
+          </span>
         </div>
 
-        <button
-          onClick={createRfq}
-          disabled={loading}
-          style={buttonStyle}
-        >
-          {loading
-            ? "Gönderiliyor..."
-            : "Teklif Talebi Gönder"}
+        <button onClick={createRfq} disabled={loading} style={buttonStyle}>
+          {loading ? "Gönderiliyor..." : "Teklif Talebi Gönder"}
         </button>
-      </div>
+      </section>
     </main>
   );
 }
 
 const pageStyle: CSSProperties = {
   minHeight: "100vh",
-  background: "#f1f5f9",
-  padding: 40,
+  background:
+    "radial-gradient(circle at top left, rgba(37,99,235,0.24), transparent 32%), #f8fafc",
+  padding: 32,
+  display: "grid",
+  gridTemplateColumns: "0.8fr 1.2fr",
+  gap: 28,
+};
+
+const heroStyle: CSSProperties = {
+  borderRadius: 30,
+  padding: 34,
+  color: "white",
+  backgroundImage:
+    "linear-gradient(180deg, rgba(15,23,42,0.45), rgba(15,23,42,0.92)), url('/images/hero-b2b.jpg')",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  minHeight: "calc(100vh - 64px)",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  boxShadow: "0 24px 60px rgba(15,23,42,0.22)",
+};
+
+const backLinkStyle: CSSProperties = {
+  color: "#dbeafe",
+  textDecoration: "none",
+  fontWeight: 900,
+};
+
+const heroBadgeStyle: CSSProperties = {
+  display: "inline-block",
+  width: "fit-content",
+  background: "rgba(59,130,246,0.24)",
+  border: "1px solid rgba(147,197,253,0.28)",
+  padding: "8px 13px",
+  borderRadius: 999,
+  fontSize: 13,
+  fontWeight: 900,
+};
+
+const heroTitleStyle: CSSProperties = {
+  fontSize: 46,
+  lineHeight: 1.05,
+  fontWeight: 900,
+  margin: "20px 0 12px",
+};
+
+const heroTextStyle: CSSProperties = {
+  color: "#dbeafe",
+  lineHeight: 1.7,
+  fontSize: 17,
+};
+
+const benefitGridStyle: CSSProperties = {
+  display: "grid",
+  gap: 10,
+};
+
+const benefitStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.12)",
+  border: "1px solid rgba(255,255,255,0.14)",
+  padding: 14,
+  borderRadius: 16,
+  fontWeight: 800,
 };
 
 const cardStyle: CSSProperties = {
-  maxWidth: 700,
-  margin: "0 auto",
   background: "white",
-  borderRadius: 24,
-  padding: 40,
-  boxShadow: "0 20px 50px rgba(15,23,42,0.1)",
+  borderRadius: 30,
+  padding: 34,
+  boxShadow: "0 24px 60px rgba(15,23,42,0.12)",
+  border: "1px solid #e2e8f0",
 };
 
-const titleStyle: CSSProperties = {
-  fontSize: 34,
-  fontWeight: 900,
-  marginBottom: 28,
-};
-
-const productBoxStyle: CSSProperties = {
-  background: "#f8fafc",
-  padding: 20,
-  borderRadius: 16,
+const cardHeaderStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 16,
+  alignItems: "start",
   marginBottom: 24,
 };
 
-const fieldStyle: CSSProperties = {
-  marginBottom: 20,
+const eyebrowStyle: CSSProperties = {
+  color: "#2563eb",
+  fontSize: 13,
+  fontWeight: 900,
+  marginBottom: 8,
+};
+
+const titleStyle: CSSProperties = {
+  margin: 0,
+  color: "#0f172a",
+  fontSize: 34,
+  fontWeight: 900,
+};
+
+const secondaryLinkStyle: CSSProperties = {
+  textDecoration: "none",
+  background: "#eff6ff",
+  color: "#1d4ed8",
+  padding: "11px 14px",
+  borderRadius: 13,
+  fontWeight: 900,
+  whiteSpace: "nowrap",
+};
+
+const summaryBoxStyle: CSSProperties = {
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+  borderRadius: 20,
+  padding: 18,
   display: "flex",
-  flexDirection: "column",
+  justifyContent: "space-between",
+  gap: 14,
+  alignItems: "center",
+  marginBottom: 16,
+};
+
+const summaryLabelStyle: CSSProperties = {
+  color: "#64748b",
+  fontSize: 13,
+  fontWeight: 800,
+  marginBottom: 5,
+};
+
+const summaryTitleStyle: CSSProperties = {
+  color: "#0f172a",
+  fontSize: 20,
+};
+
+const pricePillStyle: CSSProperties = {
+  background: "#dcfce7",
+  color: "#166534",
+  borderRadius: 999,
+  padding: "9px 12px",
+  fontWeight: 900,
+  whiteSpace: "nowrap",
+};
+
+const infoBoxStyle: CSSProperties = {
+  background: "#eff6ff",
+  color: "#1e3a8a",
+  padding: 14,
+  borderRadius: 14,
+  marginBottom: 16,
+};
+
+const gridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 14,
+};
+
+const fieldStyle: CSSProperties = {
+  display: "grid",
   gap: 8,
+  marginBottom: 16,
+};
+
+const labelStyle: CSSProperties = {
+  color: "#334155",
+  fontSize: 14,
+  fontWeight: 900,
 };
 
 const inputStyle: CSSProperties = {
-  height: 50,
-  borderRadius: 12,
+  height: 52,
+  borderRadius: 14,
   border: "1px solid #cbd5e1",
-  padding: "0 16px",
+  padding: "0 15px",
   fontSize: 15,
+  outline: "none",
 };
 
 const textareaStyle: CSSProperties = {
-  minHeight: 140,
-  borderRadius: 12,
+  minHeight: 150,
+  borderRadius: 14,
   border: "1px solid #cbd5e1",
-  padding: 16,
+  padding: 15,
   fontSize: 15,
+  outline: "none",
+  resize: "vertical",
+};
+
+const noticeStyle: CSSProperties = {
+  background: "#f0fdf4",
+  border: "1px solid #bbf7d0",
+  color: "#166534",
+  borderRadius: 16,
+  padding: 15,
+  display: "grid",
+  gap: 4,
+  marginBottom: 18,
 };
 
 const buttonStyle: CSSProperties = {
@@ -227,10 +410,11 @@ const buttonStyle: CSSProperties = {
   height: 56,
   border: "none",
   borderRadius: 16,
-  background: "#2563eb",
+  background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
   color: "white",
   fontSize: 16,
   fontWeight: 900,
+  cursor: "pointer",
 };
 
 const successStyle: CSSProperties = {
