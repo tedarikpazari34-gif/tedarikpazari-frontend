@@ -21,8 +21,6 @@ export default function LoginPage() {
 
       const token = res.data?.token;
       const role = res.data?.user?.role || res.data?.role;
-      console.log("LOGIN RESPONSE:", res.data);
-      console.log("ROLE:", role);
 
       if (!token) {
         setError("Token gelmedi");
@@ -31,7 +29,8 @@ export default function LoginPage() {
 
       localStorage.setItem("token", token);
       localStorage.setItem("role", role || "");
-      
+
+      window.dispatchEvent(new Event("storage"));
 
       if (role === "LOGISTICS") {
         window.location.href = "/logistics/shipping";
@@ -40,7 +39,7 @@ export default function LoginPage() {
       } else if (role === "ADMIN") {
         window.location.href = "/admin/dashboard";
       } else {
-        window.location.href = "/buyer/shipping";
+        window.location.href = "/";
       }
     } catch (err: any) {
       setError(
@@ -54,33 +53,122 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>Giriş Yap</h1>
+    <div style={pageStyle}>
+      <div style={cardStyle}>
+        <div style={logoStyle}>TP</div>
 
-      {error && <div style={{ color: "red", marginBottom: 12 }}>{error}</div>}
+        <h1 style={titleStyle}>Tedarik Pazarı</h1>
 
-      <input
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        <p style={subtitleStyle}>
+          Türkiye B2B tedarik ve toptan satın alma platformu
+        </p>
 
-      <br />
-      <br />
+        {error && <div style={errorStyle}>{error}</div>}
 
-      <input
-        type="password"
-        placeholder="Şifre"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        <input
+          placeholder="Email adresiniz"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={inputStyle}
+        />
 
-      <br />
-      <br />
+        <input
+          type="password"
+          placeholder="Şifreniz"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={inputStyle}
+        />
 
-      <button onClick={login} disabled={loading}>
-        {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
-      </button>
+        <button onClick={login} disabled={loading} style={buttonStyle}>
+          {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
+        </button>
+      </div>
     </div>
   );
 }
+
+const pageStyle: React.CSSProperties = {
+  minHeight: "100vh",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background:
+    "linear-gradient(135deg, #020617 0%, #0f172a 45%, #1e293b 100%)",
+  padding: 20,
+};
+
+const cardStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 420,
+  background: "rgba(15,23,42,0.92)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  borderRadius: 24,
+  padding: 36,
+  display: "flex",
+  flexDirection: "column",
+  gap: 16,
+  boxShadow: "0 20px 50px rgba(0,0,0,0.45)",
+};
+
+const logoStyle: React.CSSProperties = {
+  width: 70,
+  height: 70,
+  borderRadius: 20,
+  background: "linear-gradient(135deg, #38bdf8, #2563eb)",
+  display: "grid",
+  placeItems: "center",
+  color: "white",
+  fontWeight: 900,
+  fontSize: 26,
+  margin: "0 auto",
+};
+
+const titleStyle: React.CSSProperties = {
+  color: "white",
+  textAlign: "center",
+  margin: 0,
+  fontSize: 32,
+  fontWeight: 900,
+};
+
+const subtitleStyle: React.CSSProperties = {
+  color: "#94a3b8",
+  textAlign: "center",
+  marginTop: -8,
+  marginBottom: 10,
+  fontSize: 14,
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "14px 16px",
+  borderRadius: 14,
+  border: "1px solid #334155",
+  background: "#0f172a",
+  color: "white",
+  fontSize: 15,
+  outline: "none",
+  boxSizing: "border-box",
+};
+
+const buttonStyle: React.CSSProperties = {
+  background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+  color: "white",
+  border: "none",
+  padding: "15px",
+  borderRadius: 14,
+  fontWeight: 800,
+  fontSize: 15,
+  cursor: "pointer",
+  marginTop: 8,
+};
+
+const errorStyle: React.CSSProperties = {
+  background: "rgba(239,68,68,0.12)",
+  border: "1px solid rgba(239,68,68,0.35)",
+  color: "#fca5a5",
+  padding: 12,
+  borderRadius: 12,
+  fontSize: 14,
+};
