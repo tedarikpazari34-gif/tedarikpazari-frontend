@@ -26,6 +26,8 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminCompaniesPage from "./pages/AdminCompaniesPage";
 import WalletPage from "./pages/WalletPage";
 import ProductsPage from "./pages/ProductsPage";
+import NotificationsPage from "./pages/NotificationsPage";
+
 function PrivateRoute({
   children,
   role,
@@ -187,6 +189,7 @@ export default function App() {
         />
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
