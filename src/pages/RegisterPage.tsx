@@ -29,65 +29,87 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
 
   const register = async () => {
-  if (!companyName.trim() || !email.trim() || !password.trim()) {
-    setError("Firma, email ve şifre zorunlu");
-    return;
-  }
+    if (!companyName.trim() || !email.trim() || !password.trim()) {
+      setError("Firma, email ve şifre zorunlu");
+      return;
+    }
 
-  try {
-    setLoading(true);
-    setError("");
+    try {
+      setLoading(true);
+      setError("");
 
-    await axios.post(`${API}/auth/register`, {
-      companyName: companyName.trim(),
-      email: email.trim(),
-      password: password.trim(),
-      role: membershipType,
-    });
+      await axios.post(`${API}/auth/register`, {
+        companyName: companyName.trim(),
+        email: email.trim(),
+        password: password.trim(),
+        role: membershipType,
+        fullName,
+        phone,
+        companyType,
+        category,
+        city,
+        district,
+        taxNumber,
+        taxOffice,
+        address,
+      });
 
-    alert("Kayıt başarılı. Şimdi giriş yapabilirsiniz.");
-    navigate("/login");
-  } catch (err: any) {
-    console.error("REGISTER ERROR =>", err?.response || err);
+      alert("Kayıt başarılı. Şimdi giriş yapabilirsiniz.");
+      navigate("/login");
+    } catch (err: any) {
+      console.error("REGISTER ERROR =>", err?.response || err);
 
-    setError(
-      err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        "Kayıt sırasında hata oluştu"
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+      setError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "Kayıt sırasında hata oluştu"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main style={pageStyle}>
       <div style={overlayStyle}>
-        <div style={formWrapStyle}>
-          <div style={{ marginBottom: 18 }}>
+        <div style={cardStyle}>
+          <div style={topRowStyle}>
             <Link to="/" style={backLinkStyle}>
-              ← Ana sayfaya dön
+              ← Ana Sayfa
             </Link>
+
+            <div style={badgeStyle}>B2B Marketplace</div>
           </div>
 
-          <h1 style={titleStyle}>Üye Ol</h1>
+          <div style={{ marginBottom: 30 }}>
+            <h1 style={titleStyle}>Tedarik Pazarı'na Katılın</h1>
+
+            <p style={subtitleStyle}>
+              Toptancılar, satıcılar ve lojistik firmaları için modern B2B
+              platformu.
+            </p>
+          </div>
 
           {error && <div style={errorBoxStyle}>{error}</div>}
 
           <div style={gridStyle}>
             <div>
-              <label style={labelStyle}>Firma *</label>
+              <label style={labelStyle}>Firma Adı *</label>
+
               <input
                 style={inputStyle}
+                placeholder="Firma adını girin"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
               />
             </div>
 
             <div>
-              <label style={labelStyle}>Ad Soyad</label>
+              <label style={labelStyle}>Yetkili Ad Soyad</label>
+
               <input
                 style={inputStyle}
+                placeholder="Ad Soyad"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
               />
@@ -95,8 +117,10 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Telefon *</label>
+
               <input
                 style={inputStyle}
+                placeholder="0555 555 55 55"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
@@ -104,9 +128,11 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Email *</label>
+
               <input
                 type="email"
                 style={inputStyle}
+                placeholder="ornek@mail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -114,6 +140,7 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Üyelik Türü *</label>
+
               <select
                 style={inputStyle}
                 value={membershipType}
@@ -129,6 +156,7 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Şirket Türü</label>
+
               <select
                 style={inputStyle}
                 value={companyType}
@@ -142,6 +170,7 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Kategori</label>
+
               <select
                 style={inputStyle}
                 value={category}
@@ -158,8 +187,10 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>İl</label>
+
               <input
                 style={inputStyle}
+                placeholder="İstanbul"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
               />
@@ -167,8 +198,10 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>İlçe</label>
+
               <input
                 style={inputStyle}
+                placeholder="Kadıköy"
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
               />
@@ -176,8 +209,10 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Vergi No</label>
+
               <input
                 style={inputStyle}
+                placeholder="1234567890"
                 value={taxNumber}
                 onChange={(e) => setTaxNumber(e.target.value)}
               />
@@ -185,8 +220,10 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Vergi Dairesi</label>
+
               <input
                 style={inputStyle}
+                placeholder="Kadıköy VD"
                 value={taxOffice}
                 onChange={(e) => setTaxOffice(e.target.value)}
               />
@@ -194,19 +231,23 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Şifre *</label>
+
               <input
                 type="password"
                 style={inputStyle}
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
           </div>
 
-          <div style={{ marginTop: 16 }}>
+          <div style={{ marginTop: 18 }}>
             <label style={labelStyle}>Adres</label>
+
             <textarea
               style={textareaStyle}
+              placeholder="Firma adresinizi girin"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
@@ -219,16 +260,15 @@ export default function RegisterPage() {
             style={{
               ...buttonStyle,
               opacity: loading ? 0.7 : 1,
-              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
             {loading ? "Kaydediliyor..." : "Başvuruyu Gönder"}
           </button>
 
           <p style={loginTextStyle}>
-            Zaten hesabın var mı?{" "}
+            Zaten hesabınız var mı?{" "}
             <Link to="/login" style={loginLinkStyle}>
-              Giriş yap
+              Giriş Yap
             </Link>
           </p>
         </div>
@@ -239,11 +279,8 @@ export default function RegisterPage() {
 
 const pageStyle: CSSProperties = {
   minHeight: "100vh",
-  backgroundImage:
-    "linear-gradient(rgba(8,15,35,0.78), rgba(8,15,35,0.78)), url('/images/hero-b2b.jpg')",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
+  background:
+    "radial-gradient(circle at top, rgba(37,99,235,0.35), #020617 65%)",
 };
 
 const overlayStyle: CSSProperties = {
@@ -251,95 +288,130 @@ const overlayStyle: CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  padding: 24,
+  padding: 30,
 };
 
-const formWrapStyle: CSSProperties = {
+const cardStyle: CSSProperties = {
   width: "100%",
-  maxWidth: 980,
+  maxWidth: 1100,
+  background: "rgba(15,23,42,0.82)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  backdropFilter: "blur(18px)",
+  borderRadius: 28,
+  padding: 34,
+  boxShadow: "0 25px 60px rgba(0,0,0,0.45)",
   color: "#fff",
+};
+
+const topRowStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  marginBottom: 24,
+};
+
+const badgeStyle: CSSProperties = {
+  background: "rgba(59,130,246,0.18)",
+  border: "1px solid rgba(59,130,246,0.35)",
+  color: "#93c5fd",
+  padding: "8px 14px",
+  borderRadius: 999,
+  fontSize: 13,
+  fontWeight: 700,
 };
 
 const backLinkStyle: CSSProperties = {
-  color: "#c7d2fe",
+  color: "#cbd5e1",
   textDecoration: "none",
-  fontWeight: 600,
-  fontSize: 14,
+  fontWeight: 700,
 };
 
 const titleStyle: CSSProperties = {
-  fontSize: 54,
-  lineHeight: 1,
-  margin: "0 0 20px 0",
-  fontWeight: 800,
+  fontSize: 46,
+  fontWeight: 900,
+  margin: 0,
+  marginBottom: 10,
+  letterSpacing: "-1px",
+};
+
+const subtitleStyle: CSSProperties = {
+  color: "#94a3b8",
+  fontSize: 16,
+  margin: 0,
 };
 
 const errorBoxStyle: CSSProperties = {
-  background: "rgba(127,29,29,0.88)",
-  color: "#fff",
-  border: "1px solid rgba(252,165,165,0.5)",
-  borderRadius: 10,
-  padding: 12,
-  marginBottom: 16,
+  background: "rgba(220,38,38,0.16)",
+  border: "1px solid rgba(248,113,113,0.35)",
+  color: "#fecaca",
+  padding: 14,
+  borderRadius: 14,
+  marginBottom: 20,
 };
 
 const gridStyle: CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 14,
+  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+  gap: 18,
 };
 
 const labelStyle: CSSProperties = {
   display: "block",
-  marginBottom: 6,
+  marginBottom: 8,
   fontWeight: 700,
-  fontSize: 15,
+  color: "#e2e8f0",
+  fontSize: 14,
 };
 
 const inputStyle: CSSProperties = {
   width: "100%",
-  height: 42,
-  borderRadius: 8,
-  border: "none",
+  height: 52,
+  borderRadius: 14,
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(255,255,255,0.06)",
+  color: "#fff",
+  padding: "0 16px",
+  fontSize: 15,
   outline: "none",
-  padding: "0 12px",
-  fontSize: 14,
   boxSizing: "border-box",
 };
 
 const textareaStyle: CSSProperties = {
   width: "100%",
-  minHeight: 110,
-  borderRadius: 8,
-  border: "none",
+  minHeight: 120,
+  borderRadius: 14,
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(255,255,255,0.06)",
+  color: "#fff",
+  padding: 16,
+  fontSize: 15,
   outline: "none",
-  padding: 12,
-  fontSize: 14,
   resize: "vertical",
   boxSizing: "border-box",
 };
 
 const buttonStyle: CSSProperties = {
-  marginTop: 18,
   width: "100%",
-  height: 48,
-  borderRadius: 10,
+  height: 56,
   border: "none",
-  background: "#4ade80",
+  borderRadius: 16,
+  marginTop: 24,
+  background: "linear-gradient(135deg,#2563eb,#3b82f6)",
   color: "#fff",
-  fontWeight: 800,
   fontSize: 16,
+  fontWeight: 800,
+  cursor: "pointer",
+  boxShadow: "0 18px 35px rgba(37,99,235,0.35)",
 };
 
 const loginTextStyle: CSSProperties = {
-  marginTop: 16,
   textAlign: "center",
-  color: "#dbeafe",
-  fontWeight: 600,
+  marginTop: 20,
+  color: "#cbd5e1",
 };
 
 const loginLinkStyle: CSSProperties = {
-  color: "#93c5fd",
+  color: "#60a5fa",
   textDecoration: "none",
   fontWeight: 800,
 };
