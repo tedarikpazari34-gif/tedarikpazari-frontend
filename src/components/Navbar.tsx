@@ -20,6 +20,7 @@ const sellerLinks: NavItem[] = [
 ];
 
 const accountLinks: NavItem[] = [
+  { label: "Bildirimler", to: "/notifications" },
   { label: "Cüzdanım", to: "/wallet" },
 ];
 
@@ -31,7 +32,6 @@ const token = localStorage.getItem("token");
 
   const logout = () => {
     localStorage.clear();
-
 setOpen(false);
 navigate("/login");
   };
