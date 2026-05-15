@@ -48,8 +48,7 @@ export default function Navbar() {
         </Link>
 
         {/* DESKTOP MENU */}
-        {!open && (
-          <nav style={desktopNavStyle}>
+        <nav style={desktopNavStyle}>
             <NavGroup items={buyerLinks} />
             <NavGroup items={sellerLinks} />
             <NavGroup items={accountLinks} />
@@ -70,7 +69,7 @@ export default function Navbar() {
               </div>
             )}
           </nav>
-        )}
+        
 
         {/* MOBILE BUTTON */}
         <button
@@ -280,7 +279,7 @@ const logoutButtonStyle: React.CSSProperties = {
 };
 
 const mobileButtonStyle: React.CSSProperties = {
-  display: "block",
+  display: window.innerWidth < 980 ? "block" : "none",
   background: "rgba(255,255,255,0.08)",
   color: "white",
   border: "1px solid rgba(255,255,255,0.14)",
