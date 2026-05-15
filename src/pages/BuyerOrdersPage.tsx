@@ -25,7 +25,70 @@ type Order = {
 };
 
 const API =
-  import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
+  import.meta.env.VITE_API_URL ||
+  "https://tedarik-backend.onrender.com/api";
+
+function statusLabel(status: string) {
+  switch (status) {
+    case "PENDING_PAYMENT":
+      return "Ödeme Bekleniyor";
+
+    case "PAID":
+      return "Ödeme Alındı";
+
+    case "PREPARING":
+      return "Hazırlanıyor";
+
+    case "SHIPPED":
+      return "Kargoda";
+
+    case "COMPLETED":
+      return "Tamamlandı";
+
+    default:
+      return status;
+  }
+}
+
+function statusStyle(status: string): CSSProperties {
+  switch (status) {
+    case "PENDING_PAYMENT":
+      return {
+        background: "#fef3c7",
+        color: "#92400e",
+      };
+
+    case "PAID":
+      return {
+        background: "#dbeafe",
+        color: "#1d4ed8",
+      };
+
+    case "PREPARING":
+      return {
+        background: "#ede9fe",
+        color: "#6d28d9",
+      };
+
+    case "SHIPPED":
+      return {
+        background: "#cffafe",
+        color: "#155e75",
+      };
+
+    case "COMPLETED":
+      return {
+        background: "#dcfce7",
+        color: "#166534",
+      };
+
+    default:
+      return {
+        background: "#e5e7eb",
+        color: "#374151",
+      };
+  }
+}
 
 export default function BuyerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -40,7 +103,7 @@ export default function BuyerOrdersPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Token yok, giriş yap");
+        setError("Giriş yapmanız gerekiyor");
         return;
       }
 
@@ -67,7 +130,7 @@ export default function BuyerOrdersPage() {
       setOrders(safeOrders);
     } catch (err) {
       console.error(err);
-      setError("Fetch hatası");
+      setError("Siparişler alınamadı");
     } finally {
       setLoading(false);
     }
@@ -77,16 +140,22 @@ export default function BuyerOrdersPage() {
     loadOrders();
   }, []);
 
-  const handleAction = async (orderId: string, action: string) => {
+  const handleAction = async (
+    orderId: string,
+    action: string
+  ) => {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`${API}/orders/${orderId}/${action}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${API}/orders/${orderId}/${action}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await res.json().catch(() => null);
 
@@ -96,6 +165,7 @@ export default function BuyerOrdersPage() {
       }
 
       alert("İşlem başarılı ✅");
+
       loadOrders();
     } catch (err) {
       console.error(err);
@@ -107,12 +177,15 @@ export default function BuyerOrdersPage() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`${API}/payments/iyzico/${orderId}/initialize`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${API}/payments/iyzico/${orderId}/initialize`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await res.json();
 
@@ -122,18 +195,19 @@ export default function BuyerOrdersPage() {
       }
 
       if (!data?.checkoutFormContent) {
-        alert("iyzico ödeme formu gelmedi");
+        alert("iyzico formu alınamadı");
         return;
       }
 
       const paymentWindow = window.open("", "_blank");
 
       if (!paymentWindow) {
-        alert("Popup engellendi. Tarayıcı popup iznini aç.");
+        alert("Popup engellendi");
         return;
       }
 
       paymentWindow.document.open();
+
       paymentWindow.document.write(`
         <html>
           <head>
@@ -144,182 +218,352 @@ export default function BuyerOrdersPage() {
           </body>
         </html>
       `);
+
       paymentWindow.document.close();
     } catch (err) {
-      console.error("IYZICO PAYMENT ERROR:", err);
+      console.error(err);
       alert("Ödeme başlatılırken hata oluştu");
     }
   };
 
   if (loading) {
-    return <p style={{ padding: 40 }}>Yükleniyor...</p>;
+    return (
+      <main style={pageStyle}>
+        <div style={emptyCardStyle}>
+          Siparişler yükleniyor...
+        </div>
+      </main>
+    );
   }
 
   return (
-    <main style={{ padding: 40 }}>
-      <h1 style={{ marginBottom: 30 }}>Siparişlerim</h1>
+    <main style={pageStyle}>
+      <section style={heroStyle}>
+        <div>
+          <div style={eyebrowStyle}>
+            BUYER PANELİ
+          </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+          <h1 style={titleStyle}>
+            Siparişlerim
+          </h1>
 
-      {!error && orders.length === 0 ? (
-        <p>Henüz sipariş yok.</p>
+          <p style={descStyle}>
+            Siparişlerinizi, ödeme durumlarını,
+            kargo süreçlerini ve teslimatları
+            tek ekrandan takip edin.
+          </p>
+        </div>
+      </section>
+
+      {error ? (
+        <div style={errorCardStyle}>
+          {error}
+        </div>
+      ) : orders.length === 0 ? (
+        <div style={emptyCardStyle}>
+          <h2 style={{ marginTop: 0 }}>
+            Henüz sipariş yok
+          </h2>
+
+          <p style={{ color: "#64748b" }}>
+            Kabul ettiğiniz teklifler burada
+            görünecek.
+          </p>
+        </div>
       ) : (
-        <div style={grid}>
+        <section style={gridStyle}>
           {orders.map((o) => (
-            <div key={o.id} style={card}>
-              <h2 style={title}>
-                {o.rfq?.product?.title || "Ürün bulunamadı"}
-              </h2>
+            <article key={o.id} style={cardStyle}>
+              <div style={cardTopStyle}>
+                <div>
+                  <div style={smallLabelStyle}>
+                    Sipariş Ürünü
+                  </div>
 
-              <p style={sub}>Miktar: {o.rfq?.quantity || 0}</p>
+                  <h2 style={cardTitleStyle}>
+                    {o.rfq?.product?.title ||
+                      "Ürün"}
+                  </h2>
+                </div>
 
-              <p style={sub}>
-                Birim Fiyat:{" "}
-                {Number(o.quote?.unitPrice || 0).toLocaleString("tr-TR")} ₺
-              </p>
+                <span
+                  style={{
+                    ...badgeStyle,
+                    ...statusStyle(o.status),
+                  }}
+                >
+                  {statusLabel(o.status)}
+                </span>
+              </div>
 
-              <p style={sub}>Teslim: {o.quote?.deliveryDays || "-"} gün</p>
+              <div style={infoGridStyle}>
+                <Info
+                  label="Miktar"
+                  value={o.rfq?.quantity || "-"}
+                />
 
-              <p style={sub}>Not: {o.quote?.sellerNote || "-"}</p>
+                <Info
+                  label="Birim Fiyat"
+                  value={`${Number(
+                    o.quote?.unitPrice || 0
+                  ).toLocaleString("tr-TR")} ₺`}
+                />
 
-              <p style={price}>
-                Toplam: {Number(o.totalAmount || 0).toLocaleString("tr-TR")} ₺
-              </p>
+                <Info
+                  label="Teslim"
+                  value={`${
+                    o.quote?.deliveryDays || "-"
+                  } gün`}
+                />
 
-              <span style={statusBadge(o.status)}>{o.status}</span>
+                <Info
+                  label="Toplam"
+                  value={`${Number(
+                    o.totalAmount || 0
+                  ).toLocaleString("tr-TR")} ₺`}
+                />
+              </div>
+
+              <div style={noteBoxStyle}>
+                <strong>Satıcı Notu</strong>
+
+                <p>
+                  {o.quote?.sellerNote ||
+                    "Not bulunmuyor"}
+                </p>
+              </div>
 
               {o.status === "SHIPPED" && (
-                <div style={trackingBox}>
-                  <p style={trackingText}>
-                    🚚 Kargo: {o.shippingCompany || "-"}
-                  </p>
+                <div style={shippingBoxStyle}>
+                  <div>
+                    🚚 {o.shippingCompany || "-"}
+                  </div>
 
-                  <p style={trackingText}>
-                    Takip No: {o.shippingTrackingNo || "-"}
-                  </p>
+                  <div>
+                    Takip No:{" "}
+                    {o.shippingTrackingNo || "-"}
+                  </div>
 
-                  <p style={trackingText}>
+                  <div>
                     Çıkış Tarihi:{" "}
                     {o.shippedAt
-                      ? new Date(o.shippedAt).toLocaleString("tr-TR")
+                      ? new Date(
+                          o.shippedAt
+                        ).toLocaleString("tr-TR")
                       : "-"}
-                  </p>
+                  </div>
                 </div>
               )}
 
-              <div style={{ marginTop: 12 }}>
-                {o.status === "PENDING_PAYMENT" && (
+              <div style={actionsStyle}>
+                {o.status ===
+                  "PENDING_PAYMENT" && (
                   <button
-                    style={blueButton}
-                    onClick={() => handleIyzicoPayment(o.id)}
+                    style={blueButtonStyle}
+                    onClick={() =>
+                      handleIyzicoPayment(o.id)
+                    }
                   >
-                    💳 Öde
+                    💳 Ödeme Yap
                   </button>
                 )}
 
                 {o.status === "SHIPPED" && (
                   <button
-                    style={greenButton}
-                    onClick={() => handleAction(o.id, "complete")}
+                    style={greenButtonStyle}
+                    onClick={() =>
+                      handleAction(
+                        o.id,
+                        "complete"
+                      )
+                    }
                   >
                     ✅ Teslim Aldım
                   </button>
                 )}
               </div>
-            </div>
+            </article>
           ))}
-        </div>
+        </section>
       )}
     </main>
   );
 }
 
-const grid: CSSProperties = {
+function Info({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div style={infoBoxStyle}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+const pageStyle: CSSProperties = {
+  minHeight: "100vh",
+  background: "#f8fafc",
+  padding: 40,
+};
+
+const heroStyle: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto 24px",
+  background:
+    "linear-gradient(135deg, #0f172a, #2563eb)",
+  color: "white",
+  borderRadius: 28,
+  padding: 32,
+  boxShadow:
+    "0 24px 50px rgba(15,23,42,0.18)",
+};
+
+const eyebrowStyle: CSSProperties = {
+  color: "#93c5fd",
+  fontSize: 13,
+  fontWeight: 900,
+  marginBottom: 8,
+};
+
+const titleStyle: CSSProperties = {
+  margin: "0 0 8px",
+  fontSize: 40,
+  fontWeight: 900,
+};
+
+const descStyle: CSSProperties = {
+  margin: 0,
+  color: "#cbd5e1",
+  maxWidth: 720,
+  lineHeight: 1.7,
+};
+
+const gridStyle: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto",
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(300px,1fr))",
+  gridTemplateColumns:
+    "repeat(auto-fill, minmax(320px, 1fr))",
   gap: 20,
 };
 
-const card: CSSProperties = {
-  border: "1px solid #e5e7eb",
-  borderRadius: 16,
-  padding: 20,
-  background: "#ffffff",
+const cardStyle: CSSProperties = {
+  background: "white",
+  borderRadius: 24,
+  padding: 24,
+  border: "1px solid #e2e8f0",
+  boxShadow:
+    "0 14px 34px rgba(15,23,42,0.10)",
 };
 
-const title: CSSProperties = {
-  fontSize: 18,
-  fontWeight: 700,
-  marginBottom: 10,
+const cardTopStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 12,
+  alignItems: "start",
+  marginBottom: 18,
 };
 
-const sub: CSSProperties = {
-  fontSize: 14,
-  color: "#4b5563",
+const smallLabelStyle: CSSProperties = {
+  color: "#2563eb",
+  fontSize: 12,
+  fontWeight: 900,
   marginBottom: 6,
 };
 
-const price: CSSProperties = {
-  fontSize: 18,
-  fontWeight: 800,
-  color: "#16a34a",
-  marginTop: 10,
+const cardTitleStyle: CSSProperties = {
+  margin: 0,
+  fontSize: 22,
+  fontWeight: 900,
+  color: "#0f172a",
 };
 
-const trackingBox: CSSProperties = {
-  marginTop: 12,
-  padding: 12,
-  borderRadius: 12,
+const badgeStyle: CSSProperties = {
+  borderRadius: 999,
+  padding: "7px 11px",
+  fontSize: 12,
+  fontWeight: 900,
+};
+
+const infoGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 12,
+  marginBottom: 16,
+};
+
+const infoBoxStyle: CSSProperties = {
   background: "#f8fafc",
-  border: "1px solid #e5e7eb",
-};
-
-const trackingText: CSSProperties = {
-  margin: "4px 0",
-  fontSize: 14,
+  borderRadius: 14,
+  padding: 13,
+  display: "grid",
+  gap: 4,
   color: "#334155",
 };
 
-const blueButton: CSSProperties = {
-  padding: "8px 12px",
+const noteBoxStyle: CSSProperties = {
+  background: "#f8fafc",
+  borderRadius: 14,
+  padding: 14,
+  marginBottom: 16,
+  color: "#334155",
+};
+
+const shippingBoxStyle: CSSProperties = {
+  background: "#ecfeff",
+  border: "1px solid #a5f3fc",
+  color: "#155e75",
+  borderRadius: 14,
+  padding: 14,
+  marginBottom: 16,
+  display: "grid",
+  gap: 6,
+};
+
+const actionsStyle: CSSProperties = {
+  display: "flex",
+  gap: 10,
+  flexWrap: "wrap",
+};
+
+const blueButtonStyle: CSSProperties = {
+  border: "none",
   background: "#2563eb",
   color: "white",
-  border: "none",
-  borderRadius: 6,
+  padding: "12px 16px",
+  borderRadius: 12,
   cursor: "pointer",
+  fontWeight: 900,
 };
 
-const greenButton: CSSProperties = {
-  padding: "8px 12px",
+const greenButtonStyle: CSSProperties = {
+  border: "none",
   background: "#16a34a",
   color: "white",
-  border: "none",
-  borderRadius: 6,
+  padding: "12px 16px",
+  borderRadius: 12,
   cursor: "pointer",
+  fontWeight: 900,
 };
 
-const statusBadge = (status: string): CSSProperties => {
-  const base: CSSProperties = {
-    marginTop: 12,
-    padding: "6px 10px",
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: 700,
-    display: "inline-block",
-  };
+const emptyCardStyle: CSSProperties = {
+  maxWidth: 720,
+  margin: "0 auto",
+  background: "white",
+  border: "1px solid #e2e8f0",
+  borderRadius: 24,
+  padding: 32,
+  boxShadow:
+    "0 14px 34px rgba(15,23,42,0.10)",
+};
 
-  switch (status) {
-    case "PENDING_PAYMENT":
-      return { ...base, background: "#fef3c7", color: "#92400e" };
-    case "PAID":
-      return { ...base, background: "#dbeafe", color: "#1d4ed8" };
-    case "PREPARING":
-      return { ...base, background: "#e9d5ff", color: "#7e22ce" };
-    case "SHIPPED":
-      return { ...base, background: "#cffafe", color: "#155e75" };
-    case "COMPLETED":
-      return { ...base, background: "#dcfce7", color: "#166534" };
-    default:
-      return { ...base, background: "#e5e7eb", color: "#374151" };
-  }
+const errorCardStyle: CSSProperties = {
+  ...emptyCardStyle,
+  color: "#991b1b",
 };
