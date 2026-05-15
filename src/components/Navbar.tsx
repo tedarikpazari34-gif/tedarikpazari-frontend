@@ -26,23 +26,12 @@ const accountLinks: NavItem[] = [
 export default function Navbar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  useEffect(() => {
-  const syncToken = () => {
-    setToken(localStorage.getItem("token"));
-  };
-
-  window.addEventListener("storage", syncToken);
-
-  return () => {
-    window.removeEventListener("storage", syncToken);
-  };
-}, []);
-
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  
+const token = localStorage.getItem("token");
 
   const logout = () => {
     localStorage.clear();
-setToken(null);
+
 setOpen(false);
 navigate("/login");
   };

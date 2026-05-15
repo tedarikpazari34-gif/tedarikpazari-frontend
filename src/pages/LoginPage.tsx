@@ -31,8 +31,8 @@ export default function LoginPage() {
 
       localStorage.setItem("token", token);
       localStorage.setItem("role", role || "");
-      window.dispatchEvent(new Event("storage"));
       
+
       if (role === "LOGISTICS") {
         window.location.href = "/logistics/shipping";
       } else if (role === "SELLER") {
