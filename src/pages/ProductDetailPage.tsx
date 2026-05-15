@@ -269,7 +269,21 @@ export default function ProductDetailPage() {
               teklif veya sipariş sürecine kadar gizlenir.
             </p>
           </div>
+          <div style={supplierCardStyle}>
+  <div>
+    <div style={supplierTitleStyle}>Tedarikçi Profili</div>
+    <div style={supplierNameStyle}>Verified Supplier</div>
+    <p style={supplierDescStyle}>
+      Bu tedarikçi platform kalite ve güven kontrolünden geçmiştir.
+    </p>
+  </div>
 
+  <div style={supplierStatsStyle}>
+    <span>✓ Güvenli teklif</span>
+    <span>✓ B2B satış</span>
+    <span>✓ Hızlı dönüş</span>
+  </div>
+</div>
           <div style={actionsStyle}>
             <button
               type="button"
@@ -575,4 +589,41 @@ const loadingCardStyle: CSSProperties = {
   borderRadius: 24,
   padding: 32,
   boxShadow: "0 20px 50px rgba(15,23,42,0.1)",
+};
+const supplierCardStyle: CSSProperties = {
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+  borderRadius: 20,
+  padding: 18,
+  marginBottom: 24,
+};
+
+const supplierTitleStyle: CSSProperties = {
+  color: "#2563eb",
+  fontSize: 13,
+  fontWeight: 900,
+  marginBottom: 6,
+};
+
+const supplierNameStyle: CSSProperties = {
+  color: "#0f172a",
+  fontSize: 20,
+  fontWeight: 900,
+  marginBottom: 8,
+};
+
+const supplierDescStyle: CSSProperties = {
+  color: "#64748b",
+  lineHeight: 1.6,
+  margin: 0,
+};
+
+const supplierStatsStyle: CSSProperties = {
+  display: "flex",
+  gap: 8,
+  flexWrap: "wrap",
+  marginTop: 14,
+  color: "#166534",
+  fontSize: 13,
+  fontWeight: 800,
 };
