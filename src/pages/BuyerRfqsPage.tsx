@@ -6,12 +6,55 @@ type RFQ = {
   quantity: number;
   note?: string | null;
   status: string;
+  createdAt?: string;
   product?: {
     title?: string;
   };
 };
 
 const API = "https://tedarik-backend.onrender.com/api";
+
+function getStatusLabel(status: string) {
+  const value = status?.toUpperCase();
+
+  if (value === "OPEN") return "Açık";
+  if (value === "PENDING") return "Beklemede";
+  if (value === "CLOSED") return "Kapandı";
+  if (value === "APPROVED") return "Onaylandı";
+  if (value === "REJECTED") return "Reddedildi";
+
+  return status || "Durum yok";
+}
+
+function getStatusStyle(status: string): CSSProperties {
+  const value = status?.toUpperCase();
+
+  if (value === "OPEN" || value === "APPROVED") {
+    return {
+      background: "#dcfce7",
+      color: "#166534",
+    };
+  }
+
+  if (value === "PENDING") {
+    return {
+      background: "#fef3c7",
+      color: "#92400e",
+    };
+  }
+
+  if (value === "CLOSED" || value === "REJECTED") {
+    return {
+      background: "#fee2e2",
+      color: "#991b1b",
+    };
+  }
+
+  return {
+    background: "#e0f2fe",
+    color: "#0369a1",
+  };
+}
 
 export default function BuyerRfqsPage() {
   const [rfqs, setRfqs] = useState<RFQ[]>([]);
@@ -24,7 +67,7 @@ export default function BuyerRfqsPage() {
         const token = localStorage.getItem("token");
 
         if (!token) {
-          setError("Token yok, giriş yap");
+          setError("Teklif taleplerinizi görmek için giriş yapmalısınız.");
           return;
         }
 
@@ -53,75 +96,330 @@ export default function BuyerRfqsPage() {
     loadRfqs();
   }, []);
 
-  if (loading) return <main style={page}>Yükleniyor...</main>;
-
   return (
     <main style={page}>
-      <h1 style={{ marginBottom: 30 }}>RFQ Taleplerim</h1>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      {!error && rfqs.length === 0 ? (
-        <p>Henüz RFQ talebin yok.</p>
-      ) : (
-        <div style={grid}>
-          {rfqs.map((rfq) => (
-            <div key={rfq.id} style={card}>
-              <h2 style={title}>{rfq.product?.title || "Ürün"}</h2>
-
-              <p style={sub}>Miktar: {rfq.quantity}</p>
-              <p style={sub}>Durum: {rfq.status}</p>
-              <p style={sub}>Not: {rfq.note || "-"}</p>
-
-              <Link to={`/buyer/rfqs/${rfq.id}`} style={button}>
-                Teklifleri Gör
-              </Link>
-            </div>
-          ))}
+      <section style={hero}>
+        <div>
+          <div style={eyebrow}>ALICI PANELİ</div>
+          <h1 style={heading}>Teklif Taleplerim</h1>
+          <p style={description}>
+            Gönderdiğiniz RFQ taleplerini takip edin, gelen teklifleri inceleyin
+            ve satın alma sürecinizi tek yerden yönetin.
+          </p>
         </div>
+
+        <Link to="/buyer/rfqs/new" style={newButton}>
+          Yeni Teklif Talebi
+        </Link>
+      </section>
+
+      <section style={statsRow}>
+        <div style={statCard}>
+          <span style={statLabel}>Toplam Talep</span>
+          <strong style={statValue}>{rfqs.length}</strong>
+        </div>
+
+        <div style={statCard}>
+          <span style={statLabel}>Açık Talepler</span>
+          <strong style={statValue}>
+            {rfqs.filter((r) => r.status?.toUpperCase() === "OPEN").length}
+          </strong>
+        </div>
+
+        <div style={statCard}>
+          <span style={statLabel}>Bekleyen</span>
+          <strong style={statValue}>
+            {rfqs.filter((r) => r.status?.toUpperCase() === "PENDING").length}
+          </strong>
+        </div>
+      </section>
+
+      {loading ? (
+        <div style={emptyCard}>Teklif talepleri yükleniyor...</div>
+      ) : error ? (
+        <div style={errorCard}>
+          <strong>Bir sorun oluştu</strong>
+          <span>{error}</span>
+          <Link to="/login" style={loginLink}>
+            Giriş yap
+          </Link>
+        </div>
+      ) : rfqs.length === 0 ? (
+        <div style={emptyCard}>
+          <h2 style={{ marginTop: 0 }}>Henüz teklif talebiniz yok</h2>
+          <p style={{ color: "#64748b", lineHeight: 1.7 }}>
+            Ürün veya kategori seçerek tedarikçilerden hızlıca teklif alabilirsiniz.
+          </p>
+          <Link to="/products" style={primaryLink}>
+            Ürünleri keşfet
+          </Link>
+        </div>
+      ) : (
+        <section style={grid}>
+          {rfqs.map((rfq) => (
+            <article key={rfq.id} style={card}>
+              <div style={cardTop}>
+                <div>
+                  <div style={productLabel}>Ürün / Talep</div>
+                  <h2 style={title}>{rfq.product?.title || "Genel Teklif Talebi"}</h2>
+                </div>
+
+                <span
+                  style={{
+                    ...statusBadge,
+                    ...getStatusStyle(rfq.status),
+                  }}
+                >
+                  {getStatusLabel(rfq.status)}
+                </span>
+              </div>
+
+              <div style={infoGrid}>
+                <Info label="Miktar" value={rfq.quantity || "-"} />
+                <Info
+                  label="Tarih"
+                  value={
+                    rfq.createdAt
+                      ? new Date(rfq.createdAt).toLocaleDateString("tr-TR")
+                      : "-"
+                  }
+                />
+              </div>
+
+              <div style={noteBox}>
+                <strong>Not</strong>
+                <p>{rfq.note || "Not eklenmemiş."}</p>
+              </div>
+
+              <div style={actions}>
+                <Link to={`/buyer/rfqs/${rfq.id}`} style={detailButton}>
+                  Teklifleri Gör
+                </Link>
+
+                <Link to="/buyer/rfqs/new" style={secondaryButton}>
+                  Yeni Talep
+                </Link>
+              </div>
+            </article>
+          ))}
+        </section>
       )}
     </main>
   );
 }
 
+function Info({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div style={infoBox}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
 const page: CSSProperties = {
-  padding: 40,
   minHeight: "100vh",
   background: "#f8fafc",
+  padding: 40,
+};
+
+const hero: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto 24px",
+  background: "linear-gradient(135deg, #0f172a, #1e3a8a)",
+  color: "white",
+  borderRadius: 28,
+  padding: 32,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 20,
+  boxShadow: "0 24px 50px rgba(15,23,42,0.18)",
+};
+
+const eyebrow: CSSProperties = {
+  color: "#93c5fd",
+  fontSize: 13,
+  fontWeight: 900,
+  marginBottom: 8,
+};
+
+const heading: CSSProperties = {
+  fontSize: 40,
+  fontWeight: 900,
+  margin: "0 0 8px",
+};
+
+const description: CSSProperties = {
+  color: "#cbd5e1",
+  maxWidth: 720,
+  lineHeight: 1.7,
+  margin: 0,
+};
+
+const newButton: CSSProperties = {
+  textDecoration: "none",
+  background: "#22c55e",
+  color: "white",
+  padding: "13px 18px",
+  borderRadius: 14,
+  fontWeight: 900,
+  whiteSpace: "nowrap",
+};
+
+const statsRow: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto 24px",
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 16,
+};
+
+const statCard: CSSProperties = {
+  background: "white",
+  border: "1px solid #e2e8f0",
+  borderRadius: 20,
+  padding: 20,
+  boxShadow: "0 12px 28px rgba(15,23,42,0.08)",
+};
+
+const statLabel: CSSProperties = {
+  display: "block",
+  color: "#64748b",
+  fontWeight: 800,
+  marginBottom: 8,
+};
+
+const statValue: CSSProperties = {
+  fontSize: 30,
+  color: "#0f172a",
 };
 
 const grid: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto",
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
   gap: 20,
 };
 
 const card: CSSProperties = {
   background: "white",
-  border: "1px solid #e5e7eb",
-  borderRadius: 16,
-  padding: 20,
+  border: "1px solid #e2e8f0",
+  borderRadius: 22,
+  padding: 22,
+  boxShadow: "0 14px 34px rgba(15,23,42,0.10)",
 };
 
-const title: CSSProperties = {
-  fontSize: 18,
-  fontWeight: 800,
-  marginBottom: 10,
+const cardTop: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 12,
+  alignItems: "start",
+  marginBottom: 18,
 };
 
-const sub: CSSProperties = {
-  fontSize: 14,
-  color: "#4b5563",
+const productLabel: CSSProperties = {
+  color: "#2563eb",
+  fontSize: 12,
+  fontWeight: 900,
   marginBottom: 6,
 };
 
-const button: CSSProperties = {
-  display: "inline-block",
-  marginTop: 12,
-  padding: "10px 14px",
+const title: CSSProperties = {
+  fontSize: 21,
+  color: "#0f172a",
+  margin: 0,
+};
+
+const statusBadge: CSSProperties = {
+  borderRadius: 999,
+  padding: "7px 11px",
+  fontSize: 12,
+  fontWeight: 900,
+  whiteSpace: "nowrap",
+};
+
+const infoGrid: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 12,
+  marginBottom: 14,
+};
+
+const infoBox: CSSProperties = {
+  background: "#f8fafc",
+  borderRadius: 14,
+  padding: 13,
+  display: "grid",
+  gap: 4,
+};
+
+const noteBox: CSSProperties = {
+  background: "#f8fafc",
+  borderRadius: 14,
+  padding: 14,
+  color: "#334155",
+  marginBottom: 16,
+};
+
+const actions: CSSProperties = {
+  display: "flex",
+  gap: 10,
+  flexWrap: "wrap",
+};
+
+const detailButton: CSSProperties = {
+  flex: 1,
+  textAlign: "center",
+  textDecoration: "none",
   background: "#2563eb",
   color: "white",
-  borderRadius: 8,
+  padding: "11px 14px",
+  borderRadius: 12,
+  fontWeight: 900,
+};
+
+const secondaryButton: CSSProperties = {
+  flex: 1,
+  textAlign: "center",
   textDecoration: "none",
-  fontWeight: 700,
+  background: "#eff6ff",
+  color: "#1d4ed8",
+  padding: "11px 14px",
+  borderRadius: 12,
+  fontWeight: 900,
+};
+
+const emptyCard: CSSProperties = {
+  maxWidth: 720,
+  margin: "0 auto",
+  background: "white",
+  border: "1px solid #e2e8f0",
+  borderRadius: 24,
+  padding: 32,
+  boxShadow: "0 14px 34px rgba(15,23,42,0.10)",
+};
+
+const errorCard: CSSProperties = {
+  ...emptyCard,
+  color: "#991b1b",
+  display: "grid",
+  gap: 10,
+};
+
+const primaryLink: CSSProperties = {
+  display: "inline-block",
+  textDecoration: "none",
+  background: "#2563eb",
+  color: "white",
+  padding: "12px 16px",
+  borderRadius: 12,
+  fontWeight: 900,
+  marginTop: 10,
+};
+
+const loginLink: CSSProperties = {
+  ...primaryLink,
+  width: "fit-content",
 };
