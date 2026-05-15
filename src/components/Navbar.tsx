@@ -6,6 +6,14 @@ type NavItem = {
   to: string;
 };
 
+type NotificationItem = {
+  id: string;
+  isRead: boolean;
+};
+
+const API =
+  import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
+
 const buyerLinks: NavItem[] = [
   { label: "Ana Sayfa", to: "/" },
   { label: "Ürünler", to: "/products" },
@@ -20,20 +28,62 @@ const sellerLinks: NavItem[] = [
 ];
 
 const accountLinks: NavItem[] = [
-  { label: "Bildirimler", to: "/notifications" },
   { label: "Cüzdanım", to: "/wallet" },
 ];
 
 export default function Navbar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  
-const token = localStorage.getItem("token");
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const loadUnreadCount = async () => {
+      try {
+        if (!token) {
+          setUnreadCount(0);
+          return;
+        }
+
+        const res = await fetch(`${API}/notifications/mine`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+          setUnreadCount(0);
+          return;
+        }
+
+        const count = data.filter(
+          (item: NotificationItem) => !item.isRead
+        ).length;
+
+        setUnreadCount(count);
+      } catch (err) {
+        console.error("NOTIFICATION COUNT ERROR:", err);
+        setUnreadCount(0);
+      }
+    };
+
+    loadUnreadCount();
+
+    window.addEventListener("storage", loadUnreadCount);
+
+    return () => {
+      window.removeEventListener("storage", loadUnreadCount);
+    };
+  }, [token]);
 
   const logout = () => {
     localStorage.clear();
-setOpen(false);
-navigate("/login");
+    setUnreadCount(0);
+    setOpen(false);
+    navigate("/login");
   };
 
   return (
@@ -48,31 +98,37 @@ navigate("/login");
           </span>
         </Link>
 
-        {/* DESKTOP MENU */}
         <nav style={desktopNavStyle}>
-            <NavGroup items={buyerLinks} />
-            <NavGroup items={sellerLinks} />
-            <NavGroup items={accountLinks} />
+          <NavGroup items={buyerLinks} />
+          <NavGroup items={sellerLinks} />
+          <NavGroup items={accountLinks} />
 
-            {token ? (
-              <button onClick={logout} style={logoutButtonStyle}>
-                Çıkış Yap
-              </button>
-            ) : (
-              <div style={authGroupStyle}>
-                <Link to="/login" style={loginButtonStyle}>
-                  Giriş Yap
-                </Link>
-
-                <Link to="/register" style={registerButtonStyle}>
-                  Üye Ol
-                </Link>
-              </div>
+          <Link to="/notifications" style={bellStyle}>
+            🔔
+            {unreadCount > 0 && (
+              <span style={badgeStyle}>
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
             )}
-          </nav>
-        
+          </Link>
 
-        {/* MOBILE BUTTON */}
+          {token ? (
+            <button onClick={logout} style={logoutButtonStyle}>
+              Çıkış Yap
+            </button>
+          ) : (
+            <div style={authGroupStyle}>
+              <Link to="/login" style={loginButtonStyle}>
+                Giriş Yap
+              </Link>
+
+              <Link to="/register" style={registerButtonStyle}>
+                Üye Ol
+              </Link>
+            </div>
+          )}
+        </nav>
+
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
@@ -82,7 +138,6 @@ navigate("/login");
         </button>
       </div>
 
-      {/* MOBILE MENU */}
       {open && (
         <div style={mobileMenuStyle}>
           <MobileSection
@@ -102,6 +157,19 @@ navigate("/login");
             items={accountLinks}
             close={() => setOpen(false)}
           />
+
+          <Link
+            to="/notifications"
+            onClick={() => setOpen(false)}
+            style={mobileNotificationStyle}
+          >
+            🔔 Bildirimler
+            {unreadCount > 0 && (
+              <span style={mobileBadgeStyle}>
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </Link>
 
           {token ? (
             <button onClick={logout} style={mobileLogoutStyle}>
@@ -243,6 +311,35 @@ const linkStyle: React.CSSProperties = {
   borderRadius: 10,
 };
 
+const bellStyle: React.CSSProperties = {
+  position: "relative",
+  width: 42,
+  height: 42,
+  borderRadius: 14,
+  background: "rgba(255,255,255,0.08)",
+  border: "1px solid rgba(255,255,255,0.14)",
+  display: "grid",
+  placeItems: "center",
+  textDecoration: "none",
+  fontSize: 18,
+};
+
+const badgeStyle: React.CSSProperties = {
+  position: "absolute",
+  top: -6,
+  right: -6,
+  minWidth: 20,
+  height: 20,
+  borderRadius: 999,
+  background: "#ef4444",
+  color: "white",
+  fontSize: 11,
+  fontWeight: 900,
+  display: "grid",
+  placeItems: "center",
+  padding: "0 5px",
+};
+
 const authGroupStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
@@ -321,6 +418,28 @@ const mobileLinkStyle: React.CSSProperties = {
   textDecoration: "none",
   fontWeight: 800,
   padding: "9px 0",
+};
+
+const mobileNotificationStyle: React.CSSProperties = {
+  background: "rgba(255,255,255,0.06)",
+  border: "1px solid rgba(255,255,255,0.10)",
+  borderRadius: 16,
+  padding: 14,
+  color: "#e2e8f0",
+  textDecoration: "none",
+  fontWeight: 900,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+};
+
+const mobileBadgeStyle: React.CSSProperties = {
+  background: "#ef4444",
+  color: "white",
+  borderRadius: 999,
+  padding: "3px 8px",
+  fontSize: 12,
+  fontWeight: 900,
 };
 
 const mobileAuthStyle: React.CSSProperties = {
