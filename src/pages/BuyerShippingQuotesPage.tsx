@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = "https://tedarik-backend.onrender.com/api";
+const API = "http://localhost:3002/api";
 
 export default function BuyerShippingQuotesPage() {
   const [quotes, setQuotes] = useState<any[]>([]);

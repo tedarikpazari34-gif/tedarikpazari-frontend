@@ -1,19 +1,40 @@
 import { useEffect, useState, type CSSProperties } from "react";
 
 const API =
-  import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
+  import.meta.env.VITE_API_URL || "http://localhost:3002/api";
 
 type Wallet = {
   available: string | number;
   locked: string | number;
 };
 
+type PayoutRequest = {
+  id: string;
+  amount: string | number;
+  iban: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  adminNote?: string | null;
+  createdAt: string;
+  processedAt?: string | null;
+};
+
 function formatMoney(value?: string | number) {
   return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;
 }
 
+function getStatusLabel(status: PayoutRequest["status"]) {
+  if (status === "PENDING") return "Bekliyor";
+  if (status === "APPROVED") return "Onaylandı";
+  if (status === "REJECTED") return "Reddedildi";
+  return status;
+}
+
 export default function WalletPage() {
   const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [requests, setRequests] = useState<PayoutRequest[]>([]);
+  const [amount, setAmount] = useState("");
+  const [iban, setIban] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -44,11 +65,72 @@ export default function WalletPage() {
       }
 
       setWallet(data.wallet);
+
+      const payoutRes = await fetch(`${API}/payouts/me/requests`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (payoutRes.ok) {
+        const payoutData = await payoutRes.json();
+        setRequests(Array.isArray(payoutData) ? payoutData : []);
+      }
     } catch (err) {
       console.error(err);
       setError("Cüzdan yüklenirken hata oluştu");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePayoutRequest = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Lütfen giriş yapın");
+        return;
+      }
+
+      const numericAmount = Number(amount);
+
+      if (!numericAmount || numericAmount <= 0) {
+        alert("Geçerli bir tutar girin");
+        return;
+      }
+
+      if (!iban.trim()) {
+        alert("IBAN girin");
+        return;
+      }
+
+      const res = await fetch(`${API}/payouts/request`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: numericAmount,
+          iban: iban.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.message || "Para çekme talebi oluşturulamadı");
+        return;
+      }
+
+      alert("Para çekme talebi oluşturuldu ✅");
+      setAmount("");
+      setIban("");
+      await loadWallet();
+    } catch (err) {
+      console.error(err);
+      alert("Para çekme talebi sırasında hata oluştu");
     }
   };
 
@@ -116,6 +198,80 @@ export default function WalletPage() {
               <Step number="1" title="Ödeme alınır" />
               <Step number="2" title="Tutar blokeye alınır" />
               <Step number="3" title="Teslimat sonrası aktarılır" />
+            </div>
+          </section>
+
+          <section style={{ ...infoPanelStyle, marginTop: 24 }}>
+            <div>
+              <div style={smallLabelStyle}>PARA ÇEKME</div>
+              <h2 style={panelTitleStyle}>Para çekme talebi oluştur</h2>
+              <p style={panelTextStyle}>
+                Satıcı bakiyenizden IBAN hesabınıza aktarım talebi oluşturun.
+                Admin onayından sonra talep işlenir.
+              </p>
+
+              <div style={{ marginTop: 18 }}>
+                <input
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Tutar"
+                  style={inputStyle}
+                />
+
+                <input
+                  value={iban}
+                  onChange={(e) => setIban(e.target.value)}
+                  placeholder="IBAN"
+                  style={inputStyle}
+                />
+
+                <button
+                  style={withdrawButtonStyle}
+                  onClick={handlePayoutRequest}
+                >
+                  Para Çekme Talebi Gönder
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <div style={smallLabelStyle}>TALEP GEÇMİŞİ</div>
+              <h2 style={panelTitleStyle}>Para çekme taleplerim</h2>
+
+              {requests.length === 0 ? (
+                <p style={panelTextStyle}>Henüz para çekme talebi yok.</p>
+              ) : (
+                <div style={requestListStyle}>
+                  {requests.map((request) => (
+                    <div key={request.id} style={requestItemStyle}>
+                      <div style={requestTopStyle}>
+                        <strong>{formatMoney(request.amount)}</strong>
+                        <span style={statusBadgeStyle}>
+                          {getStatusLabel(request.status)}
+                        </span>
+                      </div>
+
+                      <div style={requestMetaStyle}>{request.iban}</div>
+
+                      <div style={requestMetaStyle}>
+                        Oluşturma:{" "}
+                        {new Date(request.createdAt).toLocaleString("tr-TR")}
+                      </div>
+
+                      {request.processedAt && (
+                        <div style={requestMetaStyle}>
+                          İşlem:{" "}
+                          {new Date(request.processedAt).toLocaleString("tr-TR")}
+                        </div>
+                      )}
+
+                      {request.adminNote && (
+                        <div style={requestNoteStyle}>{request.adminNote}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         </>
@@ -318,4 +474,67 @@ const emptyCardStyle: CSSProperties = {
 const errorCardStyle: CSSProperties = {
   ...emptyCardStyle,
   color: "#991b1b",
+};
+
+const inputStyle: CSSProperties = {
+  width: "100%",
+  padding: "12px 14px",
+  borderRadius: 12,
+  border: "1px solid #cbd5e1",
+  marginBottom: 10,
+  fontSize: 15,
+  boxSizing: "border-box",
+};
+
+const withdrawButtonStyle: CSSProperties = {
+  padding: "12px 16px",
+  border: "none",
+  borderRadius: 12,
+  background: "#2563eb",
+  color: "white",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const requestListStyle: CSSProperties = {
+  display: "grid",
+  gap: 12,
+};
+
+const requestItemStyle: CSSProperties = {
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+  borderRadius: 14,
+  padding: 14,
+  display: "grid",
+  gap: 6,
+};
+
+const requestTopStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 12,
+  alignItems: "center",
+};
+
+const statusBadgeStyle: CSSProperties = {
+  background: "#e0f2fe",
+  color: "#0369a1",
+  borderRadius: 999,
+  padding: "5px 9px",
+  fontSize: 12,
+  fontWeight: 900,
+};
+
+const requestMetaStyle: CSSProperties = {
+  color: "#64748b",
+  fontSize: 13,
+};
+
+const requestNoteStyle: CSSProperties = {
+  background: "#fff7ed",
+  color: "#9a3412",
+  borderRadius: 10,
+  padding: 10,
+  fontSize: 13,
 };

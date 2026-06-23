@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { Link } from "react-router-dom";
 
 type Order = {
   id: string;
@@ -26,7 +27,7 @@ type Order = {
 
 const API =
   import.meta.env.VITE_API_URL ||
-  "https://tedarik-backend.onrender.com/api";
+  "http://localhost:3002/api";
 
 function statusLabel(status: string) {
   switch (status) {
@@ -114,7 +115,9 @@ export default function BuyerOrdersPage() {
       });
 
       const data = await res.json();
-
+      console.log("ORDERS API DATA:", data);
+      console.log("IS ARRAY:", Array.isArray(data));
+      console.log("DATA.DATA:", data?.data);
       if (!res.ok) {
         setError(data?.message || "Siparişler alınamadı");
         setOrders([]);
@@ -165,8 +168,7 @@ export default function BuyerOrdersPage() {
       }
 
       alert("İşlem başarılı ✅");
-
-      loadOrders();
+     await loadOrders();
     } catch (err) {
       console.error(err);
       alert("İstek hatası");
@@ -178,54 +180,59 @@ export default function BuyerOrdersPage() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `${API}/payments/iyzico/${orderId}/initialize`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  `${API}/orders/${orderId}/pay`,
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
-      const data = await res.json();
+const data = await res.json().catch(() => null);
 
-      if (!res.ok) {
-        alert(data?.message || "Ödeme başlatılamadı");
-        return;
-      }
+if (!res.ok) {
+  alert(data?.message || "Ödeme başarısız");
+  return;
+}
+
+alert("Ödeme başarılı ✅");
+loadOrders();
+return;
 
       if (!data?.checkoutFormContent) {
         alert("iyzico formu alınamadı");
         return;
       }
-
-      const paymentWindow = window.open("", "_blank");
-
-      if (!paymentWindow) {
-        alert("Popup engellendi");
-        return;
-      }
-
-      paymentWindow.document.open();
-
-      paymentWindow.document.write(`
-        <html>
-          <head>
-            <title>İyzico Ödeme</title>
-          </head>
-          <body>
-            ${data.checkoutFormContent}
-          </body>
-        </html>
-      `);
-
-      paymentWindow.document.close();
     } catch (err) {
       console.error(err);
       alert("Ödeme başlatılırken hata oluştu");
     }
   };
+  const startOrderChat = async (orderId: string) => {
+  try {
+    const token = localStorage.getItem("token");
 
+    const res = await fetch(`${API}/chat/order/${orderId}/thread`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data?.message || "Chat başlatılamadı");
+      return;
+    }
+
+    window.location.href = "/chat";
+  } catch (err) {
+    console.error("START ORDER CHAT ERROR:", err);
+    alert("Chat başlatılamadı");
+  }
+};
   if (loading) {
     return (
       <main style={pageStyle}>
@@ -355,10 +362,34 @@ export default function BuyerOrdersPage() {
                   </div>
                 </div>
               )}
-
+              {o.status === "COMPLETED" && (
+  <div style={{ marginTop: 12 }}>
+    <Link
+      to={`/reviews/new?orderId=${o.id}`}
+      style={{
+        display: "inline-block",
+        padding: "10px 14px",
+        background: "#f59e0b",
+        color: "white",
+        textDecoration: "none",
+        borderRadius: 8,
+        fontWeight: 700,
+      }}
+    >
+      ⭐ Satıcıyı Değerlendir
+    </Link>
+  </div>
+)}
               <div style={actionsStyle}>
-                {o.status ===
-                  "PENDING_PAYMENT" && (
+
+  <button
+    style={chatButtonStyle}
+    onClick={() => startOrderChat(o.id)}
+  >
+    💬 Mesajlaş
+  </button>
+
+  {o.status === "PENDING_PAYMENT" && (
                   <button
                     style={blueButtonStyle}
                     onClick={() =>
@@ -566,4 +597,13 @@ const emptyCardStyle: CSSProperties = {
 const errorCardStyle: CSSProperties = {
   ...emptyCardStyle,
   color: "#991b1b",
+};
+const chatButtonStyle: CSSProperties = {
+  border: "1px solid #bfdbfe",
+  background: "#eff6ff",
+  color: "#1d4ed8",
+  padding: "12px 16px",
+  borderRadius: 12,
+  cursor: "pointer",
+  fontWeight: 900,
 };

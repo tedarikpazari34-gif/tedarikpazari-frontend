@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-const API = "https://tedarik-backend.onrender.com/api";
+const API = "http://localhost:3002/api";
 
 export default function CreateQuotePage() {
   const navigate = useNavigate();

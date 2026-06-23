@@ -23,10 +23,19 @@ import SellerQuotesPage from "./pages/SellerQuotesPage";
 import SellerQuoteCreatePage from "./pages/SellerQuoteCreatePage";
 
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminProductsPage from "./pages/AdminProductsPage";
+import AdminPayoutsPage from "./pages/AdminPayoutsPage";
+import AdminDisputesPage from "./pages/AdminDisputesPage";
 import AdminCompaniesPage from "./pages/AdminCompaniesPage";
+import AdminFinancePage from "./pages/AdminFinancePage";
+import AdminRoute from "./components/auth/AdminRoute";
 import WalletPage from "./pages/WalletPage";
 import ProductsPage from "./pages/ProductsPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import CreateReviewPage from "./pages/CreateReviewPage";
+import ChatPage from "./pages/ChatPage";
+import AdminChatModerationPage from "./pages/AdminChatModerationPage";
+import SellerStorePage from "./pages/SellerStorePage";
 
 function PrivateRoute({
   children,
@@ -106,13 +115,13 @@ export default function App() {
         />
 
         <Route
-          path="/tekliflerim"
-          element={
-            <PrivateRoute role="BUYER">
-              <BuyerQuotesPage />
-            </PrivateRoute>
-          }
-        />
+  path="/tekliflerim"
+  element={
+    <PrivateRoute role="BUYER">
+      <BuyerRfqsPage />
+    </PrivateRoute>
+  }
+/>
 
         {/* SELLER */}
         <Route
@@ -169,29 +178,73 @@ export default function App() {
           }
         />
 
-        {/* ADMIN */}
         <Route
-          path="/admin/dashboard"
-          element={
-            <PrivateRoute role="ADMIN">
-              <AdminDashboardPage />
-            </PrivateRoute>
-          }
-        />
+  path="/admin"
+  element={
+    <AdminRoute>
+      <AdminDashboardPage />
+    </AdminRoute>
+  }
+/>
 
-        <Route
-          path="/admin/companies"
-          element={
-            <PrivateRoute role="ADMIN">
-              <AdminCompaniesPage />
-            </PrivateRoute>
-          }
-        />
+<Route
+  path="/admin/companies"
+  element={
+    <AdminRoute>
+      <AdminCompaniesPage />
+    </AdminRoute>
+  }
+/>
+
+<Route
+  path="/admin/products"
+  element={
+    <AdminRoute>
+      <AdminProductsPage />
+    </AdminRoute>
+  }
+/>
+
+<Route
+  path="/admin/payouts"
+  element={
+    <AdminRoute>
+      <AdminPayoutsPage />
+    </AdminRoute>
+  }
+/>
+
+<Route
+  path="/admin/disputes"
+  element={
+    <AdminRoute>
+      <AdminDisputesPage />
+    </AdminRoute>
+  }
+/>
+
+<Route
+  path="/admin/finance"
+  element={
+    <AdminRoute>
+      <AdminFinancePage />
+    </AdminRoute>
+  }
+/>
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/reviews/new" element={<CreateReviewPage />} />
+        <Route path="/store/:id" element={<SellerStorePage />} />
+        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/admin/chat-moderation"element={
+    <AdminRoute>
+      <AdminChatModerationPage />
+    </AdminRoute>
+  }
+/> 
       </Routes>
     </BrowserRouter>
   );

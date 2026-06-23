@@ -6,13 +6,9 @@ type NavItem = {
   to: string;
 };
 
-type NotificationItem = {
-  id: string;
-  isRead: boolean;
-};
 
 const API =
-  import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
+  import.meta.env.VITE_API_URL || "http://localhost:3002/api";
 
 const buyerLinks: NavItem[] = [
   { label: "Ana Sayfa", to: "/" },
@@ -28,6 +24,7 @@ const sellerLinks: NavItem[] = [
 ];
 
 const accountLinks: NavItem[] = [
+  { label: "Mesajlar", to: "/chat" },
   { label: "Cüzdanım", to: "/wallet" },
 ];
 
@@ -39,45 +36,36 @@ export default function Navbar() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const loadUnreadCount = async () => {
-      try {
-        if (!token) {
-          setUnreadCount(0);
-          return;
-        }
-
-        const res = await fetch(`${API}/notifications/mine`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-
-        if (!Array.isArray(data)) {
-          setUnreadCount(0);
-          return;
-        }
-
-        const count = data.filter(
-          (item: NotificationItem) => !item.isRead
-        ).length;
-
-        setUnreadCount(count);
-      } catch (err) {
-        console.error("NOTIFICATION COUNT ERROR:", err);
+  const loadUnreadCount = async () => {
+    try {
+      if (!token) {
         setUnreadCount(0);
+        return;
       }
-    };
 
-    loadUnreadCount();
+      const res = await fetch(`${API}/chat/unread-count`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    window.addEventListener("storage", loadUnreadCount);
+      const data = await res.json();
 
-    return () => {
-      window.removeEventListener("storage", loadUnreadCount);
-    };
-  }, [token]);
+      setUnreadCount(Number(data || 0));
+    } catch (err) {
+      console.error("NOTIFICATION COUNT ERROR:", err);
+      setUnreadCount(0);
+    }
+  };
+
+  loadUnreadCount();
+
+  window.addEventListener("storage", loadUnreadCount);
+
+  return () => {
+    window.removeEventListener("storage", loadUnreadCount);
+  };
+}, [token]);
 
   const logout = () => {
     localStorage.clear();

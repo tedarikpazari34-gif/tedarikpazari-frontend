@@ -20,7 +20,7 @@ type Quote = {
   rfq?: { id?: string };
 };
 
-const API = "https://tedarik-backend.onrender.com/api";
+const API = "http://localhost:3002/api";
 
 function formatPrice(value?: string | number) {
   if (value === undefined || value === null || value === "") return "-";
@@ -81,16 +81,21 @@ export default function BuyerRfqDetailPage() {
         }
 
         const rfqRes = await fetch(`${API}/rfqs/mine`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  headers: { Authorization: `Bearer ${token}` },
+});
 
-        const rfqData = await rfqRes.json();
+const rfqData = await rfqRes.json();
 
-        const found = Array.isArray(rfqData)
-          ? rfqData.find((item: RFQ) => item.id === id)
-          : null;
+console.log("RFQ ID URL:", id);
+console.log("RFQ DATA:", rfqData);
 
-        setRfq(found || null);
+const found = Array.isArray(rfqData)
+  ? rfqData.find((item: RFQ) => item.id === id)
+  : null;
+
+console.log("FOUND RFQ:", found);
+
+setRfq(found || null);
 
         const qRes = await fetch(`${API}/quotes/buyer`, {
           headers: { Authorization: `Bearer ${token}` },

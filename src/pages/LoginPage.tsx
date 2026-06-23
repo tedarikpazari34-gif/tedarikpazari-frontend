@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API = "https://tedarik-backend.onrender.com/api";
+const BASE_URL = "http://localhost:3002";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,7 +14,7 @@ export default function LoginPage() {
       setLoading(true);
       setError("");
 
-      const res = await axios.post(`${API}/auth/login`, {
+      const res = await axios.post(`${BASE_URL}/api/auth/login`, {
         email: email.trim(),
         password: password.trim(),
       });

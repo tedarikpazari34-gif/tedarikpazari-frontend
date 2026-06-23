@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-const BASE_URL = "https://tedarik-backend.onrender.com";
+const BASE_URL = "http://localhost:3002";
 
 type ProductImage = {
   id: string;
@@ -25,13 +25,23 @@ type Product = {
   isActive: boolean;
   isApproved: boolean;
   createdAt: string;
+
+  seller?: {
+    id: string;
+    name?: string;
+    verified?: boolean;
+    rating?: number;
+    completedDeals?: number;
+    city?: string | null;
+  };
+
   category?: {
     id: string;
     name: string;
   };
+
   images?: ProductImage[];
 };
-
 function getCategoryIcon(categoryName?: string) {
   if (!categoryName) return "📦";
 
@@ -242,7 +252,30 @@ export default function ProductDetailPage() {
             </div>
             <div style={unitStyle}>/ {product.unitType}</div>
           </div>
+          {product.seller && (
+  <div style={sellerCardStyle}>
+    <div>
+      <div style={sellerLabelStyle}>Satıcı Firma</div>
 
+      <strong style={sellerNameStyle}>
+        {product.seller.name || "Satıcı"}
+      </strong>
+
+      <div style={sellerMetaStyle}>
+        ⭐ {product.seller.rating || 0} · 🛒{" "}
+        {product.seller.completedDeals || 0} satış · 📍{" "}
+        {product.seller.city || "Türkiye"}
+      </div>
+    </div>
+
+    <Link
+      to={`/store/${product.seller.id}`}
+      style={sellerStoreButtonStyle}
+    >
+      Mağazayı Gör
+    </Link>
+  </div>
+)} 
           <div style={infoGridStyle}>
             <InfoBox label="Birim" value={product.unitType} />
             <InfoBox label="MOQ" value={product.moq} />
@@ -628,4 +661,44 @@ const supplierStatsStyle: CSSProperties = {
   color: "#166534",
   fontSize: 13,
   fontWeight: 800,
+};
+const sellerCardStyle: CSSProperties = {
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+  borderRadius: 18,
+  padding: 18,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 16,
+  marginBottom: 22,
+};
+
+const sellerLabelStyle: CSSProperties = {
+  color: "#2563eb",
+  fontSize: 12,
+  fontWeight: 900,
+  marginBottom: 6,
+};
+
+const sellerNameStyle: CSSProperties = {
+  color: "#0f172a",
+  fontSize: 18,
+};
+
+const sellerMetaStyle: CSSProperties = {
+  marginTop: 8,
+  color: "#64748b",
+  fontSize: 13,
+  fontWeight: 700,
+};
+
+const sellerStoreButtonStyle: CSSProperties = {
+  textDecoration: "none",
+  background: "#2563eb",
+  color: "white",
+  padding: "11px 14px",
+  borderRadius: 12,
+  fontWeight: 900,
+  whiteSpace: "nowrap",
 };

@@ -21,7 +21,7 @@ type Quote = {
   };
 };
 
-const API = "https://tedarik-backend.onrender.com/api";
+const API = "http://localhost:3002/api";
 
 function formatPrice(value: string | number) {
   const numeric = Number(value);

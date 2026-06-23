@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import SellerLayout from "../components/SellerLayout";
 
-const BASE_URL = "https://tedarik-backend.onrender.com";
+const BASE_URL = "http://localhost:3002";
 
 type Category = {
   id: string;

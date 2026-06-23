@@ -12,7 +12,7 @@ type RFQ = {
   };
 };
 
-const API = "https://tedarik-backend.onrender.com/api";
+const API = "http://localhost:3002/api";
 
 function getStatusLabel(status: string) {
   const value = status?.toUpperCase();
@@ -95,7 +95,30 @@ export default function BuyerRfqsPage() {
 
     loadRfqs();
   }, []);
+  const startChat = async (rfqId: string) => {
+  try {
+    const token = localStorage.getItem("token");
 
+    const res = await fetch(`${API}/chat/rfq/${rfqId}/thread`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data?.message || "Chat başlatılamadı");
+      return;
+    }
+
+    window.location.href = "/chat";
+  } catch (err) {
+    console.error("START CHAT ERROR:", err);
+    alert("Chat başlatılamadı");
+  }
+};
   return (
     <main style={page}>
       <section style={hero}>
@@ -192,14 +215,22 @@ export default function BuyerRfqsPage() {
               </div>
 
               <div style={actions}>
-                <Link to={`/buyer/rfqs/${rfq.id}`} style={detailButton}>
-                  Teklifleri Gör
-                </Link>
+  <Link to={`/buyer/rfqs/${rfq.id}`} style={detailButton}>
+    Teklifleri Gör
+  </Link>
 
-                <Link to="/buyer/rfqs/new" style={secondaryButton}>
-                  Yeni Talep
-                </Link>
-              </div>
+  <button
+    type="button"
+    onClick={() => startChat(rfq.id)}
+    style={chatButton}
+  >
+    Mesajlaş
+  </button>
+
+  <Link to="/buyer/rfqs/new" style={secondaryButton}>
+    Yeni Talep
+  </Link>
+</div>
             </article>
           ))}
         </section>
@@ -422,4 +453,13 @@ const primaryLink: CSSProperties = {
 const loginLink: CSSProperties = {
   ...primaryLink,
   width: "fit-content",
+};
+const chatButton: CSSProperties = {
+  border: "1px solid #bfdbfe",
+  background: "#eff6ff",
+  color: "#1d4ed8",
+  padding: "12px 14px",
+  borderRadius: 14,
+  cursor: "pointer",
+  fontWeight: 900,
 };

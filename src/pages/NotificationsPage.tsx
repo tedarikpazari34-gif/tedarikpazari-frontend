@@ -12,7 +12,7 @@ type Notification = {
 
 const API =
   import.meta.env.VITE_API_URL ||
-  "https://tedarik-backend.onrender.com/api";
+  "http://localhost:3002/api";
 
 export default function NotificationsPage() {
   const [items, setItems] = useState<Notification[]>([]);
@@ -63,7 +63,29 @@ export default function NotificationsPage() {
       console.error(err);
     }
   };
+  const markAllRead = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
+    await fetch(`${API}/notifications/read-all`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setItems((prev) =>
+      prev.map((item) => ({
+        ...item,
+        isRead: true,
+      }))
+    );
+
+    window.dispatchEvent(new Event("storage"));
+  } catch (err) {
+    console.error(err);
+  }
+};
   useEffect(() => {
     loadNotifications();
   }, []);
@@ -87,10 +109,22 @@ export default function NotificationsPage() {
           </p>
         </div>
 
-        <div style={heroStatStyle}>
-          <span>Okunmamış</span>
-          <strong>{unreadCount}</strong>
-        </div>
+        <div style={heroRightStyle}>
+  <div style={heroStatStyle}>
+    <span>Okunmamış</span>
+    <strong>{unreadCount}</strong>
+  </div>
+
+  {unreadCount > 0 && (
+    <button
+      type="button"
+      onClick={markAllRead}
+      style={readAllButtonStyle}
+    >
+      Tümünü Okundu Yap
+    </button>
+  )}
+</div>
       </section>
 
       {items.length === 0 ? (
@@ -316,4 +350,18 @@ const primaryLinkStyle: CSSProperties = {
   borderRadius: 12,
   fontWeight: 900,
   marginTop: 10,
+};
+const heroRightStyle: CSSProperties = {
+  display: "grid",
+  gap: 10,
+};
+
+const readAllButtonStyle: CSSProperties = {
+  border: "1px solid rgba(255,255,255,0.18)",
+  background: "rgba(255,255,255,0.12)",
+  color: "white",
+  padding: "10px 13px",
+  borderRadius: 12,
+  cursor: "pointer",
+  fontWeight: 900,
 };

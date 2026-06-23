@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 type Quote = {
   id: string;
@@ -21,18 +21,22 @@ type RFQ = {
   quotes?: Quote[];
 };
 
-const API = "https://tedarik-backend.onrender.com/api";
+const API = "http://localhost:3002/api";
+
+function statusLabel(status: string) {
+  const value = status?.toUpperCase();
+
+  if (value === "OPEN") return "Açık";
+  if (value === "PENDING") return "Beklemede";
+  if (value === "CLOSED") return "Kapandı";
+
+  return status || "-";
+}
 
 export default function SellerRfqsPage() {
   const [rfqs, setRfqs] = useState<RFQ[]>([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const [selectedRfq, setSelectedRfq] = useState<RFQ | null>(null);
-  const [price, setPrice] = useState("");
-  const [deliveryDays, setDeliveryDays] = useState("3");
-  const [note, setNote] = useState("");
-  const [submitLoading, setSubmitLoading] = useState(false);
 
   const getToken = () => localStorage.getItem("token") || "";
 
@@ -71,339 +75,292 @@ export default function SellerRfqsPage() {
       setPageLoading(false);
     }
   };
+  const startChat = async (rfqId: string) => {
+  try {
+    const token = getToken();
 
+    const res = await fetch(`${API}/chat/rfq/${rfqId}/thread`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data?.message || "Chat başlatılamadı");
+      return;
+    }
+
+    window.location.href = "/chat";
+  } catch (err) {
+    console.error("START CHAT ERROR:", err);
+    alert("Chat başlatılamadı");
+  }
+};
   useEffect(() => {
     loadRfqs();
   }, []);
 
-  const openQuoteModal = (rfq: RFQ) => {
-    setSelectedRfq(rfq);
-    setPrice("");
-    setDeliveryDays("3");
-    setNote("");
-  };
-
-  const closeQuoteModal = () => {
-    setSelectedRfq(null);
-    setPrice("");
-    setDeliveryDays("3");
-    setNote("");
-  };
-
-  const submitQuote = async () => {
-    if (!selectedRfq) return;
-
-    if (!price || Number(price) <= 0) {
-      alert("Lütfen geçerli bir birim fiyat girin.");
-      return;
-    }
-
-    if (!deliveryDays || Number(deliveryDays) < 1) {
-      alert("Teslim süresi en az 1 gün olmalı.");
-      return;
-    }
-
-    try {
-      setSubmitLoading(true);
-
-      const token = getToken();
-
-      if (!token) {
-        alert("Oturum bulunamadı");
-        return;
-      }
-
-      const res = await fetch(`${API}/quotes`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-  rfqId: selectedRfq.id,
-  unitPrice: Number(price),
-  deliveryDays: Number(deliveryDays),
-}),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        const message = Array.isArray(data?.message)
-          ? data.message.join(", ")
-          : data?.message || "Teklif gönderilemedi";
-
-        alert(message);
-        return;
-      }
-
-      alert("Teklif başarıyla gönderildi");
-      closeQuoteModal();
-      await loadRfqs();
-    } catch (err) {
-      console.error("QUOTE CREATE ERROR:", err);
-      alert("Teklif gönderilirken hata oluştu");
-    } finally {
-      setSubmitLoading(false);
-    }
-  };
-
   if (pageLoading) {
-    return <p style={{ padding: 40 }}>Yükleniyor...</p>;
+    return (
+      <main style={pageStyle}>
+        <div style={emptyCardStyle}>RFQ talepleri yükleniyor...</div>
+      </main>
+    );
   }
 
   return (
     <main style={pageStyle}>
-      <h1 style={pageTitleStyle}>Açık RFQ Talepleri</h1>
+      <section style={heroStyle}>
+        <div>
+          <div style={eyebrowStyle}>SATICI PANELİ</div>
+          <h1 style={titleStyle}>Açık RFQ Talepleri</h1>
+          <p style={descStyle}>
+            Alıcıların gönderdiği talepleri inceleyin, uygun olanlara hızlıca
+            fiyat ve teslim süresi teklifi verin.
+          </p>
+        </div>
 
-      {error && <p style={errorStyle}>{error}</p>}
+        <div style={heroStatsStyle}>
+          <span>Toplam Talep</span>
+          <strong>{rfqs.length}</strong>
+        </div>
+      </section>
 
-      {rfqs.length === 0 ? (
-        <p style={emptyStyle}>Açık RFQ bulunamadı.</p>
+      {error && <div style={errorCardStyle}>{error}</div>}
+
+      {!error && rfqs.length === 0 ? (
+        <div style={emptyCardStyle}>
+          <h2 style={{ marginTop: 0 }}>Açık RFQ bulunamadı</h2>
+          <p style={{ color: "#64748b", lineHeight: 1.7 }}>
+            Yeni alıcı talepleri geldiğinde burada listelenecek.
+          </p>
+        </div>
       ) : (
-        <div style={gridStyle}>
+        <section style={gridStyle}>
           {rfqs.map((rfq) => (
-            <div key={rfq.id} style={cardStyle}>
-              <h2 style={cardTitleStyle}>
-                {rfq.product?.title || "Ürün yok"}
-              </h2>
+            <article key={rfq.id} style={cardStyle}>
+              <div style={cardTopStyle}>
+                <div>
+                  <div style={smallLabelStyle}>Talep Edilen Ürün</div>
+                  <h2 style={cardTitleStyle}>
+                    {rfq.product?.title || "Genel Talep"}
+                  </h2>
+                </div>
 
-              <p style={cardTextStyle}>
-                <b>Buyer:</b> {rfq.buyer?.name || "-"}
-              </p>
+                <span style={statusBadgeStyle}>{statusLabel(rfq.status)}</span>
+              </div>
 
-              <p style={cardTextStyle}>
-                <b>Miktar:</b> {rfq.quantity}
-              </p>
+              <div style={infoGridStyle}>
+                <Info label="Alıcı" value={rfq.buyer?.name || "-"} />
+                <Info label="Miktar" value={rfq.quantity || "-"} />
+                <Info label="Mevcut Teklif" value={rfq.quotes?.length || 0} />
+                <Info label="Durum" value={statusLabel(rfq.status)} />
+              </div>
 
-              <p style={cardTextStyle}>
-                <b>Durum:</b> {rfq.status}
-              </p>
+              <div style={noteBoxStyle}>
+                <strong>Talep Notu</strong>
+                <p>{rfq.note || "Not eklenmemiş."}</p>
+              </div>
 
-              <p style={cardTextStyle}>
-                <b>Not:</b> {rfq.note || "-"}
-              </p>
+              <div style={buttonRowStyle}>
+  <button
+    onClick={() => {
+      window.location.href = `/seller/quotes/create?rfqId=${rfq.id}`;
+    }}
+    style={quoteButtonStyle}
+  >
+    Teklif Ver
+  </button>
 
-              <p style={cardTextStyle}>
-                <b>Mevcut Teklif:</b> {rfq.quotes?.length || 0}
-              </p>
-
-              <button
-  onClick={() => {
-    window.location.href = `/seller/quotes/create?rfqId=${rfq.id}`;
-  }}
-  style={{
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    padding: "10px 14px",
-    fontWeight: 700,
-    cursor: "pointer",
-  }}
->
-  Teklif Ver
-</button>
-            </div>
+  <button
+    onClick={() => startChat(rfq.id)}
+    style={chatButtonStyle}
+  >
+    Mesajlaş
+  </button>
+</div>
+            </article>
           ))}
-        </div>
-      )}
-
-      {selectedRfq && (
-        <div style={overlayStyle}>
-          <div style={modalStyle}>
-            <h2 style={{ marginTop: 0, marginBottom: 16 }}>Teklif Ver</h2>
-
-            <p>
-              <b>Ürün:</b> {selectedRfq.product?.title || "Ürün yok"}
-            </p>
-
-            <p>
-              <b>Buyer:</b> {selectedRfq.buyer?.name || "-"}
-            </p>
-
-            <p>
-              <b>Miktar:</b> {selectedRfq.quantity}
-            </p>
-
-            <div style={{ marginTop: 16 }}>
-              <label style={labelStyle}>Birim Fiyat (₺)</label>
-              <input
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                style={inputStyle}
-                placeholder="Örn: 100"
-              />
-            </div>
-
-            <div style={{ marginTop: 16 }}>
-              <label style={labelStyle}>Teslim Süresi (Gün)</label>
-              <input
-                type="number"
-                min="1"
-                value={deliveryDays}
-                onChange={(e) => setDeliveryDays(e.target.value)}
-                style={inputStyle}
-                placeholder="Örn: 3"
-              />
-            </div>
-
-            <div style={{ marginTop: 16 }}>
-              <label style={labelStyle}>Satıcı Notu</label>
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                style={textareaStyle}
-                placeholder="Teslim süresi, stok durumu, ekstra bilgi..."
-              />
-            </div>
-
-            <div style={modalActionsStyle}>
-              <button onClick={closeQuoteModal} style={cancelButtonStyle}>
-                Vazgeç
-              </button>
-
-              <button
-                onClick={submitQuote}
-                style={submitButtonStyle}
-                disabled={submitLoading}
-              >
-                {submitLoading ? "Gönderiliyor..." : "Teklifi Gönder"}
-              </button>
-            </div>
-          </div>
-        </div>
+        </section>
       )}
     </main>
   );
 }
 
-const pageStyle: React.CSSProperties = {
-  padding: 40,
-  background: "#020617",
+function Info({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div style={infoBoxStyle}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+const pageStyle: CSSProperties = {
   minHeight: "100vh",
+  background: "#f8fafc",
+  padding: 40,
+};
+
+const heroStyle: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto 24px",
+  background: "linear-gradient(135deg, #0f172a, #1e3a8a)",
   color: "white",
+  borderRadius: 28,
+  padding: 32,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 20,
+  boxShadow: "0 24px 50px rgba(15,23,42,0.18)",
 };
 
-const pageTitleStyle: React.CSSProperties = {
-  marginTop: 0,
-  marginBottom: 24,
-  fontSize: 32,
-  fontWeight: 800,
+const eyebrowStyle: CSSProperties = {
+  color: "#93c5fd",
+  fontSize: 13,
+  fontWeight: 900,
+  marginBottom: 8,
 };
 
-const errorStyle: React.CSSProperties = {
-  color: "#fca5a5",
-  marginBottom: 20,
+const titleStyle: CSSProperties = {
+  margin: "0 0 8px",
+  fontSize: 40,
+  fontWeight: 900,
 };
 
-const emptyStyle: React.CSSProperties = {
+const descStyle: CSSProperties = {
+  margin: 0,
+  maxWidth: 720,
   color: "#cbd5e1",
+  lineHeight: 1.7,
 };
 
-const gridStyle: React.CSSProperties = {
+const heroStatsStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.12)",
+  border: "1px solid rgba(255,255,255,0.14)",
+  borderRadius: 20,
+  padding: 20,
+  minWidth: 160,
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+  gap: 6,
+};
+
+const gridStyle: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto",
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
   gap: 20,
 };
 
-const cardStyle: React.CSSProperties = {
-  border: "1px solid #1e293b",
+const cardStyle: CSSProperties = {
+  background: "white",
+  border: "1px solid #e2e8f0",
+  borderRadius: 22,
+  padding: 22,
+  boxShadow: "0 14px 34px rgba(15,23,42,0.10)",
+};
+
+const cardTopStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 12,
+  alignItems: "start",
+  marginBottom: 18,
+};
+
+const smallLabelStyle: CSSProperties = {
+  color: "#2563eb",
+  fontSize: 12,
+  fontWeight: 900,
+  marginBottom: 6,
+};
+
+const cardTitleStyle: CSSProperties = {
+  color: "#0f172a",
+  margin: 0,
+  fontSize: 21,
+  fontWeight: 900,
+};
+
+const statusBadgeStyle: CSSProperties = {
+  background: "#dcfce7",
+  color: "#166534",
+  borderRadius: 999,
+  padding: "7px 11px",
+  fontSize: 12,
+  fontWeight: 900,
+  whiteSpace: "nowrap",
+};
+
+const infoGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 12,
+  marginBottom: 14,
+};
+
+const infoBoxStyle: CSSProperties = {
+  background: "#f8fafc",
   borderRadius: 14,
-  padding: 20,
-  background: "#0f172a",
-  color: "white",
+  padding: 13,
+  display: "grid",
+  gap: 4,
+  color: "#334155",
 };
 
-const cardTitleStyle: React.CSSProperties = {
-  marginTop: 0,
-  marginBottom: 12,
-  fontSize: 22,
-  fontWeight: 700,
+const noteBoxStyle: CSSProperties = {
+  background: "#f8fafc",
+  borderRadius: 14,
+  padding: 14,
+  color: "#334155",
+  marginBottom: 16,
 };
 
-const cardTextStyle: React.CSSProperties = {
-  margin: "6px 0",
-  color: "#cbd5e1",
-};
-
-const quoteButtonStyle: React.CSSProperties = {
-  marginTop: 16,
-  padding: "10px 14px",
+const quoteButtonStyle: CSSProperties = {
+  width: "100%",
   border: "none",
-  borderRadius: 8,
+  borderRadius: 14,
+  padding: "13px 16px",
   background: "#2563eb",
   color: "white",
+  fontWeight: 900,
+  fontSize: 15,
   cursor: "pointer",
-  fontWeight: 600,
 };
 
-const overlayStyle: React.CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  background: "rgba(0,0,0,0.45)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 1000,
-};
-
-const modalStyle: React.CSSProperties = {
-  width: "100%",
-  maxWidth: 520,
+const emptyCardStyle: CSSProperties = {
+  maxWidth: 720,
+  margin: "0 auto",
   background: "white",
-  color: "#111827",
-  borderRadius: 14,
-  padding: 24,
-  boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+  border: "1px solid #e2e8f0",
+  borderRadius: 24,
+  padding: 32,
+  boxShadow: "0 14px 34px rgba(15,23,42,0.10)",
 };
 
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  marginBottom: 8,
-  fontWeight: 600,
+const errorCardStyle: CSSProperties = {
+  ...emptyCardStyle,
+  color: "#991b1b",
+  marginBottom: 24,
 };
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  border: "1px solid #d1d5db",
-  borderRadius: 8,
-  padding: 12,
-  fontSize: 14,
-};
-
-const textareaStyle: React.CSSProperties = {
-  width: "100%",
-  minHeight: 100,
-  border: "1px solid #d1d5db",
-  borderRadius: 8,
-  padding: 12,
-  fontSize: 14,
-  resize: "vertical",
-};
-
-const modalActionsStyle: React.CSSProperties = {
+const buttonRowStyle: CSSProperties = {
   display: "flex",
-  justifyContent: "flex-end",
   gap: 10,
-  marginTop: 20,
+  marginTop: 18,
 };
 
-const cancelButtonStyle: React.CSSProperties = {
-  padding: "10px 14px",
-  border: "1px solid #d1d5db",
-  borderRadius: 8,
-  background: "white",
+const chatButtonStyle: CSSProperties = {
+  flex: 1,
+  border: "1px solid #bfdbfe",
+  background: "#eff6ff",
+  color: "#1d4ed8",
+  padding: "12px 14px",
+  borderRadius: 14,
   cursor: "pointer",
-};
-
-const submitButtonStyle: React.CSSProperties = {
-  padding: "10px 14px",
-  border: "none",
-  borderRadius: 8,
-  background: "#16a34a",
-  color: "white",
-  cursor: "pointer",
-  fontWeight: 600,
+  fontWeight: 900,
 };

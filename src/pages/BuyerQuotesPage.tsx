@@ -23,8 +23,7 @@ type RFQ = {
   quotes?: Quote[];
 };
 
-const TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ueXFndmQwMDAzamZkMGVxdnVjN3NqIiwidXNlcklkIjoiY21tbnlxZ3ZkMDAwM2pmZDBlcXZ1YzdzaiIsImVtYWlsIjoiYnV5ZXJAdGVzdC5jb20iLCJjb21wYW55SWQiOiJzZWVkLWJ1eWVyLWNvbXBhbnkiLCJyb2xlIjoiQlVZRVIiLCJjb21wYW55U3RhdHVzIjoiQVBQUk9WRUQiLCJpYXQiOjE3NzMzNjkzMTQsImV4cCI6MTc3Mzk3NDExNH0.pUdo7npv9pOolAC6souSMIu0jmJkajcBFeOZN3OE25E";
+const TOKEN = localStorage.getItem("token");
 
 export default function BuyerRfqDetailPage() {
   const params = useParams();
@@ -33,15 +32,16 @@ export default function BuyerRfqDetailPage() {
   const [rfq, setRfq] = useState<RFQ | null>(null);
 
   useEffect(() => {
-    fetch("https://tedarik-backend.onrender.com/api/rfqs/mine", {
+    fetch("http://localhost:3002/api/rfqs/mine", {
       headers: {
         Authorization: `Bearer ${TOKEN}`,
       },
     })
       .then((res) => res.json())
       .then((data) => {
-        const found = data.find((r: RFQ) => r.id === rfqId);
-        setRfq(found);
+        const safeData = Array.isArray(data) ? data : [];
+const found = safeData.find((r: RFQ) => r.id === rfqId);
+setRfq(found || null);
       });
   }, [rfqId]);
 

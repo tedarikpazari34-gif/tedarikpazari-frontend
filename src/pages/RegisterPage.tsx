@@ -1,9 +1,10 @@
 import { useState, type CSSProperties } from "react";
 import axios from "axios";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useNavigate } from "react-router-dom";
 
 const API =
-  import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
+  import.meta.env.VITE_API_URL || "http://localhost:3002/api";
 
 type MembershipType = "BUYER" | "SELLER" | "LOGISTICS";
 
@@ -24,6 +25,7 @@ export default function RegisterPage() {
   const [taxOffice, setTaxOffice] = useState("");
   const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -31,6 +33,11 @@ export default function RegisterPage() {
   const register = async () => {
     if (!companyName.trim() || !email.trim() || !password.trim()) {
       setError("Firma, email ve şifre zorunlu");
+      return;
+    }
+
+    if (!recaptchaToken) {
+      setError("Lütfen reCAPTCHA doğrulamasını tamamlayın");
       return;
     }
 
@@ -43,6 +50,7 @@ export default function RegisterPage() {
         email: email.trim(),
         password: password.trim(),
         role: membershipType,
+        recaptchaToken,
         fullName,
         phone,
         companyType,
@@ -95,7 +103,6 @@ export default function RegisterPage() {
           <div style={gridStyle}>
             <div>
               <label style={labelStyle}>Firma Adı *</label>
-
               <input
                 style={inputStyle}
                 placeholder="Firma adını girin"
@@ -106,7 +113,6 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Yetkili Ad Soyad</label>
-
               <input
                 style={inputStyle}
                 placeholder="Ad Soyad"
@@ -117,7 +123,6 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Telefon *</label>
-
               <input
                 style={inputStyle}
                 placeholder="0555 555 55 55"
@@ -128,7 +133,6 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Email *</label>
-
               <input
                 type="email"
                 style={inputStyle}
@@ -140,7 +144,6 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Üyelik Türü *</label>
-
               <select
                 style={inputStyle}
                 value={membershipType}
@@ -156,7 +159,6 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Şirket Türü</label>
-
               <select
                 style={inputStyle}
                 value={companyType}
@@ -170,7 +172,6 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Kategori</label>
-
               <select
                 style={inputStyle}
                 value={category}
@@ -187,7 +188,6 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>İl</label>
-
               <input
                 style={inputStyle}
                 placeholder="İstanbul"
@@ -198,7 +198,6 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>İlçe</label>
-
               <input
                 style={inputStyle}
                 placeholder="Kadıköy"
@@ -209,7 +208,6 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Vergi No</label>
-
               <input
                 style={inputStyle}
                 placeholder="1234567890"
@@ -220,7 +218,6 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Vergi Dairesi</label>
-
               <input
                 style={inputStyle}
                 placeholder="Kadıköy VD"
@@ -231,7 +228,6 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>Şifre *</label>
-
               <input
                 type="password"
                 style={inputStyle}
@@ -244,13 +240,20 @@ export default function RegisterPage() {
 
           <div style={{ marginTop: 18 }}>
             <label style={labelStyle}>Adres</label>
-
             <textarea
               style={textareaStyle}
               placeholder="Firma adresinizi girin"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
+          </div>
+
+          <div style={recaptchaBoxStyle}>
+            <ReCAPTCHA
+  sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+  onChange={(token: string | null) => setRecaptchaToken(token)}
+  onExpired={() => setRecaptchaToken(null)}
+/>
           </div>
 
           <button
@@ -388,6 +391,12 @@ const textareaStyle: CSSProperties = {
   outline: "none",
   resize: "vertical",
   boxSizing: "border-box",
+};
+
+const recaptchaBoxStyle: CSSProperties = {
+  marginTop: 20,
+  display: "flex",
+  justifyContent: "center",
 };
 
 const buttonStyle: CSSProperties = {

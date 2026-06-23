@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 
-const API = "https://tedarik-backend.onrender.com/api/admin";
+const API = "http://localhost:3002/api/admin";
 
 type Company = {
   id: string;

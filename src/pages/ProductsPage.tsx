@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-const API = "https://tedarik-backend.onrender.com/api";
-const BASE_URL = "https://tedarik-backend.onrender.com";
+const API = "http://localhost:3002/api";
+const BASE_URL = "http://localhost:3002";
 
 type ProductImageObject = {
   url?: string;
@@ -96,7 +96,11 @@ export default function ProductsPage() {
   const [search, setSearch] = useState(q);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [minMoq, setMinMoq] = useState("");
+  const [city, setCity] = useState("");
+  const [verifiedOnly, setVerifiedOnly] = useState(false);  
   useEffect(() => {
     setSearch(q);
   }, [q]);
@@ -106,7 +110,16 @@ export default function ProductsPage() {
       try {
         setLoading(true);
 
-        const res = await fetch(`${API}/products`);
+        const query = new URLSearchParams();
+
+if (q) query.set("q", q);
+if (minPrice) query.set("minPrice", minPrice);
+if (maxPrice) query.set("maxPrice", maxPrice);
+if (minMoq) query.set("minMoq", minMoq);
+if (city) query.set("city", city);
+if (verifiedOnly) query.set("verified", "true");
+
+const res = await fetch(`${API}/products?${query.toString()}`);
         const data = await res.json();
 
         setProducts(Array.isArray(data) ? data : []);
@@ -119,18 +132,11 @@ export default function ProductsPage() {
     }
 
     loadProducts();
-  }, []);
+  }, [q, minPrice, maxPrice, minMoq, city, verifiedOnly]);
 
   const filteredProducts = useMemo(() => {
-    const keyword = q.trim().toLowerCase();
-
-    if (!keyword) return products;
-
-    return products.filter((product) => {
-      const text = `${getProductTitle(product)} ${getCategory(product)}`.toLowerCase();
-      return text.includes(keyword);
-    });
-  }, [products, q]);
+  return products;
+}, [products]);
 
   const handleSearch = () => {
     const keyword = search.trim();
@@ -171,7 +177,44 @@ export default function ProductsPage() {
           </button>
         </div>
       </section>
+      <section style={filterPanel}>
+  <input
+    value={minPrice}
+    onChange={(e) => setMinPrice(e.target.value)}
+    placeholder="Min fiyat"
+    style={filterInput}
+  />
 
+  <input
+    value={maxPrice}
+    onChange={(e) => setMaxPrice(e.target.value)}
+    placeholder="Max fiyat"
+    style={filterInput}
+  />
+
+  <input
+    value={minMoq}
+    onChange={(e) => setMinMoq(e.target.value)}
+    placeholder="Min MOQ"
+    style={filterInput}
+  />
+
+  <input
+    value={city}
+    onChange={(e) => setCity(e.target.value)}
+    placeholder="Şehir"
+    style={filterInput}
+  />
+
+  <label style={checkLabel}>
+    <input
+      type="checkbox"
+      checked={verifiedOnly}
+      onChange={(e) => setVerifiedOnly(e.target.checked)}
+    />
+    Onaylı tedarikçi
+  </label>
+</section>
       <section style={toolbar}>
         <div>
           <strong>
@@ -457,4 +500,32 @@ const emptyCard: CSSProperties = {
   borderRadius: 24,
   padding: 32,
   boxShadow: "0 14px 34px rgba(15,23,42,0.10)",
+};
+const filterPanel: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto 24px",
+  background: "white",
+  border: "1px solid #e2e8f0",
+  borderRadius: 20,
+  padding: 16,
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+  gap: 12,
+  boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
+};
+
+const filterInput: CSSProperties = {
+  height: 44,
+  border: "1px solid #cbd5e1",
+  borderRadius: 12,
+  padding: "0 12px",
+  fontSize: 14,
+};
+
+const checkLabel: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  fontWeight: 800,
+  color: "#334155",
 };

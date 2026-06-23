@@ -225,20 +225,20 @@ function getImageUrl(product: ApiProduct): string {
     if (typeof img === "string") {
       return img.trim() && img.startsWith("http")
         ? img
-        : `https://tedarik-backend.onrender.com${img}`;
+        : `http://localhost:3002${img}`;
     }
 
     if (img && typeof img === "object") {
       if (img.url) {
         return img.url.startsWith("http")
           ? img.url
-          : `https://tedarik-backend.onrender.com${img.url}`;
+          : `http://localhost:3002${img.url}`;
       }
 
       if (img.imageUrl) {
         return img.imageUrl.startsWith("http")
           ? img.imageUrl
-          : `https://tedarik-backend.onrender.com${img.imageUrl}`;
+          : `http://localhost:3002${img.imageUrl}`;
       }
     }
   }
@@ -246,7 +246,7 @@ function getImageUrl(product: ApiProduct): string {
   if (product.imageUrl) {
     return product.imageUrl.startsWith("http")
       ? product.imageUrl
-      : `https://tedarik-backend.onrender.com${product.imageUrl}`;
+      : `http://localhost:3002${product.imageUrl}`;
   }
 
   const title = (product.title || product.name || "").toLowerCase();
@@ -274,7 +274,7 @@ export default function HomePage() {
   useState<ProductCard[]>([]);
   const [search, setSearch] = useState("");
   useEffect(() => {
-    fetch("https://tedarik-backend.onrender.com/api/products")
+    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:3002/api"}/products`)
       .then((res) => {
         if (!res.ok) throw new Error(`Ürünler alınamadı: ${res.status}`);
         return res.json();
@@ -514,17 +514,7 @@ export default function HomePage() {
                     marginBottom: 22,
                   }}
                 >
-                  <div
-  style={{
-    display: "flex",
-    gap: 10,
-    marginTop: 22,
-    maxWidth: 620,
-    background: "white",
-    padding: 8,
-    borderRadius: 18,
-  }}
-  ></div> 
+                  
 </div>
 
                 
@@ -797,12 +787,10 @@ export default function HomePage() {
                 gap: 18,
               }}
             >
-              {featuredProducts.length === 0 && (
-  <div style={{ color: "white" }}>
-    Ürün yükleniyor...
-  </div>
-)}
-              {featuredProducts.map((item) => (
+              {(featuredProducts.length > 0
+  ? featuredProducts
+  : fallbackFeaturedProducts
+).map((item) => (
                 <div
                   key={item.id}
                   style={{
