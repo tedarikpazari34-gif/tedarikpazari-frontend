@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminSidebar from "../components/admin/AdminSidebar";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:3002/api";
+const API = import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
 type LedgerEntry = {
   id: string;

@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-const BASE_URL = "http://localhost:3002";
+const BASE_URL = "https://tedarik-backend.onrender.com";
 
 type Product = {
   id: string;

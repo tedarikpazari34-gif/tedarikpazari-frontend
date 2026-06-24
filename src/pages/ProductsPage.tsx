@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-const API = "http://localhost:3002/api";
-const BASE_URL = "http://localhost:3002";
+const API = "https://tedarik-backend.onrender.com/api";
+const BASE_URL = "https://tedarik-backend.onrender.com";
 
 type ProductImageObject = {
   url?: string;

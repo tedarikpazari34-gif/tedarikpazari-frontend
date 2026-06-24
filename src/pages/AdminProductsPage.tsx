@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import AdminSidebar from '../components/admin/AdminSidebar';
 
-const API = 'http://localhost:3002/api';
+const API = 'https://tedarik-backend.onrender.com/api';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);

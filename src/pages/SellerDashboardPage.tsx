@@ -27,10 +27,10 @@ export default function SellerDashboardPage() {
         setLoading(true);
 
         const [ordersRes, rfqsRes] = await Promise.all([
-          fetch("http://localhost:3002/api/orders", {
+          fetch("https://tedarik-backend.onrender.com/api/orders", {
             headers: authHeaders(),
           }),
-          fetch("http://localhost:3002/api/rfqs/open", {
+          fetch("https://tedarik-backend.onrender.com/api/rfqs/open", {
             headers: authHeaders(),
           }),
         ]);

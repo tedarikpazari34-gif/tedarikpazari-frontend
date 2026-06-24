@@ -45,7 +45,7 @@ type AdminMetrics = {
 };
 
 const API =
-  import.meta.env.VITE_API_URL || "http://localhost:3002/api";
+  import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
 function formatMoney(value: number | string) {
   return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;

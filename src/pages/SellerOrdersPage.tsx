@@ -22,7 +22,7 @@ type Order = {
   };
 };
 
-const API = "http://localhost:3002/api";
+const API = "https://tedarik-backend.onrender.com/api";
 
 function formatPrice(value?: number | string) {
   const numeric = Number(value || 0);

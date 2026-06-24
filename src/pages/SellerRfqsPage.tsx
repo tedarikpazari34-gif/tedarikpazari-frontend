@@ -21,7 +21,7 @@ type RFQ = {
   quotes?: Quote[];
 };
 
-const API = "http://localhost:3002/api";
+const API = "https://tedarik-backend.onrender.com/api";
 
 function statusLabel(status: string) {
   const value = status?.toUpperCase();

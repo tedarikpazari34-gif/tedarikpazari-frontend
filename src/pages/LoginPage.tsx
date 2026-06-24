@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3002/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");

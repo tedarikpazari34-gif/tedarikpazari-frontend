@@ -20,7 +20,7 @@ type Quote = {
   rfq?: { id?: string };
 };
 
-const API = "http://localhost:3002/api";
+const API = "https://tedarik-backend.onrender.com/api";
 
 function formatPrice(value?: string | number) {
   if (value === undefined || value === null || value === "") return "-";

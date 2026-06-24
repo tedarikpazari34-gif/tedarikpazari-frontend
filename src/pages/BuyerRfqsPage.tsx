@@ -12,7 +12,7 @@ type RFQ = {
   };
 };
 
-const API = "http://localhost:3002/api";
+const API = "https://tedarik-backend.onrender.com/api";
 
 function getStatusLabel(status: string) {
   const value = status?.toUpperCase();

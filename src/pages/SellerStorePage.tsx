@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 
 const API =
   import.meta.env.VITE_API_URL ||
-  "http://localhost:3002/api";
+  "https://tedarik-backend.onrender.com/api";
 
 export default function SellerStorePage() {
   const { id } = useParams();
@@ -154,7 +154,7 @@ export default function SellerStorePage() {
     src={
       product.imageUrl.startsWith("http")
         ? product.imageUrl
-        : `http://localhost:3002${product.imageUrl}`
+        : `https://tedarik-backend.onrender.com${product.imageUrl}`
     }
     alt={product.title}
     style={{

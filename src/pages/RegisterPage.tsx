@@ -4,7 +4,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useNavigate } from "react-router-dom";
 
 const API =
-  import.meta.env.VITE_API_URL || "http://localhost:3002/api";
+  import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
 type MembershipType = "BUYER" | "SELLER" | "LOGISTICS";
 

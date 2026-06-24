@@ -12,7 +12,7 @@ type Notification = {
 
 const API =
   import.meta.env.VITE_API_URL ||
-  "http://localhost:3002/api";
+  "https://tedarik-backend.onrender.com/api";
 
 export default function NotificationsPage() {
   const [items, setItems] = useState<Notification[]>([]);

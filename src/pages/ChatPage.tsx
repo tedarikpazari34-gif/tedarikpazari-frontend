@@ -36,7 +36,7 @@ import { io } from "socket.io-client";
 
 const API =
   import.meta.env.VITE_API_URL ||
-  "http://localhost:3002/api";
+  "https://tedarik-backend.onrender.com/api";
 
 const socket = io(
   API.replace("/api", ""),

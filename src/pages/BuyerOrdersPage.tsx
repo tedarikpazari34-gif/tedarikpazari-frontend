@@ -27,7 +27,7 @@ type Order = {
 
 const API =
   import.meta.env.VITE_API_URL ||
-  "http://localhost:3002/api";
+  "https://tedarik-backend.onrender.com/api";
 
 function statusLabel(status: string) {
   switch (status) {
