@@ -39,12 +39,14 @@ import SellerStorePage from "./pages/SellerStorePage";
 import LogisticsShippingPage from "./pages/LogisticsShippingPage";
 import BuyerShippingQuotesPage from "./pages/BuyerShippingQuotesPage";
 import BuyerShippingRequestPage from "./pages/BuyerShippingRequestPage";
+import LogisticsOrdersPage from "./pages/LogisticsOrdersPage";
+
 function PrivateRoute({
   children,
   role,
 }: {
   children: React.ReactNode;
-  role?: "BUYER" | "SELLER" | "ADMIN";
+  role?: "BUYER" | "SELLER" | "ADMIN" | "LOGISTICS";
 }) {
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
@@ -272,7 +274,14 @@ export default function App() {
     </PrivateRoute>
   }
 />
-    
+    <Route
+  path="/logistics/orders"
+  element={
+    <PrivateRoute role="LOGISTICS">
+      <LogisticsOrdersPage />
+    </PrivateRoute>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );
