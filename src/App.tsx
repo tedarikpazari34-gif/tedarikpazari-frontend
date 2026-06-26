@@ -36,6 +36,7 @@ import CreateReviewPage from "./pages/CreateReviewPage";
 import ChatPage from "./pages/ChatPage";
 import AdminChatModerationPage from "./pages/AdminChatModerationPage";
 import SellerStorePage from "./pages/SellerStorePage";
+import LogisticsShippingPage from "./pages/LogisticsShippingPage";
 
 function PrivateRoute({
   children,
@@ -231,6 +232,7 @@ export default function App() {
     </AdminRoute>
   }
 />
+        
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
@@ -245,6 +247,15 @@ export default function App() {
     </AdminRoute>
   }
 /> 
+     <Route
+  path="/logistics/shipping"
+  element={
+    <PrivateRoute>
+      <LogisticsShippingPage />
+    </PrivateRoute>
+  }
+/>
+    
       </Routes>
     </BrowserRouter>
   );
