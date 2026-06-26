@@ -37,7 +37,8 @@ import ChatPage from "./pages/ChatPage";
 import AdminChatModerationPage from "./pages/AdminChatModerationPage";
 import SellerStorePage from "./pages/SellerStorePage";
 import LogisticsShippingPage from "./pages/LogisticsShippingPage";
-
+import BuyerShippingQuotesPage from "./pages/BuyerShippingQuotesPage";
+import BuyerShippingRequestPage from "./pages/BuyerShippingRequestPage";
 function PrivateRoute({
   children,
   role,
@@ -252,6 +253,22 @@ export default function App() {
   element={
     <PrivateRoute>
       <LogisticsShippingPage />
+    </PrivateRoute>
+  }
+/>
+   <Route
+  path="/buyer/shipping-quotes"
+  element={
+    <PrivateRoute role="BUYER">
+      <BuyerShippingQuotesPage />
+    </PrivateRoute>
+  }
+/>
+<Route
+  path="/buyer/shipping-request"
+  element={
+    <PrivateRoute role="BUYER">
+      <BuyerShippingRequestPage />
     </PrivateRoute>
   }
 />
