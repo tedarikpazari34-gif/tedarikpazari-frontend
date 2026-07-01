@@ -41,6 +41,7 @@ import BuyerShippingQuotesPage from "./pages/BuyerShippingQuotesPage";
 import BuyerShippingRequestPage from "./pages/BuyerShippingRequestPage";
 import LogisticsOrdersPage from "./pages/LogisticsOrdersPage";
 import LogisticsDashboardPage from "./pages/LogisticsDashboardPage";
+import PanelPage from "./pages/PanelPage";
 
 function PrivateRoute({
   children,
@@ -241,7 +242,6 @@ export default function App() {
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         {/* FALLBACK */}
-        <Route path="*" element={<Navigate to="/" replace />} />
         <Route path="/reviews/new" element={<CreateReviewPage />} />
         <Route path="/store/:id" element={<SellerStorePage />} />
         <Route path="/chat" element={<ChatPage />} />
@@ -287,6 +287,15 @@ export default function App() {
   path="/logistics/dashboard"
   element={<LogisticsDashboardPage />}
 />
+<Route
+  path="/panel"
+  element={
+    <PrivateRoute>
+      <PanelPage />
+    </PrivateRoute>
+  }
+/>
+<Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
