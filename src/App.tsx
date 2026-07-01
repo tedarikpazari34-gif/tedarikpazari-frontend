@@ -40,6 +40,7 @@ import LogisticsShippingPage from "./pages/LogisticsShippingPage";
 import BuyerShippingQuotesPage from "./pages/BuyerShippingQuotesPage";
 import BuyerShippingRequestPage from "./pages/BuyerShippingRequestPage";
 import LogisticsOrdersPage from "./pages/LogisticsOrdersPage";
+import LogisticsDashboardPage from "./pages/LogisticsDashboardPage";
 
 function PrivateRoute({
   children,
@@ -281,6 +282,10 @@ export default function App() {
       <LogisticsOrdersPage />
     </PrivateRoute>
   }
+/>
+   <Route
+  path="/logistics/dashboard"
+  element={<LogisticsDashboardPage />}
 />
       </Routes>
     </BrowserRouter>
