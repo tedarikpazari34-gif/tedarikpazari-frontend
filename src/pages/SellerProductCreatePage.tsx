@@ -7,6 +7,7 @@ type Category = {
   id: string;
   name: string;
   parentId?: string | null;
+  children?: Category[];
 };
 
 type UploadedImage = {
@@ -31,7 +32,15 @@ export default function SellerProductCreatePage() {
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-
+  const flattenCategories = (items: Category[], level = 0): Category[] => {
+  return items.flatMap((item) => [
+    {
+      ...item,
+      name: `${"— ".repeat(level)}${item.name}`,
+    },
+    ...(item.children ? flattenCategories(item.children, level + 1) : []),
+  ]);
+};
   useEffect(() => {
     async function loadCategories() {
       try {
@@ -39,7 +48,7 @@ export default function SellerProductCreatePage() {
         const data = await res.json();
 
         if (Array.isArray(data)) {
-          setCategories(data);
+          setCategories(flattenCategories(data));
         }
       } catch (err) {
         console.error("Kategori yüklenemedi:", err);
