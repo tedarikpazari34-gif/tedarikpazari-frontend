@@ -150,6 +150,44 @@ export default function SellerOrdersPage() {
     }
   };
 
+  const handleOpenDispute = async (orderId: string) => {
+    const reason = window.prompt("Uyuşmazlık sebebini yazın");
+
+    if (!reason?.trim()) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Lütfen giriş yapın");
+        return;
+      }
+
+      const res = await fetch(`${API}/disputes/${orderId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          reason: reason.trim(),
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        alert(data?.message || "Uyuşmazlık açılamadı");
+        return;
+      }
+
+      alert("Uyuşmazlık başarıyla açıldı");
+    } catch (err) {
+      console.error("DISPUTE ERROR:", err);
+      alert("Uyuşmazlık açılırken hata oluştu");
+    }
+  };
+
   useEffect(() => {
     loadOrders();
   }, []);
@@ -260,6 +298,15 @@ export default function SellerOrdersPage() {
 
                 {o.status !== "PAID" && o.status !== "PREPARING" && (
                   <div style={passiveActionStyle}>İşlem beklenmiyor</div>
+                )}
+
+                {o.status !== "CANCELLED" && (
+                  <button
+                    onClick={() => handleOpenDispute(o.id)}
+                    style={disputeButtonStyle}
+                  >
+                    ⚠️ Uyuşmazlık Aç
+                  </button>
                 )}
               </div>
             </article>
@@ -461,6 +508,16 @@ const passiveActionStyle: CSSProperties = {
   color: "#64748b",
   padding: "12px 16px",
   borderRadius: 12,
+  fontWeight: 900,
+};
+
+const disputeButtonStyle: CSSProperties = {
+  border: "none",
+  background: "#dc2626",
+  color: "white",
+  padding: "12px 16px",
+  borderRadius: 12,
+  cursor: "pointer",
   fontWeight: 900,
 };
 
