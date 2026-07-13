@@ -40,10 +40,13 @@ function statusLabel(status: string) {
 
 function statusStyle(status: string): CSSProperties {
   if (status === "PAID") return { background: "#dbeafe", color: "#1d4ed8" };
-  if (status === "PREPARING") return { background: "#ede9fe", color: "#6d28d9" };
+  if (status === "PREPARING")
+    return { background: "#ede9fe", color: "#6d28d9" };
   if (status === "SHIPPED") return { background: "#cffafe", color: "#155e75" };
-  if (status === "COMPLETED") return { background: "#dcfce7", color: "#166534" };
-  if (status === "PENDING_PAYMENT") return { background: "#fef3c7", color: "#92400e" };
+  if (status === "COMPLETED")
+    return { background: "#dcfce7", color: "#166534" };
+  if (status === "PENDING_PAYMENT")
+    return { background: "#fef3c7", color: "#92400e" };
   return { background: "#e5e7eb", color: "#374151" };
 }
 
@@ -82,8 +85,8 @@ export default function SellerOrdersPage() {
       const safeOrders = Array.isArray(data)
         ? data
         : Array.isArray(data?.data)
-        ? data.data
-        : [];
+          ? data.data
+          : [];
 
       setOrders(safeOrders);
     } catch (err) {
@@ -166,7 +169,8 @@ export default function SellerOrdersPage() {
           <div style={eyebrowStyle}>SATICI PANELİ</div>
           <h1 style={titleStyle}>Satıcı Siparişleri</h1>
           <p style={descStyle}>
-            Ödemesi alınan siparişleri hazırlayın, kargoya verin ve satış sürecinizi tek panelden yönetin.
+            Ödemesi alınan siparişleri hazırlayın, kargoya verin ve satış
+            sürecinizi tek panelden yönetin.
           </p>
         </div>
 
@@ -177,9 +181,18 @@ export default function SellerOrdersPage() {
       </section>
 
       <section style={statsStyle}>
-        <Stat label="Ödenen" value={orders.filter((o) => o.status === "PAID").length} />
-        <Stat label="Hazırlanan" value={orders.filter((o) => o.status === "PREPARING").length} />
-        <Stat label="Kargoda" value={orders.filter((o) => o.status === "SHIPPED").length} />
+        <Stat
+          label="Ödenen"
+          value={orders.filter((o) => o.status === "PAID").length}
+        />
+        <Stat
+          label="Hazırlanan"
+          value={orders.filter((o) => o.status === "PREPARING").length}
+        />
+        <Stat
+          label="Kargoda"
+          value={orders.filter((o) => o.status === "SHIPPED").length}
+        />
       </section>
 
       {error ? (
@@ -198,7 +211,9 @@ export default function SellerOrdersPage() {
               <div style={cardTopStyle}>
                 <div>
                   <div style={smallLabelStyle}>Sipariş Ürünü</div>
-                  <h2 style={cardTitleStyle}>{o.rfq?.product?.title || "Ürün"}</h2>
+                  <h2 style={cardTitleStyle}>
+                    {o.rfq?.product?.title || "Ürün"}
+                  </h2>
                 </div>
 
                 <span style={{ ...badgeStyle, ...statusStyle(o.status) }}>
@@ -207,9 +222,15 @@ export default function SellerOrdersPage() {
               </div>
 
               <div style={infoGridStyle}>
-                <Info label="Buyer" value={o.buyer?.name || o.buyer?.companyName || "-"} />
+                <Info
+                  label="Buyer"
+                  value={o.buyer?.name || o.buyer?.companyName || "-"}
+                />
                 <Info label="Miktar" value={o.rfq?.quantity || "-"} />
-                <Info label="Birim Fiyat" value={formatPrice(o.quote?.unitPrice)} />
+                <Info
+                  label="Birim Fiyat"
+                  value={formatPrice(o.quote?.unitPrice)}
+                />
                 <Info label="Toplam" value={formatPrice(o.totalAmount)} />
               </div>
 
@@ -220,13 +241,19 @@ export default function SellerOrdersPage() {
 
               <div style={actionsStyle}>
                 {o.status === "PAID" && (
-                  <button onClick={() => handlePrepare(o.id)} style={orangeButtonStyle}>
+                  <button
+                    onClick={() => handlePrepare(o.id)}
+                    style={orangeButtonStyle}
+                  >
                     🛠 Hazırlamaya Başla
                   </button>
                 )}
 
                 {o.status === "PREPARING" && (
-                  <button onClick={() => handleShip(o.id)} style={blueButtonStyle}>
+                  <button
+                    onClick={() => handleShip(o.id)}
+                    style={blueButtonStyle}
+                  >
                     📦 Kargoya Ver
                   </button>
                 )}
