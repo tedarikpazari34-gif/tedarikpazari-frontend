@@ -30,7 +30,7 @@ export default function AdminDisputesPage() {
 
   async function resolveDispute(
     id: string,
-    resolution: "REFUND_BUYER" | "RELEASE_SELLER"
+    resolution: "REFUND_BUYER" | "RELEASE_SELLER",
   ) {
     try {
       await fetch(`${API}/disputes/${id}/resolve`, {
@@ -148,10 +148,8 @@ export default function AdminDisputesPage() {
                 padding: "10px 18px",
                 borderRadius: 999,
                 cursor: "pointer",
-                background:
-                  filter === x ? "#2563eb" : "#fff",
-                color:
-                  filter === x ? "#fff" : "#111827",
+                background: filter === x ? "#2563eb" : "#fff",
+                color: filter === x ? "#fff" : "#111827",
                 fontWeight: 600,
               }}
             >
@@ -178,8 +176,7 @@ export default function AdminDisputesPage() {
                   background: "#fff",
                   borderRadius: 20,
                   padding: 24,
-                  boxShadow:
-                    "0 6px 18px rgba(0,0,0,0.06)",
+                  boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
                 }}
               >
                 <div
@@ -201,24 +198,27 @@ export default function AdminDisputesPage() {
 
                 <div style={{ marginTop: 20 }}>
                   <strong>Buyer:</strong>{" "}
-                  {item.buyerCompany?.name || "-"}
+                  {item.buyerCompany?.name ||
+                    item.order?.buyerCompany?.name ||
+                    item.order?.buyer?.name ||
+                    "-"}
                 </div>
 
                 <div style={{ marginTop: 8 }}>
                   <strong>Seller:</strong>{" "}
-                  {item.sellerCompany?.name || "-"}
+                  {item.sellerCompany?.name ||
+                    item.order?.sellerCompany?.name ||
+                    item.order?.seller?.name ||
+                    "-"}
                 </div>
 
                 <div style={{ marginTop: 8 }}>
-                  <strong>Sipariş:</strong>{" "}
-                  {item.order?.id || "-"}
+                  <strong>Sipariş:</strong> {item.order?.id || "-"}
                 </div>
 
                 <div style={{ marginTop: 8 }}>
                   <strong>Oluşturma:</strong>{" "}
-                  {new Date(
-                    item.createdAt
-                  ).toLocaleString("tr-TR")}
+                  {new Date(item.createdAt).toLocaleString("tr-TR")}
                 </div>
 
                 <div style={{ marginTop: 16 }}>
@@ -234,6 +234,39 @@ export default function AdminDisputesPage() {
                     {item.description}
                   </p>
                 </div>
+
+                {Array.isArray(item.files) && item.files.length > 0 && (
+                  <div style={{ marginTop: 16 }}>
+                    <strong>Ekler</strong>
+
+                    <div
+                      style={{
+                        display: "grid",
+                        gap: 8,
+                        marginTop: 8,
+                      }}
+                    >
+                      {item.files.map((file: any) => (
+                        <a
+                          key={file.id || file.url}
+                          href={file.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            color: "#2563eb",
+                            textDecoration: "underline",
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          {file.originalName ||
+                            file.filename ||
+                            file.name ||
+                            "Dosyayı görüntüle"}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {item.resolution && (
                   <div
@@ -256,12 +289,7 @@ export default function AdminDisputesPage() {
                     }}
                   >
                     <button
-                      onClick={() =>
-                        resolveDispute(
-                          item.id,
-                          "REFUND_BUYER"
-                        )
-                      }
+                      onClick={() => resolveDispute(item.id, "REFUND_BUYER")}
                       style={{
                         background: "#dc2626",
                         color: "#fff",
@@ -276,12 +304,7 @@ export default function AdminDisputesPage() {
                     </button>
 
                     <button
-                      onClick={() =>
-                        resolveDispute(
-                          item.id,
-                          "RELEASE_SELLER"
-                        )
-                      }
+                      onClick={() => resolveDispute(item.id, "RELEASE_SELLER")}
                       style={{
                         background: "#16a34a",
                         color: "#fff",
