@@ -125,14 +125,41 @@ export default function SellerOrdersPage() {
   };
 
   const handleShip = async (orderId: string) => {
+    const shippingCompany = window.prompt(
+      "Kargo firmasını yazın",
+      "Yurtiçi Kargo"
+    );
+
+    if (!shippingCompany?.trim()) {
+      return;
+    }
+
+    const shippingTrackingNo = window.prompt(
+      "Kargo takip numarasını yazın"
+    );
+
+    if (!shippingTrackingNo?.trim()) {
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Lütfen giriş yapın");
+        return;
+      }
 
       const res = await fetch(`${API}/orders/${orderId}/ship`, {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({
+          shippingCompany: shippingCompany.trim(),
+          shippingTrackingNo: shippingTrackingNo.trim(),
+        }),
       });
 
       const data = await res.json().catch(() => null);
@@ -143,7 +170,7 @@ export default function SellerOrdersPage() {
       }
 
       alert("Sipariş kargoya verildi 🚚");
-      loadOrders();
+      await loadOrders();
     } catch (err) {
       console.error("SHIP ERROR:", err);
       alert("Kargo işlemi sırasında hata oluştu");
