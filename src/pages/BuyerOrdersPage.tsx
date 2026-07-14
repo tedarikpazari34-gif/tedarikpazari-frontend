@@ -179,36 +179,65 @@ export default function BuyerOrdersPage() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch(
-  `${API}/orders/${orderId}/pay`,
-  {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
-
-const data = await res.json().catch(() => null);
-
-if (!res.ok) {
-  alert(data?.message || "Ödeme başarısız");
-  return;
-}
-
-alert("Ödeme başarılı ✅");
-loadOrders();
-return;
-
-      if (!data?.checkoutFormContent) {
-        alert("iyzico formu alınamadı");
+      if (!token) {
+        alert("Ödeme yapmak için giriş yapmalısınız.");
         return;
       }
+
+      const res = await fetch(
+        `${API}/payments/iyzico/${orderId}/initialize`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        alert(data?.message || "iyzico ödeme formu başlatılamadı");
+        return;
+      }
+
+      if (!data?.checkoutFormContent) {
+        alert("iyzico ödeme formu alınamadı");
+        return;
+      }
+
+      const paymentWindow = window.open(
+        "",
+        "iyzico-payment",
+        "width=520,height=760,scrollbars=yes,resizable=yes"
+      );
+
+      if (!paymentWindow) {
+        alert("Ödeme penceresi açılamadı. Tarayıcı popup iznini kontrol edin.");
+        return;
+      }
+
+      paymentWindow.document.open();
+      paymentWindow.document.write(`
+        <!doctype html>
+        <html lang="tr">
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Tedarik Pazarı - Güvenli Ödeme</title>
+          </head>
+          <body>
+            ${data.checkoutFormContent}
+          </body>
+        </html>
+      `);
+      paymentWindow.document.close();
     } catch (err) {
-      console.error(err);
+      console.error("IYZICO PAYMENT ERROR:", err);
       alert("Ödeme başlatılırken hata oluştu");
     }
   };
+
   const startOrderChat = async (orderId: string) => {
   try {
     const token = localStorage.getItem("token");
