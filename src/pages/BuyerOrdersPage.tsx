@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 type Order = {
   id: string;
@@ -92,8 +92,13 @@ function statusStyle(status: string): CSSProperties {
 }
 
 export default function BuyerOrdersPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [paymentLoadingId, setPaymentLoadingId] = useState("");
+  const [paymentNotice, setPaymentNotice] = useState<
+    { type: "success" | "error"; message: string } | null
+  >(null);
   const [error, setError] = useState("");
 
   const loadOrders = async () => {
@@ -115,9 +120,6 @@ export default function BuyerOrdersPage() {
       });
 
       const data = await res.json();
-      console.log("ORDERS API DATA:", data);
-      console.log("IS ARRAY:", Array.isArray(data));
-      console.log("DATA.DATA:", data?.data);
       if (!res.ok) {
         setError(data?.message || "Siparişler alınamadı");
         setOrders([]);
@@ -141,6 +143,65 @@ export default function BuyerOrdersPage() {
 
   useEffect(() => {
     loadOrders();
+  }, []);
+
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+
+    if (!payment) return;
+
+    const isSuccess = payment === "success";
+
+    setPaymentNotice({
+      type: isSuccess ? "success" : "error",
+      message: isSuccess
+        ? "Ödemeniz başarıyla doğrulandı. Sipariş durumu güncellendi."
+        : "Ödeme tamamlanamadı. Kartınızdan çekim yapıldıysa destek ekibimizle iletişime geçin.",
+    });
+
+    loadOrders();
+
+    if (window.opener) {
+      window.opener.postMessage(
+        {
+          type: "IYZICO_PAYMENT_RESULT",
+          success: isSuccess,
+        },
+        window.location.origin
+      );
+
+      window.setTimeout(() => window.close(), 900);
+    }
+
+    const next = new URLSearchParams(searchParams);
+    next.delete("payment");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    const handlePaymentMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+
+      if (event.data?.type !== "IYZICO_PAYMENT_RESULT") return;
+
+      const isSuccess = Boolean(event.data.success);
+
+      setPaymentNotice({
+        type: isSuccess ? "success" : "error",
+        message: isSuccess
+          ? "Ödemeniz başarıyla doğrulandı. Sipariş durumu güncellendi."
+          : "Ödeme tamamlanamadı.",
+      });
+
+      setPaymentLoadingId("");
+      loadOrders();
+    };
+
+    window.addEventListener("message", handlePaymentMessage);
+
+    return () => {
+      window.removeEventListener("message", handlePaymentMessage);
+    };
   }, []);
 
   const handleAction = async (
@@ -176,7 +237,12 @@ export default function BuyerOrdersPage() {
   };
 
   const handleIyzicoPayment = async (orderId: string) => {
+    if (paymentLoadingId) return;
+
     try {
+      setPaymentLoadingId(orderId);
+      setPaymentNotice(null);
+
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -232,8 +298,17 @@ export default function BuyerOrdersPage() {
         </html>
       `);
       paymentWindow.document.close();
+
+      const popupWatcher = window.setInterval(() => {
+        if (paymentWindow.closed) {
+          window.clearInterval(popupWatcher);
+          setPaymentLoadingId("");
+          loadOrders();
+        }
+      }, 700);
     } catch (err) {
       console.error("IYZICO PAYMENT ERROR:", err);
+      setPaymentLoadingId("");
       alert("Ödeme başlatılırken hata oluştu");
     }
   };
@@ -291,6 +366,25 @@ export default function BuyerOrdersPage() {
           </p>
         </div>
       </section>
+
+      {paymentNotice && (
+        <div
+          style={{
+            ...paymentNoticeStyle,
+            ...(paymentNotice.type === "success"
+              ? paymentSuccessStyle
+              : paymentErrorStyle),
+          }}
+        >
+          <strong>
+            {paymentNotice.type === "success"
+              ? "✓ Ödeme başarılı"
+              : "⚠ Ödeme başarısız"}
+          </strong>
+
+          <span>{paymentNotice.message}</span>
+        </div>
+      )}
 
       {error ? (
         <div style={errorCardStyle}>
@@ -420,12 +514,23 @@ export default function BuyerOrdersPage() {
 
   {o.status === "PENDING_PAYMENT" && (
                   <button
-                    style={blueButtonStyle}
+                    style={{
+                      ...blueButtonStyle,
+                      opacity:
+                        paymentLoadingId === o.id ? 0.65 : 1,
+                      cursor:
+                        paymentLoadingId === o.id
+                          ? "not-allowed"
+                          : "pointer",
+                    }}
+                    disabled={paymentLoadingId === o.id}
                     onClick={() =>
                       handleIyzicoPayment(o.id)
                     }
                   >
-                    💳 Ödeme Yap
+                    {paymentLoadingId === o.id
+                      ? "Ödeme açılıyor..."
+                      : "💳 Ödeme Yap"}
                   </button>
                 )}
 
@@ -635,4 +740,27 @@ const chatButtonStyle: CSSProperties = {
   borderRadius: 12,
   cursor: "pointer",
   fontWeight: 900,
+};
+const paymentNoticeStyle: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto 20px",
+  padding: "15px 17px",
+  display: "flex",
+  flexDirection: "column",
+  gap: 5,
+  borderRadius: 15,
+  border: "1px solid",
+  lineHeight: 1.55,
+};
+
+const paymentSuccessStyle: CSSProperties = {
+  color: "#166534",
+  background: "#f0fdf4",
+  borderColor: "#bbf7d0",
+};
+
+const paymentErrorStyle: CSSProperties = {
+  color: "#991b1b",
+  background: "#fef2f2",
+  borderColor: "#fecaca",
 };
