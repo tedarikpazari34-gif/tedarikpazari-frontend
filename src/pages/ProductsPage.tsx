@@ -114,9 +114,40 @@ export default function ProductsPage() {
   
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [favoriteLoadingId, setFavoriteLoadingId] = useState("");
+  const [compareIds, setCompareIds] = useState<string[]>([]);
 useEffect(() => {
     setSearch(q);
   }, [q]);
+
+  useEffect(() => {
+    const loadCompareIds = () => {
+      try {
+        const raw = localStorage.getItem("compareProductIds");
+        const parsed = raw ? JSON.parse(raw) : [];
+
+        setCompareIds(
+          Array.isArray(parsed)
+            ? parsed.filter((value): value is string =>
+                typeof value === "string"
+              )
+            : []
+        );
+      } catch {
+        setCompareIds([]);
+      }
+    };
+
+    loadCompareIds();
+
+    window.addEventListener("compare-products-changed", loadCompareIds);
+
+    return () => {
+      window.removeEventListener(
+        "compare-products-changed",
+        loadCompareIds
+      );
+    };
+  }, []);
 
   useEffect(() => {
     async function loadFavoriteIds() {
@@ -219,6 +250,32 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     setVerifiedOnly(false);
     setSort("newest");
     navigate("/products");
+  };
+
+  const toggleCompare = (productId: string) => {
+    setCompareIds((current) => {
+      const exists = current.includes(productId);
+
+      if (!exists && current.length >= 4) {
+        alert("En fazla 4 ürün karşılaştırabilirsiniz.");
+        return current;
+      }
+
+      const next = exists
+        ? current.filter((id) => id !== productId)
+        : [...current, productId];
+
+      localStorage.setItem("compareProductIds", JSON.stringify(next));
+      window.dispatchEvent(new Event("compare-products-changed"));
+
+      return next;
+    });
+  };
+
+  const clearCompare = () => {
+    localStorage.removeItem("compareProductIds");
+    setCompareIds([]);
+    window.dispatchEvent(new Event("compare-products-changed"));
   };
 
   const toggleFavorite = async (productId: string) => {
@@ -469,6 +526,24 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                     </span>
                   </div>
 
+                  <button
+                    type="button"
+                    onClick={() => toggleCompare(product.id)}
+                    style={{
+                      ...compareCardButton,
+                      background: compareIds.includes(product.id)
+                        ? "#dbeafe"
+                        : "#f8fafc",
+                      color: compareIds.includes(product.id)
+                        ? "#1d4ed8"
+                        : "#475569",
+                    }}
+                  >
+                    {compareIds.includes(product.id)
+                      ? "✓ Karşılaştırmada"
+                      : "⚖️ Karşılaştır"}
+                  </button>
+
                   <div style={actions}>
                     <Link to={`/product/${product.id}`} style={detailBtn}>
                       İncele
@@ -487,6 +562,31 @@ const res = await fetch(`${API}/products?${query.toString()}`);
               </div>
             );
           })}
+        </div>
+      )}
+
+      {compareIds.length > 0 && (
+        <div style={compareBarStyle}>
+          <div>
+            <strong>{compareIds.length} ürün seçildi</strong>
+            <div style={compareHintStyle}>
+              En fazla 4 ürünü yan yana karşılaştırabilirsiniz.
+            </div>
+          </div>
+
+          <div style={compareBarActionsStyle}>
+            <button
+              type="button"
+              onClick={clearCompare}
+              style={compareClearButtonStyle}
+            >
+              Temizle
+            </button>
+
+            <Link to="/compare" style={compareGoButtonStyle}>
+              Karşılaştır →
+            </Link>
+          </div>
         </div>
       )}
     </main>
@@ -767,4 +867,64 @@ const favoriteButton: CSSProperties = {
   boxShadow: "0 8px 20px rgba(15,23,42,0.12)",
   fontSize: 25,
   cursor: "pointer",
+};
+
+const compareCardButton: CSSProperties = {
+  width: "100%",
+  marginTop: 14,
+  padding: "10px 12px",
+  border: "1px solid #cbd5e1",
+  borderRadius: 10,
+  fontSize: 13,
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const compareBarStyle: CSSProperties = {
+  position: "fixed",
+  zIndex: 30,
+  left: "50%",
+  bottom: 20,
+  width: "min(760px, calc(100% - 32px))",
+  transform: "translateX(-50%)",
+  padding: "15px 18px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  flexWrap: "wrap",
+  gap: 14,
+  borderRadius: 18,
+  color: "#ffffff",
+  background: "#0f172a",
+  boxShadow: "0 20px 50px rgba(15,23,42,0.30)",
+};
+
+const compareHintStyle: CSSProperties = {
+  marginTop: 4,
+  color: "#cbd5e1",
+  fontSize: 12,
+};
+
+const compareBarActionsStyle: CSSProperties = {
+  display: "flex",
+  gap: 9,
+};
+
+const compareClearButtonStyle: CSSProperties = {
+  padding: "10px 14px",
+  border: "1px solid #475569",
+  borderRadius: 10,
+  color: "#e2e8f0",
+  background: "transparent",
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
+const compareGoButtonStyle: CSSProperties = {
+  padding: "10px 15px",
+  borderRadius: 10,
+  color: "#ffffff",
+  background: "#2563eb",
+  textDecoration: "none",
+  fontWeight: 900,
 };
