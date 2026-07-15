@@ -19,7 +19,15 @@ type Product = {
   thumbnail?: string;
   images?: Array<string | ProductImageObject>;
   categoryName?: string;
-  category?: string | { name?: string } | null;
+  category?: string | { id?: string; name?: string } | null;
+  moq?: number;
+  createdAt?: string;
+  seller?: {
+    id?: string;
+    name?: string;
+    verified?: boolean;
+    city?: string | null;
+  };
 };
 
 function getProductTitle(product: Product) {
@@ -99,8 +107,10 @@ export default function ProductsPage() {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [minMoq, setMinMoq] = useState("");
+  const [maxMoq, setMaxMoq] = useState("");
   const [city, setCity] = useState("");
-  const [verifiedOnly, setVerifiedOnly] = useState(false);  
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [sort, setSort] = useState("newest");  
   useEffect(() => {
     setSearch(q);
   }, [q]);
@@ -116,6 +126,7 @@ if (q) query.set("q", q);
 if (minPrice) query.set("minPrice", minPrice);
 if (maxPrice) query.set("maxPrice", maxPrice);
 if (minMoq) query.set("minMoq", minMoq);
+if (maxMoq) query.set("maxMoq", maxMoq);
 if (city) query.set("city", city);
 if (verifiedOnly) query.set("verified", "true");
 
@@ -132,11 +143,50 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     }
 
     loadProducts();
-  }, [q, minPrice, maxPrice, minMoq, city, verifiedOnly]);
+  }, [q, minPrice, maxPrice, minMoq, maxMoq, city, verifiedOnly]);
 
   const filteredProducts = useMemo(() => {
-  return products;
-}, [products]);
+    const result = [...products];
+
+    if (sort === "price-asc") {
+      result.sort(
+        (a, b) =>
+          Number(a.price ?? a.basePrice ?? 0) -
+          Number(b.price ?? b.basePrice ?? 0)
+      );
+    }
+
+    if (sort === "price-desc") {
+      result.sort(
+        (a, b) =>
+          Number(b.price ?? b.basePrice ?? 0) -
+          Number(a.price ?? a.basePrice ?? 0)
+      );
+    }
+
+    if (sort === "newest") {
+      result.sort((a, b) => {
+        const first = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const second = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+
+        return second - first;
+      });
+    }
+
+    return result;
+  }, [products, sort]);
+
+  const clearFilters = () => {
+    setSearch("");
+    setMinPrice("");
+    setMaxPrice("");
+    setMinMoq("");
+    setMaxMoq("");
+    setCity("");
+    setVerifiedOnly(false);
+    setSort("newest");
+    navigate("/products");
+  };
 
   const handleSearch = () => {
     const keyword = search.trim();
@@ -179,6 +229,8 @@ const res = await fetch(`${API}/products?${query.toString()}`);
       </section>
       <section style={filterPanel}>
   <input
+    type="number"
+    min="0"
     value={minPrice}
     onChange={(e) => setMinPrice(e.target.value)}
     placeholder="Min fiyat"
@@ -186,6 +238,8 @@ const res = await fetch(`${API}/products?${query.toString()}`);
   />
 
   <input
+    type="number"
+    min="0"
     value={maxPrice}
     onChange={(e) => setMaxPrice(e.target.value)}
     placeholder="Max fiyat"
@@ -193,9 +247,20 @@ const res = await fetch(`${API}/products?${query.toString()}`);
   />
 
   <input
+    type="number"
+    min="0"
     value={minMoq}
     onChange={(e) => setMinMoq(e.target.value)}
     placeholder="Min MOQ"
+    style={filterInput}
+  />
+
+  <input
+    type="number"
+    min="0"
+    value={maxMoq}
+    onChange={(e) => setMaxMoq(e.target.value)}
+    placeholder="Max MOQ"
     style={filterInput}
   />
 
@@ -206,6 +271,16 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     style={filterInput}
   />
 
+  <select
+    value={sort}
+    onChange={(e) => setSort(e.target.value)}
+    style={filterInput}
+  >
+    <option value="newest">En yeni</option>
+    <option value="price-asc">Fiyat: Artan</option>
+    <option value="price-desc">Fiyat: Azalan</option>
+  </select>
+
   <label style={checkLabel}>
     <input
       type="checkbox"
@@ -214,6 +289,14 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     />
     Onaylı tedarikçi
   </label>
+
+  <button
+    type="button"
+    onClick={clearFilters}
+    style={clearButton}
+  >
+    Filtreleri Temizle
+  </button>
 </section>
       <section style={toolbar}>
         <div>
@@ -263,11 +346,21 @@ const res = await fetch(`${API}/products?${query.toString()}`);
 
                   <h3 style={productTitle}>{getProductTitle(product)}</h3>
 
-                  <div style={supplierBadge}>✔ Verified Supplier</div>
+                  {product.seller?.verified ? (
+                    <div style={supplierBadge}>
+                      ✓ Onaylı Tedarikçi
+                    </div>
+                  ) : (
+                    <div style={standardSupplierBadge}>
+                      Tedarikçi
+                    </div>
+                  )}
 
                   <div style={priceRow}>
                     <strong style={priceText}>{getPrice(product)}</strong>
-                    <span style={moqText}>Toptan alım</span>
+                    <span style={moqText}>
+                      Min. {product.moq || 1} adet
+                    </span>
                   </div>
 
                   <div style={actions}>
@@ -528,4 +621,26 @@ const checkLabel: CSSProperties = {
   gap: 8,
   fontWeight: 800,
   color: "#334155",
+};
+const standardSupplierBadge: CSSProperties = {
+  display: "inline-block",
+  background: "#f1f5f9",
+  color: "#475569",
+  padding: "6px 10px",
+  borderRadius: 999,
+  fontSize: 12,
+  fontWeight: 800,
+  marginBottom: 12,
+};
+
+const clearButton: CSSProperties = {
+  minHeight: 44,
+  border: "1px solid #fecaca",
+  borderRadius: 12,
+  padding: "0 14px",
+  background: "#fff1f2",
+  color: "#be123c",
+  fontSize: 14,
+  fontWeight: 800,
+  cursor: "pointer",
 };
