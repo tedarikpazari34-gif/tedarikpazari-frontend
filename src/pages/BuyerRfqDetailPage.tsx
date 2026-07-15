@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 type RFQ = {
   id: string;
@@ -7,7 +7,7 @@ type RFQ = {
   note?: string | null;
   status: string;
   createdAt?: string;
-  product?: { title?: string };
+  product?: { id?: string; title?: string };
 };
 
 type Quote = {
@@ -62,11 +62,13 @@ function statusStyle(status?: string): CSSProperties {
 
 export default function BuyerRfqDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [rfq, setRfq] = useState<RFQ | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
+  const [closing, setClosing] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -125,6 +127,69 @@ setRfq(found || null);
 
     loadData();
   }, [id]);
+
+  const closeRfq = async () => {
+    if (!rfq || rfq.status === "CLOSED") return;
+
+    const confirmed = window.confirm(
+      "Bu teklif talebini kapatmak istediğinize emin misiniz? Kapattıktan sonra yeni teklif alınamaz."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setClosing(true);
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API}/rfqs/${rfq.id}/close`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        alert(data?.message || "RFQ kapatılamadı.");
+        return;
+      }
+
+      setRfq((current) =>
+        current ? { ...current, status: "CLOSED" } : current
+      );
+
+      alert("Teklif talebi kapatıldı.");
+    } catch (err) {
+      console.error("RFQ CLOSE ERROR:", err);
+      alert("RFQ kapatılırken hata oluştu.");
+    } finally {
+      setClosing(false);
+    }
+  };
+
+  const copyRfq = () => {
+    if (!rfq) return;
+
+    const params = new URLSearchParams();
+
+    if (rfq.product?.id) {
+      params.set("productId", rfq.product.id);
+    }
+
+    if (rfq.product?.title) {
+      params.set("product", rfq.product.title);
+    }
+
+    params.set("quantity", String(rfq.quantity || 1));
+
+    if (rfq.note) {
+      params.set("note", rfq.note);
+    }
+
+    navigate(`/buyer/rfqs/new?${params.toString()}`);
+  };
 
   const acceptQuote = async (quoteId: string) => {
     try {
@@ -208,9 +273,33 @@ setRfq(found || null);
           </p>
         </div>
 
-        <Link to="/buyer/rfqs" style={backButtonStyle}>
-          Taleplerime Dön
-        </Link>
+        <div style={heroActionsStyle}>
+          <button
+            type="button"
+            onClick={copyRfq}
+            style={copyButtonStyle}
+          >
+            Talebi Kopyala
+          </button>
+
+          {rfq.status === "OPEN" && (
+            <button
+              type="button"
+              onClick={closeRfq}
+              disabled={closing}
+              style={{
+                ...closeButtonStyle,
+                opacity: closing ? 0.65 : 1,
+              }}
+            >
+              {closing ? "Kapatılıyor..." : "Talebi Kapat"}
+            </button>
+          )}
+
+          <Link to="/buyer/rfqs" style={backButtonStyle}>
+            Taleplerime Dön
+          </Link>
+        </div>
       </section>
 
       <section style={summaryGridStyle}>
@@ -302,7 +391,7 @@ setRfq(found || null);
                 <p>{quote.sellerNote || "Satıcı notu eklenmemiş."}</p>
               </div>
 
-              {quote.status === "SENT" ? (
+              {quote.status === "SENT" && rfq.status === "OPEN" ? (
                 <button
                   onClick={() => acceptQuote(quote.id)}
                   disabled={acceptingId === quote.id}
@@ -595,4 +684,34 @@ const primaryLinkStyle: CSSProperties = {
   padding: "12px 16px",
   borderRadius: 12,
   fontWeight: 900,
+};
+
+const heroActionsStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  flexWrap: "wrap",
+  gap: 10,
+};
+
+const copyButtonStyle: CSSProperties = {
+  minHeight: 44,
+  padding: "11px 15px",
+  border: "1px solid rgba(255,255,255,0.28)",
+  borderRadius: 13,
+  color: "#ffffff",
+  background: "rgba(255,255,255,0.12)",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const closeButtonStyle: CSSProperties = {
+  minHeight: 44,
+  padding: "11px 15px",
+  border: "1px solid #fecaca",
+  borderRadius: 13,
+  color: "#991b1b",
+  background: "#fee2e2",
+  fontWeight: 900,
+  cursor: "pointer",
 };

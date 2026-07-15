@@ -17,14 +17,16 @@ export default function CreateRfqPage() {
   const productId = params.get("productId");
   const category = params.get("category");
   const productName = params.get("product");
+  const copiedQuantity = params.get("quantity");
+  const copiedNote = params.get("note");
 
   const draftKey = `rfq-draft:${productId || category || productName || "general"}`;
 
   const [product, setProduct] = useState<Product | null>(null);
 
-  const [quantity, setQuantity] = useState("100");
+  const [quantity, setQuantity] = useState(copiedQuantity || "100");
   const [targetPrice, setTargetPrice] = useState("");
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState(copiedNote || "");
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
