@@ -162,10 +162,10 @@ const featuredSuppliers: SupplierCard[] = [
 ];
 
 const statItems: StatItem[] = [
-  { value: "250+", label: "Doğrulanmış tedarikçi" },
-  { value: "1.000+", label: "Listeleme ve ürün" },
-  { value: "20+", label: "Popüler kategori" },
-  { value: "7/24", label: "Teklif ve panel erişimi" },
+  { value: "🛡️", label: "Güvenli B2B Ticaret" },
+  { value: "📄", label: "RFQ ile Teklif Toplama" },
+  { value: "💳", label: "Güvenli Ödeme Sistemi" },
+  { value: "🚚", label: "Sipariş ve Teslimat Takibi" },
 ];
 
 const primaryButtonStyle: React.CSSProperties = {
@@ -930,60 +930,55 @@ export default function HomePage() {
                   TEDARİKÇİLER
                 </div>
                 <h2 style={{ margin: 0, fontSize: 30 }}>
-                  Doğrulanmış firmalar
+                  Kurucu Tedarikçiler
                 </h2>
               </div>
             </div>
 
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-                gap: 18,
+                background: "#ffffff",
+                color: "#111827",
+                borderRadius: 24,
+                padding: 40,
+                textAlign: "center",
+                boxShadow: "0 18px 36px rgba(15,23,42,0.08)",
+                border: "1px solid rgba(226,232,240,0.7)",
               }}
             >
-              {featuredSuppliers.map((item) => (
-                <div
-                  key={item.name}
-                  style={{
-                    background: "#ffffff",
-                    color: "#111827",
-                    borderRadius: 22,
-                    overflow: "hidden",
-                    boxShadow: "0 18px 36px rgba(15, 23, 42, 0.10)",
-                    border: "1px solid rgba(226,232,240,0.7)",
-                  }}
-                >
-                  <div
-                    style={{
-                      height: 210,
-                      backgroundImage: `url('${item.image}')`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
-                  />
-                  <div style={{ padding: 20 }}>
-                    <div
-                      style={{
-                        display: "inline-block",
-                        background: "#dbeafe",
-                        color: "#1d4ed8",
-                        padding: "8px 12px",
-                        borderRadius: 999,
-                        fontSize: 13,
-                        fontWeight: 700,
-                        marginBottom: 12,
-                      }}
-                    >
-                      {item.badge}
-                    </div>
-                    <h3 style={{ margin: "0 0 8px", fontSize: 22 }}>
-                      {item.name}
-                    </h3>
-                    <div style={{ color: "#6b7280" }}>{item.category}</div>
-                  </div>
-                </div>
-              ))}
+              <div style={{ fontSize: 46, marginBottom: 14 }}>🏢</div>
+
+              <h3 style={{ margin: "0 0 12px", fontSize: 25 }}>
+                Kurucu Tedarikçilerimizi Arıyoruz
+              </h3>
+
+              <p
+                style={{
+                  color: "#64748b",
+                  maxWidth: 680,
+                  margin: "0 auto 24px",
+                  lineHeight: 1.75,
+                }}
+              >
+                Firmanızı ücretsiz oluşturun, ürünlerinizi yayınlayın ve
+                Tedarik Pazarı'nın ilk doğrulanmış tedarikçileri arasında
+                yerinizi alın.
+              </p>
+
+              <Link
+                to="/register"
+                style={{
+                  display: "inline-block",
+                  textDecoration: "none",
+                  background: "#2563eb",
+                  color: "#ffffff",
+                  padding: "14px 24px",
+                  borderRadius: 12,
+                  fontWeight: 800,
+                }}
+              >
+                Tedarikçi Olarak Katıl
+              </Link>
             </div>
           </section>
 
