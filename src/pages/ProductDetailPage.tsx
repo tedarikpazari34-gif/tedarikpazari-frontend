@@ -80,6 +80,50 @@ export default function ProductDetailPage() {
   const [thumbErrors, setThumbErrors] = useState<Record<string, boolean>>({});
   const [sellerProducts, setSellerProducts] = useState<Product[]>([]);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [isCompared, setIsCompared] = useState(false);
+
+  useEffect(() => {
+    const loadSavedActions = async () => {
+      try {
+        const compareRaw = localStorage.getItem("compareProductIds");
+        const compareIds = compareRaw ? JSON.parse(compareRaw) : [];
+
+        setIsCompared(
+          Array.isArray(compareIds) && compareIds.includes(productId)
+        );
+      } catch {
+        setIsCompared(false);
+      }
+
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
+
+      if (!token || role !== "BUYER") {
+        setIsFavorite(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${BASE_URL}/api/favorites/ids`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json().catch(() => []);
+
+        if (res.ok && Array.isArray(data)) {
+          setIsFavorite(data.includes(productId));
+        }
+      } catch (error) {
+        console.error("PRODUCT FAVORITE STATUS ERROR:", error);
+      }
+    };
+
+    loadSavedActions();
+  }, [productId]);
 
   useEffect(() => {
     async function loadProduct() {
@@ -201,6 +245,78 @@ export default function ProductDetailPage() {
     loadRelatedProducts();
   }, [product]);
 
+  const toggleFavorite = async () => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (role !== "BUYER") {
+      alert("Favoriler özelliğini yalnızca alıcı hesapları kullanabilir.");
+      return;
+    }
+
+    try {
+      setFavoriteLoading(true);
+
+      const res = await fetch(
+        `${BASE_URL}/api/favorites/${productId}`,
+        {
+          method: isFavorite ? "DELETE" : "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        alert(data?.message || "Favori işlemi başarısız.");
+        return;
+      }
+
+      setIsFavorite((current) => !current);
+    } catch (error) {
+      console.error("PRODUCT FAVORITE ERROR:", error);
+      alert("Favori işlemi sırasında hata oluştu.");
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
+
+  const toggleCompare = () => {
+    try {
+      const raw = localStorage.getItem("compareProductIds");
+      const current: string[] = raw ? JSON.parse(raw) : [];
+      const ids = Array.isArray(current) ? current : [];
+
+      if (ids.includes(productId)) {
+        const next = ids.filter((id) => id !== productId);
+        localStorage.setItem("compareProductIds", JSON.stringify(next));
+        setIsCompared(false);
+      } else {
+        if (ids.length >= 4) {
+          alert("En fazla 4 ürün karşılaştırabilirsiniz.");
+          return;
+        }
+
+        localStorage.setItem(
+          "compareProductIds",
+          JSON.stringify([...ids, productId])
+        );
+        setIsCompared(true);
+      }
+
+      window.dispatchEvent(new Event("compare-products-changed"));
+    } catch (error) {
+      console.error("PRODUCT COMPARE ERROR:", error);
+    }
+  };
+
   if (loading) {
     return (
       <main style={pageStyle}>
@@ -256,6 +372,7 @@ export default function ProductDetailPage() {
                 src={mainImageUrl}
                 alt={product.title}
                 style={mainImageStyle}
+                loading="eager"
                 onError={() => setMainImageError(true)}
               />
             ) : (
@@ -291,6 +408,7 @@ export default function ProductDetailPage() {
                         src={thumbUrl}
                         alt={`${product.title} ${index + 1}`}
                         style={thumbImageStyle}
+                        loading="lazy"
                         onError={() =>
                           setThumbErrors((prev) => ({
                             ...prev,
@@ -448,6 +566,85 @@ export default function ProductDetailPage() {
     <span>✓ Hızlı dönüş</span>
   </div>
 </div>
+          <div style={purchaseBoxStyle}>
+            <div style={purchaseHeaderStyle}>
+              <div>
+                <span style={purchaseLabelStyle}>Toptan satın alma</span>
+                <strong style={purchasePriceStyle}>
+                  {Number(product.basePrice || 0).toLocaleString("tr-TR")} ₺
+                </strong>
+              </div>
+
+              <span style={purchaseUnitStyle}>/ {product.unitType}</span>
+            </div>
+
+            <div style={purchaseFeatureGridStyle}>
+              <div style={purchaseFeatureStyle}>
+                <span>📦 Minimum sipariş</span>
+                <strong>
+                  {product.moq} {product.unitType}
+                </strong>
+              </div>
+
+              <div style={purchaseFeatureStyle}>
+                <span>🚚 Tahmini teslim</span>
+                <strong>
+                  {product.leadTimeDays
+                    ? `${product.leadTimeDays} gün`
+                    : "Satıcıya sorun"}
+                </strong>
+              </div>
+
+              <div style={purchaseFeatureStyle}>
+                <span>🏷️ Stok durumu</span>
+                <strong>{product.stockType || "Bilgi alın"}</strong>
+              </div>
+
+              <div style={purchaseFeatureStyle}>
+                <span>🧾 KDV</span>
+                <strong>
+                  {product.vatRate !== null &&
+                  product.vatRate !== undefined
+                    ? `%${product.vatRate}`
+                    : "Belirtilmedi"}
+                </strong>
+              </div>
+            </div>
+
+            <div style={quickActionGridStyle}>
+              <button
+                type="button"
+                onClick={toggleFavorite}
+                disabled={favoriteLoading}
+                style={{
+                  ...quickActionButtonStyle,
+                  color: isFavorite ? "#be123c" : "#334155",
+                  background: isFavorite ? "#fff1f2" : "#f8fafc",
+                }}
+              >
+                {favoriteLoading
+                  ? "İşleniyor..."
+                  : isFavorite
+                    ? "♥️ Favorilerde"
+                    : "♡ Favoriye Ekle"}
+              </button>
+
+              <button
+                type="button"
+                onClick={toggleCompare}
+                style={{
+                  ...quickActionButtonStyle,
+                  color: isCompared ? "#1d4ed8" : "#334155",
+                  background: isCompared ? "#eff6ff" : "#f8fafc",
+                }}
+              >
+                {isCompared
+                  ? "✓ Karşılaştırmada"
+                  : "⚖️ Karşılaştır"}
+              </button>
+            </div>
+          </div>
+
           <div style={actionsStyle}>
             <button
               type="button"
@@ -1064,4 +1261,75 @@ const collectionMoqStyle: CSSProperties = {
   color: "#64748b",
   fontSize: 11,
   textAlign: "right",
+};
+
+const purchaseBoxStyle: CSSProperties = {
+  marginBottom: 24,
+  padding: 20,
+  borderRadius: 20,
+  background: "linear-gradient(145deg, #f8fafc, #eff6ff)",
+  border: "1px solid #dbeafe",
+};
+
+const purchaseHeaderStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "flex-end",
+  justifyContent: "space-between",
+  gap: 12,
+  marginBottom: 18,
+};
+
+const purchaseLabelStyle: CSSProperties = {
+  display: "block",
+  marginBottom: 5,
+  color: "#64748b",
+  fontSize: 12,
+  fontWeight: 700,
+};
+
+const purchasePriceStyle: CSSProperties = {
+  display: "block",
+  color: "#1d4ed8",
+  fontSize: 30,
+  fontWeight: 900,
+};
+
+const purchaseUnitStyle: CSSProperties = {
+  color: "#64748b",
+  fontSize: 13,
+  fontWeight: 700,
+};
+
+const purchaseFeatureGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))",
+  gap: 10,
+};
+
+const purchaseFeatureStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 5,
+  padding: 12,
+  borderRadius: 13,
+  background: "#ffffff",
+  color: "#64748b",
+  fontSize: 12,
+};
+
+const quickActionGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+  gap: 10,
+  marginTop: 14,
+};
+
+const quickActionButtonStyle: CSSProperties = {
+  minHeight: 44,
+  padding: "10px 13px",
+  border: "1px solid #cbd5e1",
+  borderRadius: 12,
+  fontSize: 13,
+  fontWeight: 900,
+  cursor: "pointer",
 };
