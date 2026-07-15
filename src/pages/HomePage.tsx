@@ -303,13 +303,13 @@ export default function HomePage() {
           name="description"
           content="Tedarik Pazarı ile işletmeniz için toptan ürünleri keşfedin, tedarikçilerden teklif alın ve B2B satın alma sürecinizi tek platformdan yönetin."
         />
-        <link rel="canonical" href="https://tedarikpazari.com/" />
+        <link rel="canonical" href="https://xn--tedarikpazar-d5b.com/" />
         <meta property="og:title" content="Tedarik Pazarı" />
         <meta
           property="og:description"
           content="İşletmeler için güvenli ve hızlı B2B tedarik platformu."
         />
-        <meta property="og:url" content="https://tedarikpazari.com/" />
+        <meta property="og:url" content="https://xn--tedarikpazar-d5b.com/" />
         <meta property="og:type" content="website" />
       </Helmet>
 
