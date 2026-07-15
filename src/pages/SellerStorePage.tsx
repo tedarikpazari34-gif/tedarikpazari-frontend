@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
 
@@ -46,6 +46,15 @@ type Company = {
   createdAt?: string;
   products?: Product[];
   sellerReviews?: SellerReview[];
+  stats?: {
+    productCount: number;
+    completedDeals: number;
+    rating: number;
+    reviewCount: number;
+    memberSince?: string;
+    responseTime?: number | null;
+    profileCompletion: number;
+  };
 };
 
 const API =
@@ -74,19 +83,6 @@ function formatPrice(value?: number | string) {
   return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;
 }
 
-function formatWebsite(value?: string | null) {
-  if (!value) return null;
-
-  const href =
-    value.startsWith("http://") || value.startsWith("https://")
-      ? value
-      : `https://${value}`;
-
-  return {
-    href,
-    label: value.replace(/^https?:\/\//, "").replace(/\/$/, ""),
-  };
-}
 
 export default function SellerStorePage() {
   const { id } = useParams();
@@ -128,11 +124,6 @@ export default function SellerStorePage() {
 
     loadCompany();
   }, [id]);
-
-  const website = useMemo(
-    () => formatWebsite(company?.website),
-    [company?.website]
-  );
 
   if (loading) {
     return (
@@ -243,6 +234,99 @@ export default function SellerStorePage() {
         </div>
       </section>
 
+      <section style={trustSummaryStyle}>
+        <div style={trustSummaryHeaderStyle}>
+          <div>
+            <div style={eyebrowStyle}>GÜVEN BİLGİLERİ</div>
+            <h2 style={sectionTitleStyle}>Satıcı güven özeti</h2>
+          </div>
+
+          {company.verified && (
+            <span style={verifiedStyle}>✓ Doğrulanmış Firma</span>
+          )}
+        </div>
+
+        <div style={trustMetricGridStyle}>
+          <TrustMetric
+            icon="📦"
+            label="Yayındaki Ürün"
+            value={company.stats?.productCount ?? products.length}
+          />
+          <TrustMetric
+            icon="🤝"
+            label="Tamamlanan Sipariş"
+            value={company.stats?.completedDeals ?? company.completedDeals ?? 0}
+          />
+          <TrustMetric
+            icon="⭐"
+            label="Ortalama Puan"
+            value={Number(
+              company.stats?.rating ?? company.rating ?? 0
+            ).toFixed(1)}
+          />
+          <TrustMetric
+            icon="💬"
+            label="Değerlendirme"
+            value={company.stats?.reviewCount ?? company.reviewCount ?? 0}
+          />
+          <TrustMetric
+            icon="📅"
+            label="Üyelik Tarihi"
+            value={
+              company.stats?.memberSince
+                ? new Date(company.stats.memberSince).toLocaleDateString("tr-TR")
+                : company.createdAt
+                  ? new Date(company.createdAt).toLocaleDateString("tr-TR")
+                  : "-"
+            }
+          />
+          <TrustMetric
+            icon="⚡"
+            label="Yanıt Süresi"
+            value={
+              company.stats?.responseTime
+                ? `${company.stats.responseTime} saat`
+                : "Henüz ölçülmedi"
+            }
+          />
+        </div>
+
+        <div style={completionBoxStyle}>
+          <div style={completionTopStyle}>
+            <strong>Mağaza profil tamamlama</strong>
+            <strong>
+              {company.stats?.profileCompletion ?? 0}%
+            </strong>
+          </div>
+
+          <div style={completionTrackStyle}>
+            <div
+              style={{
+                ...completionBarStyle,
+                width: `${company.stats?.profileCompletion ?? 0}%`,
+              }}
+            />
+          </div>
+
+          <div style={completionChecklistStyle}>
+            <CompletionItem done={Boolean(company.logo)} label="Logo" />
+            <CompletionItem done={Boolean(company.banner)} label="Banner" />
+            <CompletionItem
+              done={Boolean(company.description)}
+              label="Firma açıklaması"
+            />
+            <CompletionItem
+              done={products.length > 0}
+              label="İlk ürün"
+            />
+            <CompletionItem
+              done={Boolean(company.verified)}
+              label="Firma doğrulaması"
+            />
+          </div>
+        </div>
+      </section>
+
       <section style={contentGridStyle}>
         <article style={aboutCardStyle}>
           <div style={sectionHeaderStyle}>
@@ -277,23 +361,6 @@ export default function SellerStorePage() {
             <Detail
               label="Firma durumu"
               value={company.verified ? "Doğrulandı" : "Doğrulama bekliyor"}
-            />
-            <Detail
-              label="Web sitesi"
-              value={
-                website ? (
-                  <a
-                    href={website.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={websiteLinkStyle}
-                  >
-                    {website.label}
-                  </a>
-                ) : (
-                  "Eklenmedi"
-                )
-              }
             />
           </div>
         </article>
@@ -430,6 +497,44 @@ export default function SellerStorePage() {
         )}
       </section>
     </main>
+  );
+}
+
+function TrustMetric({
+  icon,
+  label,
+  value,
+}: {
+  icon: string;
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div style={trustMetricStyle}>
+      <span style={trustMetricIconStyle}>{icon}</span>
+      <span style={trustMetricLabelStyle}>{label}</span>
+      <strong style={trustMetricValueStyle}>{value}</strong>
+    </div>
+  );
+}
+
+function CompletionItem({
+  done,
+  label,
+}: {
+  done: boolean;
+  label: string;
+}) {
+  return (
+    <div
+      style={{
+        ...completionItemStyle,
+        color: done ? "#166534" : "#64748b",
+      }}
+    >
+      <span>{done ? "✓" : "○"}</span>
+      <span>{label}</span>
+    </div>
   );
 }
 
@@ -666,11 +771,6 @@ const detailStyle: CSSProperties = {
   background: "#f8fafc",
 };
 
-const websiteLinkStyle: CSSProperties = {
-  color: "#2563eb",
-  textDecoration: "none",
-};
-
 const primaryLinkStyle: CSSProperties = {
   display: "inline-block",
   marginTop: 12,
@@ -824,4 +924,99 @@ const stateCardStyle: CSSProperties = {
   borderRadius: 22,
   background: "#ffffff",
   boxShadow: "0 18px 40px rgba(15,23,42,0.08)",
+};
+
+const trustSummaryStyle: CSSProperties = {
+  maxWidth: 1180,
+  margin: "24px auto 0",
+  padding: 30,
+  borderRadius: 24,
+  background: "#ffffff",
+  boxShadow: "0 18px 40px rgba(15,23,42,0.07)",
+};
+
+const trustSummaryHeaderStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  flexWrap: "wrap",
+  gap: 16,
+  marginBottom: 22,
+};
+
+const trustMetricGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+  gap: 14,
+};
+
+const trustMetricStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 7,
+  padding: 18,
+  borderRadius: 16,
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+};
+
+const trustMetricIconStyle: CSSProperties = {
+  fontSize: 25,
+};
+
+const trustMetricLabelStyle: CSSProperties = {
+  color: "#64748b",
+  fontSize: 13,
+};
+
+const trustMetricValueStyle: CSSProperties = {
+  color: "#0f172a",
+  fontSize: 18,
+};
+
+const completionBoxStyle: CSSProperties = {
+  marginTop: 22,
+  padding: 20,
+  borderRadius: 18,
+  background: "#eff6ff",
+  border: "1px solid #dbeafe",
+};
+
+const completionTopStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 14,
+  color: "#1e3a8a",
+};
+
+const completionTrackStyle: CSSProperties = {
+  height: 11,
+  marginTop: 13,
+  overflow: "hidden",
+  borderRadius: 999,
+  background: "#dbeafe",
+};
+
+const completionBarStyle: CSSProperties = {
+  height: "100%",
+  borderRadius: 999,
+  background: "linear-gradient(90deg, #22c55e, #16a34a)",
+};
+
+const completionChecklistStyle: CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 12,
+  marginTop: 16,
+};
+
+const completionItemStyle: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 6,
+  padding: "7px 10px",
+  borderRadius: 999,
+  background: "#ffffff",
+  fontSize: 13,
+  fontWeight: 800,
 };
