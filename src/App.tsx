@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 import HomePage from "./pages/HomePage";
 import RegisterPage from "./pages/RegisterPage";
@@ -42,6 +43,7 @@ import BuyerShippingRequestPage from "./pages/BuyerShippingRequestPage";
 import LogisticsOrdersPage from "./pages/LogisticsOrdersPage";
 import LogisticsDashboardPage from "./pages/LogisticsDashboardPage";
 import PanelPage from "./pages/PanelPage";
+import LegalPage from "./pages/LegalPage";
 
 function PrivateRoute({
   children,
@@ -76,6 +78,13 @@ export default function App() {
         <Route path="/uyelik" element={<RegisterPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
+
+        {/* LEGAL */}
+        <Route path="/kvkk" element={<LegalPage />} />
+        <Route path="/aydinlatma-metni" element={<LegalPage />} />
+        <Route path="/gizlilik-politikasi" element={<LegalPage />} />
+        <Route path="/kullanim-kosullari" element={<LegalPage />} />
+        <Route path="/cerez-politikasi" element={<LegalPage />} />
 
         {/* CATEGORY */}
         <Route path="/category/:id" element={<CategoryPage />} />
@@ -297,6 +306,7 @@ export default function App() {
 />
 <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }
