@@ -44,6 +44,7 @@ import LogisticsOrdersPage from "./pages/LogisticsOrdersPage";
 import LogisticsDashboardPage from "./pages/LogisticsDashboardPage";
 import PanelPage from "./pages/PanelPage";
 import LegalPage from "./pages/LegalPage";
+import CorporatePage from "./pages/CorporatePage";
 
 function PrivateRoute({
   children,
@@ -85,6 +86,11 @@ export default function App() {
         <Route path="/gizlilik-politikasi" element={<LegalPage />} />
         <Route path="/kullanim-kosullari" element={<LegalPage />} />
         <Route path="/cerez-politikasi" element={<LegalPage />} />
+
+        {/* CORPORATE */}
+        <Route path="/hakkimizda" element={<CorporatePage />} />
+        <Route path="/iletisim" element={<CorporatePage />} />
+        <Route path="/yardim" element={<CorporatePage />} />
 
         {/* CATEGORY */}
         <Route path="/category/:id" element={<CategoryPage />} />
