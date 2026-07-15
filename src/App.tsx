@@ -22,6 +22,7 @@ import SellerProductsPage from "./pages/SellerProductsPage";
 import SellerProductCreatePage from "./pages/SellerProductCreatePage";
 import SellerQuotesPage from "./pages/SellerQuotesPage";
 import SellerQuoteCreatePage from "./pages/SellerQuoteCreatePage";
+import SellerProfilePage from "./pages/SellerProfilePage";
 
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminProductsPage from "./pages/AdminProductsPage";
@@ -145,6 +146,15 @@ export default function App() {
 />
 
         {/* SELLER */}
+        <Route
+          path="/seller/profile"
+          element={
+            <PrivateRoute role="SELLER">
+              <SellerProfilePage />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/seller/orders"
           element={

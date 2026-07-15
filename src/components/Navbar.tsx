@@ -18,6 +18,7 @@ const buyerLinks: NavItem[] = [
 ];
 
 const sellerLinks: NavItem[] = [
+  { label: "Firma Profilim", to: "/seller/profile" },
   { label: "Gelen Talepler", to: "/seller/rfqs" },
   { label: "Ürünlerim", to: "/seller/products" },
   { label: "Seller Siparişleri", to: "/seller/orders" },
