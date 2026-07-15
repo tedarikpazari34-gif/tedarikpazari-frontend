@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { Helmet } from "react-helmet-async";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
@@ -31,8 +32,12 @@ type Product = {
     name?: string;
     verified?: boolean;
     rating?: number;
+    reviewCount?: number;
     completedDeals?: number;
+    responseTime?: number;
+    logo?: string | null;
     city?: string | null;
+    country?: string | null;
   };
 
   category?: {
@@ -73,6 +78,8 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [mainImageError, setMainImageError] = useState(false);
   const [thumbErrors, setThumbErrors] = useState<Record<string, boolean>>({});
+  const [sellerProducts, setSellerProducts] = useState<Product[]>([]);
+  const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     async function loadProduct() {
@@ -131,6 +138,69 @@ export default function ProductDetailPage() {
     }
   }, [galleryImages]);
 
+  useEffect(() => {
+    async function loadRelatedProducts() {
+      if (!product) return;
+
+      try {
+        const requests: Promise<Response>[] = [];
+
+        if (product.seller?.id) {
+          requests.push(
+            fetch(
+              `${BASE_URL}/api/products?sellerId=${encodeURIComponent(
+                product.seller.id
+              )}`
+            )
+          );
+        } else {
+          requests.push(Promise.resolve(new Response("[]")));
+        }
+
+        if (product.category?.id) {
+          requests.push(
+            fetch(
+              `${BASE_URL}/api/products?categoryId=${encodeURIComponent(
+                product.category.id
+              )}`
+            )
+          );
+        } else {
+          requests.push(Promise.resolve(new Response("[]")));
+        }
+
+        const [sellerRes, similarRes] = await Promise.all(requests);
+
+        const sellerData = await sellerRes.json().catch(() => []);
+        const similarData = await similarRes.json().catch(() => []);
+
+        setSellerProducts(
+          Array.isArray(sellerData)
+            ? sellerData.filter((item: Product) => item.id !== product.id).slice(0, 4)
+            : []
+        );
+
+        setSimilarProducts(
+          Array.isArray(similarData)
+            ? similarData
+                .filter(
+                  (item: Product) =>
+                    item.id !== product.id &&
+                    item.seller?.id !== product.seller?.id
+                )
+                .slice(0, 4)
+            : []
+        );
+      } catch (error) {
+        console.error("RELATED PRODUCTS ERROR:", error);
+        setSellerProducts([]);
+        setSimilarProducts([]);
+      }
+    }
+
+    loadRelatedProducts();
+  }, [product]);
+
   if (loading) {
     return (
       <main style={pageStyle}>
@@ -158,6 +228,26 @@ export default function ProductDetailPage() {
 
   return (
     <main style={pageStyle}>
+      <Helmet>
+        <title>{product.title} | Tedarik Pazarı</title>
+        <meta
+          name="description"
+          content={
+            product.description ||
+            `${product.title} için fiyat, minimum sipariş miktarı ve tedarikçi bilgilerini inceleyin.`
+          }
+        />
+        <link
+          rel="canonical"
+          href={`https://xn--tedarikpazar-d5b.com/product/${product.id}`}
+        />
+        <meta property="og:title" content={product.title} />
+        <meta
+          property="og:description"
+          content={product.description || "Tedarik Pazarı ürün detayı"}
+        />
+      </Helmet>
+
       <section style={containerStyle}>
         <div style={gallerySectionStyle}>
           <div style={mainImageBoxStyle}>
@@ -253,29 +343,70 @@ export default function ProductDetailPage() {
             <div style={unitStyle}>/ {product.unitType}</div>
           </div>
           {product.seller && (
-  <div style={sellerCardStyle}>
-    <div>
-      <div style={sellerLabelStyle}>Satıcı Firma</div>
+            <div style={sellerCardStyle}>
+              <div style={sellerIdentityStyle}>
+                <div style={sellerLogoStyle}>
+                  {product.seller.logo ? (
+                    <img
+                      src={resolveImageUrl(product.seller.logo) || ""}
+                      alt={product.seller.name || "Satıcı"}
+                      style={sellerLogoImageStyle}
+                    />
+                  ) : (
+                    <span>
+                      {(product.seller.name || "TP")
+                        .split(" ")
+                        .slice(0, 2)
+                        .map((word) => word[0])
+                        .join("")
+                        .toUpperCase()}
+                    </span>
+                  )}
+                </div>
 
-      <strong style={sellerNameStyle}>
-        {product.seller.name || "Satıcı"}
-      </strong>
+                <div>
+                  <div style={sellerLabelStyle}>SATICI FİRMA</div>
 
-      <div style={sellerMetaStyle}>
-        ⭐ {product.seller.rating || 0} · 🛒{" "}
-        {product.seller.completedDeals || 0} satış · 📍{" "}
-        {product.seller.city || "Türkiye"}
-      </div>
-    </div>
+                  <div style={sellerNameRowStyle}>
+                    <strong style={sellerNameStyle}>
+                      {product.seller.name || "Satıcı"}
+                    </strong>
 
-    <Link
-      to={`/store/${product.seller.id}`}
-      style={sellerStoreButtonStyle}
-    >
-      Mağazayı Gör
-    </Link>
-  </div>
-)} 
+                    {product.seller.verified && (
+                      <span style={sellerVerifiedStyle}>✓ Doğrulandı</span>
+                    )}
+                  </div>
+
+                  <div style={sellerMetaStyle}>
+                    ⭐ {Number(product.seller.rating || 0).toFixed(1)}
+                    {" · "}
+                    {product.seller.reviewCount || 0} değerlendirme
+                    {" · "}
+                    {product.seller.completedDeals || 0} satış
+                  </div>
+
+                  <div style={sellerLocationStyle}>
+                    📍{" "}
+                    {[product.seller.city, product.seller.country || "Türkiye"]
+                      .filter(Boolean)
+                      .join(", ")}
+                    {" · "}
+                    ⏱{" "}
+                    {product.seller.responseTime
+                      ? `${product.seller.responseTime} saat yanıt`
+                      : "Yanıt süresi ölçülüyor"}
+                  </div>
+                </div>
+              </div>
+
+              <Link
+                to={`/store/${product.seller.id}`}
+                style={sellerStoreButtonStyle}
+              >
+                Mağazayı Gör
+              </Link>
+            </div>
+          )}
           <div style={infoGridStyle}>
             <InfoBox label="Birim" value={product.unitType} />
             <InfoBox label="MOQ" value={product.moq} />
@@ -345,7 +476,93 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </section>
+
+      {product.seller && sellerProducts.length > 0 && (
+        <ProductCollection
+          title="Bu tedarikçinin diğer ürünleri"
+          description={`${product.seller.name || "Satıcı"} tarafından yayınlanan diğer ürünler`}
+          products={sellerProducts}
+        />
+      )}
+
+      {similarProducts.length > 0 && (
+        <ProductCollection
+          title="Benzer ürünler"
+          description={`${product.category?.name || "Aynı kategorideki"} alternatif ürünler`}
+          products={similarProducts}
+        />
+      )}
     </main>
+  );
+}
+
+function ProductCollection({
+  title,
+  description,
+  products,
+}: {
+  title: string;
+  description: string;
+  products: Product[];
+}) {
+  return (
+    <section style={collectionStyle}>
+      <div style={collectionHeaderStyle}>
+        <div>
+          <h2 style={collectionTitleStyle}>{title}</h2>
+          <p style={collectionDescriptionStyle}>{description}</p>
+        </div>
+      </div>
+
+      <div style={collectionGridStyle}>
+        {products.map((item) => {
+          const image =
+            item.images?.find((value) => value.isCover)?.url ||
+            item.images?.[0]?.url ||
+            item.imageUrl;
+
+          return (
+            <Link
+              key={item.id}
+              to={`/product/${item.id}`}
+              style={collectionLinkStyle}
+            >
+              <article style={collectionCardStyle}>
+                {image ? (
+                  <img
+                    src={resolveImageUrl(image) || ""}
+                    alt={item.title}
+                    style={collectionImageStyle}
+                  />
+                ) : (
+                  <div style={collectionPlaceholderStyle}>
+                    {getCategoryIcon(item.category?.name)}
+                  </div>
+                )}
+
+                <div style={collectionBodyStyle}>
+                  <span style={collectionCategoryStyle}>
+                    {item.category?.name || "Ürün"}
+                  </span>
+
+                  <h3 style={collectionProductTitleStyle}>{item.title}</h3>
+
+                  <div style={collectionFooterStyle}>
+                    <strong style={collectionPriceStyle}>
+                      {Number(item.basePrice || 0).toLocaleString("tr-TR")} ₺
+                    </strong>
+
+                    <span style={collectionMoqStyle}>
+                      Min. {item.moq || 1} {item.unitType || "adet"}
+                    </span>
+                  </div>
+                </div>
+              </article>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -701,4 +918,150 @@ const sellerStoreButtonStyle: CSSProperties = {
   borderRadius: 12,
   fontWeight: 900,
   whiteSpace: "nowrap",
+};
+
+const sellerIdentityStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 14,
+  minWidth: 0,
+};
+
+const sellerLogoStyle: CSSProperties = {
+  width: 62,
+  height: 62,
+  flexShrink: 0,
+  display: "grid",
+  placeItems: "center",
+  overflow: "hidden",
+  borderRadius: 16,
+  background: "linear-gradient(135deg, #dbeafe, #eff6ff)",
+  color: "#1d4ed8",
+  fontSize: 20,
+  fontWeight: 900,
+};
+
+const sellerLogoImageStyle: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+};
+
+const sellerNameRowStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 8,
+};
+
+const sellerVerifiedStyle: CSSProperties = {
+  padding: "5px 8px",
+  borderRadius: 999,
+  background: "#dcfce7",
+  color: "#166534",
+  fontSize: 11,
+  fontWeight: 900,
+};
+
+const sellerLocationStyle: CSSProperties = {
+  marginTop: 7,
+  color: "#64748b",
+  fontSize: 12,
+  lineHeight: 1.5,
+};
+
+const collectionStyle: CSSProperties = {
+  maxWidth: 1220,
+  margin: "28px auto 0",
+  padding: 28,
+  borderRadius: 26,
+  background: "#ffffff",
+  boxShadow: "0 18px 42px rgba(15,23,42,0.08)",
+};
+
+const collectionHeaderStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 20,
+  marginBottom: 22,
+};
+
+const collectionTitleStyle: CSSProperties = {
+  margin: 0,
+  color: "#0f172a",
+  fontSize: "clamp(25px, 4vw, 34px)",
+};
+
+const collectionDescriptionStyle: CSSProperties = {
+  margin: "7px 0 0",
+  color: "#64748b",
+};
+
+const collectionGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))",
+  gap: 18,
+};
+
+const collectionLinkStyle: CSSProperties = {
+  color: "inherit",
+  textDecoration: "none",
+};
+
+const collectionCardStyle: CSSProperties = {
+  height: "100%",
+  overflow: "hidden",
+  borderRadius: 18,
+  border: "1px solid #e2e8f0",
+  background: "#ffffff",
+};
+
+const collectionImageStyle: CSSProperties = {
+  width: "100%",
+  height: 170,
+  objectFit: "cover",
+  background: "#f1f5f9",
+};
+
+const collectionPlaceholderStyle: CSSProperties = {
+  height: 170,
+  display: "grid",
+  placeItems: "center",
+  background: "#f1f5f9",
+  fontSize: 44,
+};
+
+const collectionBodyStyle: CSSProperties = {
+  padding: 16,
+};
+
+const collectionCategoryStyle: CSSProperties = {
+  color: "#2563eb",
+  fontSize: 11,
+  fontWeight: 900,
+  textTransform: "uppercase",
+};
+
+const collectionProductTitleStyle: CSSProperties = {
+  margin: "8px 0 16px",
+  color: "#0f172a",
+  fontSize: 17,
+};
+
+const collectionFooterStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-end",
+  gap: 10,
+};
+
+const collectionPriceStyle: CSSProperties = {
+  color: "#2563eb",
+  fontSize: 18,
+};
+
+const collectionMoqStyle: CSSProperties = {
+  color: "#64748b",
+  fontSize: 11,
+  textAlign: "right",
 };
