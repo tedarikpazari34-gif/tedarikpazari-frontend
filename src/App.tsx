@@ -35,6 +35,7 @@ import WalletPage from "./pages/WalletPage";
 import ProductsPage from "./pages/ProductsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import CreateReviewPage from "./pages/CreateReviewPage";
+import FavoritesPage from "./pages/FavoritesPage";
 import ChatPage from "./pages/ChatPage";
 import AdminChatModerationPage from "./pages/AdminChatModerationPage";
 import SellerStorePage from "./pages/SellerStorePage";
@@ -263,6 +264,14 @@ export default function App() {
   }
 />
         
+        <Route
+          path="/favorites"
+          element={
+            <PrivateRoute role="BUYER">
+              <FavoritesPage />
+            </PrivateRoute>
+          }
+        />
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />

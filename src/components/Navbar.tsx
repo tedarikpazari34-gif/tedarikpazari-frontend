@@ -11,6 +11,7 @@ const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
 const buyerLinks: NavItem[] = [
+  { label: "Favorilerim", to: "/favorites" },
   { label: "Ana Sayfa", to: "/" },
   { label: "Ürünler", to: "/products" },
   { label: "Tekliflerim", to: "/tekliflerim" },

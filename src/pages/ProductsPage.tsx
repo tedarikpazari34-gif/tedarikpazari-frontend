@@ -111,9 +111,42 @@ export default function ProductsPage() {
   const [city, setCity] = useState("");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [sort, setSort] = useState("newest");  
-  useEffect(() => {
+  
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const [favoriteLoadingId, setFavoriteLoadingId] = useState("");
+useEffect(() => {
     setSearch(q);
   }, [q]);
+
+  useEffect(() => {
+    async function loadFavoriteIds() {
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
+
+      if (!token || role !== "BUYER") {
+        setFavoriteIds(new Set());
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/favorites/ids`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json().catch(() => []);
+
+        if (res.ok && Array.isArray(data)) {
+          setFavoriteIds(new Set(data));
+        }
+      } catch (err) {
+        console.error("FAVORITE IDS ERROR:", err);
+      }
+    }
+
+    loadFavoriteIds();
+  }, []);
 
   useEffect(() => {
     async function loadProducts() {
@@ -186,6 +219,58 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     setVerifiedOnly(false);
     setSort("newest");
     navigate("/products");
+  };
+
+  const toggleFavorite = async (productId: string) => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (role !== "BUYER") {
+      alert("Favoriler özelliğini yalnızca alıcı hesapları kullanabilir.");
+      return;
+    }
+
+    const isFavorite = favoriteIds.has(productId);
+
+    try {
+      setFavoriteLoadingId(productId);
+
+      const res = await fetch(`${API}/favorites/${productId}`, {
+        method: isFavorite ? "DELETE" : "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        alert(data?.message || "Favori işlemi başarısız.");
+        return;
+      }
+
+      setFavoriteIds((current) => {
+        const next = new Set(current);
+
+        if (isFavorite) {
+          next.delete(productId);
+        } else {
+          next.add(productId);
+        }
+
+        return next;
+      });
+    } catch (err) {
+      console.error("FAVORITE TOGGLE ERROR:", err);
+      alert("Favori işlemi sırasında hata oluştu.");
+    } finally {
+      setFavoriteLoadingId("");
+    }
   };
 
   const handleSearch = () => {
@@ -330,6 +415,27 @@ const res = await fetch(`${API}/products?${query.toString()}`);
 
             return (
               <div key={product.id} style={card}>
+                <button
+                  type="button"
+                  onClick={() => toggleFavorite(product.id)}
+                  disabled={favoriteLoadingId === product.id}
+                  aria-label={
+                    favoriteIds.has(product.id)
+                      ? "Favoriden çıkar"
+                      : "Favoriye ekle"
+                  }
+                  style={{
+                    ...favoriteButton,
+                    color: favoriteIds.has(product.id)
+                      ? "#e11d48"
+                      : "#475569",
+                    opacity:
+                      favoriteLoadingId === product.id ? 0.6 : 1,
+                  }}
+                >
+                  {favoriteIds.has(product.id) ? "♥️" : "♡"}
+                </button>
+
                 <Link to={`/product/${product.id}`} style={imageLink}>
                   {image ? (
                     <img src={image} style={img} alt={getProductTitle(product)} />
@@ -474,6 +580,7 @@ const grid: CSSProperties = {
 };
 
 const card: CSSProperties = {
+  position: "relative",
   background: "white",
   borderRadius: 22,
   overflow: "hidden",
@@ -642,5 +749,22 @@ const clearButton: CSSProperties = {
   color: "#be123c",
   fontSize: 14,
   fontWeight: 800,
+  cursor: "pointer",
+};
+
+const favoriteButton: CSSProperties = {
+  position: "absolute",
+  zIndex: 2,
+  top: 12,
+  right: 12,
+  width: 42,
+  height: 42,
+  display: "grid",
+  placeItems: "center",
+  border: "1px solid rgba(226,232,240,0.9)",
+  borderRadius: 999,
+  background: "rgba(255,255,255,0.94)",
+  boxShadow: "0 8px 20px rgba(15,23,42,0.12)",
+  fontSize: 25,
   cursor: "pointer",
 };
