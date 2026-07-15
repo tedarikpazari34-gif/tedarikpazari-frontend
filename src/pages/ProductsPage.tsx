@@ -21,14 +21,32 @@ type Product = {
   categoryName?: string;
   category?: string | { id?: string; name?: string } | null;
   moq?: number;
+  leadTimeDays?: number | null;
+  stockType?: string | null;
+  unitType?: string;
   createdAt?: string;
   seller?: {
     id?: string;
     name?: string;
     verified?: boolean;
     city?: string | null;
+    rating?: number;
+    reviewCount?: number;
+    responseTime?: number;
   };
 };
+
+function isNewProduct(createdAt?: string) {
+  if (!createdAt) return false;
+
+  const created = new Date(createdAt).getTime();
+
+  if (Number.isNaN(created)) return false;
+
+  const sevenDays = 7 * 24 * 60 * 60 * 1000;
+
+  return Date.now() - created <= sevenDays;
+}
 
 function getProductTitle(product: Product) {
   return product.title || product.name || "Ürün";
@@ -472,6 +490,10 @@ const res = await fetch(`${API}/products?${query.toString()}`);
 
             return (
               <div key={product.id} style={card}>
+                {isNewProduct(product.createdAt) && (
+                  <span style={newBadge}>Yeni</span>
+                )}
+
                 <button
                   type="button"
                   onClick={() => toggleFavorite(product.id)}
@@ -495,7 +517,12 @@ const res = await fetch(`${API}/products?${query.toString()}`);
 
                 <Link to={`/product/${product.id}`} style={imageLink}>
                   {image ? (
-                    <img src={image} style={img} alt={getProductTitle(product)} />
+                    <img
+                      src={image}
+                      style={img}
+                      alt={getProductTitle(product)}
+                      loading="lazy"
+                    />
                   ) : (
                     <div style={placeholder}>
                       <span style={{ fontSize: 42 }}>📦</span>
@@ -509,20 +536,67 @@ const res = await fetch(`${API}/products?${query.toString()}`);
 
                   <h3 style={productTitle}>{getProductTitle(product)}</h3>
 
-                  {product.seller?.verified ? (
-                    <div style={supplierBadge}>
-                      ✓ Onaylı Tedarikçi
+                  <div style={sellerRow}>
+                    <div style={{ minWidth: 0 }}>
+                      {product.seller?.id ? (
+                        <Link
+                          to={`/store/${product.seller.id}`}
+                          style={sellerNameLink}
+                        >
+                          {product.seller.name || "Tedarikçi"}
+                        </Link>
+                      ) : (
+                        <span style={sellerNameText}>Tedarikçi</span>
+                      )}
+
+                      <div style={sellerMeta}>
+                        {Number(product.seller?.rating || 0) > 0
+                          ? `⭐ ${Number(product.seller?.rating).toFixed(1)}`
+                          : "⭐ Yeni satıcı"}
+
+                        {product.seller?.reviewCount
+                          ? ` · ${product.seller.reviewCount} yorum`
+                          : ""}
+
+                        {product.seller?.city
+                          ? ` · 📍 ${product.seller.city}`
+                          : ""}
+                      </div>
                     </div>
-                  ) : (
-                    <div style={standardSupplierBadge}>
-                      Tedarikçi
+
+                    {product.seller?.verified ? (
+                      <span style={supplierBadge}>✓ Onaylı</span>
+                    ) : (
+                      <span style={standardSupplierBadge}>Standart</span>
+                    )}
+                  </div>
+
+                  <div style={featureGrid}>
+                    <div style={featureItem}>
+                      <span>📦 MOQ</span>
+                      <strong>
+                        {product.moq || 1} {product.unitType || "adet"}
+                      </strong>
                     </div>
-                  )}
+
+                    <div style={featureItem}>
+                      <span>🚚 Teslim</span>
+                      <strong>
+                        {product.leadTimeDays
+                          ? `${product.leadTimeDays} gün`
+                          : "Sorunuz"}
+                      </strong>
+                    </div>
+                  </div>
 
                   <div style={priceRow}>
-                    <strong style={priceText}>{getPrice(product)}</strong>
-                    <span style={moqText}>
-                      Min. {product.moq || 1} adet
+                    <div>
+                      <span style={priceLabel}>Başlangıç fiyatı</span>
+                      <strong style={priceText}>{getPrice(product)}</strong>
+                    </div>
+
+                    <span style={stockBadge}>
+                      {product.stockType || "Toptan satış"}
                     </span>
                   </div>
 
@@ -927,4 +1001,91 @@ const compareGoButtonStyle: CSSProperties = {
   background: "#2563eb",
   textDecoration: "none",
   fontWeight: 900,
+};
+
+const newBadge: CSSProperties = {
+  position: "absolute",
+  zIndex: 3,
+  top: 14,
+  left: 14,
+  padding: "7px 11px",
+  borderRadius: 999,
+  color: "#ffffff",
+  background: "#f97316",
+  fontSize: 12,
+  fontWeight: 900,
+  boxShadow: "0 8px 18px rgba(249,115,22,0.28)",
+};
+
+const sellerRow: CSSProperties = {
+  minHeight: 54,
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  gap: 10,
+  marginBottom: 14,
+};
+
+const sellerNameLink: CSSProperties = {
+  display: "inline-block",
+  maxWidth: 170,
+  overflow: "hidden",
+  color: "#0f172a",
+  textDecoration: "none",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  fontSize: 14,
+  fontWeight: 900,
+};
+
+const sellerNameText: CSSProperties = {
+  color: "#0f172a",
+  fontSize: 14,
+  fontWeight: 900,
+};
+
+const sellerMeta: CSSProperties = {
+  marginTop: 5,
+  color: "#64748b",
+  fontSize: 11,
+  lineHeight: 1.45,
+};
+
+const featureGrid: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 9,
+  marginBottom: 16,
+};
+
+const featureItem: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 5,
+  padding: 10,
+  borderRadius: 12,
+  color: "#64748b",
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+  fontSize: 11,
+};
+
+const priceLabel: CSSProperties = {
+  display: "block",
+  marginBottom: 4,
+  color: "#94a3b8",
+  fontSize: 11,
+};
+
+const stockBadge: CSSProperties = {
+  maxWidth: 110,
+  padding: "6px 9px",
+  overflow: "hidden",
+  borderRadius: 999,
+  color: "#475569",
+  background: "#f1f5f9",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  fontSize: 11,
+  fontWeight: 800,
 };
