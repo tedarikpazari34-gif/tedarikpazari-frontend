@@ -79,6 +79,56 @@ function getProductImage(product: Product) {
   return resolveImageUrl(cover || firstImage || product.imageUrl);
 }
 
+function getSellerBadges(company: Company, productCount: number) {
+  const badges: Array<{
+    label: string;
+    icon: string;
+    tone: "green" | "blue" | "amber" | "purple";
+  }> = [];
+
+  if (company.verified) {
+    badges.push({
+      label: "Doğrulanmış Firma",
+      icon: "✓",
+      tone: "green",
+    });
+  }
+
+  if ((company.stats?.profileCompletion || 0) >= 80) {
+    badges.push({
+      label: "Güçlü Profil",
+      icon: "★",
+      tone: "blue",
+    });
+  }
+
+  if ((company.completedDeals || 0) > 0) {
+    badges.push({
+      label: "Satış Geçmişi Var",
+      icon: "🤝",
+      tone: "purple",
+    });
+  }
+
+  if ((company.rating || 0) >= 4.5 && (company.reviewCount || 0) >= 3) {
+    badges.push({
+      label: "Yüksek Puanlı",
+      icon: "⭐",
+      tone: "amber",
+    });
+  }
+
+  if (productCount >= 3) {
+    badges.push({
+      label: "Aktif Katalog",
+      icon: "📦",
+      tone: "blue",
+    });
+  }
+
+  return badges;
+}
+
 function formatPrice(value?: number | string) {
   return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;
 }
@@ -149,6 +199,7 @@ export default function SellerStorePage() {
 
   const products = company.products || [];
   const reviews = company.sellerReviews || [];
+  const sellerBadges = getSellerBadges(company, products.length);
   const rating = Number(company.rating || 0);
   const bannerUrl = resolveImageUrl(company.banner);
   const logoUrl = resolveImageUrl(company.logo);
@@ -245,6 +296,29 @@ export default function SellerStorePage() {
             <span style={verifiedStyle}>✓ Doğrulanmış Firma</span>
           )}
         </div>
+
+        {sellerBadges.length > 0 && (
+          <div style={sellerBadgeGridStyle}>
+            {sellerBadges.map((badge) => (
+              <span
+                key={badge.label}
+                style={{
+                  ...sellerBadgeStyle,
+                  ...(badge.tone === "green"
+                    ? sellerBadgeGreenStyle
+                    : badge.tone === "amber"
+                      ? sellerBadgeAmberStyle
+                      : badge.tone === "purple"
+                        ? sellerBadgePurpleStyle
+                        : sellerBadgeBlueStyle),
+                }}
+              >
+                <span>{badge.icon}</span>
+                <span>{badge.label}</span>
+              </span>
+            ))}
+          </div>
+        )}
 
         <div style={trustMetricGridStyle}>
           <TrustMetric
@@ -1019,4 +1093,46 @@ const completionItemStyle: CSSProperties = {
   background: "#ffffff",
   fontSize: 13,
   fontWeight: 800,
+};
+
+const sellerBadgeGridStyle: CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 10,
+  marginBottom: 22,
+};
+
+const sellerBadgeStyle: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 7,
+  padding: "9px 12px",
+  borderRadius: 999,
+  border: "1px solid transparent",
+  fontSize: 13,
+  fontWeight: 900,
+};
+
+const sellerBadgeGreenStyle: CSSProperties = {
+  color: "#166534",
+  background: "#dcfce7",
+  borderColor: "#bbf7d0",
+};
+
+const sellerBadgeBlueStyle: CSSProperties = {
+  color: "#1d4ed8",
+  background: "#dbeafe",
+  borderColor: "#bfdbfe",
+};
+
+const sellerBadgeAmberStyle: CSSProperties = {
+  color: "#92400e",
+  background: "#fef3c7",
+  borderColor: "#fde68a",
+};
+
+const sellerBadgePurpleStyle: CSSProperties = {
+  color: "#6d28d9",
+  background: "#ede9fe",
+  borderColor: "#ddd6fe",
 };
