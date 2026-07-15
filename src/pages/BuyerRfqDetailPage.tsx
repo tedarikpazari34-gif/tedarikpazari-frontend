@@ -18,6 +18,18 @@ type Quote = {
   sellerNote?: string | null;
   status?: string;
   rfq?: { id?: string };
+  seller?: {
+    id?: string;
+    name?: string;
+    verified?: boolean;
+    rating?: number;
+    reviewCount?: number;
+    completedDeals?: number;
+    responseTime?: number;
+    city?: string | null;
+    country?: string | null;
+    logo?: string | null;
+  };
 };
 
 const API = "https://tedarik-backend.onrender.com/api";
@@ -69,6 +81,7 @@ export default function BuyerRfqDetailPage() {
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const [closing, setClosing] = useState(false);
+  const [quoteSort, setQuoteSort] = useState<"price" | "delivery">("price");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -88,14 +101,11 @@ export default function BuyerRfqDetailPage() {
 
 const rfqData = await rfqRes.json();
 
-console.log("RFQ ID URL:", id);
-console.log("RFQ DATA:", rfqData);
 
 const found = Array.isArray(rfqData)
   ? rfqData.find((item: RFQ) => item.id === id)
   : null;
 
-console.log("FOUND RFQ:", found);
 
 setRfq(found || null);
 
@@ -253,9 +263,34 @@ setRfq(found || null);
     );
   }
 
-  const bestQuote = quotes
-    .filter((quote) => quote.unitPrice !== undefined && quote.unitPrice !== null)
-    .sort((a, b) => Number(a.unitPrice) - Number(b.unitPrice))[0];
+  const pricedQuotes = quotes.filter(
+    (quote) => quote.unitPrice !== undefined && quote.unitPrice !== null
+  );
+
+  const bestQuote = [...pricedQuotes].sort(
+    (a, b) => Number(a.unitPrice) - Number(b.unitPrice)
+  )[0];
+
+  const fastestQuote = [...quotes]
+    .filter((quote) => quote.deliveryDays !== undefined)
+    .sort(
+      (a, b) =>
+        Number(a.deliveryDays || 0) - Number(b.deliveryDays || 0)
+    )[0];
+
+  const sortedQuotes = [...quotes].sort((a, b) => {
+    if (quoteSort === "delivery") {
+      return (
+        Number(a.deliveryDays ?? Number.MAX_SAFE_INTEGER) -
+        Number(b.deliveryDays ?? Number.MAX_SAFE_INTEGER)
+      );
+    }
+
+    return (
+      Number(a.unitPrice ?? Number.MAX_SAFE_INTEGER) -
+      Number(b.unitPrice ?? Number.MAX_SAFE_INTEGER)
+    );
+  });
 
   return (
     <main style={pageStyle}>
@@ -336,9 +371,26 @@ setRfq(found || null);
           <h2 style={sectionTitleStyle}>Gelen Teklifler</h2>
         </div>
 
-        <Link to="/products" style={secondaryLinkStyle}>
-          Yeni ürün keşfet
-        </Link>
+        <div style={quoteHeaderActionsStyle}>
+          {quotes.length > 1 && (
+            <select
+              value={quoteSort}
+              onChange={(event) =>
+                setQuoteSort(
+                  event.target.value as "price" | "delivery"
+                )
+              }
+              style={sortSelectStyle}
+            >
+              <option value="price">Fiyata göre sırala</option>
+              <option value="delivery">Teslim süresine göre sırala</option>
+            </select>
+          )}
+
+          <Link to="/products" style={secondaryLinkStyle}>
+            Yeni ürün keşfet
+          </Link>
+        </div>
       </section>
 
       {quotes.length === 0 ? (
@@ -350,11 +402,80 @@ setRfq(found || null);
         </div>
       ) : (
         <section style={quoteGridStyle}>
-          {quotes.map((quote) => (
-            <article key={quote.id} style={quoteCardStyle}>
+          {sortedQuotes.map((quote) => {
+            const totalAmount =
+              Number(quote.unitPrice || 0) * Number(rfq.quantity || 0);
+
+            const isBestPrice =
+              Boolean(bestQuote) && bestQuote.id === quote.id;
+
+            const isFastest =
+              Boolean(fastestQuote) && fastestQuote.id === quote.id;
+
+            return (
+            <article
+              key={quote.id}
+              style={{
+                ...quoteCardStyle,
+                borderColor: isBestPrice ? "#86efac" : "#e2e8f0",
+              }}
+            >
+              <div style={recommendationRowStyle}>
+                {isBestPrice && (
+                  <span style={bestPriceBadgeStyle}>🏆 En iyi fiyat</span>
+                )}
+
+                {isFastest && (
+                  <span style={fastDeliveryBadgeStyle}>
+                    ⚡ En hızlı teslim
+                  </span>
+                )}
+              </div>
+
+              <div style={sellerSummaryStyle}>
+                <div>
+                  <div style={sellerLabelStyle}>TEDARİKÇİ</div>
+
+                  <div style={sellerNameRowStyle}>
+                    <strong style={sellerNameStyle}>
+                      {quote.seller?.name || "Tedarikçi"}
+                    </strong>
+
+                    {quote.seller?.verified && (
+                      <span style={verifiedSellerStyle}>
+                        ✓ Doğrulandı
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={sellerMetaStyle}>
+                    {Number(quote.seller?.rating || 0) > 0
+                      ? `⭐ ${Number(quote.seller?.rating).toFixed(1)}`
+                      : "⭐ Yeni satıcı"}
+
+                    {quote.seller?.reviewCount
+                      ? ` · ${quote.seller.reviewCount} değerlendirme`
+                      : ""}
+
+                    {quote.seller?.city
+                      ? ` · 📍 ${quote.seller.city}`
+                      : ""}
+                  </div>
+                </div>
+
+                {quote.seller?.id && (
+                  <Link
+                    to={`/store/${quote.seller.id}`}
+                    style={storeLinkStyle}
+                  >
+                    Mağazayı Gör
+                  </Link>
+                )}
+              </div>
+
               <div style={quoteTopStyle}>
                 <div>
-                  <div style={smallLabelStyle}>Tedarikçi Teklifi</div>
+                  <div style={smallLabelStyle}>Birim fiyat</div>
                   <h3 style={priceStyle}>{formatPrice(quote.unitPrice)}</h3>
                 </div>
 
@@ -380,10 +501,15 @@ setRfq(found || null);
                 />
 
                 <InfoCard
-                  label="Birim Fiyat"
-                  value={formatPrice(quote.unitPrice)}
+                  label="Toplam Tutar"
+                  value={formatPrice(totalAmount)}
                   compact
                 />
+              </div>
+
+              <div style={calculationStyle}>
+                {rfq.quantity} adet × {formatPrice(quote.unitPrice)}
+                <strong>{formatPrice(totalAmount)}</strong>
               </div>
 
               <div style={sellerNoteStyle}>
@@ -412,7 +538,8 @@ setRfq(found || null);
                 </div>
               )}
             </article>
-          ))}
+            );
+          })}
         </section>
       )}
     </main>
@@ -714,4 +841,120 @@ const closeButtonStyle: CSSProperties = {
   background: "#fee2e2",
   fontWeight: 900,
   cursor: "pointer",
+};
+
+const quoteHeaderActionsStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 10,
+};
+
+const sortSelectStyle: CSSProperties = {
+  minHeight: 44,
+  padding: "0 12px",
+  border: "1px solid #cbd5e1",
+  borderRadius: 12,
+  color: "#334155",
+  background: "#ffffff",
+  fontWeight: 800,
+};
+
+const recommendationRowStyle: CSSProperties = {
+  minHeight: 28,
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 7,
+  marginBottom: 12,
+};
+
+const bestPriceBadgeStyle: CSSProperties = {
+  padding: "6px 9px",
+  borderRadius: 999,
+  color: "#166534",
+  background: "#dcfce7",
+  fontSize: 11,
+  fontWeight: 900,
+};
+
+const fastDeliveryBadgeStyle: CSSProperties = {
+  padding: "6px 9px",
+  borderRadius: 999,
+  color: "#1d4ed8",
+  background: "#dbeafe",
+  fontSize: 11,
+  fontWeight: 900,
+};
+
+const sellerSummaryStyle: CSSProperties = {
+  marginBottom: 16,
+  padding: 14,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
+  borderRadius: 15,
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+};
+
+const sellerLabelStyle: CSSProperties = {
+  marginBottom: 5,
+  color: "#64748b",
+  fontSize: 10,
+  fontWeight: 900,
+  letterSpacing: 0.8,
+};
+
+const sellerNameRowStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 7,
+};
+
+const sellerNameStyle: CSSProperties = {
+  color: "#0f172a",
+  fontSize: 16,
+};
+
+const verifiedSellerStyle: CSSProperties = {
+  padding: "4px 7px",
+  borderRadius: 999,
+  color: "#166534",
+  background: "#dcfce7",
+  fontSize: 10,
+  fontWeight: 900,
+};
+
+const sellerMetaStyle: CSSProperties = {
+  marginTop: 6,
+  color: "#64748b",
+  fontSize: 11,
+  lineHeight: 1.5,
+};
+
+const storeLinkStyle: CSSProperties = {
+  flexShrink: 0,
+  padding: "8px 10px",
+  borderRadius: 10,
+  color: "#1d4ed8",
+  background: "#eff6ff",
+  textDecoration: "none",
+  fontSize: 11,
+  fontWeight: 900,
+};
+
+const calculationStyle: CSSProperties = {
+  marginBottom: 14,
+  padding: "12px 14px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
+  borderRadius: 13,
+  color: "#475569",
+  background: "#f0fdf4",
+  border: "1px solid #bbf7d0",
+  fontSize: 13,
 };
