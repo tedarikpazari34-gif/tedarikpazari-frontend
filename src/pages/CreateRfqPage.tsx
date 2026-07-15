@@ -18,6 +18,8 @@ export default function CreateRfqPage() {
   const category = params.get("category");
   const productName = params.get("product");
 
+  const draftKey = `rfq-draft:${productId || category || productName || "general"}`;
+
   const [product, setProduct] = useState<Product | null>(null);
 
   const [quantity, setQuantity] = useState("100");
@@ -27,6 +29,46 @@ export default function CreateRfqPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey);
+
+      if (!raw) return;
+
+      const draft = JSON.parse(raw);
+
+      if (draft.quantity !== undefined) {
+        setQuantity(String(draft.quantity));
+      }
+
+      if (draft.targetPrice !== undefined) {
+        setTargetPrice(String(draft.targetPrice));
+      }
+
+      if (draft.note !== undefined) {
+        setNote(String(draft.note));
+      }
+    } catch (err) {
+      console.error("RFQ DRAFT LOAD ERROR:", err);
+    }
+  }, [draftKey]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      localStorage.setItem(
+        draftKey,
+        JSON.stringify({
+          quantity,
+          targetPrice,
+          note,
+          updatedAt: new Date().toISOString(),
+        })
+      );
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [draftKey, quantity, targetPrice, note]);
 
   useEffect(() => {
     async function loadProduct() {
@@ -62,7 +104,12 @@ export default function CreateRfqPage() {
 
       const finalNote = [
         category ? `Kategori: ${category}` : "",
-        product?.title || productName ? `Ürün: ${product?.title || productName}` : "",
+        product?.title || productName
+          ? `Ürün: ${product?.title || productName}`
+          : "",
+        targetPrice
+          ? `Hedef Fiyat: ${Number(targetPrice).toLocaleString("tr-TR")} ₺`
+          : "",
         note,
       ]
         .filter(Boolean)
@@ -77,7 +124,6 @@ export default function CreateRfqPage() {
         body: JSON.stringify({
           productId,
           quantity: Number(quantity),
-          targetPrice: targetPrice ? Number(targetPrice) : undefined,
           note: finalNote,
         }),
       });
@@ -89,6 +135,7 @@ export default function CreateRfqPage() {
         return;
       }
 
+      localStorage.removeItem(draftKey);
       setSuccess("Teklif talebi başarıyla gönderildi.");
 
       setTimeout(() => {
@@ -165,6 +212,8 @@ export default function CreateRfqPage() {
           <label style={fieldStyle}>
             <span style={labelStyle}>Miktar *</span>
             <input
+              type="number"
+              min="1"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               style={inputStyle}
@@ -175,6 +224,9 @@ export default function CreateRfqPage() {
           <label style={fieldStyle}>
             <span style={labelStyle}>Hedef Fiyat</span>
             <input
+              type="number"
+              min="0"
+              step="0.01"
               value={targetPrice}
               onChange={(e) => setTargetPrice(e.target.value)}
               style={inputStyle}
@@ -192,6 +244,10 @@ export default function CreateRfqPage() {
             placeholder="Teslimat adresi, ürün özellikleri, marka tercihi, termin süresi gibi detayları yazın."
           />
         </label>
+
+        <div style={draftNoticeStyle}>
+          ✓ Form değişiklikleri bu cihazda otomatik taslak olarak saklanır.
+        </div>
 
         <div style={noticeStyle}>
           <strong>Platform güvenceli süreç</strong>
@@ -431,4 +487,14 @@ const errorStyle: CSSProperties = {
   padding: 14,
   borderRadius: 12,
   marginBottom: 16,
+};
+const draftNoticeStyle: CSSProperties = {
+  marginBottom: 14,
+  padding: "11px 13px",
+  borderRadius: 12,
+  color: "#166534",
+  background: "#f0fdf4",
+  border: "1px solid #bbf7d0",
+  fontSize: 13,
+  fontWeight: 800,
 };
