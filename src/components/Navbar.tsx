@@ -45,15 +45,20 @@ export default function Navbar() {
         return;
       }
 
-      const res = await fetch(`${API}/chat/unread-count`, {
+      const res = await fetch(`${API}/notifications/unread-count`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
 
-      setUnreadCount(Number(data || 0));
+      if (!res.ok) {
+        setUnreadCount(0);
+        return;
+      }
+
+      setUnreadCount(Number(data?.count || 0));
     } catch (err) {
       console.error("NOTIFICATION COUNT ERROR:", err);
       setUnreadCount(0);
@@ -62,10 +67,21 @@ export default function Navbar() {
 
   loadUnreadCount();
 
+  const intervalId = window.setInterval(loadUnreadCount, 30000);
+
   window.addEventListener("storage", loadUnreadCount);
+  window.addEventListener(
+    "notifications-changed",
+    loadUnreadCount as EventListener
+  );
 
   return () => {
+    window.clearInterval(intervalId);
     window.removeEventListener("storage", loadUnreadCount);
+    window.removeEventListener(
+      "notifications-changed",
+      loadUnreadCount as EventListener
+    );
   };
 }, [token]);
 

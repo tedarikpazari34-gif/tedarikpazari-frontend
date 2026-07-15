@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 type Notification = {
   id: string;
@@ -15,6 +15,7 @@ const API =
   "https://tedarik-backend.onrender.com/api";
 
 export default function NotificationsPage() {
+  const navigate = useNavigate();
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,11 +59,21 @@ export default function NotificationsPage() {
         )
       );
 
-      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new Event("notifications-changed"));
     } catch (err) {
       console.error(err);
     }
   };
+  const openNotification = async (item: Notification) => {
+    if (!item.isRead) {
+      await markRead(item.id);
+    }
+
+    if (item.link) {
+      navigate(item.link);
+    }
+  };
+
   const markAllRead = async () => {
   try {
     const token = localStorage.getItem("token");
@@ -177,9 +188,13 @@ export default function NotificationsPage() {
                   )}
 
                   {item.link && (
-                    <Link to={item.link} style={detailLinkStyle}>
+                    <button
+                      type="button"
+                      onClick={() => openNotification(item)}
+                      style={detailButtonStyle}
+                    >
                       Detaya Git →
-                    </Link>
+                    </button>
                   )}
                 </div>
               </div>
@@ -360,6 +375,15 @@ const readAllButtonStyle: CSSProperties = {
   border: "1px solid rgba(255,255,255,0.18)",
   background: "rgba(255,255,255,0.12)",
   color: "white",
+  padding: "10px 13px",
+  borderRadius: 12,
+  cursor: "pointer",
+  fontWeight: 900,
+};
+const detailButtonStyle: CSSProperties = {
+  border: "none",
+  background: "#eff6ff",
+  color: "#1d4ed8",
   padding: "10px 13px",
   borderRadius: 12,
   cursor: "pointer",
