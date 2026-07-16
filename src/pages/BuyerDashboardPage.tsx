@@ -6,37 +6,47 @@ type RecentOrder = {
   id: string;
   status: string;
   totalAmount?: number | string;
-  payoutAmount?: number | string;
 };
 
-type SellerDashboard = {
-  activeProducts: number;
-  totalProducts: number;
+type RecentShippingOrder = {
+  id: string;
+  status: string;
+  trackingNo?: string | null;
+  shippingCompany?: string | null;
+};
+
+type BuyerDashboard = {
   openRfqs: number;
-  sentQuotes: number;
+  closedRfqs: number;
+  totalRfqs: number;
+  receivedQuotes: number;
+  pendingPaymentOrders: number;
   activeOrders: number;
   completedOrders: number;
   totalOrders: number;
-  grossSales: number;
-  totalPayout: number;
-  walletAvailable: number;
-  walletLocked: number;
+  totalPurchases: number;
+  shippingRequests: number;
+  activeShippingOrders: number;
+  completedShippingOrders: number;
   recentOrders: RecentOrder[];
+  recentShippingOrders: RecentShippingOrder[];
 };
 
-const emptyDashboard: SellerDashboard = {
-  activeProducts: 0,
-  totalProducts: 0,
+const emptyDashboard: BuyerDashboard = {
   openRfqs: 0,
-  sentQuotes: 0,
+  closedRfqs: 0,
+  totalRfqs: 0,
+  receivedQuotes: 0,
+  pendingPaymentOrders: 0,
   activeOrders: 0,
   completedOrders: 0,
   totalOrders: 0,
-  grossSales: 0,
-  totalPayout: 0,
-  walletAvailable: 0,
-  walletLocked: 0,
+  totalPurchases: 0,
+  shippingRequests: 0,
+  activeShippingOrders: 0,
+  completedShippingOrders: 0,
   recentOrders: [],
+  recentShippingOrders: [],
 };
 
 function money(value: number | string | undefined) {
@@ -51,13 +61,17 @@ function statusLabel(status: string) {
     SHIPPED: "Kargoda",
     COMPLETED: "Tamamlandı",
     CANCELLED: "İptal Edildi",
+    PENDING_PICKUP: "Yükleme Bekliyor",
+    PICKED_UP: "Teslim Alındı",
+    IN_TRANSIT: "Yolda",
+    DELIVERED: "Teslim Edildi",
   };
 
   return labels[status] || status;
 }
 
-export default function SellerDashboardPage() {
-  const [data, setData] = useState<SellerDashboard>(emptyDashboard);
+export default function BuyerDashboardPage() {
+  const [data, setData] = useState<BuyerDashboard>(emptyDashboard);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -67,7 +81,7 @@ export default function SellerDashboardPage() {
         setLoading(true);
         setError("");
 
-        const response = await authFetch("/dashboard/seller");
+        const response = await authFetch("/dashboard/buyer");
         const result = await response.json();
 
         if (!response.ok) {
@@ -84,9 +98,12 @@ export default function SellerDashboardPage() {
           recentOrders: Array.isArray(result?.recentOrders)
             ? result.recentOrders
             : [],
+          recentShippingOrders: Array.isArray(result?.recentShippingOrders)
+            ? result.recentShippingOrders
+            : [],
         });
       } catch (err: any) {
-        console.error("Seller dashboard error:", err);
+        console.error("Buyer dashboard error:", err);
         setError(err?.message || "Dashboard verileri alınamadı");
       } finally {
         setLoading(false);
@@ -104,94 +121,81 @@ export default function SellerDashboardPage() {
     <main style={pageStyle}>
       <div style={headerStyle}>
         <div>
-          <h1 style={titleStyle}>Satıcı Dashboard</h1>
+          <h1 style={titleStyle}>Alıcı Dashboard</h1>
           <p style={subtitleStyle}>
-            Ürün, teklif, sipariş ve kazanç özetinizi takip edin.
+            Satın alma, teklif ve nakliye süreçlerinizi tek ekrandan yönetin.
           </p>
         </div>
 
-        <Link to="/seller/products/new" style={primaryLinkStyle}>
-          Yeni Ürün Ekle
+        <Link to="/products" style={primaryLinkStyle}>
+          Ürünleri İncele
         </Link>
       </div>
 
       {error && <div style={errorStyle}>{error}</div>}
 
       <div style={statGridStyle}>
-        <StatCard title="Aktif Ürün" value={data.activeProducts} icon="🏷️" />
         <StatCard title="Açık RFQ" value={data.openRfqs} icon="📋" />
-        <StatCard title="Gönderilen Teklif" value={data.sentQuotes} icon="💬" />
+        <StatCard title="Gelen Teklif" value={data.receivedQuotes} icon="💬" />
+        <StatCard
+          title="Ödeme Bekleyen"
+          value={data.pendingPaymentOrders}
+          icon="💳"
+        />
         <StatCard title="Aktif Sipariş" value={data.activeOrders} icon="📦" />
         <StatCard
           title="Tamamlanan Sipariş"
           value={data.completedOrders}
           icon="✅"
         />
-        <StatCard title="Brüt Satış" value={money(data.grossSales)} icon="₺" />
         <StatCard
-          title="Net Hak Ediş"
-          value={money(data.totalPayout)}
-          icon="💰"
+          title="Toplam Satın Alma"
+          value={money(data.totalPurchases)}
+          icon="₺"
         />
         <StatCard
-          title="Kullanılabilir Bakiye"
-          value={money(data.walletAvailable)}
-          icon="👛"
+          title="Nakliye Talebi"
+          value={data.shippingRequests}
+          icon="🚚"
+        />
+        <StatCard
+          title="Aktif Taşıma"
+          value={data.activeShippingOrders}
+          icon="🛣️"
         />
       </div>
 
       <div style={quickGridStyle}>
-        <Link to="/seller/products" style={quickCardStyle}>
-          <span style={quickIconStyle}>🏷️</span>
-          <strong>Ürünlerim</strong>
-          <small style={quickTextStyle}>Ürünlerinizi yönetin</small>
-        </Link>
-
-        <Link to="/seller/quotes" style={quickCardStyle}>
-          <span style={quickIconStyle}>📝</span>
-          <strong>Tekliflerim</strong>
+        <Link to="/products" style={quickCardStyle}>
+          <span style={quickIconStyle}>🔎</span>
+          <strong>Ürün Ara</strong>
           <small style={quickTextStyle}>
-            Gönderdiğiniz teklifleri takip edin
+            Tedarikçilerin ürünlerini inceleyin
           </small>
         </Link>
 
-        <Link to="/seller/orders" style={quickCardStyle}>
+        <Link to="/buyer/orders" style={quickCardStyle}>
           <span style={quickIconStyle}>📦</span>
           <strong>Siparişlerim</strong>
-          <small style={quickTextStyle}>Sipariş durumlarını güncelleyin</small>
-        </Link>
-
-        <Link to="/wallet" style={quickCardStyle}>
-          <span style={quickIconStyle}>💳</span>
-          <strong>Cüzdan</strong>
           <small style={quickTextStyle}>
-            Bakiye ve hak edişlerinizi görüntüleyin
+            Sipariş ve ödeme durumlarını takip edin
           </small>
         </Link>
+
+        <Link to="/buyer/shipping-quotes" style={quickCardStyle}>
+          <span style={quickIconStyle}>🚛</span>
+          <strong>Nakliye Teklifleri</strong>
+          <small style={quickTextStyle}>
+            Lojistik firmalarının tekliflerini görün
+          </small>
+        </Link>
+
+        <Link to="/chat" style={quickCardStyle}>
+          <span style={quickIconStyle}>💬</span>
+          <strong>Mesajlar</strong>
+          <small style={quickTextStyle}>Ticari görüşmelerinizi yönetin</small>
+        </Link>
       </div>
-
-      <section style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Finansal Özet</h2>
-
-        <div style={financeGridStyle}>
-          <div style={financeCardStyle}>
-            <span style={mutedStyle}>Brüt satış</span>
-            <strong style={financeValueStyle}>{money(data.grossSales)}</strong>
-          </div>
-
-          <div style={financeCardStyle}>
-            <span style={mutedStyle}>Net hak ediş</span>
-            <strong style={financeValueStyle}>{money(data.totalPayout)}</strong>
-          </div>
-
-          <div style={financeCardStyle}>
-            <span style={mutedStyle}>Kilitli bakiye</span>
-            <strong style={financeValueStyle}>
-              {money(data.walletLocked)}
-            </strong>
-          </div>
-        </div>
-      </section>
 
       <section style={sectionStyle}>
         <h2 style={sectionTitleStyle}>Son Siparişler</h2>
@@ -205,6 +209,31 @@ export default function SellerDashboardPage() {
                 <div>
                   <strong>Sipariş #{order.id.slice(-8)}</strong>
                   <div style={mutedStyle}>{money(order.totalAmount)}</div>
+                </div>
+
+                <span style={badgeStyle}>{statusLabel(order.status)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={sectionTitleStyle}>Son Taşımalar</h2>
+
+        {data.recentShippingOrders.length === 0 ? (
+          <div style={emptyStyle}>Henüz aktif taşıma bulunmuyor.</div>
+        ) : (
+          <div style={listStyle}>
+            {data.recentShippingOrders.map((order) => (
+              <div key={order.id} style={listItemStyle}>
+                <div>
+                  <strong>
+                    {order.shippingCompany || "Lojistik taşıması"}
+                  </strong>
+                  <div style={mutedStyle}>
+                    Takip: {order.trackingNo || "Henüz oluşturulmadı"}
+                  </div>
                 </div>
 
                 <span style={badgeStyle}>{statusLabel(order.status)}</span>
@@ -334,8 +363,8 @@ const quickCardStyle: CSSProperties = {
   display: "flex",
   flexDirection: "column",
   gap: 7,
-  background: "#dcfce7",
-  border: "1px solid #bbf7d0",
+  background: "#e0f2fe",
+  border: "1px solid #bae6fd",
   borderRadius: 16,
   padding: 18,
 };
@@ -362,25 +391,6 @@ const sectionTitleStyle: CSSProperties = {
   fontSize: 20,
 };
 
-const financeGridStyle: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-  gap: 14,
-};
-
-const financeCardStyle: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 8,
-  padding: 16,
-  borderRadius: 12,
-  background: "#f8fafc",
-};
-
-const financeValueStyle: CSSProperties = {
-  fontSize: 22,
-};
-
 const listStyle: CSSProperties = {
   display: "grid",
   gap: 10,
@@ -397,13 +407,14 @@ const listItemStyle: CSSProperties = {
 };
 
 const mutedStyle: CSSProperties = {
+  marginTop: 5,
   color: "#64748b",
   fontSize: 14,
 };
 
 const badgeStyle: CSSProperties = {
-  background: "#dcfce7",
-  color: "#166534",
+  background: "#dbeafe",
+  color: "#1d4ed8",
   borderRadius: 999,
   padding: "6px 10px",
   fontSize: 12,

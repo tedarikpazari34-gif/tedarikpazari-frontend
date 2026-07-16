@@ -1,7 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -33,11 +34,13 @@ export default function LoginPage() {
       window.dispatchEvent(new Event("storage"));
 
       if (role === "LOGISTICS") {
-        window.location.href = "/logistics/shipping";
+        window.location.href = "/logistics/dashboard";
       } else if (role === "SELLER") {
-        window.location.href = "/seller/orders";
+        window.location.href = "/seller/dashboard";
       } else if (role === "ADMIN") {
-        window.location.href = "/admin/dashboard";
+        window.location.href = "/admin";
+      } else if (role === "BUYER") {
+        window.location.href = "/buyer/dashboard";
       } else {
         window.location.href = "/";
       }
@@ -45,7 +48,7 @@ export default function LoginPage() {
       setError(
         err?.response?.data?.message ||
           err?.response?.data?.error ||
-          "Giriş başarısız"
+          "Giriş başarısız",
       );
     } finally {
       setLoading(false);
@@ -93,8 +96,7 @@ const pageStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background:
-    "linear-gradient(135deg, #020617 0%, #0f172a 45%, #1e293b 100%)",
+  background: "linear-gradient(135deg, #020617 0%, #0f172a 45%, #1e293b 100%)",
   padding: 20,
 };
 

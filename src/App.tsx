@@ -45,6 +45,8 @@ import LogisticsShippingPage from "./pages/LogisticsShippingPage";
 import BuyerShippingQuotesPage from "./pages/BuyerShippingQuotesPage";
 import BuyerShippingRequestPage from "./pages/BuyerShippingRequestPage";
 import LogisticsOrdersPage from "./pages/LogisticsOrdersPage";
+import BuyerDashboardPage from "./pages/BuyerDashboardPage";
+import SellerDashboardPage from "./pages/SellerDashboardPage";
 import LogisticsDashboardPage from "./pages/LogisticsDashboardPage";
 import PanelPage from "./pages/PanelPage";
 import LegalPage from "./pages/LegalPage";
@@ -140,13 +142,13 @@ export default function App() {
         />
 
         <Route
-  path="/tekliflerim"
-  element={
-    <PrivateRoute role="BUYER">
-      <BuyerRfqsPage />
-    </PrivateRoute>
-  }
-/>
+          path="/tekliflerim"
+          element={
+            <PrivateRoute role="BUYER">
+              <BuyerRfqsPage />
+            </PrivateRoute>
+          }
+        />
 
         {/* SELLER */}
         <Route
@@ -213,59 +215,59 @@ export default function App() {
         />
 
         <Route
-  path="/admin"
-  element={
-    <AdminRoute>
-      <AdminDashboardPage />
-    </AdminRoute>
-  }
-/>
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboardPage />
+            </AdminRoute>
+          }
+        />
 
-<Route
-  path="/admin/companies"
-  element={
-    <AdminRoute>
-      <AdminCompaniesPage />
-    </AdminRoute>
-  }
-/>
+        <Route
+          path="/admin/companies"
+          element={
+            <AdminRoute>
+              <AdminCompaniesPage />
+            </AdminRoute>
+          }
+        />
 
-<Route
-  path="/admin/products"
-  element={
-    <AdminRoute>
-      <AdminProductsPage />
-    </AdminRoute>
-  }
-/>
+        <Route
+          path="/admin/products"
+          element={
+            <AdminRoute>
+              <AdminProductsPage />
+            </AdminRoute>
+          }
+        />
 
-<Route
-  path="/admin/payouts"
-  element={
-    <AdminRoute>
-      <AdminPayoutsPage />
-    </AdminRoute>
-  }
-/>
+        <Route
+          path="/admin/payouts"
+          element={
+            <AdminRoute>
+              <AdminPayoutsPage />
+            </AdminRoute>
+          }
+        />
 
-<Route
-  path="/admin/disputes"
-  element={
-    <AdminRoute>
-      <AdminDisputesPage />
-    </AdminRoute>
-  }
-/>
+        <Route
+          path="/admin/disputes"
+          element={
+            <AdminRoute>
+              <AdminDisputesPage />
+            </AdminRoute>
+          }
+        />
 
-<Route
-  path="/admin/finance"
-  element={
-    <AdminRoute>
-      <AdminFinancePage />
-    </AdminRoute>
-  }
-/>
-        
+        <Route
+          path="/admin/finance"
+          element={
+            <AdminRoute>
+              <AdminFinancePage />
+            </AdminRoute>
+          }
+        />
+
         <Route
           path="/favorites"
           element={
@@ -276,66 +278,92 @@ export default function App() {
         />
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/products" element={<ProductsPage />} />
-        <Route
-          path="/compare"
-          element={<CompareProductsPage />}
-        />
+        <Route path="/compare" element={<CompareProductsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         {/* FALLBACK */}
         <Route path="/reviews/new" element={<CreateReviewPage />} />
         <Route path="/store/:id" element={<SellerStorePage />} />
         <Route path="/chat" element={<ChatPage />} />
-        <Route path="/admin/chat-moderation"element={
-    <AdminRoute>
-      <AdminChatModerationPage />
-    </AdminRoute>
-  }
-/> 
-     <Route
-  path="/logistics/shipping"
-  element={
-    <PrivateRoute>
-      <LogisticsShippingPage />
-    </PrivateRoute>
-  }
-/>
-   <Route
-  path="/buyer/shipping-quotes"
-  element={
-    <PrivateRoute role="BUYER">
-      <BuyerShippingQuotesPage />
-    </PrivateRoute>
-  }
-/>
-<Route
-  path="/buyer/shipping-request"
-  element={
-    <PrivateRoute role="BUYER">
-      <BuyerShippingRequestPage />
-    </PrivateRoute>
-  }
-/>
-    <Route
-  path="/logistics/orders"
-  element={
-    <PrivateRoute role="LOGISTICS">
-      <LogisticsOrdersPage />
-    </PrivateRoute>
-  }
-/>
-   <Route
-  path="/logistics/dashboard"
-  element={<LogisticsDashboardPage />}
-/>
-<Route
-  path="/panel"
-  element={
-    <PrivateRoute>
-      <PanelPage />
-    </PrivateRoute>
-  }
-/>
-<Route path="*" element={<Navigate to="/" replace />} />
+        <Route
+          path="/admin/chat-moderation"
+          element={
+            <AdminRoute>
+              <AdminChatModerationPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/logistics/shipping"
+          element={
+            <PrivateRoute>
+              <LogisticsShippingPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/buyer/shipping-quotes"
+          element={
+            <PrivateRoute role="BUYER">
+              <BuyerShippingQuotesPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/buyer/shipping-request"
+          element={
+            <PrivateRoute role="BUYER">
+              <BuyerShippingRequestPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/logistics/orders"
+          element={
+            <PrivateRoute role="LOGISTICS">
+              <LogisticsOrdersPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/buyer/dashboard"
+          element={
+            <PrivateRoute role="BUYER">
+              <BuyerDashboardPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/seller/dashboard"
+          element={
+            <PrivateRoute role="SELLER">
+              <SellerDashboardPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/logistics/dashboard"
+          element={
+            <PrivateRoute role="LOGISTICS">
+              <LogisticsDashboardPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin/dashboard"
+          element={<Navigate to="/admin" replace />}
+        />
+        <Route
+          path="/panel"
+          element={
+            <PrivateRoute>
+              <PanelPage />
+            </PrivateRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
       <MobileBottomNav />
