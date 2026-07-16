@@ -38,6 +38,7 @@ type AdminMetrics = {
   completedOrders: number;
   pendingOrders?: number;
   disputes: number;
+  totalRfqs: number;
   openRfqs: number;
   quotes: number;
   gmv: number;
@@ -84,16 +85,16 @@ export default function AdminDashboardPage() {
       };
 
       const [metricsRes, ordersRes, rfqsRes] = await Promise.all([
-  fetch(`${API}/dashboard/admin`, { headers }),
-  fetch(`${API}/orders`, { headers }),
-  fetch(`${API}/rfqs/open`, { headers }),
-]);
+        fetch(`${API}/dashboard/admin`, { headers }),
+        fetch(`${API}/orders`, { headers }),
+        fetch(`${API}/rfqs/open`, { headers }),
+      ]);
 
-const metricsData = await metricsRes.json();
+      const metricsData = await metricsRes.json();
 
-if (metricsRes.ok) {
-  setMetrics(metricsData);
-}
+      if (metricsRes.ok) {
+        setMetrics(metricsData);
+      }
 
       const ordersData = await ordersRes.json();
       const rfqsData = await rfqsRes.json();
@@ -105,8 +106,8 @@ if (metricsRes.ok) {
         const safeOrders = Array.isArray(ordersData)
           ? ordersData
           : Array.isArray(ordersData?.data)
-          ? ordersData.data
-          : [];
+            ? ordersData.data
+            : [];
 
         setOrders(safeOrders);
       }
@@ -131,74 +132,49 @@ if (metricsRes.ok) {
   }, []);
 
   const totalRevenue =
-  metrics?.gmv ??
-  orders.reduce(
-    (sum, order) =>
-      sum + Number(order.totalAmount || 0),
-    0
-  );
+    metrics?.gmv ??
+    orders.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0);
 
-const totalCommission =
-  metrics?.commission ??
-  orders.reduce(
-    (sum, order) =>
-      sum +
-      Number(order.commissionAmount || 0),
-    0
-  );
+  const totalCommission =
+    metrics?.commission ??
+    orders.reduce((sum, order) => sum + Number(order.commissionAmount || 0), 0);
 
-const activeRfqs =
-  metrics?.openRfqs ??
-  rfqs.filter(
-    (rfq) => rfq.status === "OPEN"
-  ).length;
+  const activeRfqs =
+    metrics?.openRfqs ?? rfqs.filter((rfq) => rfq.status === "OPEN").length;
 
-const completedOrders =
-  metrics?.completedOrders ??
-  orders.filter(
-    (order) =>
-      order.status === "COMPLETED"
-  ).length;
+  const completedOrders =
+    metrics?.completedOrders ??
+    orders.filter((order) => order.status === "COMPLETED").length;
 
-const paidOrders = orders.filter(
-  (order) => order.status === "PAID"
-).length;
+  const paidOrders = orders.filter((order) => order.status === "PAID").length;
 
-const totalOrders =
-  metrics?.totalOrders ??
-  orders.length;
+  const totalOrders = metrics?.totalOrders ?? orders.length;
   const revenueData = [
-  {
-    name: "Sipariş",
-    revenue: totalRevenue,
-    commission: totalCommission,
-  },
-];
+    {
+      name: "Sipariş",
+      revenue: totalRevenue,
+      commission: totalCommission,
+    },
+  ];
 
-const otherOrders = Math.max(
-  0,
-  orders.length - paidOrders - completedOrders
-);
+  const otherOrders = Math.max(0, orders.length - paidOrders - completedOrders);
 
+  const orderStatusData = [
+    {
+      name: "Ödendi",
+      value: paidOrders,
+    },
+    {
+      name: "Tamamlandı",
+      value: completedOrders,
+    },
+    {
+      name: "Diğer",
+      value: orders.length - paidOrders - completedOrders,
+    },
+  ];
 
-
-const orderStatusData = [
-  {
-    name: "Ödendi",
-    value: paidOrders,
-  },
-  {
-    name: "Tamamlandı",
-    value: completedOrders,
-  },
-  {
-    name: "Diğer",
-    value:
-      orders.length - paidOrders - completedOrders,
-  },
-];
-
-const COLORS = ["#2563eb", "#22c55e", "#f59e0b"];
+  const COLORS = ["#2563eb", "#22c55e", "#f59e0b"];
   if (loading) {
     return (
       <div
@@ -215,9 +191,7 @@ const COLORS = ["#2563eb", "#22c55e", "#f59e0b"];
             flex: 1,
           }}
         >
-          <div style={emptyCardStyle}>
-            Admin verileri yükleniyor...
-          </div>
+          <div style={emptyCardStyle}>Admin verileri yükleniyor...</div>
         </main>
       </div>
     );
@@ -245,8 +219,8 @@ const COLORS = ["#2563eb", "#22c55e", "#f59e0b"];
             <h1 style={titleStyle}>Platform Dashboard</h1>
 
             <p style={descStyle}>
-              RFQ, sipariş, işlem hacmi ve platform
-              komisyonlarını tek ekrandan takip edin.
+              RFQ, sipariş, işlem hacmi ve platform komisyonlarını tek ekrandan
+              takip edin.
             </p>
           </div>
 
@@ -260,7 +234,7 @@ const COLORS = ["#2563eb", "#22c55e", "#f59e0b"];
         {error && <div style={errorCardStyle}>{error}</div>}
 
         <section style={statsStyle}>
-          <Stat label="RFQ Sayısı" value={rfqs.length} />
+          <Stat label="Toplam RFQ" value={metrics?.totalRfqs ?? rfqs.length} />
 
           <Stat label="Aktif RFQ" value={activeRfqs} />
 
@@ -268,10 +242,7 @@ const COLORS = ["#2563eb", "#22c55e", "#f59e0b"];
 
           <Stat label="Ödenen Sipariş" value={paidOrders} />
 
-          <Stat
-            label="Tamamlanan"
-            value={completedOrders}
-          />
+          <Stat label="Tamamlanan" value={completedOrders} />
 
           <Stat
             label="Komisyon"
@@ -279,205 +250,144 @@ const COLORS = ["#2563eb", "#22c55e", "#f59e0b"];
             highlight
           />
           <Stat label="Şirketler" value={metrics?.totalCompanies ?? "-"} />
-<Stat label="Ürünler" value={metrics?.totalProducts ?? "-"} />
-<Stat label="Dispute" value={metrics?.disputes ?? "-"} />
+          <Stat label="Ürünler" value={metrics?.totalProducts ?? "-"} />
+          <Stat label="Dispute" value={metrics?.disputes ?? "-"} />
         </section>
 
         <section style={quickActionsStyle}>
-          <Link
-            to="/admin/companies"
-            style={actionCardStyle}
-          >
+          <Link to="/admin/companies" style={actionCardStyle}>
             <strong>Şirket Onayları</strong>
 
-            <span>
-              Firma ve kullanıcı kayıtlarını incele
-            </span>
+            <span>Firma ve kullanıcı kayıtlarını incele</span>
           </Link>
 
-          <Link
-            to="/admin/products"
-            style={actionCardStyle}
-          >
+          <Link to="/admin/products" style={actionCardStyle}>
             <strong>Ürün Yönetimi</strong>
 
-            <span>
-              Bekleyen ürünleri onayla
-            </span>
+            <span>Bekleyen ürünleri onayla</span>
           </Link>
           <Link to="/admin/chat-moderation" style={actionCardStyle}>
-  <strong>Chat Moderation</strong>
-  <span>Şüpheli mesajları ve platform dışı iletişim denemelerini incele</span>
-</Link>
-          <Link
-            to="/admin/payouts"
-            style={actionCardStyle}
-          >
+            <strong>Chat Moderation</strong>
+            <span>
+              Şüpheli mesajları ve platform dışı iletişim denemelerini incele
+            </span>
+          </Link>
+          <Link to="/admin/payouts" style={actionCardStyle}>
             <strong>Payout Yönetimi</strong>
 
-            <span>
-              Satıcı ödeme taleplerini yönet
-            </span>
+            <span>Satıcı ödeme taleplerini yönet</span>
           </Link>
 
-          <Link
-            to="/admin/disputes"
-            style={actionCardStyle}
-          >
+          <Link to="/admin/disputes" style={actionCardStyle}>
             <strong>Dispute Yönetimi</strong>
 
-            <span>
-              Escrow dispute süreçlerini çöz
-            </span>
+            <span>Escrow dispute süreçlerini çöz</span>
           </Link>
 
-          <Link
-            to="/admin/finance"
-            style={actionCardStyle}
-          >
+          <Link to="/admin/finance" style={actionCardStyle}>
             <strong>Finans Dashboard</strong>
 
-            <span>
-              Ledger ve işlem geçmişini görüntüle
-            </span>
+            <span>Ledger ve işlem geçmişini görüntüle</span>
           </Link>
         </section>
         <section style={chartGridStyle}>
-  <div style={chartCardStyle}>
-    <div style={chartHeaderStyle}>
-      <div>
-        <div style={eyebrowDarkStyle}>
-          GELİR ANALİTİĞİ
-        </div>
+          <div style={chartCardStyle}>
+            <div style={chartHeaderStyle}>
+              <div>
+                <div style={eyebrowDarkStyle}>GELİR ANALİTİĞİ</div>
 
-        <h2 style={sectionTitleStyle}>
-          Platform Geliri
-        </h2>
-      </div>
-    </div>
+                <h2 style={sectionTitleStyle}>Platform Geliri</h2>
+              </div>
+            </div>
 
-    <div style={{ width: "100%", height: 320 }}>
-      <ResponsiveContainer>
-        <AreaChart data={revenueData}>
-          <defs>
-            <linearGradient
-              id="colorRevenue"
-              x1="0"
-              y1="0"
-              x2="0"
-              y2="1"
-            >
-              <stop
-                offset="5%"
-                stopColor="#2563eb"
-                stopOpacity={0.8}
-              />
+            <div style={{ width: "100%", height: 320 }}>
+              <ResponsiveContainer>
+                <AreaChart data={revenueData}>
+                  <defs>
+                    <linearGradient
+                      id="colorRevenue"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.8} />
 
-              <stop
-                offset="95%"
-                stopColor="#2563eb"
-                stopOpacity={0}
-              />
-            </linearGradient>
-          </defs>
+                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
 
-          <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" />
 
-          <XAxis dataKey="name" />
+                  <XAxis dataKey="name" />
 
-          <YAxis />
+                  <YAxis />
 
-          <Tooltip />
+                  <Tooltip />
 
-          <Area
-            type="monotone"
-            dataKey="revenue"
-            stroke="#2563eb"
-            fillOpacity={1}
-            fill="url(#colorRevenue)"
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
-  </div>
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#2563eb"
+                    fillOpacity={1}
+                    fill="url(#colorRevenue)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
-  <div style={chartCardStyle}>
-    <div style={chartHeaderStyle}>
-      <div>
-        <div style={eyebrowDarkStyle}>
-          SİPARİŞ DURUMU
-        </div>
+          <div style={chartCardStyle}>
+            <div style={chartHeaderStyle}>
+              <div>
+                <div style={eyebrowDarkStyle}>SİPARİŞ DURUMU</div>
 
-        <h2 style={sectionTitleStyle}>
-          Sipariş Dağılımı
-        </h2>
-      </div>
-    </div>
+                <h2 style={sectionTitleStyle}>Sipariş Dağılımı</h2>
+              </div>
+            </div>
 
-    <div style={{ width: "100%", height: 320 }}>
-      <ResponsiveContainer>
-        <PieChart>
-          <Pie
-            data={orderStatusData}
-            cx="50%"
-            cy="50%"
-            outerRadius={110}
-            dataKey="value"
-            label
-          >
-            {orderStatusData.map((_, index) => (
-              <Cell
-                key={index}
-                fill={
-                  COLORS[index % COLORS.length]
-                }
-              />
-            ))}
-          </Pie>
+            <div style={{ width: "100%", height: 320 }}>
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={orderStatusData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={110}
+                    dataKey="value"
+                    label
+                  >
+                    {orderStatusData.map((_, index) => (
+                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
 
-          <Tooltip />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
-  </div>
-</section>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </section>
         <section style={tableSectionStyle}>
           <div style={sectionHeaderStyle}>
             <div>
-              <div style={eyebrowDarkStyle}>
-                SON HAREKETLER
-              </div>
+              <div style={eyebrowDarkStyle}>SON HAREKETLER</div>
 
-              <h2 style={sectionTitleStyle}>
-                Son Siparişler
-              </h2>
+              <h2 style={sectionTitleStyle}>Son Siparişler</h2>
             </div>
           </div>
 
           {orders.length === 0 ? (
-            <div style={emptyTableStyle}>
-              Sipariş yok.
-            </div>
+            <div style={emptyTableStyle}>Sipariş yok.</div>
           ) : (
             <div style={tableStyle}>
               {orders.slice(0, 10).map((order) => (
-                <div
-                  key={order.id}
-                  style={rowStyle}
-                >
-                  <span style={orderIdStyle}>
-                    #{order.id.slice(0, 8)}
-                  </span>
+                <div key={order.id} style={rowStyle}>
+                  <span style={orderIdStyle}>#{order.id.slice(0, 8)}</span>
 
-                  <span>
-                    {formatMoney(order.totalAmount || 0)}
-                  </span>
+                  <span>{formatMoney(order.totalAmount || 0)}</span>
 
-                  <span>
-                    {formatMoney(
-                      order.commissionAmount || 0
-                    )}
-                  </span>
+                  <span>{formatMoney(order.commissionAmount || 0)}</span>
 
                   <span style={statusPillStyle}>
                     {statusLabel(order.status)}
@@ -526,8 +436,7 @@ const pageStyle: CSSProperties = {
 const heroStyle: CSSProperties = {
   maxWidth: 1180,
   margin: "0 auto 24px",
-  background:
-    "linear-gradient(135deg, #020617, #1e3a8a)",
+  background: "linear-gradient(135deg, #020617, #1e3a8a)",
   color: "white",
   borderRadius: 28,
   padding: 32,
@@ -572,8 +481,7 @@ const statsStyle: CSSProperties = {
   maxWidth: 1180,
   margin: "0 auto 24px",
   display: "grid",
-  gridTemplateColumns:
-    "repeat(auto-fit, minmax(180px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
   gap: 18,
 };
 
@@ -600,8 +508,7 @@ const quickActionsStyle: CSSProperties = {
   maxWidth: 1180,
   margin: "0 auto 24px",
   display: "grid",
-  gridTemplateColumns:
-    "repeat(auto-fit, minmax(220px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
   gap: 18,
 };
 
