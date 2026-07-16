@@ -774,9 +774,15 @@ export default function HomePage() {
 
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-                gap: 16,
+                display: isMobile ? "flex" : "grid",
+                gridTemplateColumns: isMobile
+                  ? undefined
+                  : "repeat(auto-fit, minmax(240px, 1fr))",
+                gap: isMobile ? 12 : 16,
+                overflowX: isMobile ? "auto" : "visible",
+                paddingBottom: isMobile ? 8 : 0,
+                scrollSnapType: isMobile ? "x mandatory" : undefined,
+                WebkitOverflowScrolling: "touch",
               }}
             >
               {sectors.map((sector) => (
@@ -788,14 +794,18 @@ export default function HomePage() {
     style={{
       cursor: "pointer",
                     position: "relative",
-                    minHeight: 180,
+                    minHeight: isMobile ? 138 : 180,
+                    minWidth: isMobile ? 168 : undefined,
+                    width: isMobile ? 168 : undefined,
+                    flex: isMobile ? "0 0 168px" : undefined,
+                    scrollSnapAlign: isMobile ? "start" : undefined,
                     overflow: "hidden",
-                    borderRadius: 20,
+                    borderRadius: isMobile ? 16 : 20,
                     backgroundImage: `linear-gradient(180deg, rgba(8,17,32,0.20) 0%, rgba(8,17,32,0.82) 100%), url('${sector.image}')`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     border: "1px solid rgba(148, 163, 184, 0.14)",
-                    padding: 18,
+                    padding: isMobile ? 13 : 18,
                     display: "flex",
                     alignItems: "end",
                   }}
@@ -847,7 +857,13 @@ export default function HomePage() {
                 >
                   ÖNE ÇIKAN ÜRÜNLER
                 </div>
-                <h2 style={{ margin: 0, fontSize: 30 }}>
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: isMobile ? 25 : 30,
+                    lineHeight: 1.2,
+                  }}
+                >
                   Popüler toptan ürünler
                 </h2>
               </div>
@@ -867,35 +883,43 @@ export default function HomePage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-                gap: 18,
+                gridTemplateColumns: isMobile
+                  ? "repeat(2, minmax(0, 1fr))"
+                  : "repeat(auto-fit, minmax(260px, 1fr))",
+                gap: isMobile ? 10 : 18,
               }}
             >
               {(featuredProducts.length > 0
   ? featuredProducts
   : fallbackFeaturedProducts
 ).map((item) => (
-                <div
+                <Link
                   key={item.id}
+                  to={`/product/${item.id}`}
                   style={{
+                    display: "block",
+                    textDecoration: "none",
                     background: "#ffffff",
                     color: "#111827",
-                    borderRadius: 22,
+                    borderRadius: isMobile ? 15 : 22,
                     overflow: "hidden",
-                    boxShadow: "0 18px 36px rgba(15, 23, 42, 0.10)",
+                    boxShadow: isMobile
+                      ? "0 8px 20px rgba(15,23,42,0.10)"
+                      : "0 18px 36px rgba(15,23,42,0.10)",
                     border: "1px solid rgba(226,232,240,0.7)",
+                    minWidth: 0,
                   }}
                 >
                   <div
                     style={{
-                      height: 220,
+                      height: isMobile ? 142 : 220,
                       backgroundImage: `url('${item.image}')`,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                     }}
                   />
 
-                  <div style={{ padding: 20 }}>
+                  <div style={{ padding: isMobile ? 11 : 20 }}>
                     <div
                       style={{
                         color: "#2563eb",
@@ -907,40 +931,60 @@ export default function HomePage() {
                       {item.category}
                     </div>
 
-                    <h3 style={{ margin: "0 0 8px", fontSize: 22 }}>
+                    <h3
+                      style={{
+                        margin: "0 0 8px",
+                        fontSize: isMobile ? 15 : 22,
+                        lineHeight: 1.3,
+                        minHeight: isMobile ? 39 : "auto",
+                        display: "-webkit-box",
+                        WebkitLineClamp: isMobile ? 2 : undefined,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
                       {item.title}
                     </h3>
 
-                    <div style={{ color: "#6b7280", marginBottom: 14 }}>
-                      Toptan alım için uygun
-                    </div>
+                    {!isMobile && (
+                      <div style={{ color: "#6b7280", marginBottom: 14 }}>
+                        Toptan alım için uygun
+                      </div>
+                    )}
 
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        gap: 12,
+                        gap: 8,
                       }}
                     >
-                      <strong style={{ fontSize: 20 }}>{item.price}</strong>
+                      <strong
+                        style={{
+                          fontSize: isMobile ? 16 : 20,
+                          color: "#0f172a",
+                        }}
+                      >
+                        {item.price}
+                      </strong>
 
-                      <Link
-  to={`/product/${item.id}`}
-  style={{
-    textDecoration: "none",
-    background: "#2563eb",
-    color: "#fff",
-    padding: "10px 14px",
-    borderRadius: 10,
-    fontWeight: 700,
-  }}
->
-  İncele
-</Link>
+                      {!isMobile && (
+                        <span
+                          style={{
+                            background: "#2563eb",
+                            color: "#fff",
+                            padding: "10px 14px",
+                            borderRadius: 10,
+                            fontWeight: 700,
+                          }}
+                        >
+                          İncele
+                        </span>
+                      )}
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </section>
