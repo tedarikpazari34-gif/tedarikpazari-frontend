@@ -1,8 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 
 const API =
-  import.meta.env.VITE_API_URL ||
-  "https://tedarik-backend.onrender.com/api";
+  import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
 function formatDate(value?: string | null) {
   if (!value) return "-";
@@ -25,6 +24,11 @@ export default function ShippingPage() {
   const [rfqs, setRfqs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState("");
+  const [selectedRfq, setSelectedRfq] = useState<any | null>(null);
+  const [quotePrice, setQuotePrice] = useState("");
+  const [deliveryDays, setDeliveryDays] = useState("");
+  const [quoteNote, setQuoteNote] = useState("");
+  const [formError, setFormError] = useState("");
 
   const load = async () => {
     try {
@@ -59,17 +63,43 @@ export default function ShippingPage() {
     load();
   }, []);
 
-  const sendQuote = async (rfqId: string) => {
+  const openQuoteModal = (rfq: any) => {
+    setSelectedRfq(rfq);
+    setQuotePrice("");
+    setDeliveryDays("");
+    setQuoteNote("");
+    setFormError("");
+  };
+
+  const closeQuoteModal = () => {
+    if (busyId) return;
+
+    setSelectedRfq(null);
+    setQuotePrice("");
+    setDeliveryDays("");
+    setQuoteNote("");
+    setFormError("");
+  };
+
+  const sendQuote = async () => {
+    if (!selectedRfq) return;
+
+    const numericPrice = Number(quotePrice);
+    const numericDeliveryDays = Number(deliveryDays);
+
+    if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+      setFormError("Geçerli bir teklif fiyatı girin.");
+      return;
+    }
+
+    if (!Number.isInteger(numericDeliveryDays) || numericDeliveryDays <= 0) {
+      setFormError("Teslim süresini gün olarak girin.");
+      return;
+    }
+
     try {
-      const price = prompt("Teklif fiyatı gir:");
-      if (!price) return;
-
-      const deliveryDays = prompt("Teslim süresi kaç gün?");
-      if (!deliveryDays) return;
-
-      const note = prompt("Not ekle (opsiyonel):") || "";
-
-      setBusyId(rfqId);
+      setFormError("");
+      setBusyId(selectedRfq.id);
 
       const token = localStorage.getItem("token");
 
@@ -80,25 +110,30 @@ export default function ShippingPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          rfqId,
-          price: Number(price),
-          deliveryDays: Number(deliveryDays),
-          note,
+          rfqId: selectedRfq.id,
+          price: numericPrice,
+          deliveryDays: numericDeliveryDays,
+          note: quoteNote.trim(),
         }),
       });
 
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "Teklif gönderilemedi");
+        setFormError(
+          Array.isArray(data?.message)
+            ? data.message.join(", ")
+            : data?.message || "Teklif gönderilemedi",
+        );
         return;
       }
 
-      alert("Nakliye teklifi gönderildi ✅");
+      closeQuoteModal();
       await load();
+      alert("Nakliye teklifi gönderildi ✅");
     } catch (error) {
       console.error("SEND QUOTE ERROR:", error);
-      alert("İşlem sırasında hata oluştu");
+      setFormError("İşlem sırasında bağlantı hatası oluştu.");
     } finally {
       setBusyId("");
     }
@@ -119,8 +154,8 @@ export default function ShippingPage() {
           <div style={eyebrowStyle}>LOJİSTİK PAZARI</div>
           <h1 style={titleStyle}>Açık Nakliye Talepleri</h1>
           <p style={heroTextStyle}>
-            Rota, yük özellikleri ve teslimat beklentilerini inceleyerek
-            uygun taşımalara teklif verin.
+            Rota, yük özellikleri ve teslimat beklentilerini inceleyerek uygun
+            taşımalara teklif verin.
           </p>
         </div>
 
@@ -190,14 +225,8 @@ export default function ShippingPage() {
                   label="Hacim"
                   value={rfq.volume ? `${rfq.volume} m³` : "-"}
                 />
-                <Info
-                  label="Palet"
-                  value={rfq.palletCount ?? "-"}
-                />
-                <Info
-                  label="Koli"
-                  value={rfq.packageCount ?? "-"}
-                />
+                <Info label="Palet" value={rfq.palletCount ?? "-"} />
+                <Info label="Koli" value={rfq.packageCount ?? "-"} />
                 <Info
                   label="Yükleme Tarihi"
                   value={formatDate(rfq.loadingDate)}
@@ -210,10 +239,7 @@ export default function ShippingPage() {
                       : deliveryText(rfq.deliveryExpectation)
                   }
                 />
-                <Info
-                  label="Teklif Sayısı"
-                  value={rfq.quotes?.length || 0}
-                />
+                <Info label="Teklif Sayısı" value={rfq.quotes?.length || 0} />
               </div>
 
               <div style={featureGridStyle}>
@@ -233,32 +259,160 @@ export default function ShippingPage() {
               )}
 
               <button
-                onClick={() => sendQuote(rfq.id)}
-                disabled={busyId === rfq.id}
+                onClick={() => openQuoteModal(rfq)}
+                disabled={Boolean(busyId)}
                 style={{
                   ...quoteButtonStyle,
-                  opacity: busyId === rfq.id ? 0.65 : 1,
+                  opacity: busyId ? 0.65 : 1,
                 }}
               >
-                {busyId === rfq.id
-                  ? "Teklif gönderiliyor..."
-                  : "💰 Nakliye Teklifi Ver"}
+                💰 Nakliye Teklifi Ver
               </button>
             </article>
           ))}
         </section>
       )}
+
+      {selectedRfq && (
+        <div
+          style={modalOverlayStyle}
+          onClick={closeQuoteModal}
+          role="presentation"
+        >
+          <section
+            style={modalStyle}
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="shipping-quote-title"
+          >
+            <div style={modalHeaderStyle}>
+              <div>
+                <div style={modalEyebrowStyle}>NAKLİYE TEKLİFİ</div>
+
+                <h2 id="shipping-quote-title" style={modalTitleStyle}>
+                  Teklifinizi Oluşturun
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeQuoteModal}
+                disabled={Boolean(busyId)}
+                style={closeButtonStyle}
+                aria-label="Teklif formunu kapat"
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={modalRouteStyle}>
+              <div>
+                <span style={modalRouteLabelStyle}>Yükleme</span>
+                <strong>
+                  {selectedRfq.fromCity || "-"}
+                  {selectedRfq.fromDistrict
+                    ? ` / ${selectedRfq.fromDistrict}`
+                    : ""}
+                </strong>
+              </div>
+
+              <span style={modalArrowStyle}>→</span>
+
+              <div>
+                <span style={modalRouteLabelStyle}>Teslimat</span>
+                <strong>
+                  {selectedRfq.toCity || "-"}
+                  {selectedRfq.toDistrict ? ` / ${selectedRfq.toDistrict}` : ""}
+                </strong>
+              </div>
+            </div>
+
+            <label style={fieldStyle}>
+              <span style={fieldLabelStyle}>Teklif fiyatı</span>
+
+              <div style={moneyInputWrapStyle}>
+                <input
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={quotePrice}
+                  onChange={(event) => setQuotePrice(event.target.value)}
+                  placeholder="Örnek: 12500"
+                  style={moneyInputStyle}
+                  autoFocus
+                />
+
+                <span style={currencyStyle}>₺</span>
+              </div>
+            </label>
+
+            <label style={fieldStyle}>
+              <span style={fieldLabelStyle}>Tahmini teslim süresi</span>
+
+              <div style={moneyInputWrapStyle}>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  inputMode="numeric"
+                  value={deliveryDays}
+                  onChange={(event) => setDeliveryDays(event.target.value)}
+                  placeholder="Örnek: 2"
+                  style={moneyInputStyle}
+                />
+
+                <span style={currencyStyle}>Gün</span>
+              </div>
+            </label>
+
+            <label style={fieldStyle}>
+              <span style={fieldLabelStyle}>Teklif notu</span>
+
+              <textarea
+                value={quoteNote}
+                onChange={(event) => setQuoteNote(event.target.value)}
+                placeholder="Araç, yükleme saati veya taşıma koşullarıyla ilgili not ekleyin."
+                maxLength={500}
+                style={textareaStyle}
+              />
+
+              <small style={characterStyle}>{quoteNote.length}/500</small>
+            </label>
+
+            {formError && <div style={formErrorStyle}>{formError}</div>}
+
+            <div style={modalActionsStyle}>
+              <button
+                type="button"
+                onClick={closeQuoteModal}
+                disabled={Boolean(busyId)}
+                style={cancelButtonStyle}
+              >
+                Vazgeç
+              </button>
+
+              <button
+                type="button"
+                onClick={sendQuote}
+                disabled={Boolean(busyId)}
+                style={{
+                  ...submitButtonStyle,
+                  opacity: busyId ? 0.65 : 1,
+                }}
+              >
+                {busyId ? "Gönderiliyor..." : "Teklifi Gönder"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
 
-function Info({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) {
+function Info({ label, value }: { label: string; value: string | number }) {
   return (
     <div style={infoStyle}>
       <span>{label}</span>
@@ -457,4 +611,195 @@ const emptyStyle: CSSProperties = {
   background: "#ffffff",
   border: "1px solid #e2e8f0",
   boxShadow: "0 12px 28px rgba(15,23,42,0.08)",
+};
+
+const modalOverlayStyle: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 1000,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 20,
+  background: "rgba(15, 23, 42, 0.68)",
+  backdropFilter: "blur(5px)",
+};
+
+const modalStyle: CSSProperties = {
+  width: "100%",
+  maxWidth: 540,
+  maxHeight: "calc(100vh - 40px)",
+  overflowY: "auto",
+  padding: 24,
+  borderRadius: 24,
+  background: "#ffffff",
+  boxShadow: "0 30px 80px rgba(15, 23, 42, 0.35)",
+};
+
+const modalHeaderStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  gap: 16,
+  marginBottom: 18,
+};
+
+const modalEyebrowStyle: CSSProperties = {
+  marginBottom: 5,
+  color: "#0f766e",
+  fontSize: 11,
+  fontWeight: 900,
+  letterSpacing: 0.8,
+};
+
+const modalTitleStyle: CSSProperties = {
+  margin: 0,
+  color: "#0f172a",
+  fontSize: 25,
+  fontWeight: 900,
+};
+
+const closeButtonStyle: CSSProperties = {
+  width: 38,
+  height: 38,
+  flexShrink: 0,
+  border: "1px solid #e2e8f0",
+  borderRadius: 12,
+  background: "#f8fafc",
+  color: "#334155",
+  fontSize: 25,
+  lineHeight: 1,
+  cursor: "pointer",
+};
+
+const modalRouteStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr auto 1fr",
+  alignItems: "center",
+  gap: 12,
+  marginBottom: 20,
+  padding: 15,
+  border: "1px solid #99f6e4",
+  borderRadius: 16,
+  background: "#f0fdfa",
+  color: "#0f172a",
+};
+
+const modalRouteLabelStyle: CSSProperties = {
+  display: "block",
+  marginBottom: 4,
+  color: "#0f766e",
+  fontSize: 11,
+  fontWeight: 900,
+};
+
+const modalArrowStyle: CSSProperties = {
+  color: "#0f766e",
+  fontSize: 21,
+  fontWeight: 900,
+};
+
+const fieldStyle: CSSProperties = {
+  display: "grid",
+  gap: 8,
+  marginBottom: 16,
+};
+
+const fieldLabelStyle: CSSProperties = {
+  color: "#334155",
+  fontSize: 14,
+  fontWeight: 800,
+};
+
+const moneyInputWrapStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "stretch",
+  overflow: "hidden",
+  border: "1px solid #cbd5e1",
+  borderRadius: 13,
+  background: "#ffffff",
+};
+
+const moneyInputStyle: CSSProperties = {
+  width: "100%",
+  minWidth: 0,
+  padding: "13px 14px",
+  border: "none",
+  outline: "none",
+  color: "#0f172a",
+  fontSize: 16,
+};
+
+const currencyStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  minWidth: 58,
+  padding: "0 13px",
+  borderLeft: "1px solid #e2e8f0",
+  background: "#f8fafc",
+  color: "#475569",
+  fontSize: 14,
+  fontWeight: 800,
+};
+
+const textareaStyle: CSSProperties = {
+  width: "100%",
+  minHeight: 110,
+  resize: "vertical",
+  boxSizing: "border-box",
+  padding: 13,
+  border: "1px solid #cbd5e1",
+  borderRadius: 13,
+  outline: "none",
+  color: "#0f172a",
+  fontFamily: "inherit",
+  fontSize: 15,
+  lineHeight: 1.5,
+};
+
+const characterStyle: CSSProperties = {
+  justifySelf: "end",
+  color: "#94a3b8",
+  fontSize: 12,
+};
+
+const formErrorStyle: CSSProperties = {
+  marginBottom: 16,
+  padding: 12,
+  border: "1px solid #fecaca",
+  borderRadius: 12,
+  background: "#fef2f2",
+  color: "#b91c1c",
+  fontSize: 14,
+  fontWeight: 700,
+};
+
+const modalActionsStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 12,
+  marginTop: 6,
+};
+
+const cancelButtonStyle: CSSProperties = {
+  minHeight: 48,
+  border: "1px solid #cbd5e1",
+  borderRadius: 13,
+  background: "#ffffff",
+  color: "#334155",
+  fontSize: 15,
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
+const submitButtonStyle: CSSProperties = {
+  minHeight: 48,
+  border: "none",
+  borderRadius: 13,
+  background: "#0f766e",
+  color: "#ffffff",
+  fontSize: 15,
+  fontWeight: 900,
+  cursor: "pointer",
 };
