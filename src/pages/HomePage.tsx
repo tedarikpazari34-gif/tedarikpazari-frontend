@@ -273,6 +273,17 @@ export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] =
   useState<ProductCard[]>([]);
   const [search, setSearch] = useState("");
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 700 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 700);
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api"}/products`)
       .then((res) => {
@@ -421,7 +432,7 @@ export default function HomePage() {
             >
               <div
                 style={{
-                  padding: 38,
+                  padding: isMobile ? 22 : 38,
                   maxWidth: 720,
                 }}
               >
@@ -442,8 +453,8 @@ export default function HomePage() {
 
                 <h1
                   style={{
-                    fontSize: 44,
-                    lineHeight: 1.08,
+                    fontSize: isMobile ? 36 : 44,
+                    lineHeight: isMobile ? 1.12 : 1.08,
                     margin: "0 0 18px",
                     fontWeight: 900,
                     maxWidth: 760,
@@ -455,8 +466,8 @@ export default function HomePage() {
 
                 <p
                   style={{
-                    fontSize: 19,
-                    lineHeight: 1.75,
+                    fontSize: isMobile ? 17 : 19,
+                    lineHeight: isMobile ? 1.55 : 1.75,
                     margin: "0 0 24px",
                     maxWidth: 720,
                     color: "rgba(255,255,255,0.96)",
@@ -473,6 +484,7 @@ export default function HomePage() {
                     marginBottom: 10,
                     maxWidth: 650,
                     flexWrap: "wrap",
+                    width: "100%",
                   }}
                 >
                   <input
@@ -509,7 +521,8 @@ export default function HomePage() {
                       );
                     }}
                     style={{
-                      minWidth: 110,
+                      minWidth: isMobile ? "100%" : 110,
+                      width: isMobile ? "100%" : "auto",
                       height: 52,
                       border: "none",
                       background: "#2563eb",
@@ -550,11 +563,17 @@ export default function HomePage() {
                     gap: 12,
                     flexWrap: "wrap",
                     marginBottom: 24,
+                    width: "100%",
                   }}
                 >
                   <Link
                     to="/buyer/rfqs/new"
-                    style={primaryButtonStyle}
+                    style={{
+                      ...primaryButtonStyle,
+                      width: isMobile ? "100%" : "auto",
+                      textAlign: "center",
+                      boxSizing: "border-box",
+                    }}
                   >
                     Ücretsiz Teklif Al
                   </Link>
@@ -564,6 +583,9 @@ export default function HomePage() {
                     style={{
                       ...secondaryButtonStyle,
                       background: "rgba(255,255,255,0.96)",
+                      width: isMobile ? "100%" : "auto",
+                      textAlign: "center",
+                      boxSizing: "border-box",
                     }}
                   >
                     Satıcı Olarak Başla
