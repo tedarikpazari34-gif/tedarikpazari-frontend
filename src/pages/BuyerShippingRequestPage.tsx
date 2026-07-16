@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { TURKEY_CITIES } from "../constants/turkeyCities";
 
 const API = "https://tedarik-backend.onrender.com/api";
 
@@ -52,6 +53,21 @@ export default function BuyerShippingRequestPage() {
   const submit = async () => {
     if (!orderId) {
       alert("Sipariş seçmelisiniz");
+      return;
+    }
+
+    if (!fromAddress) {
+      alert("Çıkış şehrini seçmelisiniz");
+      return;
+    }
+
+    if (!toAddress) {
+      alert("Varış şehrini seçmelisiniz");
+      return;
+    }
+
+    if (fromAddress === toAddress) {
+      alert("Çıkış ve varış şehri aynı olamaz");
       return;
     }
 
@@ -110,11 +126,31 @@ export default function BuyerShippingRequestPage() {
           ))}
         </select>
 
-        <label>Çıkış Adresi</label>
-        <input value={fromAddress} onChange={(e) => setFromAddress(e.target.value)} />
+        <label>Çıkış Şehri</label>
+        <select
+          value={fromAddress}
+          onChange={(e) => setFromAddress(e.target.value)}
+        >
+          <option value="">Şehir seçin</option>
+          {TURKEY_CITIES.map((cityName) => (
+            <option key={cityName} value={cityName}>
+              {cityName}
+            </option>
+          ))}
+        </select>
 
-        <label>Varış Adresi</label>
-        <input value={toAddress} onChange={(e) => setToAddress(e.target.value)} />
+        <label>Varış Şehri</label>
+        <select
+          value={toAddress}
+          onChange={(e) => setToAddress(e.target.value)}
+        >
+          <option value="">Şehir seçin</option>
+          {TURKEY_CITIES.map((cityName) => (
+            <option key={cityName} value={cityName}>
+              {cityName}
+            </option>
+          ))}
+        </select>
 
         <label>Ağırlık</label>
         <input value={weight} onChange={(e) => setWeight(e.target.value)} />
