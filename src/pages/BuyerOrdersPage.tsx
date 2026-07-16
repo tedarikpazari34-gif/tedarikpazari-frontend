@@ -512,6 +512,20 @@ export default function BuyerOrdersPage() {
     💬 Mesajlaş
   </button>
 
+  {["PAID", "PREPARING", "SHIPPED", "COMPLETED"].includes(
+    o.status
+  ) && (
+    <Link
+      to={`/buyer/shipping-request?orderId=${o.id}`}
+      style={{
+        ...shippingButtonStyle,
+        textDecoration: "none",
+      }}
+    >
+      🚚 Nakliye Teklifi Al
+    </Link>
+  )}
+
   {o.status === "PENDING_PAYMENT" && (
                   <button
                     style={{
@@ -705,6 +719,19 @@ const blueButtonStyle: CSSProperties = {
   borderRadius: 12,
   cursor: "pointer",
   fontWeight: 900,
+};
+
+const shippingButtonStyle: CSSProperties = {
+  border: "none",
+  background: "#0f766e",
+  color: "white",
+  padding: "10px 14px",
+  borderRadius: 10,
+  cursor: "pointer",
+  fontWeight: 800,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
 };
 
 const greenButtonStyle: CSSProperties = {

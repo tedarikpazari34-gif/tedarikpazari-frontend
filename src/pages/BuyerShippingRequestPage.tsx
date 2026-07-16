@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const API = "https://tedarik-backend.onrender.com/api";
 
 export default function BuyerShippingRequestPage() {
+  const [params] = useSearchParams();
+  const requestedOrderId = params.get("orderId") || "";
+
   const [orders, setOrders] = useState<any[]>([]);
-  const [orderId, setOrderId] = useState("");
+  const [orderId, setOrderId] = useState(requestedOrderId);
   const [fromAddress, setFromAddress] = useState("İstanbul");
   const [toAddress, setToAddress] = useState("Ankara");
   const [weight, setWeight] = useState("");
@@ -24,7 +28,16 @@ export default function BuyerShippingRequestPage() {
         });
 
         const data = await res.json();
-        setOrders(Array.isArray(data) ? data : []);
+        const loadedOrders = Array.isArray(data) ? data : [];
+
+        setOrders(loadedOrders);
+
+        if (
+          requestedOrderId &&
+          loadedOrders.some((order) => order.id === requestedOrderId)
+        ) {
+          setOrderId(requestedOrderId);
+        }
       } catch (err) {
         console.error(err);
         setOrders([]);
@@ -34,7 +47,7 @@ export default function BuyerShippingRequestPage() {
     };
 
     loadOrders();
-  }, []);
+  }, [requestedOrderId]);
 
   const submit = async () => {
     if (!orderId) {
