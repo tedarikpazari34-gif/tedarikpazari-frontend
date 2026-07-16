@@ -2,6 +2,7 @@ import { useState, type CSSProperties } from "react";
 import axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useNavigate } from "react-router-dom";
+import { TURKEY_CITIES } from "../constants/turkeyCities";
 
 const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
@@ -188,12 +189,19 @@ export default function RegisterPage() {
 
             <div>
               <label style={labelStyle}>İl</label>
-              <input
+              <select
                 style={inputStyle}
-                placeholder="İstanbul"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-              />
+              >
+                <option value="">Şehir seçin</option>
+
+                {TURKEY_CITIES.map((cityName) => (
+                  <option key={cityName} value={cityName}>
+                    {cityName}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>

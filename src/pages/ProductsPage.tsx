@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { TURKEY_CITIES } from "../constants/turkeyCities";
 
 const API = "https://tedarik-backend.onrender.com/api";
 const BASE_URL = "https://tedarik-backend.onrender.com";
@@ -424,12 +425,19 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     style={filterInput}
   />
 
-  <input
+  <select
     value={city}
     onChange={(e) => setCity(e.target.value)}
-    placeholder="Şehir"
     style={filterInput}
-  />
+  >
+    <option value="">Tüm şehirler</option>
+
+    {TURKEY_CITIES.map((cityName) => (
+      <option key={cityName} value={cityName}>
+        {cityName}
+      </option>
+    ))}
+  </select>
 
   <select
     value={sort}

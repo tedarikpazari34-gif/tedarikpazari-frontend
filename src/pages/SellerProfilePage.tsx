@@ -5,6 +5,8 @@ import {
   type CSSProperties,
 } from "react";
 
+import { TURKEY_CITIES } from "../constants/turkeyCities";
+
 type CompanyProfile = {
   id: string;
   name: string;
@@ -289,12 +291,19 @@ export default function SellerProfilePage() {
           <div style={twoColumnStyle}>
             <label style={fieldStyle}>
               <span style={labelStyle}>Şehir</span>
-              <input
+              <select
                 value={city}
                 onChange={(event) => setCity(event.target.value)}
                 style={inputStyle}
-                maxLength={100}
-              />
+              >
+                <option value="">Şehir seçin</option>
+
+                {TURKEY_CITIES.map((cityName) => (
+                  <option key={cityName} value={cityName}>
+                    {cityName}
+                  </option>
+                ))}
+              </select>
             </label>
 
             <label style={fieldStyle}>
