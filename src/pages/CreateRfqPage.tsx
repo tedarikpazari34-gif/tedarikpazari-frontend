@@ -25,11 +25,13 @@ export default function CreateRfqPage() {
   const [product, setProduct] = useState<Product | null>(null);
 
   const [quantity, setQuantity] = useState(copiedQuantity || "100");
+  const [unitType, setUnitType] = useState("Adet");
+  const [deliveryCity, setDeliveryCity] = useState("");
   const [targetPrice, setTargetPrice] = useState("");
   const [note, setNote] = useState(copiedNote || "");
 
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState("");
+  const [createdRfqId, setCreatedRfqId] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -42,6 +44,14 @@ export default function CreateRfqPage() {
 
       if (draft.quantity !== undefined) {
         setQuantity(String(draft.quantity));
+      }
+
+      if (draft.unitType !== undefined) {
+        setUnitType(String(draft.unitType));
+      }
+
+      if (draft.deliveryCity !== undefined) {
+        setDeliveryCity(String(draft.deliveryCity));
       }
 
       if (draft.targetPrice !== undefined) {
@@ -62,6 +72,8 @@ export default function CreateRfqPage() {
         draftKey,
         JSON.stringify({
           quantity,
+          unitType,
+          deliveryCity,
           targetPrice,
           note,
           updatedAt: new Date().toISOString(),
@@ -70,7 +82,7 @@ export default function CreateRfqPage() {
     }, 350);
 
     return () => window.clearTimeout(timer);
-  }, [draftKey, quantity, targetPrice, note]);
+  }, [draftKey, quantity, unitType, deliveryCity, targetPrice, note]);
 
   useEffect(() => {
     async function loadProduct() {
@@ -95,12 +107,26 @@ export default function CreateRfqPage() {
     try {
       setLoading(true);
       setError("");
-      setSuccess("");
 
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Teklif talebi oluşturmak için lütfen giriş yapın.");
+        navigate("/login");
+        return;
+      }
+
+      if (!quantity || Number(quantity) < 1) {
+        setError("Lütfen geçerli bir miktar girin.");
+        return;
+      }
+
+      if (!deliveryCity.trim()) {
+        setError("Lütfen teslimat şehrini yazın.");
+        return;
+      }
+
+      if (!note.trim()) {
+        setError("Satıcıların doğru teklif verebilmesi için kısa bir açıklama yazın.");
         return;
       }
 
@@ -109,10 +135,12 @@ export default function CreateRfqPage() {
         product?.title || productName
           ? `Ürün: ${product?.title || productName}`
           : "",
+        `Miktar Birimi: ${unitType}`,
+        `Teslimat Şehri: ${deliveryCity.trim()}`,
         targetPrice
           ? `Hedef Fiyat: ${Number(targetPrice).toLocaleString("tr-TR")} ₺`
           : "",
-        note,
+        note.trim(),
       ]
         .filter(Boolean)
         .join("\n");
@@ -138,11 +166,7 @@ export default function CreateRfqPage() {
       }
 
       localStorage.removeItem(draftKey);
-      setSuccess("Teklif talebi başarıyla gönderildi.");
-
-      setTimeout(() => {
-        navigate("/buyer/rfqs");
-      }, 1200);
+      setCreatedRfqId(data?.id || "created");
     } catch (err) {
       console.error(err);
       setError("İşlem sırasında hata oluştu");
@@ -151,7 +175,73 @@ export default function CreateRfqPage() {
     }
   };
 
-  const selectedTitle = product?.title || productName || category || "Genel teklif talebi";
+  const selectedTitle =
+    product?.title || productName || category || "Genel teklif talebi";
+
+  if (createdRfqId) {
+    return (
+      <main style={successPageStyle}>
+        <section style={successCardStyle}>
+          <div style={successIconStyle}>✓</div>
+
+          <div style={successEyebrowStyle}>TALEBİNİZ YAYINLANDI</div>
+
+          <h1 style={successTitleStyle}>
+            Teklif talebiniz başarıyla oluşturuldu
+          </h1>
+
+          <p style={successTextStyle}>
+            Talebiniz ilgili tedarikçilere gösterilmeye başlandı.
+            Yeni teklifler geldiğinde bildirim alacaksınız.
+          </p>
+
+          <div style={successSummaryStyle}>
+            <div>
+              <span style={successSummaryLabelStyle}>Talep</span>
+              <strong>{selectedTitle}</strong>
+            </div>
+
+            <div>
+              <span style={successSummaryLabelStyle}>Miktar</span>
+              <strong>
+                {quantity} {unitType}
+              </strong>
+            </div>
+
+            <div>
+              <span style={successSummaryLabelStyle}>Teslimat</span>
+              <strong>{deliveryCity}</strong>
+            </div>
+          </div>
+
+          <div style={successActionStyle}>
+            <button
+              type="button"
+              onClick={() => navigate("/buyer/rfqs")}
+              style={successPrimaryButtonStyle}
+            >
+              Tekliflerimi Gör
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setCreatedRfqId("");
+                setQuantity("100");
+                setUnitType("Adet");
+                setDeliveryCity("");
+                setTargetPrice("");
+                setNote("");
+              }}
+              style={successSecondaryButtonStyle}
+            >
+              Yeni Talep Oluştur
+            </button>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main style={pageStyle}>
@@ -206,11 +296,9 @@ export default function CreateRfqPage() {
           </div>
         )}
 
-        {success && <div style={successStyle}>{success}</div>}
-
         {error && <div style={errorStyle}>{error}</div>}
 
-        <div style={gridStyle}>
+        <div style={formGridStyle}>
           <label style={fieldStyle}>
             <span style={labelStyle}>Miktar *</span>
             <input
@@ -224,6 +312,24 @@ export default function CreateRfqPage() {
           </label>
 
           <label style={fieldStyle}>
+            <span style={labelStyle}>Birim *</span>
+            <select
+              value={unitType}
+              onChange={(e) => setUnitType(e.target.value)}
+              style={inputStyle}
+            >
+              <option value="Adet">Adet</option>
+              <option value="Koli">Koli</option>
+              <option value="Paket">Paket</option>
+              <option value="Kilogram">Kilogram</option>
+              <option value="Ton">Ton</option>
+              <option value="Litre">Litre</option>
+              <option value="Metre">Metre</option>
+              <option value="Palet">Palet</option>
+            </select>
+          </label>
+
+          <label style={fieldStyle}>
             <span style={labelStyle}>Hedef Fiyat</span>
             <input
               type="number"
@@ -232,18 +338,28 @@ export default function CreateRfqPage() {
               value={targetPrice}
               onChange={(e) => setTargetPrice(e.target.value)}
               style={inputStyle}
-              placeholder="Opsiyonel"
+              placeholder="İsteğe bağlı"
             />
           </label>
         </div>
 
         <label style={fieldStyle}>
-          <span style={labelStyle}>Ek Not</span>
+          <span style={labelStyle}>Teslimat Şehri *</span>
+          <input
+            value={deliveryCity}
+            onChange={(e) => setDeliveryCity(e.target.value)}
+            style={inputStyle}
+            placeholder="Örn: İstanbul"
+          />
+        </label>
+
+        <label style={fieldStyle}>
+          <span style={labelStyle}>Ürün ve Teslimat Detayları *</span>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             style={textareaStyle}
-            placeholder="Teslimat adresi, ürün özellikleri, marka tercihi, termin süresi gibi detayları yazın."
+            placeholder="Ölçü, renk, kalite, marka tercihi, paketleme, teslim süresi gibi satıcının teklif vermesi için gerekli bilgileri yazın."
           />
         </label>
 
@@ -259,7 +375,7 @@ export default function CreateRfqPage() {
         </div>
 
         <button onClick={createRfq} disabled={loading} style={buttonStyle}>
-          {loading ? "Gönderiliyor..." : "Teklif Talebi Gönder"}
+          {loading ? "Talebiniz oluşturuluyor..." : "Ücretsiz Teklif Talebi Oluştur"}
         </button>
       </section>
     </main>
@@ -415,9 +531,9 @@ const infoBoxStyle: CSSProperties = {
   marginBottom: 16,
 };
 
-const gridStyle: CSSProperties = {
+const formGridStyle: CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "1fr 1fr",
+  gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
   gap: 14,
 };
 
@@ -475,13 +591,6 @@ const buttonStyle: CSSProperties = {
   cursor: "pointer",
 };
 
-const successStyle: CSSProperties = {
-  background: "#dcfce7",
-  color: "#166534",
-  padding: 14,
-  borderRadius: 12,
-  marginBottom: 16,
-};
 
 const errorStyle: CSSProperties = {
   background: "#fee2e2",
@@ -499,4 +608,109 @@ const draftNoticeStyle: CSSProperties = {
   border: "1px solid #bbf7d0",
   fontSize: 13,
   fontWeight: 800,
+};
+
+const successPageStyle: CSSProperties = {
+  minHeight: "100vh",
+  padding: 32,
+  display: "grid",
+  placeItems: "center",
+  background:
+    "radial-gradient(circle at top, rgba(37,99,235,0.18), transparent 36%), #f8fafc",
+};
+
+const successCardStyle: CSSProperties = {
+  width: "100%",
+  maxWidth: 760,
+  padding: 42,
+  borderRadius: 30,
+  background: "#ffffff",
+  border: "1px solid #dbeafe",
+  boxShadow: "0 28px 70px rgba(15,23,42,0.14)",
+  textAlign: "center",
+};
+
+const successIconStyle: CSSProperties = {
+  width: 76,
+  height: 76,
+  margin: "0 auto 20px",
+  display: "grid",
+  placeItems: "center",
+  borderRadius: 999,
+  background: "#dcfce7",
+  color: "#15803d",
+  fontSize: 38,
+  fontWeight: 900,
+};
+
+const successEyebrowStyle: CSSProperties = {
+  color: "#16a34a",
+  fontSize: 13,
+  fontWeight: 900,
+  letterSpacing: 0.8,
+};
+
+const successTitleStyle: CSSProperties = {
+  margin: "10px 0 12px",
+  color: "#0f172a",
+  fontSize: 36,
+  lineHeight: 1.15,
+  fontWeight: 900,
+};
+
+const successTextStyle: CSSProperties = {
+  maxWidth: 580,
+  margin: "0 auto",
+  color: "#64748b",
+  lineHeight: 1.7,
+  fontSize: 16,
+};
+
+const successSummaryStyle: CSSProperties = {
+  margin: "26px 0",
+  padding: 18,
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+  gap: 12,
+  borderRadius: 20,
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+  textAlign: "left",
+};
+
+const successSummaryLabelStyle: CSSProperties = {
+  display: "block",
+  marginBottom: 5,
+  color: "#64748b",
+  fontSize: 12,
+  fontWeight: 800,
+};
+
+const successActionStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  flexWrap: "wrap",
+  gap: 12,
+};
+
+const successPrimaryButtonStyle: CSSProperties = {
+  minWidth: 190,
+  minHeight: 50,
+  border: "none",
+  borderRadius: 14,
+  background: "#2563eb",
+  color: "#ffffff",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const successSecondaryButtonStyle: CSSProperties = {
+  minWidth: 190,
+  minHeight: 50,
+  border: "1px solid #cbd5e1",
+  borderRadius: 14,
+  background: "#ffffff",
+  color: "#334155",
+  fontWeight: 900,
+  cursor: "pointer",
 };
