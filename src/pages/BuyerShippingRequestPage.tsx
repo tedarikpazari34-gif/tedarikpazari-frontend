@@ -68,7 +68,17 @@ export default function BuyerShippingRequestPage() {
   const [loadingDate, setLoadingDate] = useState("");
   const [requestedDeliveryDate, setRequestedDeliveryDate] =
     useState("");
+  const [deliveryExpectation, setDeliveryExpectation] =
+    useState("");
 
+  const [isFragile, setIsFragile] = useState(false);
+  const [isDangerous, setIsDangerous] = useState(false);
+  const [coldChain, setColdChain] = useState(false);
+  const [stackable, setStackable] = useState(true);
+  const [needForklift, setNeedForklift] = useState(false);
+  const [needCrane, setNeedCrane] = useState(false);
+
+  const [photoUrl, setPhotoUrl] = useState("");
   const [note, setNote] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -523,6 +533,79 @@ export default function BuyerShippingRequestPage() {
           </div>
 
           <label style={fieldStyle}>
+            <span style={labelStyle}>
+              Teslimat Beklentisi
+            </span>
+
+            <select
+              value={deliveryExpectation}
+              onChange={(event) =>
+                setDeliveryExpectation(event.target.value)
+              }
+              style={inputStyle}
+            >
+              <option value="">Seçiniz</option>
+              <option value="ACIL">Acil</option>
+              <option value="1_3_GUN">1–3 gün</option>
+              <option value="1_HAFTA">1 hafta</option>
+              <option value="ESNEK">Esnek / Fark etmez</option>
+            </select>
+          </label>
+
+          <div style={featureGridStyle}>
+            <CheckField
+              label="Kırılabilir yük"
+              checked={isFragile}
+              onChange={setIsFragile}
+            />
+
+            <CheckField
+              label="Tehlikeli madde"
+              checked={isDangerous}
+              onChange={setIsDangerous}
+            />
+
+            <CheckField
+              label="Soğuk zincir gerekli"
+              checked={coldChain}
+              onChange={setColdChain}
+            />
+
+            <CheckField
+              label="Üst üste konulabilir"
+              checked={stackable}
+              onChange={setStackable}
+            />
+
+            <CheckField
+              label="Forklift gerekli"
+              checked={needForklift}
+              onChange={setNeedForklift}
+            />
+
+            <CheckField
+              label="Vinç gerekli"
+              checked={needCrane}
+              onChange={setNeedCrane}
+            />
+          </div>
+
+          <label style={fieldStyle}>
+            <span style={labelStyle}>
+              Yük Fotoğrafı URL
+            </span>
+
+            <input
+              value={photoUrl}
+              onChange={(event) =>
+                setPhotoUrl(event.target.value)
+              }
+              placeholder="İsteğe bağlı görsel bağlantısı"
+              style={inputStyle}
+            />
+          </label>
+
+          <label style={fieldStyle}>
             <span style={labelStyle}>Ek Not</span>
 
             <textarea
@@ -650,6 +733,29 @@ function TextField({
         placeholder={placeholder}
         style={inputStyle}
       />
+    </label>
+  );
+}
+
+function CheckField({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <label style={checkFieldStyle}>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) =>
+          onChange(event.target.checked)
+        }
+      />
+      <span>{label}</span>
     </label>
   );
 }
@@ -791,6 +897,29 @@ const twoColumnStyle: CSSProperties = {
   gridTemplateColumns:
     "repeat(auto-fit, minmax(220px, 1fr))",
   gap: 14,
+};
+
+const featureGridStyle: CSSProperties = {
+  marginBottom: 14,
+  display: "grid",
+  gridTemplateColumns:
+    "repeat(auto-fit, minmax(190px, 1fr))",
+  gap: 10,
+};
+
+const checkFieldStyle: CSSProperties = {
+  minHeight: 46,
+  padding: "10px 12px",
+  display: "flex",
+  alignItems: "center",
+  gap: 9,
+  borderRadius: 12,
+  color: "#334155",
+  background: "#ffffff",
+  border: "1px solid #cbd5e1",
+  fontSize: 13,
+  fontWeight: 800,
+  cursor: "pointer",
 };
 
 const fieldStyle: CSSProperties = {
