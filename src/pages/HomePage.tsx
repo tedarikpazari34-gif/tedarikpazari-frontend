@@ -377,7 +377,7 @@ export default function HomePage() {
             <nav
               style={{
                 display: "flex",
-                gap: 12,
+                gap: isMobile ? 8 : 12,
                 flexWrap: "wrap",
                 width: "100%",
               }}
@@ -669,8 +669,8 @@ export default function HomePage() {
               style={{
                 background: "#ffffff",
                 color: "#0f172a",
-                borderRadius: 28,
-                padding: 28,
+                borderRadius: isMobile ? 20 : 28,
+                padding: isMobile ? 18 : 28,
                 width: "100%",
                 boxShadow: "0 20px 40px rgba(15, 23, 42, 0.16)",
                 border: "1px solid rgba(226,232,240,0.8)",
@@ -680,33 +680,50 @@ export default function HomePage() {
                 style={{
                   fontWeight: 800,
                   color: "#4f46e5",
-                  marginBottom: 10,
-                  fontSize: 14,
+                  marginBottom: isMobile ? 6 : 10,
+                  fontSize: isMobile ? 12 : 14,
                 }}
               >
                 ÖNE ÇIKAN AVANTAJLAR
               </div>
 
-              <h2 style={{ margin: "0 0 18px", fontSize: 28 }}>
+              <h2
+                style={{
+                  margin: isMobile ? "0 0 12px" : "0 0 18px",
+                  fontSize: isMobile ? 22 : 28,
+                  lineHeight: 1.2,
+                }}
+              >
                 Tedarik sürecinizi hızlandırın
               </h2>
 
-              <div style={{ display: "grid", gap: 14 }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: isMobile
+                    ? "repeat(2, minmax(0, 1fr))"
+                    : "1fr",
+                  gap: isMobile ? 9 : 14,
+                }}
+              >
                 {highlights.map((item) => (
                   <div
                     key={item.title}
                     style={{
                       background: "#f8fafc",
                       border: "1px solid #e5e7eb",
-                      borderRadius: 16,
-                      padding: 16,
+                      borderRadius: isMobile ? 13 : 16,
+                      padding: isMobile ? 11 : 16,
+                      minWidth: 0,
                     }}
                   >
                     <div
                       style={{
                         fontWeight: 700,
-                        marginBottom: 6,
+                        marginBottom: isMobile ? 4 : 6,
                         color: "#111827",
+                        fontSize: isMobile ? 13 : 16,
+                        lineHeight: 1.25,
                       }}
                     >
                       {item.title}
@@ -714,8 +731,8 @@ export default function HomePage() {
                     <div
                       style={{
                         color: "#6b7280",
-                        lineHeight: 1.6,
-                        fontSize: 15,
+                        lineHeight: isMobile ? 1.4 : 1.6,
+                        fontSize: isMobile ? 11 : 15,
                       }}
                     >
                       {item.description}
@@ -836,7 +853,7 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section style={{ marginBottom: 28 }}>
+          <section style={{ marginBottom: isMobile ? 18 : 28 }}>
             <div
               style={{
                 display: "flex",
@@ -992,9 +1009,11 @@ export default function HomePage() {
           <section
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: 18,
-              marginBottom: 28,
+              gridTemplateColumns: isMobile
+                ? "1fr"
+                : "repeat(auto-fit, minmax(260px, 1fr))",
+              gap: isMobile ? 9 : 18,
+              marginBottom: isMobile ? 18 : 28,
             }}
           >
             {steps.map((item) => (
@@ -1003,33 +1022,54 @@ export default function HomePage() {
                 style={{
                   background: "#ffffff",
                   color: "#111827",
-                  borderRadius: 22,
-                  padding: 24,
-                  boxShadow: "0 18px 36px rgba(15, 23, 42, 0.10)",
+                  borderRadius: isMobile ? 15 : 22,
+                  padding: isMobile ? 13 : 24,
+                  boxShadow: isMobile
+                    ? "0 8px 18px rgba(15,23,42,0.08)"
+                    : "0 18px 36px rgba(15, 23, 42, 0.10)",
+                  display: isMobile ? "grid" : "block",
+                  gridTemplateColumns: isMobile ? "34px 1fr" : undefined,
+                  columnGap: isMobile ? 11 : undefined,
+                  alignItems: isMobile ? "start" : undefined,
                   border: "1px solid rgba(226,232,240,0.7)",
                 }}
               >
                 <div
                   style={{
-                    width: 44,
-                    height: 44,
+                    width: isMobile ? 34 : 44,
+                    height: isMobile ? 34 : 44,
                     borderRadius: 999,
                     display: "grid",
                     placeItems: "center",
                     background: "#dbeafe",
                     color: "#1d4ed8",
                     fontWeight: 800,
-                    marginBottom: 14,
+                    marginBottom: isMobile ? 0 : 14,
+                    fontSize: isMobile ? 14 : 16,
+                    gridRow: isMobile ? "1 / span 2" : undefined,
                   }}
                 >
                   {item.step}
                 </div>
 
-                <h3 style={{ margin: "0 0 10px", fontSize: 20 }}>
+                <h3
+                  style={{
+                    margin: isMobile ? "1px 0 4px" : "0 0 10px",
+                    fontSize: isMobile ? 15 : 20,
+                    lineHeight: 1.25,
+                  }}
+                >
                   {item.title}
                 </h3>
 
-                <p style={{ margin: 0, color: "#6b7280", lineHeight: 1.65 }}>
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#6b7280",
+                    lineHeight: isMobile ? 1.4 : 1.65,
+                    fontSize: isMobile ? 12 : 16,
+                  }}
+                >
                   {item.description}
                 </p>
               </div>
@@ -1060,7 +1100,7 @@ export default function HomePage() {
                 <h2
                   style={{
                     margin: 0,
-                    fontSize: isMobile ? 27 : 30,
+                    fontSize: isMobile ? 22 : 30,
                     lineHeight: 1.2,
                   }}
                 >
@@ -1073,9 +1113,13 @@ export default function HomePage() {
               style={{
                 background: "#ffffff",
                 color: "#111827",
-                borderRadius: isMobile ? 22 : 24,
-                padding: isMobile ? "28px 20px" : 40,
-                textAlign: "center",
+                borderRadius: isMobile ? 16 : 24,
+                padding: isMobile ? "16px" : 40,
+                textAlign: isMobile ? "left" : "center",
+                display: isMobile ? "grid" : "block",
+                gridTemplateColumns: isMobile ? "40px 1fr" : undefined,
+                gap: isMobile ? 10 : undefined,
+                alignItems: isMobile ? "center" : undefined,
                 boxSizing: "border-box",
                 boxShadow: "0 18px 36px rgba(15,23,42,0.08)",
                 border: "1px solid rgba(226,232,240,0.7)",
@@ -1083,8 +1127,9 @@ export default function HomePage() {
             >
               <div
                 style={{
-                  fontSize: isMobile ? 38 : 46,
-                  marginBottom: isMobile ? 10 : 14,
+                  fontSize: isMobile ? 30 : 46,
+                  marginBottom: isMobile ? 0 : 14,
+                  gridRow: isMobile ? "1 / span 3" : undefined,
                 }}
               >
                 🏢
@@ -1092,8 +1137,8 @@ export default function HomePage() {
 
               <h3
                 style={{
-                  margin: "0 0 12px",
-                  fontSize: isMobile ? 23 : 25,
+                  margin: isMobile ? "0 0 4px" : "0 0 12px",
+                  fontSize: isMobile ? 16 : 25,
                   lineHeight: 1.25,
                 }}
               >
@@ -1104,9 +1149,9 @@ export default function HomePage() {
                 style={{
                   color: "#64748b",
                   maxWidth: 680,
-                  margin: "0 auto 24px",
-                  lineHeight: isMobile ? 1.55 : 1.75,
-                  fontSize: isMobile ? 16 : 17,
+                  margin: isMobile ? "0 0 10px" : "0 auto 24px",
+                  lineHeight: isMobile ? 1.4 : 1.75,
+                  fontSize: isMobile ? 12 : 17,
                 }}
               >
                 Firmanızı ücretsiz oluşturun, ürünlerinizi yayınlayın ve
@@ -1121,11 +1166,12 @@ export default function HomePage() {
                   textDecoration: "none",
                   background: "#2563eb",
                   color: "#ffffff",
-                  padding: "14px 24px",
+                  padding: isMobile ? "10px 13px" : "14px 24px",
                   borderRadius: 12,
                   fontWeight: 800,
-                  width: isMobile ? "100%" : "auto",
-                  maxWidth: isMobile ? 360 : "none",
+                  fontSize: isMobile ? 13 : 16,
+                  width: isMobile ? "fit-content" : "auto",
+                  maxWidth: isMobile ? "none" : "none",
                   boxSizing: "border-box",
                 }}
               >
@@ -1142,8 +1188,8 @@ export default function HomePage() {
                 "linear-gradient(90deg, rgba(15,23,42,0.90) 0%, rgba(23,37,84,0.72) 100%), url('/images/cta-banner.jpg')",
               backgroundSize: "cover",
               backgroundPosition: "center",
-              borderRadius: isMobile ? 22 : 28,
-              padding: isMobile ? "30px 20px" : 34,
+              borderRadius: isMobile ? 17 : 28,
+              padding: isMobile ? "18px 14px" : 34,
               textAlign: "center",
               boxSizing: "border-box",
               boxShadow: "0 24px 50px rgba(15, 23, 42, 0.20)",
@@ -1152,7 +1198,7 @@ export default function HomePage() {
             <h2
               style={{
                 margin: "0 0 12px",
-                fontSize: isMobile ? 29 : 34,
+                fontSize: isMobile ? 21 : 34,
                 lineHeight: 1.2,
               }}
             >
@@ -1160,11 +1206,11 @@ export default function HomePage() {
             </h2>
             <p
               style={{
-                margin: "0 auto 20px",
+                margin: isMobile ? "0 auto 13px" : "0 auto 20px",
                 maxWidth: 760,
                 color: "#cbd5e1",
-                fontSize: isMobile ? 16 : 17,
-                lineHeight: isMobile ? 1.55 : 1.7,
+                fontSize: isMobile ? 12 : 17,
+                lineHeight: isMobile ? 1.4 : 1.7,
               }}
             >
               İşletmenize uygun ürünler için teklif toplayın, tedarikçileri
@@ -1185,9 +1231,10 @@ export default function HomePage() {
                   textDecoration: "none",
                   background: "#22c55e",
                   color: "#fff",
-                  padding: "13px 20px",
+                  padding: isMobile ? "10px 13px" : "13px 20px",
                   borderRadius: 12,
                   fontWeight: 700,
+                  fontSize: isMobile ? 13 : 16,
                   boxShadow: "0 10px 24px rgba(34,197,94,0.24)",
                   width: isMobile ? "100%" : "auto",
                   maxWidth: isMobile ? 360 : "none",
@@ -1201,30 +1248,32 @@ export default function HomePage() {
                 style={{
                   ...secondaryButtonStyle,
                   width: isMobile ? "100%" : "auto",
-                  maxWidth: isMobile ? 360 : "none",
+                  maxWidth: isMobile ? "none" : "none",
                   boxSizing: "border-box",
                   textAlign: "center",
+                  padding: isMobile ? "10px 13px" : "13px 20px",
+                  fontSize: isMobile ? 13 : 16,
                 }}
               >
                 Teklif Talebi Oluştur
               </Link>
-              <Link
-                to={`/products?q=${encodeURIComponent(search.trim())}`}
-                style={{
-                  textDecoration: "none",
-                  background: "#ffffff",
-                  color: "#0f172a",
-                  padding: "13px 20px",
-                  borderRadius: 12,
-                  fontWeight: 700,
-                  width: isMobile ? "100%" : "auto",
-                  maxWidth: isMobile ? 360 : "none",
-                  boxSizing: "border-box",
-                  textAlign: "center",
-                }}
-              >
-                Ürünleri İncele
-              </Link>
+              {!isMobile && (
+                <Link
+                  to={`/products?q=${encodeURIComponent(search.trim())}`}
+                  style={{
+                    textDecoration: "none",
+                    background: "#ffffff",
+                    color: "#0f172a",
+                    padding: "13px 20px",
+                    borderRadius: 12,
+                    fontWeight: 700,
+                    boxSizing: "border-box",
+                    textAlign: "center",
+                  }}
+                >
+                  Ürünleri İncele
+                </Link>
+              )}
             </div>
           </section>
         </div>
