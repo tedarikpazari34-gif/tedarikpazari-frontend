@@ -6,28 +6,52 @@ type NavItem = {
   to: string;
 };
 
-
 const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
+const publicLinks: NavItem[] = [
+  { label: "Ana Sayfa", to: "/" },
+  { label: "Ürünler", to: "/products" },
+];
+
 const buyerLinks: NavItem[] = [
-  { label: "Favorilerim", to: "/favorites" },
+  { label: "Dashboard", to: "/buyer/dashboard" },
   { label: "Ana Sayfa", to: "/" },
   { label: "Ürünler", to: "/products" },
   { label: "Tekliflerim", to: "/tekliflerim" },
   { label: "Siparişlerim", to: "/buyer/orders" },
+  { label: "Nakliye Teklifleri", to: "/buyer/shipping-quotes" },
+  { label: "Favorilerim", to: "/favorites" },
+  { label: "Mesajlar", to: "/chat" },
+  { label: "Cüzdanım", to: "/wallet" },
 ];
 
 const sellerLinks: NavItem[] = [
-  { label: "Firma Profilim", to: "/seller/profile" },
+  { label: "Dashboard", to: "/seller/dashboard" },
   { label: "Gelen Talepler", to: "/seller/rfqs" },
+  { label: "Tekliflerim", to: "/seller/quotes" },
+  { label: "Siparişlerim", to: "/seller/orders" },
   { label: "Ürünlerim", to: "/seller/products" },
-  { label: "Seller Siparişleri", to: "/seller/orders" },
+  { label: "Firma Profilim", to: "/seller/profile" },
+  { label: "Cüzdanım", to: "/wallet" },
+  { label: "Mesajlar", to: "/chat" },
 ];
 
-const accountLinks: NavItem[] = [
+const logisticsLinks: NavItem[] = [
+  { label: "Dashboard", to: "/logistics/dashboard" },
+  { label: "Açık Yükler", to: "/logistics/shipping" },
+  { label: "Taşımalarım", to: "/logistics/orders" },
   { label: "Mesajlar", to: "/chat" },
-  { label: "Cüzdanım", to: "/wallet" },
+];
+
+const adminLinks: NavItem[] = [
+  { label: "Dashboard", to: "/admin" },
+  { label: "Şirketler", to: "/admin/companies" },
+  { label: "Ürün Yönetimi", to: "/admin/products" },
+  { label: "Ödemeler", to: "/admin/payouts" },
+  { label: "Uyuşmazlıklar", to: "/admin/disputes" },
+  { label: "Finans", to: "/admin/finance" },
+  { label: "Mesaj Denetimi", to: "/admin/chat-moderation" },
 ];
 
 export default function Navbar() {
@@ -36,54 +60,77 @@ export default function Navbar() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+
+  const roleLinks: NavItem[] =
+    role === "BUYER"
+      ? buyerLinks
+      : role === "SELLER"
+        ? sellerLinks
+        : role === "LOGISTICS"
+          ? logisticsLinks
+          : role === "ADMIN"
+            ? adminLinks
+            : publicLinks;
+
+  const mobileSectionTitle =
+    role === "BUYER"
+      ? "Alıcı Paneli"
+      : role === "SELLER"
+        ? "Satıcı Paneli"
+        : role === "LOGISTICS"
+          ? "Lojistik Paneli"
+          : role === "ADMIN"
+            ? "Yönetim Paneli"
+            : "Menü";
 
   useEffect(() => {
-  const loadUnreadCount = async () => {
-    try {
-      if (!token) {
+    const loadUnreadCount = async () => {
+      try {
+        if (!token) {
+          setUnreadCount(0);
+          return;
+        }
+
+        const res = await fetch(`${API}/notifications/unread-count`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok) {
+          setUnreadCount(0);
+          return;
+        }
+
+        setUnreadCount(Number(data?.count || 0));
+      } catch (err) {
+        console.error("NOTIFICATION COUNT ERROR:", err);
         setUnreadCount(0);
-        return;
       }
+    };
 
-      const res = await fetch(`${API}/notifications/unread-count`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    loadUnreadCount();
 
-      const data = await res.json().catch(() => null);
+    const intervalId = window.setInterval(loadUnreadCount, 30000);
 
-      if (!res.ok) {
-        setUnreadCount(0);
-        return;
-      }
-
-      setUnreadCount(Number(data?.count || 0));
-    } catch (err) {
-      console.error("NOTIFICATION COUNT ERROR:", err);
-      setUnreadCount(0);
-    }
-  };
-
-  loadUnreadCount();
-
-  const intervalId = window.setInterval(loadUnreadCount, 30000);
-
-  window.addEventListener("storage", loadUnreadCount);
-  window.addEventListener(
-    "notifications-changed",
-    loadUnreadCount as EventListener
-  );
-
-  return () => {
-    window.clearInterval(intervalId);
-    window.removeEventListener("storage", loadUnreadCount);
-    window.removeEventListener(
+    window.addEventListener("storage", loadUnreadCount);
+    window.addEventListener(
       "notifications-changed",
-      loadUnreadCount as EventListener
+      loadUnreadCount as EventListener,
     );
-  };
-}, [token]);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("storage", loadUnreadCount);
+      window.removeEventListener(
+        "notifications-changed",
+        loadUnreadCount as EventListener,
+      );
+    };
+  }, [token]);
 
   const logout = () => {
     localStorage.clear();
@@ -100,14 +147,12 @@ export default function Navbar() {
 
           <span>
             TEDARİK PAZARI
-            <small style={brandSubStyle}>B2B Marketplace</small>
+            <small style={brandSubStyle}>B2B Pazaryeri</small>
           </span>
         </Link>
 
         <nav style={desktopNavStyle}>
-          <NavGroup items={buyerLinks} />
-          <NavGroup items={sellerLinks} />
-          <NavGroup items={accountLinks} />
+          <NavGroup items={roleLinks} />
 
           <Link to="/notifications" style={bellStyle}>
             🔔
@@ -147,20 +192,8 @@ export default function Navbar() {
       {open && (
         <div style={mobileMenuStyle}>
           <MobileSection
-            title="Alıcı Paneli"
-            items={buyerLinks}
-            close={() => setOpen(false)}
-          />
-
-          <MobileSection
-            title="Satıcı Paneli"
-            items={sellerLinks}
-            close={() => setOpen(false)}
-          />
-
-          <MobileSection
-            title="Hesap"
-            items={accountLinks}
+            title={mobileSectionTitle}
+            items={roleLinks}
             close={() => setOpen(false)}
           />
 
