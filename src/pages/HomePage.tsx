@@ -327,6 +327,8 @@ export default function HomePage() {
       <div
         style={{
           minHeight: "100vh",
+          width: "100%",
+          overflowX: "hidden",
           background:
             "radial-gradient(circle at top left, rgba(37,99,235,0.18), transparent 30%), #081120",
           color: "#ffffff",
@@ -336,7 +338,9 @@ export default function HomePage() {
           style={{
             maxWidth: 1240,
             margin: "0 auto",
-            padding: "28px 20px 72px",
+            padding: isMobile ? "18px 14px 48px" : "28px 20px 72px",
+            width: "100%",
+            boxSizing: "border-box",
           }}
         >
           <header
@@ -375,6 +379,7 @@ export default function HomePage() {
                 display: "flex",
                 gap: 12,
                 flexWrap: "wrap",
+                width: "100%",
               }}
             >
               <Link
@@ -1008,7 +1013,13 @@ export default function HomePage() {
                 >
                   TEDARİKÇİLER
                 </div>
-                <h2 style={{ margin: 0, fontSize: 30 }}>
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: isMobile ? 27 : 30,
+                    lineHeight: 1.2,
+                  }}
+                >
                   Kurucu Tedarikçiler
                 </h2>
               </div>
@@ -1018,16 +1029,30 @@ export default function HomePage() {
               style={{
                 background: "#ffffff",
                 color: "#111827",
-                borderRadius: 24,
-                padding: 40,
+                borderRadius: isMobile ? 22 : 24,
+                padding: isMobile ? "28px 20px" : 40,
                 textAlign: "center",
+                boxSizing: "border-box",
                 boxShadow: "0 18px 36px rgba(15,23,42,0.08)",
                 border: "1px solid rgba(226,232,240,0.7)",
               }}
             >
-              <div style={{ fontSize: 46, marginBottom: 14 }}>🏢</div>
+              <div
+                style={{
+                  fontSize: isMobile ? 38 : 46,
+                  marginBottom: isMobile ? 10 : 14,
+                }}
+              >
+                🏢
+              </div>
 
-              <h3 style={{ margin: "0 0 12px", fontSize: 25 }}>
+              <h3
+                style={{
+                  margin: "0 0 12px",
+                  fontSize: isMobile ? 23 : 25,
+                  lineHeight: 1.25,
+                }}
+              >
                 Kurucu Tedarikçilerimizi Arıyoruz
               </h3>
 
@@ -1036,7 +1061,8 @@ export default function HomePage() {
                   color: "#64748b",
                   maxWidth: 680,
                   margin: "0 auto 24px",
-                  lineHeight: 1.75,
+                  lineHeight: isMobile ? 1.55 : 1.75,
+                  fontSize: isMobile ? 16 : 17,
                 }}
               >
                 Firmanızı ücretsiz oluşturun, ürünlerinizi yayınlayın ve
@@ -1054,6 +1080,9 @@ export default function HomePage() {
                   padding: "14px 24px",
                   borderRadius: 12,
                   fontWeight: 800,
+                  width: isMobile ? "100%" : "auto",
+                  maxWidth: isMobile ? 360 : "none",
+                  boxSizing: "border-box",
                 }}
               >
                 Tedarikçi Olarak Katıl
@@ -1069,13 +1098,20 @@ export default function HomePage() {
                 "linear-gradient(90deg, rgba(15,23,42,0.90) 0%, rgba(23,37,84,0.72) 100%), url('/images/cta-banner.jpg')",
               backgroundSize: "cover",
               backgroundPosition: "center",
-              borderRadius: 28,
-              padding: 34,
+              borderRadius: isMobile ? 22 : 28,
+              padding: isMobile ? "30px 20px" : 34,
               textAlign: "center",
+              boxSizing: "border-box",
               boxShadow: "0 24px 50px rgba(15, 23, 42, 0.20)",
             }}
           >
-            <h2 style={{ margin: "0 0 12px", fontSize: 34 }}>
+            <h2
+              style={{
+                margin: "0 0 12px",
+                fontSize: isMobile ? 29 : 34,
+                lineHeight: 1.2,
+              }}
+            >
               Toplu alım yapmak mı istiyorsunuz?
             </h2>
             <p
@@ -1083,8 +1119,8 @@ export default function HomePage() {
                 margin: "0 auto 20px",
                 maxWidth: 760,
                 color: "#cbd5e1",
-                lineHeight: 1.7,
-                fontSize: 17,
+                fontSize: isMobile ? 16 : 17,
+                lineHeight: isMobile ? 1.55 : 1.7,
               }}
             >
               İşletmenize uygun ürünler için teklif toplayın, tedarikçileri
@@ -1109,11 +1145,23 @@ export default function HomePage() {
                   borderRadius: 12,
                   fontWeight: 700,
                   boxShadow: "0 10px 24px rgba(34,197,94,0.24)",
+                  width: isMobile ? "100%" : "auto",
+                  maxWidth: isMobile ? 360 : "none",
+                  boxSizing: "border-box",
                 }}
               >
                 Ücretsiz Başla
               </Link>
-              <Link to="/buyer/rfqs/new" style={secondaryButtonStyle}>
+              <Link
+                to="/buyer/rfqs/new"
+                style={{
+                  ...secondaryButtonStyle,
+                  width: isMobile ? "100%" : "auto",
+                  maxWidth: isMobile ? 360 : "none",
+                  boxSizing: "border-box",
+                  textAlign: "center",
+                }}
+              >
                 Teklif Talebi Oluştur
               </Link>
               <Link
@@ -1125,6 +1173,10 @@ export default function HomePage() {
                   padding: "13px 20px",
                   borderRadius: 12,
                   fontWeight: 700,
+                  width: isMobile ? "100%" : "auto",
+                  maxWidth: isMobile ? 360 : "none",
+                  boxSizing: "border-box",
+                  textAlign: "center",
                 }}
               >
                 Ürünleri İncele
