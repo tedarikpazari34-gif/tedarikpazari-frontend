@@ -17,17 +17,17 @@ const API =
   "https://tedarik-backend.onrender.com/api";
 
 const VEHICLE_TYPES = [
-  "Kamyonet",
-  "Kamyon",
-  "Tır",
-  "Tenteli Tır",
-  "Frigorifik Araç",
-  "Konteyner Taşıma",
-  "Parsiyel Taşıma",
-  "Panelvan",
-  "Açık Kasa",
-  "Kapalı Kasa",
-  "Diğer",
+  { value: "Kamyonet", icon: "🚐" },
+  { value: "Kamyon", icon: "🚚" },
+  { value: "Tır", icon: "🚛" },
+  { value: "Tenteli Tır", icon: "🚛" },
+  { value: "Frigorifik Araç", icon: "❄️" },
+  { value: "Konteyner Taşıma", icon: "📦" },
+  { value: "Parsiyel Taşıma", icon: "🧩" },
+  { value: "Panelvan", icon: "🚐" },
+  { value: "Açık Kasa", icon: "🛻" },
+  { value: "Kapalı Kasa", icon: "🚚" },
+  { value: "Diğer", icon: "➕" },
 ];
 
 type Order = {
@@ -393,27 +393,32 @@ export default function BuyerShippingRequestPage() {
             />
           </div>
 
-          <label style={fieldStyle}>
+          <div style={fieldStyle}>
             <span style={labelStyle}>
               Araç / Taşıma Tipi *
             </span>
 
-            <select
-              value={vehicleType}
-              onChange={(event) =>
-                setVehicleType(event.target.value)
-              }
-              style={inputStyle}
-            >
-              <option value="">Araç tipi seçin</option>
+            <div style={vehicleGridStyle}>
+              {VEHICLE_TYPES.map((item) => {
+                const selected = vehicleType === item.value;
 
-              {VEHICLE_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </label>
+                return (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setVehicleType(item.value)}
+                    style={{
+                      ...vehicleCardStyle,
+                      ...(selected ? selectedVehicleCardStyle : {}),
+                    }}
+                  >
+                    <span style={vehicleIconStyle}>{item.icon}</span>
+                    <span>{item.value}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </FormSection>
 
         <FormSection
@@ -897,6 +902,37 @@ const twoColumnStyle: CSSProperties = {
   gridTemplateColumns:
     "repeat(auto-fit, minmax(220px, 1fr))",
   gap: 14,
+};
+
+const vehicleGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(135px, 1fr))",
+  gap: 10,
+};
+
+const vehicleCardStyle: CSSProperties = {
+  minHeight: 78,
+  padding: 12,
+  display: "grid",
+  placeItems: "center",
+  gap: 6,
+  borderRadius: 14,
+  border: "1px solid #cbd5e1",
+  background: "#ffffff",
+  color: "#334155",
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
+const selectedVehicleCardStyle: CSSProperties = {
+  border: "2px solid #0f766e",
+  background: "#f0fdfa",
+  color: "#115e59",
+  boxShadow: "0 8px 18px rgba(15,118,110,0.12)",
+};
+
+const vehicleIconStyle: CSSProperties = {
+  fontSize: 25,
 };
 
 const featureGridStyle: CSSProperties = {
