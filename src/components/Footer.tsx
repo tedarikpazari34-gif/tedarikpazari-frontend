@@ -82,6 +82,10 @@ function FooterColumn({
 }
 
 const footerStyle: CSSProperties = {
+  width: "100%",
+  maxWidth: "100%",
+  overflowX: "hidden",
+  boxSizing: "border-box",
   padding: "56px 24px 22px",
   color: "#e2e8f0",
   background:
@@ -89,14 +93,17 @@ const footerStyle: CSSProperties = {
 };
 
 const mainStyle: CSSProperties = {
+  width: "100%",
   maxWidth: 1180,
+  minWidth: 0,
   margin: "0 auto",
   display: "grid",
-  gridTemplateColumns: "minmax(240px, 2fr) repeat(3, minmax(150px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
   gap: 38,
 };
 
 const brandColumnStyle: CSSProperties = {
+  minWidth: 0,
   display: "flex",
   alignItems: "flex-start",
   gap: 14,
@@ -127,6 +134,7 @@ const textStyle: CSSProperties = {
 };
 
 const columnStyle: CSSProperties = {
+  minWidth: 0,
   display: "flex",
   flexDirection: "column",
   gap: 12,
@@ -139,9 +147,12 @@ const columnTitleStyle: CSSProperties = {
 };
 
 const linkStyle: CSSProperties = {
+  minWidth: 0,
   color: "#cbd5e1",
   textDecoration: "none",
   fontSize: 14,
+  overflowWrap: "anywhere",
+  wordBreak: "break-word",
 };
 
 const smallTextStyle: CSSProperties = {
@@ -152,7 +163,9 @@ const smallTextStyle: CSSProperties = {
 };
 
 const bottomStyle: CSSProperties = {
+  width: "100%",
   maxWidth: 1180,
+  minWidth: 0,
   margin: "42px auto 0",
   paddingTop: 20,
   borderTop: "1px solid rgba(148,163,184,0.2)",
