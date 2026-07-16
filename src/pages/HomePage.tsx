@@ -442,14 +442,15 @@ export default function HomePage() {
 
                 <h1
                   style={{
-                    fontSize: 36,
-                    lineHeight: 1.1,
+                    fontSize: 44,
+                    lineHeight: 1.08,
                     margin: "0 0 18px",
-                    fontWeight: 800,
+                    fontWeight: 900,
+                    maxWidth: 760,
                     textShadow: "0 8px 30px rgba(0,0,0,0.38)",
                   }}
                 >
-                  Teklif toplayın, güvenli ödeyin, tedarik sürecinizi tek panelden yönetin
+                  Tek Talep Açın, Uygun Tedarikçilerden Teklif Alın
                 </h1>
 
                 <p
@@ -457,65 +458,117 @@ export default function HomePage() {
                     fontSize: 19,
                     lineHeight: 1.75,
                     margin: "0 0 24px",
-                    maxWidth: 680,
+                    maxWidth: 720,
                     color: "rgba(255,255,255,0.96)",
                   }}
                 >
-                  Tedarik Pazarı; alıcıların ürün ve hizmet için teklif topladığı,
-                  satıcıların hızlı teklif verdiği, ödeme ve sipariş sürecinin güvenli
-                  şekilde yönetildiği B2B tedarik platformudur.
+                  Toplu alım ihtiyacınızı yayınlayın, teklifleri karşılaştırın ve
+                  sipariş sürecinizi güvenli ödeme altyapısıyla tek panelden yönetin.
+                  Satıcıysanız yeni taleplere ulaşın ve satış fırsatlarını büyütün.
                 </p>
                 <div
-  style={{
-    display: "flex",
-    gap: 10,
-    marginBottom: 18,
-    maxWidth: 560,
-  }}
->
-  <input
-  value={search}
-  onChange={(e) => setSearch(e.target.value)}
-  onKeyDown={(e) => {
-  if (e.key === "Enter") {
-    navigate(`/products?q=${encodeURIComponent(search)}`);
-  }
-}}
-  placeholder="Ürün ara... örn: temizlik bezi, ambalaj, gıda"
-  style={{
-    flex: 1,
-    height: 48,
-    borderRadius: 12,
-    border: "none",
-    padding: "0 14px",
-    fontSize: 15,
-  }}
-/>
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    marginBottom: 10,
+                    maxWidth: 650,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && search.trim()) {
+                        navigate(
+                          `/products?q=${encodeURIComponent(search.trim())}`
+                        );
+                      }
+                    }}
+                    placeholder="Ürün, kategori veya marka ara..."
+                    style={{
+                      flex: "1 1 340px",
+                      height: 52,
+                      borderRadius: 14,
+                      border: "1px solid rgba(255,255,255,0.22)",
+                      padding: "0 16px",
+                      fontSize: 15,
+                      outline: "none",
+                    }}
+                  />
 
-  <Link
-    to={`/products?q=${encodeURIComponent(search)}`}
-    style={{
-      textDecoration: "none",
-      background: "#1d4ed8",
-      color: "#fff",
-      padding: "13px 22px",
-      borderRadius: 12,
-      fontWeight: 700,
-    }}
-  >
-    Ara
-  </Link>
-</div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const query = search.trim();
+
+                      navigate(
+                        query
+                          ? `/products?q=${encodeURIComponent(query)}`
+                          : "/products"
+                      );
+                    }}
+                    style={{
+                      minWidth: 110,
+                      height: 52,
+                      border: "none",
+                      background: "#2563eb",
+                      color: "#fff",
+                      padding: "0 22px",
+                      borderRadius: 14,
+                      fontWeight: 800,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Ürün Ara
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    color: "#dbeafe",
+                    fontSize: 14,
+                    marginBottom: 20,
+                  }}
+                >
+                  Aradığınız ürünü bulamadınız mı?{" "}
+                  <Link
+                    to="/buyer/rfqs/new"
+                    style={{
+                      color: "#ffffff",
+                      fontWeight: 900,
+                      textDecoration: "underline",
+                    }}
+                  >
+                    Doğrudan teklif talebi oluşturun
+                  </Link>
+                </div>
+
                 <div
                   style={{
                     display: "flex",
                     gap: 12,
                     flexWrap: "wrap",
-                    marginBottom: 22,
+                    marginBottom: 24,
                   }}
                 >
-                  
-</div>
+                  <Link
+                    to="/buyer/rfqs/new"
+                    style={primaryButtonStyle}
+                  >
+                    Ücretsiz Teklif Al
+                  </Link>
+
+                  <Link
+                    to="/register"
+                    style={{
+                      ...secondaryButtonStyle,
+                      background: "rgba(255,255,255,0.96)",
+                    }}
+                  >
+                    Satıcı Olarak Başla
+                  </Link>
+                </div>
 
                 
 
@@ -527,8 +580,12 @@ export default function HomePage() {
                     marginBottom: 26,
                   }}
                 >
-                  {["Verified Suppliers", "RFQ Destekli", "Türkiye + Avrupa"].map(
-                    (item) => (
+                  {[
+                    "Doğrulanmış Tedarikçiler",
+                    "RFQ ile Teklif Toplama",
+                    "Güvenli Ödeme",
+                    "Türkiye Geneli",
+                  ].map((item) => (
                       <span
                         key={item}
                         style={{
@@ -1035,10 +1092,10 @@ export default function HomePage() {
                 Ücretsiz Başla
               </Link>
               <Link to="/buyer/rfqs/new" style={secondaryButtonStyle}>
-              Tedarik Paneli
+                Teklif Talebi Oluştur
               </Link>
               <Link
-                to={`/products?q=${search}`}
+                to={`/products?q=${encodeURIComponent(search.trim())}`}
                 style={{
                   textDecoration: "none",
                   background: "#ffffff",
@@ -1048,7 +1105,7 @@ export default function HomePage() {
                   fontWeight: 700,
                 }}
               >
-                Panele Git
+                Ürünleri İncele
               </Link>
             </div>
           </section>
