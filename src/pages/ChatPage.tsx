@@ -1,6 +1,22 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 type Thread = {
   id: string;
+  type: "RFQ" | "ORDER" | "SHIPPING";
+  logistics?: {
+    id?: string;
+    name?: string;
+  };
+  shippingOrder?: {
+    id: string;
+    trackingNo?: string | null;
+    shippingCompany?: string | null;
+  };
   buyer?: {
     name?: string;
   };
@@ -35,18 +51,14 @@ type Message = {
 import { io } from "socket.io-client";
 
 const API =
-  import.meta.env.VITE_API_URL ||
-  "https://tedarik-backend.onrender.com/api";
+  import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
-const socket = io(
-  API.replace("/api", ""),
-  {
-    transports: ["websocket"],
-    query: {
-      userId: localStorage.getItem("userId") || "",
-    },
-  }
-);
+const socket = io(API.replace("/api", ""), {
+  transports: ["websocket"],
+  query: {
+    userId: localStorage.getItem("userId") || "",
+  },
+});
 
 export default function ChatPage() {
   const [threads, setThreads] = useState<Thread[]>([]);
@@ -63,14 +75,13 @@ export default function ChatPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const typingTimeoutRef = useRef<number | null>(null);
-  
 
   const headers = useMemo(
     () => ({
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     }),
-    [token]
+    [token],
   );
 
   const loadThreads = async () => {
@@ -100,20 +111,18 @@ export default function ChatPage() {
       setMessages([]);
     }
   };
-  const [isMobile, setIsMobile] = useState(
-  window.innerWidth < 900
-);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
   useEffect(() => {
-  const handleResize = () => {
-    setIsMobile(window.innerWidth < 900);
-  };
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 900);
+    };
 
-  window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize);
 
-  return () => {
-    window.removeEventListener("resize", handleResize);
-  };
-}, []);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const sendMessage = async () => {
     if (!selectedThread || !content.trim()) return;
@@ -127,7 +136,7 @@ export default function ChatPage() {
           body: JSON.stringify({
             content,
           }),
-        }
+        },
       );
 
       if (!res.ok) {
@@ -144,121 +153,119 @@ export default function ChatPage() {
     }
   };
   const sendFile = async (file: File) => {
-  if (!selectedThread) return;
+    if (!selectedThread) return;
 
-  try {
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
 
-    formData.append("file", file);
+      formData.append("file", file);
 
-    const res = await fetch(
-      `${API}/chat/threads/${selectedThread.id}/upload`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `${API}/chat/threads/${selectedThread.id}/upload`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
         },
-        body: formData,
+      );
+
+      if (!res.ok) {
+        const err = await res.json();
+
+        alert(err?.message || "Dosya gönderilemedi");
+        return;
       }
-    );
 
-    if (!res.ok) {
-      const err = await res.json();
-
-      alert(err?.message || "Dosya gönderilemedi");
-      return;
+      await loadMessages(selectedThread.id);
+      await loadThreads();
+    } catch (err) {
+      console.error("FILE SEND ERROR:", err);
     }
-
-    await loadMessages(selectedThread.id);
-    await loadThreads();
-  } catch (err) {
-    console.error("FILE SEND ERROR:", err);
-  }
-};
+  };
   useEffect(() => {
     loadThreads();
   }, []);
 
   useEffect(() => {
-  if (!selectedThread) return;
+    if (!selectedThread) return;
 
-  loadMessages(selectedThread.id);
+    loadMessages(selectedThread.id);
 
-  socket.emit("joinThread", {
-    threadId: selectedThread.id,
-  });
+    socket.emit("joinThread", {
+      threadId: selectedThread.id,
+    });
 
-  socket.on("newMessage", (message) => {
-    setMessages((prev) => [...prev, message]);
-    window.dispatchEvent(new Event("storage"));
-  });
+    socket.on("newMessage", (message) => {
+      setMessages((prev) => [...prev, message]);
+      window.dispatchEvent(new Event("storage"));
+    });
 
-  return () => {
-    socket.off("newMessage");
-  };
-}, [selectedThread?.id]);
+    return () => {
+      socket.off("newMessage");
+    };
+  }, [selectedThread?.id]);
   useEffect(() => {
-  socket.on("typingStart", () => {
-    setIsTyping(true);
-  });
+    socket.on("typingStart", () => {
+      setIsTyping(true);
+    });
 
-  socket.on("typingStop", () => {
-    setIsTyping(false);
-  });
+    socket.on("typingStop", () => {
+      setIsTyping(false);
+    });
 
-  return () => {
-    socket.off("typingStart");
-    socket.off("typingStop");
-  };
-}, []);
+    return () => {
+      socket.off("typingStart");
+      socket.off("typingStop");
+    };
+  }, []);
   useEffect(() => {
-  socket.on("userOnline", ({ userId }) => {
-    setOnlineUsers((prev) =>
-      prev.includes(userId)
-        ? prev
-        : [...prev, userId]
-    );
-  });
+    socket.on("userOnline", ({ userId }) => {
+      setOnlineUsers((prev) =>
+        prev.includes(userId) ? prev : [...prev, userId],
+      );
+    });
 
-  socket.on("userOffline", ({ userId }) => {
-    setOnlineUsers((prev) =>
-      prev.filter((id) => id !== userId)
-    );
-  });
+    socket.on("userOffline", ({ userId }) => {
+      setOnlineUsers((prev) => prev.filter((id) => id !== userId));
+    });
 
-  return () => {
-    socket.off("userOnline");
-    socket.off("userOffline");
-  };
-}, []);
+    return () => {
+      socket.off("userOnline");
+      socket.off("userOffline");
+    };
+  }, []);
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
   const selectedTitle =
-    selectedThread?.rfq?.product?.title ||
-    (selectedThread?.order?.id
-      ? `Sipariş #${selectedThread.order.id.slice(0, 8)}`
-      : "Chat");
+    selectedThread?.type === "SHIPPING"
+      ? `Nakliye Sohbeti${
+          selectedThread.shippingOrder?.trackingNo
+            ? ` • ${selectedThread.shippingOrder.trackingNo}`
+            : ""
+        }`
+      : selectedThread?.rfq?.product?.title ||
+        (selectedThread?.order?.id
+          ? `Sipariş #${selectedThread.order.id.slice(0, 8)}`
+          : "Chat");
 
   return (
     <main style={pageStyle}>
       <div
-  style={{
-    ...layoutStyle,
-    gridTemplateColumns: isMobile
-      ? "1fr"
-      : "360px 1fr",
-  }}
->
+        style={{
+          ...layoutStyle,
+          gridTemplateColumns: isMobile ? "1fr" : "360px 1fr",
+        }}
+      >
         <aside
-  style={{
-    ...sidebarStyle,
-    height: isMobile
-      ? "auto"
-      : "calc(100vh - 48px)",
-  }}
->
+          style={{
+            ...sidebarStyle,
+            height: isMobile ? "auto" : "calc(100vh - 48px)",
+          }}
+        >
           <div style={sidebarHeaderStyle}>
             <div>
               <div style={eyebrowStyle}>GÜVENLİ MESAJLAŞMA</div>
@@ -278,10 +285,16 @@ export default function ChatPage() {
             threads.map((thread) => {
               const lastMessage = thread.messages?.[0];
               const title =
-                thread.rfq?.product?.title ||
-                (thread.order?.id
-                  ? `Sipariş #${thread.order.id.slice(0, 8)}`
-                  : "Platform Chat");
+                thread.type === "SHIPPING"
+                  ? `Nakliye Sohbeti${
+                      thread.shippingOrder?.trackingNo
+                        ? ` • ${thread.shippingOrder.trackingNo}`
+                        : ""
+                    }`
+                  : thread.rfq?.product?.title ||
+                    (thread.order?.id
+                      ? `Sipariş #${thread.order.id.slice(0, 8)}`
+                      : "Platform Chat");
 
               return (
                 <button
@@ -301,8 +314,11 @@ export default function ChatPage() {
                   </div>
 
                   <span style={threadSubStyle}>
-                    {thread.buyer?.name || "Buyer"} ↔️{" "}
-                    {thread.seller?.name || "Seller"}
+                    {thread.buyer?.name || "Alıcı"} ↔️{" "}
+                    {thread.seller?.name || "Satıcı"}
+                    {thread.type === "SHIPPING" && thread.logistics?.name
+                      ? ` ↔️ ${thread.logistics.name}`
+                      : ""}
                   </span>
 
                   <span style={previewStyle}>
@@ -315,13 +331,11 @@ export default function ChatPage() {
         </aside>
 
         <section
-  style={{
-    ...chatAreaStyle,
-    height: isMobile
-      ? "75vh"
-      : "calc(100vh - 48px)",
-  }}
->
+          style={{
+            ...chatAreaStyle,
+            height: isMobile ? "75vh" : "calc(100vh - 48px)",
+          }}
+        >
           {!selectedThread ? (
             <div style={emptyChatStyle}>
               <div style={emptyIconStyle}>💬</div>
@@ -334,31 +348,33 @@ export default function ChatPage() {
                 <div>
                   <strong style={chatTitleStyle}>{selectedTitle}</strong>
                   <div
-  style={{
-    ...chatSubStyle,
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-  }}
->
-  <span>
-    {selectedThread.buyer?.name || "Buyer"} ↔️{" "}
-    {selectedThread.seller?.name || "Seller"}
-  </span>
+                    style={{
+                      ...chatSubStyle,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <span>
+                      {selectedThread.buyer?.name || "Alıcı"} ↔️{" "}
+                      {selectedThread.seller?.name || "Satıcı"}
+                      {selectedThread.type === "SHIPPING" &&
+                      selectedThread.logistics?.name
+                        ? ` ↔️ ${selectedThread.logistics.name}`
+                        : ""}
+                    </span>
 
-  <span
-    style={{
-      width: 10,
-      height: 10,
-      borderRadius: "50%",
-      background:
-        onlineUsers.length > 0
-          ? "#22c55e"
-          : "#94a3b8",
-      display: "inline-block",
-    }}
-  />
-</div>
+                    <span
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        background:
+                          onlineUsers.length > 0 ? "#22c55e" : "#94a3b8",
+                        display: "inline-block",
+                      }}
+                    />
+                  </div>
                 </div>
 
                 <span style={headerBadgeStyle}>Platform içi iletişim</span>
@@ -391,121 +407,117 @@ export default function ChatPage() {
                           }}
                         >
                           <>
-  {msg.fileUrl ? (
-    msg.fileType?.startsWith("image/") ? (
-      <img
-        src={`${API.replace("/api", "")}${msg.fileUrl}`}
-        alt={msg.fileName || "file"}
-        style={{
-          maxWidth: 240,
-          borderRadius: 12,
-          display: "block",
-        }}
-      />
-    ) : (
-      <a
-        href={`${API.replace("/api", "")}${msg.fileUrl}`}
-        target="_blank"
-        rel="noreferrer"
-        style={{
-          color: mine ? "white" : "#2563eb",
-          fontWeight: 800,
-        }}
-      >
-        📄 {msg.fileName || "Dosya"}
-      </a>
-    )
-  ) : (
-    <div>{msg.content}</div>
-  )}
-</>
+                            {msg.fileUrl ? (
+                              msg.fileType?.startsWith("image/") ? (
+                                <img
+                                  src={`${API.replace("/api", "")}${msg.fileUrl}`}
+                                  alt={msg.fileName || "file"}
+                                  style={{
+                                    maxWidth: 240,
+                                    borderRadius: 12,
+                                    display: "block",
+                                  }}
+                                />
+                              ) : (
+                                <a
+                                  href={`${API.replace("/api", "")}${msg.fileUrl}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  style={{
+                                    color: mine ? "white" : "#2563eb",
+                                    fontWeight: 800,
+                                  }}
+                                >
+                                  📄 {msg.fileName || "Dosya"}
+                                </a>
+                              )
+                            ) : (
+                              <div>{msg.content}</div>
+                            )}
+                          </>
 
                           <div
-  style={{
-    ...messageTimeStyle,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    gap: 6,
-  }}
->
-  <span>
-    {new Date(msg.createdAt).toLocaleString("tr-TR")}
-  </span>
+                            style={{
+                              ...messageTimeStyle,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-end",
+                              gap: 6,
+                            }}
+                          >
+                            <span>
+                              {new Date(msg.createdAt).toLocaleString("tr-TR")}
+                            </span>
 
-  {mine && (
-    <span>
-      {msg.isRead ? "✓✓" : "✓"}
-    </span>
-  )}
-</div>
+                            {mine && <span>{msg.isRead ? "✓✓" : "✓"}</span>}
+                          </div>
                         </div>
                       </div>
                     );
                   })
                 )}
-  {isTyping && (
-  <div
-    style={{
-      color: "#64748b",
-      fontSize: 13,
-      paddingLeft: 8,
-      fontStyle: "italic",
-    }}
-  >
-    Yazıyor...
-  </div>
-)}
+                {isTyping && (
+                  <div
+                    style={{
+                      color: "#64748b",
+                      fontSize: 13,
+                      paddingLeft: 8,
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Yazıyor...
+                  </div>
+                )}
                 <div ref={bottomRef} />
               </div>
 
               <div style={inputAreaStyle}>
-               <>
-  <input
-    ref={fileInputRef}
-    type="file"
-    accept="image/*,.pdf"
-    style={{ display: "none" }}
-    onChange={(e) => {
-      const file = e.target.files?.[0];
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,.pdf"
+                    style={{ display: "none" }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
 
-      if (file) {
-        sendFile(file);
-      }
-    }}
-  />
+                      if (file) {
+                        sendFile(file);
+                      }
+                    }}
+                  />
 
-  <button
-    type="button"
-    onClick={() => fileInputRef.current?.click()}
-    style={uploadButtonStyle}
-  >
-    📎
-  </button>
-</> 
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={uploadButtonStyle}
+                  >
+                    📎
+                  </button>
+                </>
                 <input
                   value={content}
                   onChange={(e) => {
-  setContent(e.target.value);
+                    setContent(e.target.value);
 
-  if (!selectedThread) return;
+                    if (!selectedThread) return;
 
-  socket.emit("typingStart", {
-    threadId: selectedThread.id,
-    userId: myUserId,
-  });
+                    socket.emit("typingStart", {
+                      threadId: selectedThread.id,
+                      userId: myUserId,
+                    });
 
-  if (typingTimeoutRef.current) {
-    window.clearTimeout(typingTimeoutRef.current);
-  }
+                    if (typingTimeoutRef.current) {
+                      window.clearTimeout(typingTimeoutRef.current);
+                    }
 
-  typingTimeoutRef.current = window.setTimeout(() => {
-    socket.emit("typingStop", {
-      threadId: selectedThread.id,
-      userId: myUserId,
-    });
-  }, 1200);
-}}
+                    typingTimeoutRef.current = window.setTimeout(() => {
+                      socket.emit("typingStop", {
+                        threadId: selectedThread.id,
+                        userId: myUserId,
+                      });
+                    }, 1200);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       sendMessage();
