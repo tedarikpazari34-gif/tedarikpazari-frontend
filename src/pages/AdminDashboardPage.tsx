@@ -26,6 +26,41 @@ type RFQ = {
   id: string;
   status?: string;
 };
+type AdminOverview = {
+  companies: {
+    total: number;
+    pending: number;
+    approved: number;
+    blocked: number;
+  };
+  users: {
+    total: number;
+  };
+  marketplace: {
+    productsTotal: number;
+    productsApproved: number;
+    productsPending: number;
+    rfqsTotal: number;
+    quotesTotal: number;
+    disputesOpen: number;
+    payoutsPending: number;
+  };
+  orders: {
+    total: number;
+    pendingPayment: number;
+    paid: number;
+    preparing: number;
+    shipped: number;
+    completed: number;
+  };
+  finance: {
+    escrowDepositedTotal: number | string;
+    commissionTotal: number | string;
+    walletAvailableTotal: number | string;
+    walletLockedTotal: number | string;
+  };
+};
+
 type AdminMetrics = {
   totalUsers: number;
   totalCompanies: number;
@@ -68,6 +103,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [metrics, setMetrics] = useState<AdminMetrics | null>(null);
+  const [overview, setOverview] = useState<AdminOverview | null>(null);
   const loadAdminData = async () => {
     try {
       setLoading(true);
@@ -84,8 +120,9 @@ export default function AdminDashboardPage() {
         Authorization: `Bearer ${token}`,
       };
 
-      const [metricsRes, ordersRes, rfqsRes] = await Promise.all([
+      const [metricsRes, overviewRes, ordersRes, rfqsRes] = await Promise.all([
         fetch(`${API}/dashboard/admin`, { headers }),
+        fetch(`${API}/admin/metrics/overview`, { headers }),
         fetch(`${API}/orders`, { headers }),
         fetch(`${API}/rfqs/open`, { headers }),
       ]);
@@ -94,6 +131,15 @@ export default function AdminDashboardPage() {
 
       if (metricsRes.ok) {
         setMetrics(metricsData);
+      }
+
+      const overviewData = await overviewRes.json();
+
+      if (overviewRes.ok) {
+        setOverview(overviewData);
+      } else {
+        console.error("ADMIN OVERVIEW ERROR:", overviewData);
+        setOverview(null);
       }
 
       const ordersData = await ordersRes.json();
@@ -232,6 +278,52 @@ export default function AdminDashboardPage() {
         </section>
 
         {error && <div style={errorCardStyle}>{error}</div>}
+
+        <section style={priorityStatsStyle}>
+          <PriorityStat
+            label="Onay Bekleyen Firma"
+            value={overview?.companies.pending ?? 0}
+            to="/admin/companies"
+            tone="warning"
+          />
+
+          <PriorityStat
+            label="Onay Bekleyen Ürün"
+            value={overview?.marketplace.productsPending ?? 0}
+            to="/admin/products"
+            tone="warning"
+          />
+
+          <PriorityStat
+            label="Açık Anlaşmazlık"
+            value={overview?.marketplace.disputesOpen ?? 0}
+            to="/admin/disputes"
+            tone="danger"
+          />
+
+          <PriorityStat
+            label="Bekleyen Satıcı Ödemesi"
+            value={overview?.marketplace.payoutsPending ?? 0}
+            to="/admin/payouts"
+            tone="money"
+          />
+
+          <PriorityStat
+            label="Toplam Sipariş"
+            value={overview?.orders.total ?? totalOrders}
+            to="/admin/finance"
+            tone="info"
+          />
+
+          <PriorityStat
+            label="Escrow İşlem Hacmi"
+            value={formatMoney(
+              overview?.finance.escrowDepositedTotal ?? totalRevenue,
+            )}
+            to="/admin/finance"
+            tone="money"
+          />
+        </section>
 
         <section style={statsStyle}>
           <Stat label="Toplam RFQ" value={metrics?.totalRfqs ?? rfqs.length} />
@@ -402,6 +494,59 @@ export default function AdminDashboardPage() {
   );
 }
 
+function PriorityStat({
+  label,
+  value,
+  to,
+  tone,
+}: {
+  label: string;
+  value: string | number;
+  to: string;
+  tone: "warning" | "danger" | "money" | "info";
+}) {
+  const tones = {
+    warning: {
+      background: "#fffbeb",
+      border: "#f59e0b",
+      color: "#92400e",
+    },
+    danger: {
+      background: "#fef2f2",
+      border: "#ef4444",
+      color: "#991b1b",
+    },
+    money: {
+      background: "#f0fdf4",
+      border: "#22c55e",
+      color: "#166534",
+    },
+    info: {
+      background: "#eff6ff",
+      border: "#2563eb",
+      color: "#1d4ed8",
+    },
+  };
+
+  const selectedTone = tones[tone];
+
+  return (
+    <Link
+      to={to}
+      style={{
+        ...priorityStatCardStyle,
+        background: selectedTone.background,
+        borderColor: selectedTone.border,
+        color: selectedTone.color,
+      }}
+    >
+      <span style={priorityStatLabelStyle}>{label}</span>
+      <strong style={priorityStatValueStyle}>{value}</strong>
+      <span style={priorityStatLinkStyle}>Yönet →</span>
+    </Link>
+  );
+}
+
 function Stat({
   label,
   value,
@@ -475,6 +620,39 @@ const heroAmountStyle: CSSProperties = {
   minWidth: 190,
   display: "grid",
   gap: 6,
+};
+
+const priorityStatsStyle: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto 24px",
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 18,
+};
+
+const priorityStatCardStyle: CSSProperties = {
+  border: "1px solid",
+  borderRadius: 20,
+  padding: 22,
+  display: "grid",
+  gap: 10,
+  textDecoration: "none",
+  boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
+};
+
+const priorityStatLabelStyle: CSSProperties = {
+  fontSize: 14,
+  fontWeight: 800,
+};
+
+const priorityStatValueStyle: CSSProperties = {
+  fontSize: 30,
+  fontWeight: 900,
+};
+
+const priorityStatLinkStyle: CSSProperties = {
+  fontSize: 13,
+  fontWeight: 800,
 };
 
 const statsStyle: CSSProperties = {
