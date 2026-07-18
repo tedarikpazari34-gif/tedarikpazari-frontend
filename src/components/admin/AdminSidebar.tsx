@@ -1,29 +1,33 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from "react-router-dom";
 
 const items = [
   {
-    label: 'Dashboard',
-    path: '/admin',
+    label: "Dashboard",
+    path: "/admin",
   },
   {
-    label: 'Şirketler',
-    path: '/admin/companies',
+    label: "Kontrol Merkezi",
+    path: "/admin/control-center",
   },
   {
-    label: 'Ürünler',
-    path: '/admin/products',
+    label: "Şirketler",
+    path: "/admin/companies",
   },
   {
-    label: 'Payouts',
-    path: '/admin/payouts',
+    label: "Ürünler",
+    path: "/admin/products",
   },
   {
-    label: 'Disputes',
-    path: '/admin/disputes',
+    label: "Payouts",
+    path: "/admin/payouts",
   },
   {
-    label: 'Finans',
-    path: '/admin/finance',
+    label: "Disputes",
+    path: "/admin/disputes",
+  },
+  {
+    label: "Finans",
+    path: "/admin/finance",
   },
 ];
 
@@ -34,10 +38,10 @@ export default function AdminSidebar() {
     <div
       style={{
         width: 260,
-        minHeight: '100vh',
-        background: '#111827',
+        minHeight: "100vh",
+        background: "#111827",
         padding: 24,
-        color: '#fff',
+        color: "#fff",
       }}
     >
       <h2
@@ -52,8 +56,8 @@ export default function AdminSidebar() {
 
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
+          display: "flex",
+          flexDirection: "column",
           gap: 12,
         }}
       >
@@ -65,11 +69,11 @@ export default function AdminSidebar() {
               key={item.path}
               to={item.path}
               style={{
-                padding: '14px 16px',
+                padding: "14px 16px",
                 borderRadius: 12,
-                textDecoration: 'none',
-                background: active ? '#2563eb' : 'transparent',
-                color: '#fff',
+                textDecoration: "none",
+                background: active ? "#2563eb" : "transparent",
+                color: "#fff",
                 fontWeight: 600,
               }}
             >

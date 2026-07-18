@@ -40,6 +40,7 @@ import FavoritesPage from "./pages/FavoritesPage";
 import CompareProductsPage from "./pages/CompareProductsPage";
 import ChatPage from "./pages/ChatPage";
 import AdminChatModerationPage from "./pages/AdminChatModerationPage";
+import AdminControlCenterPage from "./pages/AdminControlCenterPage";
 import SellerStorePage from "./pages/SellerStorePage";
 import LogisticsShippingPage from "./pages/LogisticsShippingPage";
 import BuyerShippingQuotesPage from "./pages/BuyerShippingQuotesPage";
@@ -219,6 +220,15 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminDashboardPage />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/control-center"
+          element={
+            <AdminRoute>
+              <AdminControlCenterPage />
             </AdminRoute>
           }
         />
