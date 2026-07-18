@@ -48,17 +48,12 @@ type Message = {
   };
 };
 
-import { io } from "socket.io-client";
+import { getSocket } from "../lib/socket";
 
 const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
-const socket = io(API.replace("/api", ""), {
-  transports: ["websocket"],
-  query: {
-    userId: localStorage.getItem("userId") || "",
-  },
-});
+const socket = getSocket();
 
 export default function ChatPage() {
   const [threads, setThreads] = useState<Thread[]>([]);

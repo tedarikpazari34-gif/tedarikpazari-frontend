@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { disconnectSocket, getSocket } from "../lib/socket";
 
 type NavItem = {
   label: string;
@@ -132,7 +133,26 @@ export default function Navbar() {
     };
   }, [token]);
 
+  useEffect(() => {
+    if (!token) return;
+
+    const socket = getSocket();
+
+    const handleNewNotification = () => {
+      setUnreadCount((current) => current + 1);
+
+      window.dispatchEvent(new Event("notifications-changed"));
+    };
+
+    socket.on("newNotification", handleNewNotification);
+
+    return () => {
+      socket.off("newNotification", handleNewNotification);
+    };
+  }, [token]);
+
   const logout = () => {
+    disconnectSocket();
     localStorage.clear();
     setUnreadCount(0);
     setOpen(false);
