@@ -77,8 +77,13 @@ export default function SellerProductCreatePage() {
         formData.append("files", file);
       });
 
+      const token = localStorage.getItem("token");
+
       const res = await fetch(`${BASE_URL}/api/upload/multiple`, {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
