@@ -107,7 +107,11 @@ export default function SellerProductsPage() {
                 <div style={imageWrapStyle}>
                   {product.imageUrl ? (
                     <img
-                      src={`${BASE_URL}${product.imageUrl}`}
+                      src={
+                        product.imageUrl.startsWith("http")
+                          ? product.imageUrl
+                          : `${BASE_URL}${product.imageUrl}`
+                      }
                       alt={product.title}
                       style={imageStyle}
                     />
