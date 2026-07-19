@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { disconnectSocket, getSocket } from "../lib/socket";
+import { enablePushNotifications } from "../pushNotifications";
 
 type NavItem = {
   label: string;
@@ -59,6 +60,12 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pushEnabled, setPushEnabled] = useState(
+    typeof window !== "undefined" &&
+      "Notification" in window &&
+      Notification.permission === "granted",
+  );
+  const [pushLoading, setPushLoading] = useState(false);
 
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
@@ -151,6 +158,19 @@ export default function Navbar() {
     };
   }, [token]);
 
+  const enablePush = async () => {
+    try {
+      setPushLoading(true);
+      await enablePushNotifications();
+      setPushEnabled(true);
+      alert("Telefon bildirimleri başarıyla açıldı.");
+    } catch (err: any) {
+      alert(err?.message || "Bildirimler açılamadı.");
+    } finally {
+      setPushLoading(false);
+    }
+  };
+
   const logout = () => {
     disconnectSocket();
     localStorage.clear();
@@ -182,6 +202,17 @@ export default function Navbar() {
               </span>
             )}
           </Link>
+
+          {token && !pushEnabled && (
+            <button
+              type="button"
+              onClick={enablePush}
+              disabled={pushLoading}
+              style={pushButtonStyle}
+            >
+              {pushLoading ? "Açılıyor..." : "Bildirimleri Aç"}
+            </button>
+          )}
 
           {token ? (
             <button onClick={logout} style={logoutButtonStyle}>
@@ -422,6 +453,16 @@ const registerButtonStyle: React.CSSProperties = {
   padding: "10px 14px",
   borderRadius: 12,
   fontWeight: 900,
+  fontSize: 13,
+};
+
+const pushButtonStyle: React.CSSProperties = {
+  border: "1px solid #d1d5db",
+  background: "#ffffff",
+  borderRadius: 10,
+  padding: "9px 12px",
+  cursor: "pointer",
+  fontWeight: 700,
   fontSize: 13,
 };
 
