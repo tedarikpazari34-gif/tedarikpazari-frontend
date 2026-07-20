@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDmkt_dIxdpdjJbsA-Z4nYp2ZNsw2MUpT8",
+  apiKey: "AIzaSyDmkt_dIxdpujJbsA-Z4nYp2ZNsW2MUpT8",
   authDomain: "tedarik-pazari.firebaseapp.com",
   projectId: "tedarik-pazari",
   storageBucket: "tedarik-pazari.firebasestorage.app",
