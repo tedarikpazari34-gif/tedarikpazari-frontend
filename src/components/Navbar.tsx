@@ -158,6 +158,20 @@ export default function Navbar() {
     };
   }, [token]);
 
+  useEffect(() => {
+    if (!token) return;
+    if (!("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
+
+    enablePushNotifications()
+      .then(() => {
+        setPushEnabled(true);
+      })
+      .catch((err) => {
+        console.error("AUTO PUSH TOKEN ERROR:", err);
+      });
+  }, [token]);
+
   const enablePush = async () => {
     try {
       setPushLoading(true);
