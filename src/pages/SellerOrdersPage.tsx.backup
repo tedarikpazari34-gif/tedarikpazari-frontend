@@ -40,10 +40,13 @@ function statusLabel(status: string) {
 
 function statusStyle(status: string): CSSProperties {
   if (status === "PAID") return { background: "#dbeafe", color: "#1d4ed8" };
-  if (status === "PREPARING") return { background: "#ede9fe", color: "#6d28d9" };
+  if (status === "PREPARING")
+    return { background: "#ede9fe", color: "#6d28d9" };
   if (status === "SHIPPED") return { background: "#cffafe", color: "#155e75" };
-  if (status === "COMPLETED") return { background: "#dcfce7", color: "#166534" };
-  if (status === "PENDING_PAYMENT") return { background: "#fef3c7", color: "#92400e" };
+  if (status === "COMPLETED")
+    return { background: "#dcfce7", color: "#166534" };
+  if (status === "PENDING_PAYMENT")
+    return { background: "#fef3c7", color: "#92400e" };
   return { background: "#e5e7eb", color: "#374151" };
 }
 
@@ -82,8 +85,8 @@ export default function SellerOrdersPage() {
       const safeOrders = Array.isArray(data)
         ? data
         : Array.isArray(data?.data)
-        ? data.data
-        : [];
+          ? data.data
+          : [];
 
       setOrders(safeOrders);
     } catch (err) {
@@ -122,57 +125,31 @@ export default function SellerOrdersPage() {
   };
 
   const handleShip = async (orderId: string) => {
-  const shippingCompany = window.prompt(
-    "Kargo firmasını yazın",
-    "Yurtiçi Kargo"
-  );
+    try {
+      const token = localStorage.getItem("token");
 
-  if (!shippingCompany?.trim()) {
-    return;
-  }
+      const res = await fetch(`${API}/orders/${orderId}/ship`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-  const shippingTrackingNo = window.prompt(
-    "Kargo takip numarasını yazın"
-  );
+      const data = await res.json().catch(() => null);
 
-  if (!shippingTrackingNo?.trim()) {
-    return;
-  }
+      if (!res.ok) {
+        alert(data?.message || "Kargo işlemi başarısız");
+        return;
+      }
 
-  try {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("Lütfen giriş yapın");
-      return;
+      alert("Sipariş kargoya verildi 🚚");
+      loadOrders();
+    } catch (err) {
+      console.error("SHIP ERROR:", err);
+      alert("Kargo işlemi sırasında hata oluştu");
     }
+  };
 
-    const res = await fetch(`${API}/orders/${orderId}/ship`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        shippingCompany: shippingCompany.trim(),
-        shippingTrackingNo: shippingTrackingNo.trim(),
-      }),
-    });
-
-    const data = await res.json().catch(() => null);
-
-    if (!res.ok) {
-      alert(data?.message || "Kargo işlemi başarısız");
-      return;
-    }
-
-    alert("Sipariş kargoya verildi 🚚");
-    await loadOrders();
-  } catch (err) {
-    console.error("SHIP ERROR:", err);
-    alert("Kargo işlemi sırasında hata oluştu");
-  }
-};
   const handleOpenDispute = async (orderId: string) => {
     const reason = window.prompt("Uyuşmazlık sebebini yazın");
 
@@ -205,12 +182,12 @@ export default function SellerOrdersPage() {
       }
 
       alert("Uyuşmazlık başarıyla açıldı");
-      loadOrders();
     } catch (err) {
       console.error("DISPUTE ERROR:", err);
       alert("Uyuşmazlık açılırken hata oluştu");
     }
   };
+
   useEffect(() => {
     loadOrders();
   }, []);
@@ -230,7 +207,8 @@ export default function SellerOrdersPage() {
           <div style={eyebrowStyle}>SATICI PANELİ</div>
           <h1 style={titleStyle}>Satıcı Siparişleri</h1>
           <p style={descStyle}>
-            Ödemesi alınan siparişleri hazırlayın, kargoya verin ve satış sürecinizi tek panelden yönetin.
+            Ödemesi alınan siparişleri hazırlayın, kargoya verin ve satış
+            sürecinizi tek panelden yönetin.
           </p>
         </div>
 
@@ -241,9 +219,18 @@ export default function SellerOrdersPage() {
       </section>
 
       <section style={statsStyle}>
-        <Stat label="Ödenen" value={orders.filter((o) => o.status === "PAID").length} />
-        <Stat label="Hazırlanan" value={orders.filter((o) => o.status === "PREPARING").length} />
-        <Stat label="Kargoda" value={orders.filter((o) => o.status === "SHIPPED").length} />
+        <Stat
+          label="Ödenen"
+          value={orders.filter((o) => o.status === "PAID").length}
+        />
+        <Stat
+          label="Hazırlanan"
+          value={orders.filter((o) => o.status === "PREPARING").length}
+        />
+        <Stat
+          label="Kargoda"
+          value={orders.filter((o) => o.status === "SHIPPED").length}
+        />
       </section>
 
       {error ? (
@@ -262,7 +249,9 @@ export default function SellerOrdersPage() {
               <div style={cardTopStyle}>
                 <div>
                   <div style={smallLabelStyle}>Sipariş Ürünü</div>
-                  <h2 style={cardTitleStyle}>{o.rfq?.product?.title || "Ürün"}</h2>
+                  <h2 style={cardTitleStyle}>
+                    {o.rfq?.product?.title || "Ürün"}
+                  </h2>
                 </div>
 
                 <span style={{ ...badgeStyle, ...statusStyle(o.status) }}>
@@ -271,9 +260,15 @@ export default function SellerOrdersPage() {
               </div>
 
               <div style={infoGridStyle}>
-                <Info label="Buyer" value={o.buyer?.name || o.buyer?.companyName || "-"} />
+                <Info
+                  label="Buyer"
+                  value={o.buyer?.name || o.buyer?.companyName || "-"}
+                />
                 <Info label="Miktar" value={o.rfq?.quantity || "-"} />
-                <Info label="Birim Fiyat" value={formatPrice(o.quote?.unitPrice)} />
+                <Info
+                  label="Birim Fiyat"
+                  value={formatPrice(o.quote?.unitPrice)}
+                />
                 <Info label="Toplam" value={formatPrice(o.totalAmount)} />
               </div>
 
@@ -284,13 +279,19 @@ export default function SellerOrdersPage() {
 
               <div style={actionsStyle}>
                 {o.status === "PAID" && (
-                  <button onClick={() => handlePrepare(o.id)} style={orangeButtonStyle}>
+                  <button
+                    onClick={() => handlePrepare(o.id)}
+                    style={orangeButtonStyle}
+                  >
                     🛠 Hazırlamaya Başla
                   </button>
                 )}
 
                 {o.status === "PREPARING" && (
-                  <button onClick={() => handleShip(o.id)} style={blueButtonStyle}>
+                  <button
+                    onClick={() => handleShip(o.id)}
+                    style={blueButtonStyle}
+                  >
                     📦 Kargoya Ver
                   </button>
                 )}
@@ -299,7 +300,7 @@ export default function SellerOrdersPage() {
                   <div style={passiveActionStyle}>İşlem beklenmiyor</div>
                 )}
 
-                {!o.status.includes("CANCELLED") && (
+                {o.status !== "CANCELLED" && (
                   <button
                     onClick={() => handleOpenDispute(o.id)}
                     style={disputeButtonStyle}
@@ -510,6 +511,16 @@ const passiveActionStyle: CSSProperties = {
   fontWeight: 900,
 };
 
+const disputeButtonStyle: CSSProperties = {
+  border: "none",
+  background: "#dc2626",
+  color: "white",
+  padding: "12px 16px",
+  borderRadius: 12,
+  cursor: "pointer",
+  fontWeight: 900,
+};
+
 const emptyCardStyle: CSSProperties = {
   maxWidth: 720,
   margin: "0 auto",
@@ -523,13 +534,4 @@ const emptyCardStyle: CSSProperties = {
 const errorCardStyle: CSSProperties = {
   ...emptyCardStyle,
   color: "#991b1b",
-};
-const disputeButtonStyle: CSSProperties = {
-  border: "none",
-  background: "#dc2626",
-  color: "white",
-  padding: "12px 16px",
-  borderRadius: 12,
-  cursor: "pointer",
-  fontWeight: 900,
 };
