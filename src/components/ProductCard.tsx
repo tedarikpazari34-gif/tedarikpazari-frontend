@@ -163,7 +163,7 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
             marginBottom: 6,
           }}
         >
-          <strong>Satıcı:</strong> Onaylı Tedarikçi
+          <strong>Satıcı:</strong> Doğrulanmış Firma
         </div>
 
         {product.seller?.verified && (
@@ -175,7 +175,7 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
               marginBottom: 16,
             }}
           >
-            ✔ Onaylı Tedarikçi
+            ✔ Doğrulanmış Firma
           </div>
         )}
 

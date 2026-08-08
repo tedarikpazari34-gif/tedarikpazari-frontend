@@ -1460,7 +1460,7 @@ export default function PanelPage() {
             </div>
 
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              {["Verified Suppliers", "RFQ Destekli", "Türkiye + Avrupa"].map((item) => (
+              {["Doğrulanmış Firmalar", "RFQ Destekli", "Türkiye + Avrupa"].map((item) => (
                 <div
                   key={item}
                   style={{
@@ -1755,7 +1755,7 @@ export default function PanelPage() {
                 </div>
 
                 <div>
-                  <strong>Satıcı:</strong> {selectedProduct.seller?.name || "Onaylı Tedarikçi"}
+                  <strong>Satıcı:</strong> {selectedProduct.seller?.name || "Doğrulanmış Firma"}
                 </div>
 
                 {selectedProduct.seller?.verified && (
@@ -1766,7 +1766,7 @@ export default function PanelPage() {
                       marginTop: 4,
                     }}
                   >
-                    ✔ Onaylı Tedarikçi
+                    ✔ Doğrulanmış Firma
                   </div>
                 )}
               </div>

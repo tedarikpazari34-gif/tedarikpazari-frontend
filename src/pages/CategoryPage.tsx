@@ -311,7 +311,7 @@ export default function CategoryPage() {
                     </span>
                   </div>
 
-                  <div style={supplierBadgeStyle}>✔ Verified Supplier</div>
+                  <div style={supplierBadgeStyle}>✔ Doğrulanmış Firma</div>
 
                   <div style={actionsStyle}>
                     <Link to={`/product/${product.id}`} style={detailButtonStyle}>

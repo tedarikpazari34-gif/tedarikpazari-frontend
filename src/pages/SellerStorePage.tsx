@@ -258,7 +258,7 @@ export default function SellerStorePage() {
                 <h1 style={companyTitleStyle}>{company.name}</h1>
 
                 {company.verified && (
-                  <span style={verifiedStyle}>✓ Onaylı Tedarikçi</span>
+                  <span style={verifiedStyle}>✓ Doğrulanmış Firma</span>
                 )}
               </div>
 

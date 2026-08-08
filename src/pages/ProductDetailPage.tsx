@@ -432,7 +432,7 @@ export default function ProductDetailPage() {
           </div>
 
           <div style={badgeRowStyle}>
-            <span style={verifiedBadgeStyle}>✔ Verified Supplier</span>
+            <span style={verifiedBadgeStyle}>✔ Doğrulanmış Firma</span>
 
             {product.rfqEnabled && <span style={rfqBadgeStyle}>RFQ Uygun</span>}
 
@@ -541,7 +541,7 @@ export default function ProductDetailPage() {
                   : "-"
               }
             />
-            <InfoBox label="Tedarikçi" value="Verified Supplier" green />
+            <InfoBox label="Tedarikçi" value="Doğrulanmış Firma" green />
           </div>
 
           <div style={noticeStyle}>
@@ -554,7 +554,7 @@ export default function ProductDetailPage() {
           <div style={supplierCardStyle}>
   <div>
     <div style={supplierTitleStyle}>Tedarikçi Profili</div>
-    <div style={supplierNameStyle}>Verified Supplier</div>
+    <div style={supplierNameStyle}>Doğrulanmış Firma</div>
     <p style={supplierDescStyle}>
       Bu tedarikçi platform kalite ve güven kontrolünden geçmiştir.
     </p>
