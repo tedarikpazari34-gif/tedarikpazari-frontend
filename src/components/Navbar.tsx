@@ -26,6 +26,7 @@ const buyerLinks: NavItem[] = [
   { label: "Favorilerim", to: "/favorites" },
   { label: "Mesajlar", to: "/chat" },
   { label: "Cüzdanım", to: "/wallet" },
+  { label: "Firma Doğrulama", to: "/company/verification" },
 ];
 
 const sellerLinks: NavItem[] = [
@@ -37,6 +38,7 @@ const sellerLinks: NavItem[] = [
   { label: "Firma Profilim", to: "/seller/profile" },
   { label: "Cüzdanım", to: "/wallet" },
   { label: "Mesajlar", to: "/chat" },
+  { label: "Firma Doğrulama", to: "/company/verification" },
 ];
 
 const logisticsLinks: NavItem[] = [

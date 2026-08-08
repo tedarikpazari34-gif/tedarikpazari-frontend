@@ -52,6 +52,7 @@ import LogisticsDashboardPage from "./pages/LogisticsDashboardPage";
 import PanelPage from "./pages/PanelPage";
 import LegalPage from "./pages/LegalPage";
 import CorporatePage from "./pages/CorporatePage";
+import CompanyVerificationPage from "./pages/CompanyVerificationPage";
 
 function PrivateRoute({
   children,
@@ -147,6 +148,16 @@ export default function App() {
           element={
             <PrivateRoute role="BUYER">
               <BuyerRfqsPage />
+            </PrivateRoute>
+          }
+        />
+
+        {/* COMPANY VERIFICATION */}
+        <Route
+          path="/company/verification"
+          element={
+            <PrivateRoute>
+              <CompanyVerificationPage />
             </PrivateRoute>
           }
         />
