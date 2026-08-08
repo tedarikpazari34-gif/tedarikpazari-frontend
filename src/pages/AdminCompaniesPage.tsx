@@ -16,6 +16,7 @@ type Company = {
   createdAt?: string | null;
   role?: string | null;
   status?: string | null;
+  verified?: boolean;
   address?: {
     address?: string;
     district?: string;
@@ -167,6 +168,74 @@ export default function AdminCompaniesPage() {
     } catch (err) {
       console.error(err);
       alert("İşlem hatası");
+    } finally {
+      setActionId("");
+    }
+  };
+
+  const verifyCompany = async (id: string) => {
+    try {
+      setActionId(id);
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API}/companies/${id}/verify`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.message || "Firma doğrulanamadı");
+        return;
+      }
+
+      await loadCompanies();
+
+      setSelectedCompany((current) =>
+        current?.id === id
+          ? { ...current, verified: true }
+          : current
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Doğrulama işlemi başarısız");
+    } finally {
+      setActionId("");
+    }
+  };
+
+  const unverifyCompany = async (id: string) => {
+    try {
+      setActionId(id);
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API}/companies/${id}/unverify`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.message || "Doğrulama kaldırılamadı");
+        return;
+      }
+
+      await loadCompanies();
+
+      setSelectedCompany((current) =>
+        current?.id === id
+          ? { ...current, verified: false }
+          : current
+      );
+    } catch (err) {
+      console.error(err);
+      alert("İşlem başarısız");
     } finally {
       setActionId("");
     }
@@ -525,10 +594,37 @@ export default function AdminCompaniesPage() {
                 label="Durum"
                 value={getStatusLabel(selectedCompany.status)}
               />
+
+
+              <Info
+                label="Firma Doğrulaması"
+                value={
+                  selectedCompany.verified
+                    ? "✓ Doğrulanmış Firma"
+                    : "Doğrulanmadı"
+                }
+              />
             </div>
 
             {selectedCompany.role !== "ADMIN" && (
               <div style={{ ...actionsStyle, marginTop: 24 }}>
+                {selectedCompany.verified ? (
+                  <button
+                    onClick={() => unverifyCompany(selectedCompany.id)}
+                    disabled={actionId === selectedCompany.id}
+                    style={unverifyButtonStyle}
+                  >
+                    Doğrulamayı Kaldır
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => verifyCompany(selectedCompany.id)}
+                    disabled={actionId === selectedCompany.id}
+                    style={verifyButtonStyle}
+                  >
+                    ✓ Firmayı Doğrula
+                  </button>
+                )}
                 {selectedCompany.status !== "APPROVED" && (
                   <button
                     onClick={async () => {
@@ -995,4 +1091,24 @@ const detailGridStyle: CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
   gap: 14,
+};
+
+const verifyButtonStyle: CSSProperties = {
+  border: "none",
+  background: "#0f766e",
+  color: "white",
+  padding: "10px 14px",
+  borderRadius: 10,
+  cursor: "pointer",
+  fontWeight: 900,
+};
+
+const unverifyButtonStyle: CSSProperties = {
+  border: "1px solid #94a3b8",
+  background: "#f8fafc",
+  color: "#334155",
+  padding: "10px 14px",
+  borderRadius: 10,
+  cursor: "pointer",
+  fontWeight: 800,
 };
