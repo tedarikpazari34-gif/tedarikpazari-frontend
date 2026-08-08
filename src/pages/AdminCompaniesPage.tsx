@@ -7,8 +7,22 @@ type Company = {
   name?: string | null;
   companyName?: string | null;
   email?: string | null;
+  phone?: string | null;
+  city?: string | null;
+  taxNumber?: string | null;
+  taxOffice?: string | null;
+  website?: string | null;
+  description?: string | null;
+  createdAt?: string | null;
   role?: string | null;
   status?: string | null;
+  address?: {
+    address?: string;
+    district?: string;
+    companyType?: string;
+    category?: string;
+    fullName?: string;
+  } | null;
   users?: {
     id?: string;
     role?: string;
@@ -57,6 +71,7 @@ export default function AdminCompaniesPage() {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState("");
   const [error, setError] = useState("");
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   const loadCompanies = async () => {
     try {
@@ -318,6 +333,13 @@ export default function AdminCompaniesPage() {
                 </span>
 
                 <span style={miniActionsStyle}>
+                  <button
+                    onClick={() => setSelectedCompany(company)}
+                    style={detailButtonStyle}
+                  >
+                    Detay
+                  </button>
+
                   {isAdmin ? (
                     <span style={adminBadgeStyle}>
                       Admin korunuyor
@@ -389,6 +411,154 @@ export default function AdminCompaniesPage() {
           })}
         </div>
       </section>
+
+      {selectedCompany && (
+        <div style={modalOverlayStyle}>
+          <div style={modalStyle}>
+            <div style={modalHeaderStyle}>
+              <div>
+                <div style={eyebrowDarkStyle}>FİRMA DETAYI</div>
+                <h2 style={{ margin: 0 }}>
+                  {selectedCompany.companyName ||
+                    selectedCompany.name ||
+                    "İsimsiz şirket"}
+                </h2>
+              </div>
+
+              <button
+                onClick={() => setSelectedCompany(null)}
+                style={closeButtonStyle}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={detailGridStyle}>
+              <Info
+                label="Firma Adı"
+                value={
+                  selectedCompany.companyName ||
+                  selectedCompany.name ||
+                  "-"
+                }
+              />
+
+              <Info
+                label="Yetkili Kişi"
+                value={selectedCompany.address?.fullName || "-"}
+              />
+
+              <Info
+                label="Telefon"
+                value={selectedCompany.phone || "-"}
+              />
+
+              <Info
+                label="E-posta"
+                value={
+                  selectedCompany.email ||
+                  selectedCompany.users?.[0]?.email ||
+                  "-"
+                }
+              />
+
+              <Info
+                label="Rol"
+                value={getRoleLabel(
+                  selectedCompany.role ||
+                    selectedCompany.users?.[0]?.role
+                )}
+              />
+
+              <Info
+                label="Kategori / Sektör"
+                value={selectedCompany.address?.category || "-"}
+              />
+
+              <Info
+                label="Şirket Türü"
+                value={selectedCompany.address?.companyType || "-"}
+              />
+
+              <Info
+                label="Şehir"
+                value={selectedCompany.city || "-"}
+              />
+
+              <Info
+                label="İlçe"
+                value={selectedCompany.address?.district || "-"}
+              />
+
+              <Info
+                label="Adres"
+                value={selectedCompany.address?.address || "-"}
+              />
+
+              <Info
+                label="Vergi No"
+                value={selectedCompany.taxNumber || "-"}
+              />
+
+              <Info
+                label="Vergi Dairesi"
+                value={selectedCompany.taxOffice || "-"}
+              />
+
+              <Info
+                label="Web Sitesi"
+                value={selectedCompany.website || "-"}
+              />
+
+              <Info
+                label="Kayıt Tarihi"
+                value={
+                  selectedCompany.createdAt
+                    ? new Date(
+                        selectedCompany.createdAt
+                      ).toLocaleString("tr-TR")
+                    : "-"
+                }
+              />
+
+              <Info
+                label="Durum"
+                value={getStatusLabel(selectedCompany.status)}
+              />
+            </div>
+
+            {selectedCompany.role !== "ADMIN" && (
+              <div style={{ ...actionsStyle, marginTop: 24 }}>
+                {selectedCompany.status !== "APPROVED" && (
+                  <button
+                    onClick={async () => {
+                      await approveCompany(selectedCompany.id);
+                      setSelectedCompany(null);
+                    }}
+                    disabled={actionId === selectedCompany.id}
+                    style={approveButtonStyle}
+                  >
+                    Onayla
+                  </button>
+                )}
+
+                {selectedCompany.status !== "BLOCKED" && (
+                  <button
+                    onClick={async () => {
+                      await blockCompany(selectedCompany.id);
+                      setSelectedCompany(null);
+                    }}
+                    disabled={actionId === selectedCompany.id}
+                    style={blockButtonStyle}
+                  >
+                    Blokla
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
@@ -771,4 +941,58 @@ const errorCardStyle: CSSProperties = {
   ...emptyCardStyle,
   color: "#991b1b",
   marginBottom: 24,
+};
+const detailButtonStyle: CSSProperties = {
+  border: "1px solid #2563eb",
+  background: "#eff6ff",
+  color: "#1d4ed8",
+  padding: "8px 12px",
+  borderRadius: 10,
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
+const modalOverlayStyle: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(15,23,42,0.55)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 20,
+  zIndex: 9999,
+};
+
+const modalStyle: CSSProperties = {
+  width: "min(900px, 96vw)",
+  maxHeight: "90vh",
+  overflowY: "auto",
+  background: "white",
+  borderRadius: 24,
+  padding: 24,
+  boxShadow: "0 24px 60px rgba(15,23,42,0.25)",
+};
+
+const modalHeaderStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 16,
+  marginBottom: 20,
+};
+
+const closeButtonStyle: CSSProperties = {
+  border: 0,
+  background: "#f1f5f9",
+  width: 38,
+  height: 38,
+  borderRadius: 12,
+  cursor: "pointer",
+  fontSize: 18,
+};
+
+const detailGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 14,
 };
