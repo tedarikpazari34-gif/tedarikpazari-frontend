@@ -51,6 +51,7 @@ const logisticsLinks: NavItem[] = [
 const adminLinks: NavItem[] = [
   { label: "Dashboard", to: "/admin" },
   { label: "Şirketler", to: "/admin/companies" },
+  { label: "Doğrulama Başvuruları", to: "/admin/verification-requests" },
   { label: "Ürün Yönetimi", to: "/admin/products" },
   { label: "Ödemeler", to: "/admin/payouts" },
   { label: "Uyuşmazlıklar", to: "/admin/disputes" },

@@ -53,6 +53,7 @@ import PanelPage from "./pages/PanelPage";
 import LegalPage from "./pages/LegalPage";
 import CorporatePage from "./pages/CorporatePage";
 import CompanyVerificationPage from "./pages/CompanyVerificationPage";
+import AdminVerificationRequestsPage from "./pages/AdminVerificationRequestsPage";
 
 function PrivateRoute({
   children,
@@ -249,6 +250,15 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminCompaniesPage />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/verification-requests"
+          element={
+            <AdminRoute>
+              <AdminVerificationRequestsPage />
             </AdminRoute>
           }
         />
