@@ -82,6 +82,71 @@ const pages: Record<string, PageContent> = {
           </a>
         </div>
 
+        <h2>Sosyal medya</h2>
+        <p>
+          Tedarik Pazarı'nı sosyal medya hesaplarımızdan da takip edebilirsiniz.
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: 12,
+            margin: "20px 0 28px",
+          }}
+        >
+          <a
+            href="https://www.instagram.com/tedarikpazari/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              textDecoration: "none",
+              padding: 16,
+              borderRadius: 14,
+              background: "#fff7ed",
+              color: "#9a3412",
+              fontWeight: 800,
+              border: "1px solid #fed7aa",
+            }}
+          >
+            📸 Instagram
+          </a>
+
+          <a
+            href="https://www.facebook.com/share/1E3oSxUxDg/?mibextid=wwXIfr"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              textDecoration: "none",
+              padding: 16,
+              borderRadius: 14,
+              background: "#eff6ff",
+              color: "#1d4ed8",
+              fontWeight: 800,
+              border: "1px solid #bfdbfe",
+            }}
+          >
+            Facebook
+          </a>
+
+          <a
+            href="https://www.linkedin.com/in/tedarik-pazarı-b54996427"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              textDecoration: "none",
+              padding: 16,
+              borderRadius: 14,
+              background: "#f0f9ff",
+              color: "#0369a1",
+              fontWeight: 800,
+              border: "1px solid #bae6fd",
+            }}
+          >
+            LinkedIn
+          </a>
+        </div>
+
         <h2>Destek talebinizde bulunması gerekenler</h2>
         <p>
           Daha hızlı yardımcı olabilmemiz için firma adınızı, hesabınızda
