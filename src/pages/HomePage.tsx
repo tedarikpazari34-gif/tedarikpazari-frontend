@@ -18,13 +18,6 @@ type StepItem = {
   description: string;
 };
 
-type SupplierCard = {
-  name: string;
-  category: string;
-  badge: string;
-  image: string;
-};
-
 type StatItem = {
   value: string;
   label: string;
@@ -74,9 +67,9 @@ const sectors: Sector[] = [
 
 const highlights: Highlight[] = [
   {
-    title: "Doğrulanmış tedarikçiler",
+    title: "Belgeyle firma doğrulama",
     description:
-      "İşletmenize uygun üretici, toptancı ve satıcıları daha güvenli şekilde keşfedin.",
+      "Doğrulama başvurusu yapan firmalar belgelerini iletebilir ve kontrol sonrasında doğrulanmış firma rozeti alabilir.",
   },
   {
     title: "Teklif toplama altyapısı",
@@ -137,27 +130,6 @@ const fallbackFeaturedProducts: ProductCard[] = [
     category: "Elektrik",
     price: "₺450+",
     image: "/images/product-3.jpg",
-  },
-];
-
-const featuredSuppliers: SupplierCard[] = [
-  {
-    name: "Marmara Ambalaj",
-    category: "Ambalaj ve Paketleme",
-    badge: "Doğrulandı",
-    image: "/images/supplier-1.jpg",
-  },
-  {
-    name: "Anadolu Hijyen",
-    category: "Temizlik ve Hijyen",
-    badge: "Öne Çıkan",
-    image: "/images/supplier-2.jpg",
-  },
-  {
-    name: "Nova Endüstri",
-    category: "Elektrik ve Aydınlatma",
-    badge: "Kurumsal",
-    image: "/images/supplier-3.jpg",
   },
 ];
 
@@ -466,7 +438,7 @@ export default function HomePage() {
                     textShadow: "0 8px 30px rgba(0,0,0,0.38)",
                   }}
                 >
-                  Tek Talep Açın, Uygun Tedarikçilerden Teklif Alın
+                  Tedarik Aramayı Bırakın. Teklifler Size Gelsin
                 </h1>
 
                 <p
@@ -478,9 +450,9 @@ export default function HomePage() {
                     color: "rgba(255,255,255,0.96)",
                   }}
                 >
-                  Toplu alım ihtiyacınızı yayınlayın, teklifleri karşılaştırın ve
-                  sipariş sürecinizi güvenli ödeme altyapısıyla tek panelden yönetin.
-                  Satıcıysanız yeni taleplere ulaşın ve satış fırsatlarını büyütün.
+                  İhtiyacınızı yayınlayın, uygun firmalardan gelen teklifleri
+                  tek ekranda karşılaştırın. Satıcıysanız yeni satın alma taleplerine
+                  ulaşın ve işletmeniz için yeni iş fırsatları oluşturun.
                 </p>
                 <div
                   style={{
@@ -608,7 +580,7 @@ export default function HomePage() {
                   }}
                 >
                   {[
-                    "Doğrulanmış Tedarikçiler",
+                    "Belgeyle Doğrulanabilen Firmalar",
                     "RFQ ile Teklif Toplama",
                     "Güvenli Ödeme",
                     "Türkiye Geneli",
@@ -1077,88 +1049,112 @@ export default function HomePage() {
           </section>
 
           <section style={{ marginBottom: 28 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "end",
-                justifyContent: "space-between",
-                gap: 16,
-                flexWrap: "wrap",
-                marginBottom: 20,
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    color: "#38bdf8",
-                    fontWeight: 700,
-                    marginBottom: 8,
-                  }}
-                >
-                  TEDARİKÇİLER
-                </div>
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: isMobile ? 22 : 30,
-                    lineHeight: 1.2,
-                  }}
-                >
-                  Kurucu Tedarikçiler
-                </h2>
+            <div style={{ marginBottom: 20 }}>
+              <div
+                style={{
+                  color: "#38bdf8",
+                  fontWeight: 700,
+                  marginBottom: 8,
+                }}
+              >
+                GÜVENLİ B2B TİCARET
               </div>
+
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: isMobile ? 24 : 32,
+                  lineHeight: 1.2,
+                }}
+              >
+                Firma bilgileri paylaşılmadan güvenli ticaret altyapısı
+              </h2>
+
+              <p
+                style={{
+                  color: "#94a3b8",
+                  maxWidth: 760,
+                  lineHeight: 1.7,
+                  fontSize: isMobile ? 13 : 16,
+                }}
+              >
+                TedarikPazarı, alıcı ve satıcıların teklif ve sipariş sürecini
+                platform içinde yönetebilmesi için tasarlanmıştır.
+              </p>
             </div>
 
             <div
               style={{
-                background: "#ffffff",
-                color: "#111827",
-                borderRadius: isMobile ? 16 : 24,
-                padding: isMobile ? "16px" : 40,
-                textAlign: isMobile ? "left" : "center",
-                display: isMobile ? "grid" : "block",
-                gridTemplateColumns: isMobile ? "40px 1fr" : undefined,
-                gap: isMobile ? 10 : undefined,
-                alignItems: isMobile ? "center" : undefined,
-                boxSizing: "border-box",
-                boxShadow: "0 18px 36px rgba(15,23,42,0.08)",
-                border: "1px solid rgba(226,232,240,0.7)",
+                display: "grid",
+                gridTemplateColumns: isMobile
+                  ? "1fr"
+                  : "repeat(3, minmax(0, 1fr))",
+                gap: 16,
               }}
             >
-              <div
-                style={{
-                  fontSize: isMobile ? 30 : 46,
-                  marginBottom: isMobile ? 0 : 14,
-                  gridRow: isMobile ? "1 / span 3" : undefined,
-                }}
-              >
-                🏢
-              </div>
+              {[
+                {
+                  icon: "✓",
+                  title: "Belgeyle Doğrulama",
+                  text: "Firmalar doğrulama belgelerini iletebilir. Kontrol edilen firmalar doğrulanmış firma rozeti kazanır.",
+                },
+                {
+                  icon: "🔒",
+                  title: "Platform İçi İletişim",
+                  text: "Teklif ve satın alma süreci boyunca ticari iletişim platform içinde tutulur.",
+                },
+                {
+                  icon: "🛡️",
+                  title: "Kontrollü İşlem Akışı",
+                  text: "Teklif, sipariş, ödeme ve teslimat adımları tek sistem üzerinden takip edilir.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  style={{
+                    background: "#ffffff",
+                    color: "#0f172a",
+                    borderRadius: 20,
+                    padding: isMobile ? 18 : 24,
+                    border: "1px solid #e2e8f0",
+                    boxShadow: "0 14px 32px rgba(15,23,42,0.08)",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 46,
+                      height: 46,
+                      borderRadius: 14,
+                      display: "grid",
+                      placeItems: "center",
+                      background: "#eff6ff",
+                      color: "#1d4ed8",
+                      fontSize: 22,
+                      fontWeight: 900,
+                      marginBottom: 14,
+                    }}
+                  >
+                    {item.icon}
+                  </div>
 
-              <h3
-                style={{
-                  margin: isMobile ? "0 0 4px" : "0 0 12px",
-                  fontSize: isMobile ? 16 : 25,
-                  lineHeight: 1.25,
-                }}
-              >
-                Kurucu Tedarikçilerimizi Arıyoruz
-              </h3>
+                  <h3 style={{ margin: "0 0 8px", fontSize: 19 }}>
+                    {item.title}
+                  </h3>
 
-              <p
-                style={{
-                  color: "#64748b",
-                  maxWidth: 680,
-                  margin: isMobile ? "0 0 10px" : "0 auto 24px",
-                  lineHeight: isMobile ? 1.4 : 1.75,
-                  fontSize: isMobile ? 12 : 17,
-                }}
-              >
-                Firmanızı ücretsiz oluşturun, ürünlerinizi yayınlayın ve
-                Tedarik Pazarı'nın ilk doğrulanmış tedarikçileri arasında
-                yerinizi alın.
-              </p>
+                  <p
+                    style={{
+                      margin: 0,
+                      color: "#64748b",
+                      lineHeight: 1.65,
+                    }}
+                  >
+                    {item.text}
+                  </p>
+                </div>
+              ))}
+            </div>
 
+            <div style={{ marginTop: 20, textAlign: "center" }}>
               <Link
                 to="/register"
                 style={{
@@ -1166,16 +1162,12 @@ export default function HomePage() {
                   textDecoration: "none",
                   background: "#2563eb",
                   color: "#ffffff",
-                  padding: isMobile ? "10px 13px" : "14px 24px",
+                  padding: "13px 22px",
                   borderRadius: 12,
                   fontWeight: 800,
-                  fontSize: isMobile ? 13 : 16,
-                  width: isMobile ? "fit-content" : "auto",
-                  maxWidth: isMobile ? "none" : "none",
-                  boxSizing: "border-box",
                 }}
               >
-                Tedarikçi Olarak Katıl
+                Ücretsiz Firma Hesabı Oluştur
               </Link>
             </div>
           </section>
@@ -1202,7 +1194,7 @@ export default function HomePage() {
                 lineHeight: 1.2,
               }}
             >
-              Toplu alım yapmak mı istiyorsunuz?
+              Alıcı veya satıcı olarak ticaret ağınızı büyütün
             </h2>
             <p
               style={{
@@ -1213,8 +1205,8 @@ export default function HomePage() {
                 lineHeight: isMobile ? 1.4 : 1.7,
               }}
             >
-              İşletmenize uygun ürünler için teklif toplayın, tedarikçileri
-              karşılaştırın ve satın alma sürecini daha planlı yönetin.
+              Alıcı olarak ihtiyaçlarınıza teklif alın; satıcı olarak yeni
+              taleplere ulaşın. Tedarik sürecinizi tek platformdan yönetin.
             </p>
             
             <div
