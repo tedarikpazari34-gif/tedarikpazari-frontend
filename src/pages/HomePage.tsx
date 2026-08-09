@@ -315,74 +315,6 @@ export default function HomePage() {
             boxSizing: "border-box",
           }}
         >
-          <header
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 16,
-              flexWrap: "wrap",
-              marginBottom: 28,
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: 30,
-                  fontWeight: 800,
-                  color: "#38bdf8",
-                }}
-              >
-                TEDARİK PAZARI
-              </div>
-              <div
-                style={{
-                  color: "#94a3b8",
-                  marginTop: 6,
-                  fontSize: 14,
-                }}
-              >
-                Türkiye B2B tedarik ve toptan satın alma platformu
-              </div>
-            </div>
-
-            <nav
-              style={{
-                display: "flex",
-                gap: isMobile ? 8 : 12,
-                flexWrap: "wrap",
-                width: "100%",
-              }}
-            >
-              <Link
-                to="/register"
-                style={{
-                  textDecoration: "none",
-                  background: "#22c55e",
-                  color: "#fff",
-                  padding: "11px 18px",
-                  borderRadius: 12,
-                  fontWeight: 700,
-                }}
-              >
-                Üye Ol
-              </Link>
-
-              <Link
-                to="/login"
-                style={{
-                  textDecoration: "none",
-                  background: "#2563eb",
-                  color: "#fff",
-                  padding: "11px 18px",
-                  borderRadius: 12,
-                  fontWeight: 700,
-                }}
-              >
-                Giriş Yap
-              </Link>
-            </nav>
-          </header>
 
           <section
             style={{
@@ -712,6 +644,163 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </section>
+
+          <section
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))",
+              gap: 16,
+              marginBottom: 28,
+            }}
+          >
+            <div
+              style={{
+                background: "linear-gradient(135deg, #eff6ff, #ffffff)",
+                color: "#0f172a",
+                borderRadius: 22,
+                padding: isMobile ? 20 : 28,
+                border: "1px solid #bfdbfe",
+                boxShadow: "0 16px 34px rgba(37,99,235,0.10)",
+              }}
+            >
+              <div
+                style={{
+                  display: "inline-flex",
+                  width: 46,
+                  height: 46,
+                  borderRadius: 14,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "#dbeafe",
+                  fontSize: 22,
+                  marginBottom: 16,
+                }}
+              >
+                🛒
+              </div>
+
+              <div
+                style={{
+                  color: "#2563eb",
+                  fontWeight: 900,
+                  fontSize: 13,
+                  marginBottom: 8,
+                }}
+              >
+                ALICILAR İÇİN
+              </div>
+
+              <h2
+                style={{
+                  margin: "0 0 10px",
+                  fontSize: isMobile ? 23 : 28,
+                  lineHeight: 1.2,
+                }}
+              >
+                İhtiyacınızı yayınlayın, teklifler size gelsin
+              </h2>
+
+              <p
+                style={{
+                  margin: "0 0 18px",
+                  color: "#64748b",
+                  lineHeight: 1.65,
+                }}
+              >
+                Tek tek tedarikçi aramak yerine talebinizi oluşturun,
+                gelen teklifleri fiyat ve teslim süresine göre karşılaştırın.
+              </p>
+
+              <Link
+                to="/buyer/rfqs/new"
+                style={{
+                  display: "inline-block",
+                  textDecoration: "none",
+                  background: "#2563eb",
+                  color: "#ffffff",
+                  padding: "12px 18px",
+                  borderRadius: 12,
+                  fontWeight: 900,
+                }}
+              >
+                Teklif Talebi Oluştur
+              </Link>
+            </div>
+
+            <div
+              style={{
+                background: "linear-gradient(135deg, #f0fdf4, #ffffff)",
+                color: "#0f172a",
+                borderRadius: 22,
+                padding: isMobile ? 20 : 28,
+                border: "1px solid #bbf7d0",
+                boxShadow: "0 16px 34px rgba(22,163,74,0.10)",
+              }}
+            >
+              <div
+                style={{
+                  display: "inline-flex",
+                  width: 46,
+                  height: 46,
+                  borderRadius: 14,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "#dcfce7",
+                  fontSize: 22,
+                  marginBottom: 16,
+                }}
+              >
+                📈
+              </div>
+
+              <div
+                style={{
+                  color: "#16a34a",
+                  fontWeight: 900,
+                  fontSize: 13,
+                  marginBottom: 8,
+                }}
+              >
+                SATICILAR İÇİN
+              </div>
+
+              <h2
+                style={{
+                  margin: "0 0 10px",
+                  fontSize: isMobile ? 23 : 28,
+                  lineHeight: 1.2,
+                }}
+              >
+                Yeni taleplere ulaşın, satış fırsatlarınızı büyütün
+              </h2>
+
+              <p
+                style={{
+                  margin: "0 0 18px",
+                  color: "#64748b",
+                  lineHeight: 1.65,
+                }}
+              >
+                Ürünlerinizi yayınlayın, size uygun satın alma taleplerini görün
+                ve teklif vererek yeni müşterilere ulaşın.
+              </p>
+
+              <Link
+                to="/register"
+                style={{
+                  display: "inline-block",
+                  textDecoration: "none",
+                  background: "#16a34a",
+                  color: "#ffffff",
+                  padding: "12px 18px",
+                  borderRadius: 12,
+                  fontWeight: 900,
+                }}
+              >
+                Satıcı Olarak Üye Ol
+              </Link>
             </div>
           </section>
 
