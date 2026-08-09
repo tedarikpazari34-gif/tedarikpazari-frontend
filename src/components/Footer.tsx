@@ -50,6 +50,44 @@ export default function Footer() {
           <span style={smallTextStyle}>
             Hesap bilgilerinizi ve kart şifrenizi kimseyle paylaşmayın.
           </span>
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+              marginTop: 16,
+            }}
+          >
+            <strong style={columnTitleStyle}>Bizi Takip Edin</strong>
+
+            <a
+              href="https://www.instagram.com/tedarikpazari/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={linkStyle}
+            >
+              📸 Instagram
+            </a>
+
+            <a
+              href="https://www.facebook.com/share/1E3oSxUxDg/?mibextid=wwXIfr"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={linkStyle}
+            >
+              Facebook
+            </a>
+
+            <a
+              href="https://www.linkedin.com/in/tedarik-pazarı-b54996427"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={linkStyle}
+            >
+              LinkedIn
+            </a>
+          </div>
         </div>
       </div>
 
