@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Tedarik Pazarı</string>
+    <string name="title_activity_main">Tedarik Pazarı</string>
+    <string name="package_name">com.tedarikpazari34.app</string>
+    <string name="custom_url_scheme">com.tedarikpazari34.app</string>
+</resources>
