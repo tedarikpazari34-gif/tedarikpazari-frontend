@@ -395,21 +395,24 @@ const pageStyle: CSSProperties = {
   minHeight: "100vh",
   background:
     "radial-gradient(circle at top left, rgba(37,99,235,0.24), transparent 32%), #f8fafc",
-  padding: 32,
+  padding: window.innerWidth < 700 ? 12 : 32,
   display: "grid",
-  gridTemplateColumns: "0.8fr 1.2fr",
-  gap: 28,
+  gridTemplateColumns: window.innerWidth < 700 ? "1fr" : "0.8fr 1.2fr",
+  gap: window.innerWidth < 700 ? 16 : 28,
+  width: "100%",
+  maxWidth: "100%",
+  overflowX: "hidden",
 };
 
 const heroStyle: CSSProperties = {
-  borderRadius: 30,
-  padding: 34,
+  borderRadius: window.innerWidth < 700 ? 22 : 30,
+  padding: window.innerWidth < 700 ? 22 : 34,
   color: "white",
   backgroundImage:
     "linear-gradient(180deg, rgba(15,23,42,0.45), rgba(15,23,42,0.92)), url('/images/hero-b2b.jpg')",
   backgroundSize: "cover",
   backgroundPosition: "center",
-  minHeight: "calc(100vh - 64px)",
+  minHeight: window.innerWidth < 700 ? 360 : "calc(100vh - 64px)",
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
@@ -434,7 +437,7 @@ const heroBadgeStyle: CSSProperties = {
 };
 
 const heroTitleStyle: CSSProperties = {
-  fontSize: 46,
+  fontSize: window.innerWidth < 700 ? 32 : 46,
   lineHeight: 1.05,
   fontWeight: 900,
   margin: "20px 0 12px",
@@ -485,7 +488,8 @@ const eyebrowStyle: CSSProperties = {
 const titleStyle: CSSProperties = {
   margin: 0,
   color: "#0f172a",
-  fontSize: 34,
+  fontSize: window.innerWidth < 700 ? 28 : 34,
+  lineHeight: 1.1,
   fontWeight: 900,
 };
 

@@ -1,5 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 
 type Order = {
   id: string;
@@ -264,6 +266,30 @@ export default function BuyerOrdersPage() {
 
       if (!res.ok) {
         alert(data?.message || "iyzico ödeme formu başlatılamadı");
+        return;
+      }
+
+      if (Capacitor.isNativePlatform()) {
+        if (!data?.paymentPageUrl) {
+          setPaymentLoadingId("");
+          alert("Mobil ödeme sayfası alınamadı");
+          return;
+        }
+
+        const browserListener = await Browser.addListener(
+          "browserFinished",
+          async () => {
+            await browserListener.remove();
+            setPaymentLoadingId("");
+            loadOrders();
+          }
+        );
+
+        await Browser.open({
+          url: data.paymentPageUrl,
+          presentationStyle: "fullscreen",
+        });
+
         return;
       }
 

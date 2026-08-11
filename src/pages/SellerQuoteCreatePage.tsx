@@ -193,10 +193,13 @@ const pageStyle: CSSProperties = {
   minHeight: "100vh",
   background:
     "radial-gradient(circle at top left, rgba(37,99,235,0.24), transparent 32%), #f8fafc",
-  padding: 32,
+  padding: window.innerWidth < 700 ? 12 : 32,
   display: "grid",
-  gridTemplateColumns: "0.85fr 1.15fr",
-  gap: 28,
+  gridTemplateColumns: window.innerWidth < 700 ? "1fr" : "0.85fr 1.15fr",
+  gap: window.innerWidth < 700 ? 16 : 28,
+  width: "100%",
+  maxWidth: "100%",
+  overflowX: "hidden",
 };
 
 const heroStyle: CSSProperties = {
@@ -300,7 +303,7 @@ const secondaryLinkStyle: CSSProperties = {
 
 const gridStyle: CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "1fr 1fr",
+  gridTemplateColumns: window.innerWidth < 700 ? "1fr" : "1fr 1fr",
   gap: 14,
 };
 

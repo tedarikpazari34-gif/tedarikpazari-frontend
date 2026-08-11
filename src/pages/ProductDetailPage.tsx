@@ -790,7 +790,10 @@ function InfoBox({
 const pageStyle: CSSProperties = {
   minHeight: "100vh",
   background: "#f1f5f9",
-  padding: "40px 24px",
+  padding: window.innerWidth < 700 ? "24px 12px" : "40px 24px",
+  width: "100%",
+  maxWidth: "100%",
+  overflowX: "hidden",
 };
 
 const containerStyle: CSSProperties = {
@@ -806,20 +809,26 @@ const gallerySectionStyle: CSSProperties = {
   display: "flex",
   flexDirection: "column",
   gap: 16,
+  minWidth: 0,
+  width: "100%",
+  maxWidth: "100%",
 };
 
 const mainImageBoxStyle: CSSProperties = {
   background: "white",
-  borderRadius: 28,
+  borderRadius: window.innerWidth < 700 ? 20 : 28,
   overflow: "hidden",
-  minHeight: 520,
+  minHeight: window.innerWidth < 700 ? 320 : 520,
   boxShadow: "0 20px 50px rgba(15,23,42,0.1)",
   border: "1px solid #e2e8f0",
+  width: "100%",
+  maxWidth: "100%",
 };
 
 const mainImageStyle: CSSProperties = {
   width: "100%",
-  height: 520,
+  maxWidth: "100%",
+  height: window.innerWidth < 700 ? 320 : 520,
   objectFit: "cover",
   display: "block",
 };
@@ -1082,10 +1091,14 @@ const sellerCardStyle: CSSProperties = {
   borderRadius: 18,
   padding: 18,
   display: "flex",
+  flexDirection: window.innerWidth < 700 ? "column" : "row",
   justifyContent: "space-between",
-  alignItems: "center",
+  alignItems: window.innerWidth < 700 ? "stretch" : "center",
   gap: 16,
   marginBottom: 22,
+  width: "100%",
+  maxWidth: "100%",
+  overflow: "hidden",
 };
 
 const sellerLabelStyle: CSSProperties = {
@@ -1115,6 +1128,9 @@ const sellerStoreButtonStyle: CSSProperties = {
   borderRadius: 12,
   fontWeight: 900,
   whiteSpace: "nowrap",
+  textAlign: "center",
+  width: window.innerWidth < 700 ? "100%" : "auto",
+  maxWidth: "100%",
 };
 
 const sellerIdentityStyle: CSSProperties = {
