@@ -32,8 +32,14 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
 
   const register = async () => {
-    if (!companyName.trim() || !email.trim() || !password.trim()) {
-      setError("Firma, email ve şifre zorunlu");
+    if (
+      !companyName.trim() ||
+      !fullName.trim() ||
+      !phone.trim() ||
+      !email.trim() ||
+      !password.trim()
+    ) {
+      setError("Firma adı, yetkili kişi, telefon, email ve şifre zorunludur");
       return;
     }
 
@@ -52,8 +58,8 @@ export default function RegisterPage() {
         password: password.trim(),
         role: membershipType,
         recaptchaToken,
-        fullName,
-        phone,
+        fullName: fullName.trim(),
+        phone: phone.trim(),
         companyType,
         category,
         city,
@@ -113,12 +119,13 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Yetkili Ad Soyad</label>
+              <label style={labelStyle}>Yetkili Ad Soyad *</label>
               <input
                 style={inputStyle}
                 placeholder="Ad Soyad"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
+                required
               />
             </div>
 
@@ -129,6 +136,7 @@ export default function RegisterPage() {
                 placeholder="0555 555 55 55"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                required
               />
             </div>
 
