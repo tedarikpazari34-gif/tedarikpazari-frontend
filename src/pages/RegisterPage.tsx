@@ -3,6 +3,7 @@ import axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useNavigate } from "react-router-dom";
 import { TURKEY_CITIES } from "../constants/turkeyCities";
+import { sectors } from "../data/sectors";
 
 const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
@@ -19,7 +20,7 @@ export default function RegisterPage() {
   const [membershipType, setMembershipType] =
     useState<MembershipType>("BUYER");
   const [companyType, setCompanyType] = useState("Şahıs");
-  const [category, setCategory] = useState("Gıda");
+  const [category, setCategory] = useState(sectors[0]?.name || "");
   const [city, setCity] = useState("");
   const [district, setDistrict] = useState("");
   const [taxNumber, setTaxNumber] = useState("");
@@ -186,12 +187,11 @@ export default function RegisterPage() {
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
-                <option>Gıda</option>
-                <option>Temizlik</option>
-                <option>Ambalaj</option>
-                <option>Elektrik</option>
-                <option>İş Güvenliği</option>
-                <option>Lojistik</option>
+                {sectors.map((sector) => (
+                  <option key={sector.id} value={sector.name}>
+                    {sector.name}
+                  </option>
+                ))}
               </select>
             </div>
 
