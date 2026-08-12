@@ -71,11 +71,11 @@ export const sectors: Sector[] = [
     iconLetter: "M",
   },
   {
-    id: "tekstil-is-guvenligi",
-    name: "Tekstil ve İş Güvenliği",
-    slug: "tekstil-ve-is-guvenligi",
-    shortDescription: "İş eldiveni, iş kıyafeti, ayakkabı ve koruyucu ekipman",
-    iconLetter: "T",
+    id: "diger-urun-hizmetler",
+    name: "Diğer Ürün ve Hizmetler",
+    slug: "diger-urun-ve-hizmetler",
+    shortDescription: "Mevcut kategorilere uymayan ürün, ekipman, sarf ve hizmetler",
+    iconLetter: "D",
   },
   {
     id: "makine-ekipman",
