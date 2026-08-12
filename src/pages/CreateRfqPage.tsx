@@ -12,19 +12,29 @@ type Product = {
   basePrice?: string;
 };
 
+type Category = {
+  id: string;
+  name: string;
+  parentId?: string | null;
+};
+
 export default function CreateRfqPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
   const productId = params.get("productId");
-  const category = params.get("category");
+  const initialCategory = params.get("category");
   const productName = params.get("product");
   const copiedQuantity = params.get("quantity");
   const copiedNote = params.get("note");
 
-  const draftKey = `rfq-draft:${productId || category || productName || "general"}`;
+  const draftKey = `rfq-draft:${productId || initialCategory || productName || "general"}`;
 
   const [product, setProduct] = useState<Product | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedRootId, setSelectedRootId] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [requestTitle, setRequestTitle] = useState(productName || "");
 
   const [quantity, setQuantity] = useState(copiedQuantity || "100");
   const [unitType, setUnitType] = useState("Adet");
@@ -63,6 +73,18 @@ export default function CreateRfqPage() {
       if (draft.note !== undefined) {
         setNote(String(draft.note));
       }
+
+      if (draft.requestTitle !== undefined) {
+        setRequestTitle(String(draft.requestTitle));
+      }
+
+      if (draft.selectedRootId !== undefined) {
+        setSelectedRootId(String(draft.selectedRootId));
+      }
+
+      if (draft.selectedCategoryId !== undefined) {
+        setSelectedCategoryId(String(draft.selectedCategoryId));
+      }
     } catch (err) {
       console.error("RFQ DRAFT LOAD ERROR:", err);
     }
@@ -78,13 +100,62 @@ export default function CreateRfqPage() {
           deliveryCity,
           targetPrice,
           note,
+          requestTitle,
+          selectedRootId,
+          selectedCategoryId,
           updatedAt: new Date().toISOString(),
         })
       );
     }, 350);
 
     return () => window.clearTimeout(timer);
-  }, [draftKey, quantity, unitType, deliveryCity, targetPrice, note]);
+  }, [
+    draftKey,
+    quantity,
+    unitType,
+    deliveryCity,
+    targetPrice,
+    note,
+    requestTitle,
+    selectedRootId,
+    selectedCategoryId,
+  ]);
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const res = await fetch(`${BASE_URL}/api/categories`);
+        const data = await res.json();
+
+        if (!res.ok || !Array.isArray(data)) return;
+
+        setCategories(data);
+
+        if (initialCategory && !selectedCategoryId) {
+          const decoded = decodeURIComponent(initialCategory);
+
+          const found = data.find(
+            (item: Category) =>
+              item.id === decoded ||
+              item.name.toLowerCase() === decoded.toLowerCase()
+          );
+
+          if (found) {
+            setSelectedCategoryId(found.id);
+            setSelectedRootId(found.parentId || found.id);
+
+            if (!requestTitle && found.parentId) {
+              setRequestTitle(found.name);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("CATEGORY LOAD ERROR:", err);
+      }
+    }
+
+    loadCategories();
+  }, [initialCategory]);
 
   useEffect(() => {
     async function loadProduct() {
@@ -117,6 +188,18 @@ export default function CreateRfqPage() {
         return;
       }
 
+      if (!productId) {
+        if (!selectedCategoryId) {
+          setError("Lütfen ana sektör ve kategori seçin.");
+          return;
+        }
+
+        if (!requestTitle.trim()) {
+          setError("Lütfen talebiniz için kısa bir başlık yazın.");
+          return;
+        }
+      }
+
       if (!quantity || Number(quantity) < 1) {
         setError("Lütfen geçerli bir miktar girin.");
         return;
@@ -132,10 +215,14 @@ export default function CreateRfqPage() {
         return;
       }
 
+      const selectedCategory = categories.find(
+        (item) => item.id === selectedCategoryId
+      );
+
       const finalNote = [
-        category ? `Kategori: ${category}` : "",
-        product?.title || productName
-          ? `Ürün: ${product?.title || productName}`
+        selectedCategory ? `Kategori: ${selectedCategory.name}` : "",
+        product?.title || productName || requestTitle
+          ? `Talep: ${product?.title || productName || requestTitle}`
           : "",
         `Miktar Birimi: ${unitType}`,
         `Teslimat Şehri: ${deliveryCity.trim()}`,
@@ -154,8 +241,11 @@ export default function CreateRfqPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          productId,
+          productId: productId || undefined,
+          categoryId: productId ? undefined : selectedCategoryId,
+          title: productId ? undefined : requestTitle.trim(),
           quantity: Number(quantity),
+          unitType,
           note: finalNote,
         }),
       });
@@ -177,8 +267,23 @@ export default function CreateRfqPage() {
     }
   };
 
+  const selectedCategoryName =
+    categories.find((item) => item.id === selectedCategoryId)?.name || "";
+
   const selectedTitle =
-    product?.title || productName || category || "Genel teklif talebi";
+    product?.title ||
+    productName ||
+    requestTitle ||
+    selectedCategoryName ||
+    "Genel teklif talebi";
+
+  const rootCategories = categories
+    .filter((item) => !item.parentId)
+    .sort((a, b) => a.name.localeCompare(b.name, "tr"));
+
+  const childCategories = categories
+    .filter((item) => item.parentId === selectedRootId)
+    .sort((a, b) => a.name.localeCompare(b.name, "tr"));
 
   if (createdRfqId) {
     return (
@@ -234,6 +339,9 @@ export default function CreateRfqPage() {
                 setDeliveryCity("");
                 setTargetPrice("");
                 setNote("");
+                setRequestTitle("");
+                setSelectedRootId("");
+                setSelectedCategoryId("");
               }}
               style={successSecondaryButtonStyle}
             >
@@ -292,13 +400,78 @@ export default function CreateRfqPage() {
           )}
         </div>
 
-        {category && (
-          <div style={infoBoxStyle}>
-            <strong>Kategori:</strong> {category}
-          </div>
-        )}
-
         {error && <div style={errorStyle}>{error}</div>}
+
+        {!productId && (
+          <>
+            <label style={fieldStyle}>
+              <span style={labelStyle}>Talep Başlığı *</span>
+              <input
+                value={requestTitle}
+                onChange={(e) => setRequestTitle(e.target.value)}
+                style={inputStyle}
+                placeholder="Örn: Fantom çene ve endodonti malzemeleri"
+              />
+            </label>
+
+            <div style={formGridStyle}>
+              <label style={fieldStyle}>
+                <span style={labelStyle}>Ana Sektör *</span>
+                <select
+                  value={selectedRootId}
+                  onChange={(e) => {
+                    const rootId = e.target.value;
+                    setSelectedRootId(rootId);
+                    setSelectedCategoryId("");
+                  }}
+                  style={inputStyle}
+                >
+                  <option value="">Ana sektör seçin</option>
+
+                  {rootCategories.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label style={fieldStyle}>
+                <span style={labelStyle}>Alt Kategori *</span>
+                <select
+                  value={selectedCategoryId}
+                  onChange={(e) => setSelectedCategoryId(e.target.value)}
+                  style={inputStyle}
+                  disabled={!selectedRootId}
+                >
+                  <option value="">
+                    {selectedRootId
+                      ? "Alt kategori seçin"
+                      : "Önce ana sektör seçin"}
+                  </option>
+
+                  {childCategories.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+
+                  {selectedRootId && childCategories.length === 0 && (
+                    <option value={selectedRootId}>
+                      Ana kategori
+                    </option>
+                  )}
+                </select>
+              </label>
+            </div>
+
+            {selectedCategoryName && (
+              <div style={infoBoxStyle}>
+                <strong>Seçilen kategori:</strong> {selectedCategoryName}
+              </div>
+            )}
+          </>
+        )}
 
         <div style={formGridStyle}>
           <label style={fieldStyle}>
