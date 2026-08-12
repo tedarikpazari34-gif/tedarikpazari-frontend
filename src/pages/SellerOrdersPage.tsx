@@ -7,6 +7,7 @@ type Order = {
   commissionAmount?: number | string;
   rfq?: {
     quantity?: number;
+    title?: string | null;
     product?: {
       title?: string;
     };
@@ -261,8 +262,8 @@ export default function SellerOrdersPage() {
             <article key={o.id} style={cardStyle}>
               <div style={cardTopStyle}>
                 <div>
-                  <div style={smallLabelStyle}>Sipariş Ürünü</div>
-                  <h2 style={cardTitleStyle}>{o.rfq?.product?.title || "Ürün"}</h2>
+                  <div style={smallLabelStyle}>Sipariş / Talep</div>
+                  <h2 style={cardTitleStyle}>{o.rfq?.product?.title || o.rfq?.title || "Alım Talebi"}</h2>
                 </div>
 
                 <span style={{ ...badgeStyle, ...statusStyle(o.status) }}>

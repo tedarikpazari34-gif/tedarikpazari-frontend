@@ -15,6 +15,7 @@ type Order = {
 
   rfq?: {
     quantity?: number;
+    title?: string | null;
     product?: {
       title?: string;
     };
@@ -434,12 +435,13 @@ export default function BuyerOrdersPage() {
               <div style={cardTopStyle}>
                 <div>
                   <div style={smallLabelStyle}>
-                    Sipariş Ürünü
+                    Sipariş / Talep
                   </div>
 
                   <h2 style={cardTitleStyle}>
                     {o.rfq?.product?.title ||
-                      "Ürün"}
+                      o.rfq?.title ||
+                      "Alım Talebi"}
                   </h2>
                 </div>
 

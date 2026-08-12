@@ -11,6 +11,7 @@ type Quote = {
   rfq?: {
     id: string;
     quantity: number;
+    title?: string | null;
     product?: {
       title?: string;
       unitType?: string;
@@ -182,11 +183,11 @@ export default function SellerQuotesPage() {
               <div style={cardTopStyle}>
                 <div>
                   <div style={smallLabelStyle}>
-                    Teklif Verilen Ürün
+                    Teklif Verilen Talep
                   </div>
 
                   <h2 style={cardTitleStyle}>
-                    {q.rfq?.product?.title || "Ürün"}
+                    {q.rfq?.product?.title || q.rfq?.title || "Alım Talebi"}
                   </h2>
                 </div>
 
