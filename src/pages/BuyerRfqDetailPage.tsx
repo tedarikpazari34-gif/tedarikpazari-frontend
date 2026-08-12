@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 type RFQ = {
   id: string;
+  title?: string | null;
   quantity: number;
   note?: string | null;
   status: string;
@@ -299,7 +300,7 @@ setRfq(found || null);
           <div style={eyebrowStyle}>RFQ DETAYI</div>
 
           <h1 style={titleStyle}>
-            {rfq.product?.title || "Genel Teklif Talebi"}
+            {rfq.product?.title || rfq.title || "Genel Teklif Talebi"}
           </h1>
 
           <p style={descriptionStyle}>
