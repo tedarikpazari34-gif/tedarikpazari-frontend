@@ -9,6 +9,7 @@ import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 
 import CategoryPage from "./pages/CategoryPage";
+import AllCategoriesPage from "./pages/AllCategoriesPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 
 import BuyerOrdersPage from "./pages/BuyerOrdersPage";
@@ -102,6 +103,7 @@ export default function App() {
         <Route path="/yardim" element={<CorporatePage />} />
 
         {/* CATEGORY */}
+        <Route path="/categories" element={<AllCategoriesPage />} />
         <Route path="/category/:id" element={<CategoryPage />} />
 
         {/* PRODUCT */}

@@ -839,7 +839,7 @@ export default function HomePage() {
               </div>
 
               <Link
-                to="/products"
+                to="/categories"
                 style={{
                   textDecoration: "none",
                   color: "#93c5fd",
