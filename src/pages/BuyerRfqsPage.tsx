@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 type RFQ = {
   id: string;
   quantity: number;
+  title?: string | null;
+  unitType?: string | null;
   note?: string | null;
   status: string;
   createdAt?: string;
@@ -184,7 +186,7 @@ export default function BuyerRfqsPage() {
               <div style={cardTop}>
                 <div>
                   <div style={productLabel}>Ürün / Talep</div>
-                  <h2 style={title}>{rfq.product?.title || "Genel Teklif Talebi"}</h2>
+                  <h2 style={title}>{rfq.product?.title || rfq.title || "Genel Teklif Talebi"}</h2>
                 </div>
 
                 <span
@@ -198,7 +200,7 @@ export default function BuyerRfqsPage() {
               </div>
 
               <div style={infoGrid}>
-                <Info label="Miktar" value={rfq.quantity || "-"} />
+                <Info label="Miktar" value={rfq.quantity ? `${rfq.quantity} ${rfq.unitType || ""}`.trim() : "-"} />
                 <Info
                   label="Tarih"
                   value={
