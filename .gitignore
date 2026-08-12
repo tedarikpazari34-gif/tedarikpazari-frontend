@@ -27,3 +27,7 @@ dist-ssr
 dist
 tsconfig.tsbuildinfo
 .vercel
+
+# Local backup files
+*.backup*
+*-backup.*
