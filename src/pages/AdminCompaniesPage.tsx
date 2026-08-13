@@ -1,6 +1,13 @@
 import { useEffect, useState, type CSSProperties } from "react";
 
 const API = "https://tedarik-backend.onrender.com/api/admin";
+const BACKEND = "https://tedarik-backend.onrender.com";
+
+function resolveImageUrl(url?: string | null) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${BACKEND}${url.startsWith("/") ? "" : "/"}${url}`;
+}
 
 type Company = {
   id: string;
@@ -28,6 +35,24 @@ type Company = {
     id?: string;
     role?: string;
     email?: string;
+  }[];
+
+  productCount?: number;
+  approvedProductCount?: number;
+  pendingProductCount?: number;
+  lastProductAt?: string | null;
+
+  products?: {
+    id: string;
+    title: string;
+    imageUrl?: string | null;
+    basePrice?: number | string | null;
+    isApproved: boolean;
+    createdAt?: string | null;
+    images?: {
+      url: string;
+      isCover?: boolean;
+    }[];
   }[];
 };
 
@@ -606,6 +631,89 @@ export default function AdminCompaniesPage() {
               />
             </div>
 
+            <div style={productsSectionStyle}>
+              <div style={productsHeaderStyle}>
+                <div>
+                  <div style={eyebrowDarkStyle}>ÜRÜNLER</div>
+                  <h3 style={{ margin: "4px 0 0" }}>
+                    Firma Ürünleri ({selectedCompany.productCount || 0})
+                  </h3>
+                </div>
+
+                <div style={productStatsStyle}>
+                  <span>Onaylı: {selectedCompany.approvedProductCount || 0}</span>
+                  <span>Bekleyen: {selectedCompany.pendingProductCount || 0}</span>
+                </div>
+              </div>
+
+              {!selectedCompany.products?.length ? (
+                <div style={emptyInlineStyle}>
+                  Bu firma henüz ürün eklememiş.
+                </div>
+              ) : (
+                <div style={productGridStyle}>
+                  {selectedCompany.products.map((product) => {
+                    const image =
+                      product.images?.find((img) => img.isCover)?.url ||
+                      product.images?.[0]?.url ||
+                      product.imageUrl ||
+                      "";
+
+                    return (
+                      <div key={product.id} style={productCardStyle}>
+                        <div style={productImageBoxStyle}>
+                          {image ? (
+                            <img
+                              src={resolveImageUrl(image)}
+                              alt={product.title}
+                              style={productImageStyle}
+                            />
+                          ) : (
+                            <div style={productImageFallbackStyle}>
+                              Görsel yok
+                            </div>
+                          )}
+                        </div>
+
+                        <div style={productBodyStyle}>
+                          <strong style={productTitleStyle}>
+                            {product.title}
+                          </strong>
+
+                          <div style={productPriceStyle}>
+                            {Number(product.basePrice || 0).toLocaleString("tr-TR")} ₺
+                          </div>
+
+                          <span
+                            style={{
+                              ...productStatusStyle,
+                              ...(product.isApproved
+                                ? {
+                                    background: "#dcfce7",
+                                    color: "#166534",
+                                  }
+                                : {
+                                    background: "#fef3c7",
+                                    color: "#92400e",
+                                  }),
+                            }}
+                          >
+                            {product.isApproved ? "Onaylı" : "Onay Bekliyor"}
+                          </span>
+
+                          <div style={productDateStyle}>
+                            {product.createdAt
+                              ? new Date(product.createdAt).toLocaleString("tr-TR")
+                              : "-"}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             {selectedCompany.role !== "ADMIN" && (
               <div style={{ ...actionsStyle, marginTop: 24 }}>
                 {selectedCompany.verified ? (
@@ -1111,4 +1219,95 @@ const unverifyButtonStyle: CSSProperties = {
   borderRadius: 10,
   cursor: "pointer",
   fontWeight: 800,
+};
+
+const productsSectionStyle: CSSProperties = {
+  marginTop: 26,
+};
+
+const productsHeaderStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 16,
+  flexWrap: "wrap",
+  marginBottom: 16,
+};
+
+const productStatsStyle: CSSProperties = {
+  display: "flex",
+  gap: 10,
+  flexWrap: "wrap",
+  color: "#475569",
+  fontSize: 13,
+  fontWeight: 800,
+};
+
+const productGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))",
+  gap: 16,
+};
+
+const productCardStyle: CSSProperties = {
+  border: "1px solid #e2e8f0",
+  borderRadius: 16,
+  overflow: "hidden",
+  background: "#ffffff",
+};
+
+const productImageBoxStyle: CSSProperties = {
+  width: "100%",
+  height: 150,
+  background: "#f8fafc",
+  overflow: "hidden",
+};
+
+const productImageStyle: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  display: "block",
+};
+
+const productImageFallbackStyle: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  display: "grid",
+  placeItems: "center",
+  color: "#94a3b8",
+  fontWeight: 800,
+};
+
+const productBodyStyle: CSSProperties = {
+  padding: 14,
+  display: "flex",
+  flexDirection: "column",
+  gap: 8,
+};
+
+const productTitleStyle: CSSProperties = {
+  color: "#0f172a",
+  fontSize: 15,
+  lineHeight: 1.3,
+};
+
+const productPriceStyle: CSSProperties = {
+  color: "#2563eb",
+  fontWeight: 900,
+  fontSize: 16,
+};
+
+const productStatusStyle: CSSProperties = {
+  display: "inline-block",
+  width: "fit-content",
+  padding: "5px 9px",
+  borderRadius: 999,
+  fontSize: 11,
+  fontWeight: 900,
+};
+
+const productDateStyle: CSSProperties = {
+  color: "#64748b",
+  fontSize: 11,
 };
