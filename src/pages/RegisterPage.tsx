@@ -70,6 +70,13 @@ export default function RegisterPage() {
         address,
       });
 
+      if (typeof window !== "undefined" && typeof (window as any).fbq === "function") {
+        (window as any).fbq("track", "CompleteRegistration", {
+          content_name: "Firma Kaydı",
+          status: "completed",
+        });
+      }
+
       alert("Kayıt başarılı. Şimdi giriş yapabilirsiniz.");
       navigate("/login");
     } catch (err: any) {
