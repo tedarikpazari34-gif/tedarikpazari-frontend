@@ -104,32 +104,84 @@ const pages: Record<string, LegalContent> = {
 
   "/gizlilik-politikasi": {
     title: "Gizlilik Politikası",
-    description: "Tedarik Pazarı internet sitesi ve platform gizlilik politikası.",
-    updatedAt: "15 Temmuz 2026",
+    description:
+      "Tedarik Pazarı internet sitesi ve mobil uygulaması gizlilik politikası.",
+    updatedAt: "14 Ağustos 2026",
     content: (
       <>
-        <h2>Bilgi güvenliği</h2>
+        <h2>1. Kapsam</h2>
         <p>
-          Kullanıcı bilgilerinin gizliliğini korumak amacıyla erişim kontrolü,
-          kimlik doğrulama, kayıt tutma ve güvenli iletişim önlemleri uygulanır.
+          Bu Gizlilik Politikası, Tedarik Pazarı internet sitesi ve mobil
+          uygulamasının kullanımı sırasında işlenen bilgileri açıklar.
         </p>
 
-        <h2>Üçüncü taraf hizmetleri</h2>
+        <h2>2. İşlenebilecek bilgiler</h2>
         <p>
-          Platform; ödeme için iyzico, barındırma ve veritabanı hizmetleri,
-          e-posta altyapısı ve gerekli diğer teknik hizmet sağlayıcıları
-          kullanabilir.
+          Hesap ve iletişim bilgileri, firma bilgileri, ürün ve hizmet
+          bilgileri, teklif talepleri, teklifler, siparişler, kargo ve
+          işlem kayıtları ile destek ve mesajlaşma verileri işlenebilir.
         </p>
 
-        <h2>Kullanıcı sorumluluğu</h2>
+        <h2>3. Fotoğraf, kamera ve dosya erişimi</h2>
         <p>
-          Kullanıcılar hesap şifrelerini korumak, doğru bilgi vermek ve
-          yetkisiz erişim şüphesi halinde platformu bilgilendirmekle
-          sorumludur.
+          Kullanıcılar ürün, firma, uyuşmazlık veya diğer gerekli görselleri
+          yüklemek istediklerinde cihazlarındaki fotoğraf arşivinden seçim
+          yapabilir, dosya seçebilir veya kamera ile yeni bir görsel
+          oluşturabilir. Bu erişimler yalnızca kullanıcı tarafından ilgili
+          özellik kullanıldığında gerçekleştirilir.
         </p>
 
-        <h2>İletişim</h2>
-        <p>Gizlilikle ilgili sorular: {contactEmail}</p>
+        <h2>4. Verilerin kullanım amaçları</h2>
+        <p>
+          Bilgiler; hesap ve firma işlemlerinin yürütülmesi, alıcı ve
+          satıcıların buluşturulması, RFQ ve teklif süreçlerinin yönetilmesi,
+          sipariş ve teslimat işlemlerinin gerçekleştirilmesi, bildirimlerin
+          iletilmesi, güvenliğin sağlanması ve kullanıcı desteği sunulması
+          amacıyla kullanılabilir.
+        </p>
+
+        <h2>5. Bildirimler</h2>
+        <p>
+          Kullanıcılara teklif, sipariş, ödeme, teslimat ve hesap
+          hareketleriyle ilgili hizmet bildirimleri gönderilebilir.
+        </p>
+
+        <h2>6. Ödeme ve finansal bilgiler</h2>
+        <p>
+          Ödeme özellikleri kullanıma sunulduğunda ödeme işlemleri yetkili
+          ödeme hizmeti sağlayıcıları aracılığıyla gerçekleştirilebilir.
+          Kart bilgileri, kullanılan ödeme altyapısının güvenlik ve
+          saklama kurallarına tabi olabilir.
+        </p>
+
+        <h2>7. Hizmet sağlayıcıları</h2>
+        <p>
+          Platformun işletilmesi için barındırma, veritabanı, e-posta,
+          bildirim, dosya depolama, güvenlik ve gerektiğinde ödeme hizmeti
+          sağlayıcılarından yararlanılabilir. Bilgiler yalnızca hizmetin
+          gerektirdiği ölçüde paylaşılır.
+        </p>
+
+        <h2>8. Saklama ve güvenlik</h2>
+        <p>
+          Bilgiler, hizmetlerin sunulması ve yasal yükümlülüklerin yerine
+          getirilmesi için gerekli süre boyunca saklanır. Yetkisiz erişim,
+          kayıp ve kötüye kullanıma karşı uygun teknik ve idari tedbirler
+          uygulanır.
+        </p>
+
+        <h2>9. Kullanıcı hakları</h2>
+        <p>
+          Kullanıcılar kişisel verileriyle ilgili bilgi alma, düzeltme,
+          silme veya ilgili mevzuat kapsamındaki diğer haklarını kullanmak
+          üzere bizimle iletişime geçebilir.
+        </p>
+
+        <h2>10. İletişim</h2>
+        <p>
+          Gizlilik ve kişisel verilerle ilgili talepler:
+          {" "}{contactEmail}
+        </p>
       </>
     ),
   },
