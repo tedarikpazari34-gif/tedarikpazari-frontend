@@ -1,11 +1,40 @@
-import type { CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 
 export default function Footer() {
+  const [isMobile, setIsMobile] = useState(
+    () => window.innerWidth <= 768
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <footer style={footerStyle}>
-      <div style={mainStyle}>
-        <div style={brandColumnStyle}>
+    <footer
+      style={{
+        ...footerStyle,
+        padding: isMobile ? "28px 18px 120px" : "56px 24px 22px",
+      }}
+    >
+      <div
+        style={{
+          ...mainStyle,
+          gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: isMobile ? 24 : 38,
+        }}
+      >
+        <div
+          style={{
+            ...brandColumnStyle,
+            gridColumn: isMobile ? "1 / -1" : undefined,
+          }}
+        >
           <div style={logoStyle}>TP</div>
 
           <div>
@@ -91,7 +120,14 @@ export default function Footer() {
         </div>
       </div>
 
-      <div style={bottomStyle}>
+      <div
+        style={{
+          ...bottomStyle,
+          margin: isMobile ? "28px auto 0" : "42px auto 0",
+          paddingTop: isMobile ? 16 : 20,
+          fontSize: isMobile ? 12 : 13,
+        }}
+      >
         <span>©️ 2026 Tedarik Pazarı. Tüm hakları saklıdır.</span>
         <span>Güvenli B2B ticaret altyapısı</span>
       </div>

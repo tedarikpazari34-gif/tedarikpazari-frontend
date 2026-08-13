@@ -39,6 +39,19 @@ function resolveImageUrl(value?: string | null) {
 }
 
 export default function SellerProfilePage() {
+  const [isMobile, setIsMobile] = useState(
+    () => window.innerWidth <= 768
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const [profile, setProfile] = useState<CompanyProfile | null>(null);
 
   const [name, setName] = useState("");
@@ -252,8 +265,19 @@ export default function SellerProfilePage() {
         </div>
       </section>
 
-      <section style={layoutStyle}>
-        <article style={formCardStyle}>
+      <section
+        style={{
+          ...layoutStyle,
+          gridTemplateColumns: isMobile ? "1fr" : "minmax(0, 1.7fr) minmax(300px, 1fr)",
+          gap: isMobile ? 18 : 24,
+        }}
+      >
+        <article
+          style={{
+            ...formCardStyle,
+            padding: isMobile ? 20 : 30,
+          }}
+        >
           <div style={sectionHeaderStyle}>
             <div>
               <div style={sectionEyebrowStyle}>FİRMA BİLGİLERİ</div>
@@ -364,7 +388,12 @@ export default function SellerProfilePage() {
           </button>
         </article>
 
-        <aside style={mediaCardStyle}>
+        <aside
+          style={{
+            ...mediaCardStyle,
+            padding: isMobile ? 20 : 28,
+          }}
+        >
           <div style={sectionEyebrowStyle}>MAĞAZA GÖRSELLERİ</div>
           <h2 style={mediaTitleStyle}>Logo ve banner</h2>
 

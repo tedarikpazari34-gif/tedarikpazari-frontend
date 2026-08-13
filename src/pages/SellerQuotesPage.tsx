@@ -64,6 +64,19 @@ function statusStyle(status: string): CSSProperties {
 }
 
 export default function SellerQuotesPage() {
+  const [isMobile, setIsMobile] = useState(
+    () => window.innerWidth <= 768
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -116,7 +129,14 @@ export default function SellerQuotesPage() {
 
   return (
     <main style={pageStyle}>
-      <section style={heroStyle}>
+      <section
+        style={{
+          ...heroStyle,
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "stretch" : "center",
+          padding: isMobile ? 24 : 32,
+        }}
+      >
         <div>
           <div style={eyebrowStyle}>SATICI PANELİ</div>
 
@@ -128,7 +148,16 @@ export default function SellerQuotesPage() {
           </p>
         </div>
 
-        <Link to="/seller/rfqs" style={heroButtonStyle}>
+        <Link
+          to="/seller/rfqs"
+          style={{
+            ...heroButtonStyle,
+            width: isMobile ? "100%" : "auto",
+            boxSizing: "border-box",
+            textAlign: "center",
+            marginTop: isMobile ? 16 : 0,
+          }}
+        >
           Yeni RFQ Bul
         </Link>
       </section>

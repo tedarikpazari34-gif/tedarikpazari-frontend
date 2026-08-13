@@ -17,6 +17,9 @@ type UploadedImage = {
 };
 
 export default function SellerProductCreatePage() {
+  const [isMobile, setIsMobile] = useState(
+    () => window.innerWidth <= 768
+  );
   const [categories, setCategories] = useState<Category[]>([]);
 
   const [title, setTitle] = useState("");
@@ -41,6 +44,15 @@ export default function SellerProductCreatePage() {
     ...(item.children ? flattenCategories(item.children, level + 1) : []),
   ]);
 };
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     async function loadCategories() {
       try {
@@ -190,19 +202,47 @@ export default function SellerProductCreatePage() {
 
   return (
     <SellerLayout title="Yeni Ürün Ekle">
-      <main style={pageStyle}>
-        <div style={cardStyle}>
-          <h1 style={titleStyle}>Yeni Ürün Ekle</h1>
-
-          <p style={subtitleStyle}>
+      <main
+        style={{
+          ...pageStyle,
+          minHeight: isMobile ? "auto" : "100vh",
+          padding: isMobile ? "8px 0 28px" : "20px 0",
+        }}
+      >
+        <div
+          style={{
+            ...cardStyle,
+            maxWidth: isMobile ? "100%" : 1000,
+            padding: isMobile ? 20 : 40,
+            borderRadius: isMobile ? 18 : 24,
+            boxSizing: "border-box",
+          }}
+        >
+          <p
+            style={{
+              ...subtitleStyle,
+              marginTop: 0,
+            }}
+          >
             Satışa sunacağınız ürün bilgilerini girin.
           </p>
 
           {message && <div style={successStyle}>{message}</div>}
           {error && <div style={errorStyle}>{error}</div>}
 
-          <form onSubmit={handleCreateProduct} style={formStyle}>
-            <div style={gridStyle}>
+          <form
+            onSubmit={handleCreateProduct}
+            style={{
+              ...formStyle,
+              padding: isMobile ? 16 : 24,
+            }}
+          >
+            <div
+              style={{
+                ...gridStyle,
+                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+              }}
+            >
               <input
                 placeholder="Ürün adı"
                 value={title}

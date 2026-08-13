@@ -49,6 +49,19 @@ function statusStyle(status: string): CSSProperties {
 }
 
 export default function SellerOrdersPage() {
+  const [isMobile, setIsMobile] = useState(
+    () => window.innerWidth <= 768
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -226,7 +239,14 @@ export default function SellerOrdersPage() {
 
   return (
     <main style={pageStyle}>
-      <section style={heroStyle}>
+      <section
+        style={{
+          ...heroStyle,
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "stretch" : "center",
+          padding: isMobile ? 24 : 32,
+        }}
+      >
         <div>
           <div style={eyebrowStyle}>SATICI PANELİ</div>
           <h1 style={titleStyle}>Satıcı Siparişleri</h1>
@@ -235,7 +255,15 @@ export default function SellerOrdersPage() {
           </p>
         </div>
 
-        <div style={heroStatStyle}>
+        <div
+          style={{
+            ...heroStatStyle,
+            width: isMobile ? "100%" : "auto",
+            minWidth: isMobile ? 0 : 160,
+            boxSizing: "border-box",
+            marginTop: isMobile ? 16 : 0,
+          }}
+        >
           <span>Toplam Sipariş</span>
           <strong>{orders.length}</strong>
         </div>

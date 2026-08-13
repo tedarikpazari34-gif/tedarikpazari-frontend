@@ -30,6 +30,19 @@ function getStatusLabel(status: PayoutRequest["status"]) {
 }
 
 export default function WalletPage() {
+  const [isMobile, setIsMobile] = useState(
+    () => window.innerWidth <= 768
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [requests, setRequests] = useState<PayoutRequest[]>([]);
   const [amount, setAmount] = useState("");
@@ -148,7 +161,14 @@ export default function WalletPage() {
 
   return (
     <main style={pageStyle}>
-      <section style={heroStyle}>
+      <section
+        style={{
+          ...heroStyle,
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "stretch" : "center",
+          padding: isMobile ? 24 : 32,
+        }}
+      >
         <div>
           <div style={eyebrowStyle}>FİNANS PANELİ</div>
           <h1 style={titleStyle}>Cüzdanım</h1>
@@ -158,7 +178,15 @@ export default function WalletPage() {
           </p>
         </div>
 
-        <div style={heroAmountStyle}>
+        <div
+          style={{
+            ...heroAmountStyle,
+            width: isMobile ? "100%" : "auto",
+            minWidth: isMobile ? 0 : 190,
+            boxSizing: "border-box",
+            marginTop: isMobile ? 16 : 0,
+          }}
+        >
           <span>Kullanılabilir</span>
           <strong>{formatMoney(wallet?.available)}</strong>
         </div>

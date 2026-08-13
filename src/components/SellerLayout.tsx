@@ -1,4 +1,4 @@
-import { type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 export default function SellerLayout({
   children,
@@ -8,6 +8,18 @@ export default function SellerLayout({
   title?: string;
 }) {
   const path = window.location.pathname;
+  const [isMobile, setIsMobile] = useState(
+    () => window.innerWidth <= 768
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const logout = () => {
     localStorage.clear();
@@ -24,8 +36,16 @@ export default function SellerLayout({
   ];
 
   return (
-    <div style={layout}>
-      <aside style={sidebar}>
+    <div
+      style={{
+        ...layout,
+        minHeight: isMobile ? "auto" : "100vh",
+        flexDirection: isMobile ? "column" : "row",
+        width: "100%",
+        overflowX: "hidden",
+      }}
+    >
+      {!isMobile && <aside style={sidebar}>
         <div style={brand}>
           <div style={brandIcon}>T</div>
           <div>
@@ -57,16 +77,44 @@ export default function SellerLayout({
         <button onClick={logout} style={logoutButton}>
           Çıkış Yap
         </button>
-      </aside>
+      </aside>}
 
-      <main style={main}>
-        <header style={topbar}>
+      <main
+        style={{
+          ...main,
+          width: isMobile ? "100%" : undefined,
+          minWidth: 0,
+          padding: isMobile ? "18px 16px 110px" : 36,
+          boxSizing: "border-box",
+        }}
+      >
+        <header
+          style={{
+            ...topbar,
+            alignItems: isMobile ? "flex-start" : "center",
+            flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? 12 : undefined,
+            marginBottom: isMobile ? 18 : 28,
+          }}
+        >
           <div>
-            <h1 style={pageTitle}>{title}</h1>
+            <h1
+              style={{
+                ...pageTitle,
+                fontSize: isMobile ? 24 : 32,
+              }}
+            >
+              {title}
+            </h1>
             <p style={pageSub}>Ürünlerinizi, taleplerinizi ve siparişlerinizi yönetin.</p>
           </div>
 
-          <div style={profileBox}>
+          <div
+            style={{
+              ...profileBox,
+              display: isMobile ? "none" : "flex",
+            }}
+          >
             <div style={avatar}>S</div>
             <div>
               <div style={profileName}>Satıcı Hesabı</div>

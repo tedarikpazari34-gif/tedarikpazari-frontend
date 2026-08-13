@@ -75,14 +75,18 @@ export default function SellerProductsPage() {
       <main style={pageStyle}>
         <div style={headerStyle}>
           <div>
-            <h1 style={titleStyle}>Ürünlerim</h1>
-            <p style={subtitleStyle}>
+            <p
+              style={{
+                ...subtitleStyle,
+                marginTop: 0,
+              }}
+            >
               Satıcı hesabınıza ait ürünleri buradan yönetin.
             </p>
           </div>
 
           <a href="/seller/products/new" style={addButtonStyle}>
-            + Yeni Ürün Ekle
+            + Yeni Ürün
           </a>
         </div>
 
@@ -225,6 +229,9 @@ const subtitleStyle: CSSProperties = {
 
 const addButtonStyle: CSSProperties = {
   background: "#2563eb",
+  whiteSpace: "nowrap",
+  flexShrink: 0,
+  fontSize: 14,
   color: "white",
   textDecoration: "none",
   padding: "13px 18px",
@@ -249,7 +256,7 @@ const cardStyle: CSSProperties = {
 
 const imageWrapStyle: CSSProperties = {
   position: "relative",
-  height: 210,
+  height: 180,
   background: "#e2e8f0",
 };
 

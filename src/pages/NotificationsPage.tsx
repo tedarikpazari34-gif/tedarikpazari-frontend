@@ -15,6 +15,19 @@ const API =
   "https://tedarik-backend.onrender.com/api";
 
 export default function NotificationsPage() {
+  const [isMobile, setIsMobile] = useState(
+    () => window.innerWidth <= 768
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const navigate = useNavigate();
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -111,7 +124,14 @@ export default function NotificationsPage() {
 
   return (
     <main style={pageStyle}>
-      <section style={heroStyle}>
+      <section
+        style={{
+          ...heroStyle,
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "stretch" : "center",
+          padding: isMobile ? 24 : 32,
+        }}
+      >
         <div>
           <div style={eyebrowStyle}>BİLDİRİM MERKEZİ</div>
           <h1 style={titleStyle}>Bildirimler</h1>
@@ -120,8 +140,21 @@ export default function NotificationsPage() {
           </p>
         </div>
 
-        <div style={heroRightStyle}>
-  <div style={heroStatStyle}>
+        <div
+          style={{
+            ...heroRightStyle,
+            width: isMobile ? "100%" : undefined,
+            marginTop: isMobile ? 16 : 0,
+          }}
+        >
+  <div
+    style={{
+      ...heroStatStyle,
+      width: isMobile ? "100%" : "auto",
+      minWidth: isMobile ? 0 : 150,
+      boxSizing: "border-box",
+    }}
+  >
     <span>Okunmamış</span>
     <strong>{unreadCount}</strong>
   </div>
@@ -130,7 +163,11 @@ export default function NotificationsPage() {
     <button
       type="button"
       onClick={markAllRead}
-      style={readAllButtonStyle}
+      style={{
+        ...readAllButtonStyle,
+        width: isMobile ? "100%" : "auto",
+        boxSizing: "border-box",
+      }}
     >
       Tümünü Okundu Yap
     </button>
