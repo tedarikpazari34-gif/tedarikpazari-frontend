@@ -631,6 +631,57 @@ export default function AdminCompaniesPage() {
               />
             </div>
 
+            <div style={{ margin: "20px 0" }}>
+              <button
+                onClick={async () => {
+                  const content = window.prompt(
+                    "Firmaya göndermek istediğiniz mesajı yazın:"
+                  );
+
+                  if (!content?.trim()) return;
+
+                  try {
+                    const token = localStorage.getItem("token");
+
+                    const res = await fetch(
+                      `https://tedarik-backend.onrender.com/api/chat/admin/company/${selectedCompany.id}/message`,
+                      {
+                        method: "POST",
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                          content: content.trim(),
+                        }),
+                      }
+                    );
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                      alert(data?.message || "Mesaj gönderilemedi");
+                      return;
+                    }
+
+                    alert("Mesaj başarıyla gönderildi");
+                  } catch (err) {
+                    console.error("ADMIN COMPANY MESSAGE ERROR:", err);
+                    alert("Mesaj gönderilemedi");
+                  }
+                }}
+                style={{
+                  padding: "12px 18px",
+                  borderRadius: "10px",
+                  border: "none",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                }}
+              >
+                ✉️ Mesaj Gönder
+              </button>
+            </div>
+
             <div style={productsSectionStyle}>
               <div style={productsHeaderStyle}>
                 <div>
