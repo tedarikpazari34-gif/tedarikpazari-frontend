@@ -239,6 +239,36 @@ export default function CreateRfqPage() {
       if (data.targetPrice !== undefined && data.targetPrice !== null) {
         setTargetPrice(String(data.targetPrice));
       }
+
+      if (!productId && data.categoryName && categories.length > 0) {
+        const suggestedCategory = String(data.categoryName)
+          .trim()
+          .toLocaleLowerCase("tr-TR");
+
+        const exactMatch = categories.find(
+          (item) =>
+            item.name.trim().toLocaleLowerCase("tr-TR") === suggestedCategory
+        );
+
+        const partialMatch =
+          exactMatch ||
+          categories.find((item) => {
+            const categoryName = item.name
+              .trim()
+              .toLocaleLowerCase("tr-TR");
+
+            return (
+              categoryName.includes(suggestedCategory) ||
+              suggestedCategory.includes(categoryName)
+            );
+          });
+
+        if (partialMatch) {
+          setSelectedCategoryId(partialMatch.id);
+          setSelectedRootId(partialMatch.parentId || partialMatch.id);
+        }
+      }
+
       if (data.note) setNote(String(data.note));
     } catch (err) {
       console.error("AI RFQ ERROR:", err);
