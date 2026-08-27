@@ -279,6 +279,13 @@ setRfq(found || null);
         Number(a.deliveryDays || 0) - Number(b.deliveryDays || 0)
     )[0];
 
+  const highestRatedQuote = [...quotes]
+    .filter((quote) => Number(quote.seller?.rating || 0) > 0)
+    .sort(
+      (a, b) =>
+        Number(b.seller?.rating || 0) - Number(a.seller?.rating || 0)
+    )[0];
+
   const sortedQuotes = [...quotes].sort((a, b) => {
     if (quoteSort === "delivery") {
       return (
@@ -365,6 +372,54 @@ setRfq(found || null);
           </span>
         </div>
       </section>
+
+      {quotes.length > 0 && (
+        <section style={comparisonPanelStyle}>
+          <div>
+            <div style={eyebrowDarkStyle}>TEKLİF KARŞILAŞTIRMA</div>
+            <h2 style={comparisonTitleStyle}>Öne Çıkan Teklifler</h2>
+            <p style={comparisonTextStyle}>
+              Fiyat, teslim süresi ve satıcı puanını tek bakışta karşılaştırın.
+            </p>
+          </div>
+
+          <div style={comparisonGridStyle}>
+            <div style={comparisonCardStyle}>
+              <span style={comparisonLabelStyle}>🏆 En İyi Fiyat</span>
+              <strong style={comparisonValueStyle}>
+                {bestQuote ? formatPrice(bestQuote.unitPrice) : "-"}
+              </strong>
+              <small style={comparisonMetaStyle}>
+                {bestQuote?.seller?.name || "Tedarikçi"}
+              </small>
+            </div>
+
+            <div style={comparisonCardStyle}>
+              <span style={comparisonLabelStyle}>⚡ En Hızlı Teslim</span>
+              <strong style={comparisonValueStyle}>
+                {fastestQuote?.deliveryDays !== undefined
+                  ? `${fastestQuote.deliveryDays} gün`
+                  : "-"}
+              </strong>
+              <small style={comparisonMetaStyle}>
+                {fastestQuote?.seller?.name || "Tedarikçi"}
+              </small>
+            </div>
+
+            <div style={comparisonCardStyle}>
+              <span style={comparisonLabelStyle}>⭐ En Yüksek Puan</span>
+              <strong style={comparisonValueStyle}>
+                {highestRatedQuote
+                  ? Number(highestRatedQuote.seller?.rating || 0).toFixed(1)
+                  : "-"}
+              </strong>
+              <small style={comparisonMetaStyle}>
+                {highestRatedQuote?.seller?.name || "Henüz puan yok"}
+              </small>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section style={quotesHeaderStyle}>
         <div>
@@ -688,6 +743,59 @@ const badgeStyle: CSSProperties = {
   fontSize: 12,
   fontWeight: 900,
   whiteSpace: "nowrap",
+};
+
+const comparisonPanelStyle: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto 28px",
+  background: "white",
+  border: "1px solid #e2e8f0",
+  borderRadius: 24,
+  padding: 24,
+  boxShadow: "0 14px 34px rgba(15,23,42,0.08)",
+};
+
+const comparisonTitleStyle: CSSProperties = {
+  margin: "0 0 8px",
+  color: "#0f172a",
+  fontSize: 28,
+  fontWeight: 900,
+};
+
+const comparisonTextStyle: CSSProperties = {
+  margin: "0 0 18px",
+  color: "#64748b",
+};
+
+const comparisonGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 14,
+};
+
+const comparisonCardStyle: CSSProperties = {
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+  borderRadius: 18,
+  padding: 18,
+  display: "grid",
+  gap: 7,
+};
+
+const comparisonLabelStyle: CSSProperties = {
+  color: "#475569",
+  fontSize: 13,
+  fontWeight: 900,
+};
+
+const comparisonValueStyle: CSSProperties = {
+  color: "#0f172a",
+  fontSize: 26,
+  fontWeight: 900,
+};
+
+const comparisonMetaStyle: CSSProperties = {
+  color: "#64748b",
 };
 
 const quotesHeaderStyle: CSSProperties = {
