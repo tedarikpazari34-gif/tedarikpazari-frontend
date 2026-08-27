@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 const API = "https://tedarik-backend.onrender.com/api";
@@ -13,10 +13,95 @@ export default function CreateQuotePage() {
   const [price, setPrice] = useState("");
   const [days, setDays] = useState("3");
   const [note, setNote] = useState("");
+  const [rfqData, setRfqData] = useState<any>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    const loadRfq = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token || !rfqIdFromUrl) return;
+
+        const res = await fetch(`${API}/rfqs`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !Array.isArray(data)) return;
+
+        const found = data.find((item: any) => item.id === rfqIdFromUrl);
+
+        if (found) {
+          setRfqData(found);
+        }
+      } catch (err) {
+        console.error("RFQ LOAD ERROR:", err);
+      }
+    };
+
+    loadRfq();
+  }, [rfqIdFromUrl]);
+
+  const generateAiQuote = async () => {
+    try {
+      setAiLoading(true);
+      setError("");
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError("Teklif hazırlamak için giriş yapmalısınız.");
+        return;
+      }
+
+      if (!rfqData) {
+        setError("Talep bilgileri henüz yüklenmedi.");
+        return;
+      }
+
+      const res = await fetch(`${API}/ai/quote-draft`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: rfqData.product?.title || rfqData.title || "",
+          quantity: rfqData.quantity,
+          unitType: rfqData.unitType,
+          note: rfqData.note || "",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data?.message || "AI teklif taslağı oluşturulamadı.");
+        return;
+      }
+
+      if (data.deliveryDays) {
+        setDays(String(data.deliveryDays));
+      }
+
+      if (data.sellerNote) {
+        setNote(String(data.sellerNote));
+      }
+    } catch (err) {
+      console.error("AI QUOTE ERROR:", err);
+      setError("AI teklif hazırlama sırasında hata oluştu.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!rfqId.trim()) {
@@ -130,6 +215,30 @@ export default function CreateQuotePage() {
           />
         </label>
 
+        <div style={aiBoxStyle}>
+          <div style={aiBadgeStyle}>✨ AI DESTEKLİ</div>
+
+          <h3 style={aiTitleStyle}>AI ile Teklif Hazırla</h3>
+
+          <p style={aiTextStyle}>
+            AI, alıcının talebini analiz ederek teslim süresi ve profesyonel
+            teklif notu hazırlasın. Fiyatı siz belirleyin.
+          </p>
+
+          <button
+            type="button"
+            onClick={generateAiQuote}
+            disabled={aiLoading}
+            style={{
+              ...aiButtonStyle,
+              opacity: aiLoading ? 0.65 : 1,
+              cursor: aiLoading ? "not-allowed" : "pointer",
+            }}
+          >
+            {aiLoading ? "AI hazırlanıyor..." : "✨ AI ile Teklif Hazırla"}
+          </button>
+        </div>
+
         <div style={gridStyle}>
           <label style={fieldStyle}>
             <span style={labelStyle}>Birim Fiyat (₺) *</span>
@@ -188,6 +297,47 @@ export default function CreateQuotePage() {
     </main>
   );
 }
+
+const aiBoxStyle: CSSProperties = {
+  background: "linear-gradient(135deg, #eff6ff, #f5f3ff)",
+  border: "1px solid #c7d2fe",
+  borderRadius: 18,
+  padding: 18,
+  marginBottom: 20,
+};
+
+const aiBadgeStyle: CSSProperties = {
+  display: "inline-block",
+  background: "#4f46e5",
+  color: "white",
+  borderRadius: 999,
+  padding: "6px 10px",
+  fontSize: 12,
+  fontWeight: 900,
+  marginBottom: 10,
+};
+
+const aiTitleStyle: CSSProperties = {
+  margin: "0 0 8px",
+  fontSize: 21,
+  color: "#0f172a",
+  fontWeight: 900,
+};
+
+const aiTextStyle: CSSProperties = {
+  margin: "0 0 14px",
+  color: "#475569",
+  lineHeight: 1.6,
+};
+
+const aiButtonStyle: CSSProperties = {
+  border: "none",
+  borderRadius: 12,
+  padding: "12px 16px",
+  background: "#4f46e5",
+  color: "white",
+  fontWeight: 900,
+};
 
 const pageStyle: CSSProperties = {
   minHeight: "100vh",
