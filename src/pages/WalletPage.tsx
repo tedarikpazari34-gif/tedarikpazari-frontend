@@ -64,7 +64,20 @@ function getHistoryNote(note?: string | null) {
       "Admin tarafından bakiye yüklemesi yapıldı.",
   };
 
-  return translations[note] || note;
+  if (translations[note]) {
+    return translations[note];
+  }
+
+  const normalized = note.toLocaleLowerCase("tr-TR");
+
+  if (
+    normalized.includes("payment deposited into escrow") ||
+    normalized.includes("ödeme") && normalized.includes("escrow")
+  ) {
+    return "Ödeme güvenli hesaba alındı.";
+  }
+
+  return note;
 }
 
 function getHistoryPrefix(direction: WalletHistoryItem["direction"]) {
