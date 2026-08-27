@@ -319,9 +319,51 @@ export default function SellerOrdersPage() {
                 )}
 
                 {o.status === "PREPARING" && (
-                  <button onClick={() => handleShip(o.id)} style={blueButtonStyle}>
-                    📦 Kargoya Ver
-                  </button>
+                  <>
+                    <button onClick={() => handleShip(o.id)} style={blueButtonStyle}>
+                      📦 Kargoya Ver
+                    </button>
+
+                    <button
+                      onClick={async () => {
+                        const ok = window.confirm(
+                          "Siparişi kendi teslimatına hazır olarak işaretlemek istiyor musunuz?"
+                        );
+
+                        if (!ok) return;
+
+                        try {
+                          const token = localStorage.getItem("token");
+
+                          const res = await fetch(
+                            `${API}/orders/${o.id}/self-delivery`,
+                            {
+                              method: "POST",
+                              headers: {
+                                Authorization: `Bearer ${token}`,
+                              },
+                            }
+                          );
+
+                          const data = await res.json().catch(() => null);
+
+                          if (!res.ok) {
+                            alert(data?.message || "İşlem başarısız");
+                            return;
+                          }
+
+                          alert("Sipariş teslime hazır olarak işaretlendi 🤝");
+                          loadOrders();
+                        } catch (err) {
+                          console.error("SELF DELIVERY ERROR:", err);
+                          alert("İşlem sırasında hata oluştu");
+                        }
+                      }}
+                      style={orangeButtonStyle}
+                    >
+                      🤝 Teslime Hazır
+                    </button>
+                  </>
                 )}
 
                 {o.status !== "PAID" && o.status !== "PREPARING" && (
