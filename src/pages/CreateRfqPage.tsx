@@ -215,7 +215,26 @@ export default function CreateRfqPage() {
 
       if (data.title) setRequestTitle(String(data.title));
       if (data.quantity) setQuantity(String(data.quantity));
-      if (data.unitType) setUnitType(String(data.unitType));
+
+      const promptLower = aiPrompt.toLocaleLowerCase("tr-TR");
+
+      const detectedUnit =
+        promptLower.includes("koli") ? "Koli" :
+        promptLower.includes("paket") ? "Paket" :
+        promptLower.includes("kilogram") || promptLower.includes(" kg") ? "Kilogram" :
+        promptLower.includes("ton") ? "Ton" :
+        promptLower.includes("litre") ? "Litre" :
+        promptLower.includes("metre") ? "Metre" :
+        promptLower.includes("palet") ? "Palet" :
+        promptLower.includes("adet") ? "Adet" :
+        "";
+
+      if (detectedUnit) {
+        setUnitType(detectedUnit);
+      } else if (data.unitType) {
+        setUnitType(String(data.unitType));
+      }
+
       if (data.deliveryCity) setDeliveryCity(String(data.deliveryCity));
       if (data.targetPrice !== undefined && data.targetPrice !== null) {
         setTargetPrice(String(data.targetPrice));
