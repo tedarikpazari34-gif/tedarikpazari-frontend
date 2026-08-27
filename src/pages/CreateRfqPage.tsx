@@ -43,6 +43,8 @@ export default function CreateRfqPage() {
   const [note, setNote] = useState(copiedNote || "");
 
   const [loading, setLoading] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
   const [createdRfqId, setCreatedRfqId] = useState("");
   const [error, setError] = useState("");
 
@@ -175,6 +177,57 @@ export default function CreateRfqPage() {
 
     loadProduct();
   }, [productId]);
+
+  const generateAiDraft = async () => {
+    try {
+      setAiLoading(true);
+      setError("");
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      if (!aiPrompt.trim()) {
+        setError("AI için ihtiyacınızı kısa bir cümleyle yazın.");
+        return;
+      }
+
+      const res = await fetch(`${BASE_URL}/api/ai/rfq-draft`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          prompt: aiPrompt.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data?.message || "AI taslağı oluşturulamadı");
+        return;
+      }
+
+      if (data.title) setRequestTitle(String(data.title));
+      if (data.quantity) setQuantity(String(data.quantity));
+      if (data.unitType) setUnitType(String(data.unitType));
+      if (data.deliveryCity) setDeliveryCity(String(data.deliveryCity));
+      if (data.targetPrice !== undefined && data.targetPrice !== null) {
+        setTargetPrice(String(data.targetPrice));
+      }
+      if (data.note) setNote(String(data.note));
+    } catch (err) {
+      console.error("AI RFQ ERROR:", err);
+      setError("AI talep oluşturma sırasında hata oluştu.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const createRfq = async () => {
     try {
@@ -402,6 +455,37 @@ export default function CreateRfqPage() {
 
         {error && <div style={errorStyle}>{error}</div>}
 
+        <section style={aiBoxStyle}>
+          <div style={aiBadgeStyle}>✨ AI DESTEKLİ</div>
+
+          <h3 style={aiTitleStyle}>AI ile Talep Oluştur</h3>
+
+          <p style={aiTextStyle}>
+            İhtiyacınızı kısa bir cümleyle yazın. AI; başlık, miktar,
+            birim, teslimat şehri ve açıklama alanlarını sizin için doldursun.
+          </p>
+
+          <textarea
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            style={aiTextareaStyle}
+            placeholder="Örn: 100 koli ıslak mendil lazım, İstanbul teslim"
+          />
+
+          <button
+            type="button"
+            onClick={generateAiDraft}
+            disabled={aiLoading}
+            style={{
+              ...aiButtonStyle,
+              opacity: aiLoading ? 0.65 : 1,
+              cursor: aiLoading ? "not-allowed" : "pointer",
+            }}
+          >
+            {aiLoading ? "AI hazırlanıyor..." : "✨ AI ile Formu Doldur"}
+          </button>
+        </section>
+
         {!productId && (
           <>
             <label style={fieldStyle}>
@@ -563,6 +647,60 @@ export default function CreateRfqPage() {
     </main>
   );
 }
+
+const aiBoxStyle: CSSProperties = {
+  background: "linear-gradient(135deg, #eff6ff, #f5f3ff)",
+  border: "1px solid #c7d2fe",
+  borderRadius: 20,
+  padding: 20,
+  marginBottom: 22,
+};
+
+const aiBadgeStyle: CSSProperties = {
+  display: "inline-block",
+  background: "#4f46e5",
+  color: "white",
+  borderRadius: 999,
+  padding: "6px 10px",
+  fontSize: 12,
+  fontWeight: 900,
+  marginBottom: 10,
+};
+
+const aiTitleStyle: CSSProperties = {
+  margin: "0 0 8px",
+  fontSize: 22,
+  color: "#0f172a",
+  fontWeight: 900,
+};
+
+const aiTextStyle: CSSProperties = {
+  margin: "0 0 14px",
+  color: "#475569",
+  lineHeight: 1.6,
+};
+
+const aiTextareaStyle: CSSProperties = {
+  width: "100%",
+  minHeight: 90,
+  padding: 14,
+  borderRadius: 14,
+  border: "1px solid #cbd5e1",
+  resize: "vertical",
+  boxSizing: "border-box",
+  fontSize: 15,
+  marginBottom: 12,
+  fontFamily: "inherit",
+};
+
+const aiButtonStyle: CSSProperties = {
+  border: "none",
+  borderRadius: 12,
+  padding: "12px 16px",
+  background: "#4f46e5",
+  color: "white",
+  fontWeight: 900,
+};
 
 const pageStyle: CSSProperties = {
   minHeight: "100vh",
