@@ -44,6 +44,27 @@ function getHistoryLabel(type: string) {
   return type;
 }
 
+function getHistoryNote(note?: string | null) {
+  if (!note) return "";
+
+  const translations: Record<string, string> = {
+    "Escrow released to seller after commission deduction":
+      "Komisyon sonrası tutar satıcı bakiyesine aktarıldı.",
+    "Platform commission reserved":
+      "Platform komisyonu ayrıldı.",
+    "Buyer payment deposited into escrow":
+      "Alıcı ödemesi güvenli hesaba alındı.",
+    "Seller payout request created":
+      "Para çekme talebi oluşturuldu.",
+    "Payout request approved":
+      "Para çekme talebi onaylandı.",
+    "Admin wallet top-up":
+      "Admin tarafından bakiye yüklemesi yapıldı.",
+  };
+
+  return translations[note] || note;
+}
+
 function getHistoryPrefix(direction: WalletHistoryItem["direction"]) {
   if (direction === "IN") return "+";
   if (direction === "OUT") return "-";
@@ -319,7 +340,9 @@ export default function WalletPage() {
                     </div>
 
                     {item.note && (
-                      <div style={requestMetaStyle}>{item.note}</div>
+                      <div style={requestMetaStyle}>
+                        {getHistoryNote(item.note)}
+                      </div>
                     )}
                   </div>
                 ))}
