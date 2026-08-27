@@ -27,7 +27,7 @@ export default function CreateQuotePage() {
 
         if (!token || !rfqIdFromUrl) return;
 
-        const res = await fetch(`${API}/rfqs`, {
+        const res = await fetch(`${API}/rfqs/seller/${rfqIdFromUrl}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -35,13 +35,12 @@ export default function CreateQuotePage() {
 
         const data = await res.json();
 
-        if (!res.ok || !Array.isArray(data)) return;
-
-        const found = data.find((item: any) => item.id === rfqIdFromUrl);
-
-        if (found) {
-          setRfqData(found);
+        if (!res.ok) {
+          console.error("RFQ DETAIL LOAD ERROR:", data);
+          return;
         }
+
+        setRfqData(data);
       } catch (err) {
         console.error("RFQ LOAD ERROR:", err);
       }
