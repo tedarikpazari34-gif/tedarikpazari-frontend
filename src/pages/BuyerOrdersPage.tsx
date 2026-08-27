@@ -32,7 +32,7 @@ const API =
   import.meta.env.VITE_API_URL ||
   "https://tedarik-backend.onrender.com/api";
 
-function statusLabel(status: string) {
+function statusLabel(status: string, shippingCompany?: string | null) {
   switch (status) {
     case "PENDING_PAYMENT":
       return "Ödeme Bekleniyor";
@@ -44,7 +44,9 @@ function statusLabel(status: string) {
       return "Hazırlanıyor";
 
     case "SHIPPED":
-      return "Kargoda";
+      return shippingCompany === "Kendi Teslimatım"
+        ? "Teslime Hazır"
+        : "Kargoda";
 
     case "COMPLETED":
       return "Tamamlandı";
@@ -451,7 +453,7 @@ export default function BuyerOrdersPage() {
                     ...statusStyle(o.status),
                   }}
                 >
-                  {statusLabel(o.status)}
+                  {statusLabel(o.status, o.shippingCompany)}
                 </span>
               </div>
 
@@ -494,23 +496,38 @@ export default function BuyerOrdersPage() {
 
               {o.status === "SHIPPED" && (
                 <div style={shippingBoxStyle}>
-                  <div>
-                    🚚 {o.shippingCompany || "-"}
-                  </div>
+                  {o.shippingCompany === "Kendi Teslimatım" ? (
+                    <>
+                      <div>🤝 Teslimat: Kendi Teslimatım</div>
+                      <div>
+                        Durum: Teslime Hazır
+                      </div>
+                      <div>
+                        Hazır Olma Tarihi:{" "}
+                        {o.shippedAt
+                          ? new Date(o.shippedAt).toLocaleString("tr-TR")
+                          : "-"}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        🚚 {o.shippingCompany || "-"}
+                      </div>
 
-                  <div>
-                    Takip No:{" "}
-                    {o.shippingTrackingNo || "-"}
-                  </div>
+                      <div>
+                        Takip No:{" "}
+                        {o.shippingTrackingNo || "-"}
+                      </div>
 
-                  <div>
-                    Çıkış Tarihi:{" "}
-                    {o.shippedAt
-                      ? new Date(
-                          o.shippedAt
-                        ).toLocaleString("tr-TR")
-                      : "-"}
-                  </div>
+                      <div>
+                        Çıkış Tarihi:{" "}
+                        {o.shippedAt
+                          ? new Date(o.shippedAt).toLocaleString("tr-TR")
+                          : "-"}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
               {o.status === "COMPLETED" && (
