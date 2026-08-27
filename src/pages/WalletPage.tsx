@@ -8,6 +8,17 @@ type Wallet = {
   locked: string | number;
 };
 
+type WalletHistoryItem = {
+  id: string;
+  type: string;
+  amount: string | number;
+  currency: string;
+  note?: string | null;
+  createdAt: string;
+  direction: "IN" | "OUT" | "INFO";
+  orderId?: string | null;
+};
+
 type PayoutRequest = {
   id: string;
   amount: string | number;
@@ -20,6 +31,23 @@ type PayoutRequest = {
 
 function formatMoney(value?: string | number) {
   return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;
+}
+
+function getHistoryLabel(type: string) {
+  if (type === "ESCROW_RELEASE_SELLER") return "Sipariş Geliri";
+  if (type === "ESCROW_DEPOSIT") return "Escrow Ödemesi";
+  if (type === "COMMISSION") return "Platform Komisyonu";
+  if (type === "PAYOUT_REQUEST") return "Para Çekme Talebi";
+  if (type === "PAYOUT_APPROVE") return "Para Çekme Onayı";
+  if (type === "PAYOUT_REJECT") return "Para Çekme Reddi";
+  if (type === "ADJUSTMENT") return "Bakiye İşlemi";
+  return type;
+}
+
+function getHistoryPrefix(direction: WalletHistoryItem["direction"]) {
+  if (direction === "IN") return "+";
+  if (direction === "OUT") return "-";
+  return "";
 }
 
 function getStatusLabel(status: PayoutRequest["status"]) {
@@ -45,6 +73,7 @@ export default function WalletPage() {
 
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [requests, setRequests] = useState<PayoutRequest[]>([]);
+  const [history, setHistory] = useState<WalletHistoryItem[]>([]);
   const [amount, setAmount] = useState("");
   const [iban, setIban] = useState("");
 
@@ -88,6 +117,19 @@ export default function WalletPage() {
       if (payoutRes.ok) {
         const payoutData = await payoutRes.json();
         setRequests(Array.isArray(payoutData) ? payoutData : []);
+      }
+
+      const historyRes = await fetch(`${API}/wallet/me/history`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (historyRes.ok) {
+        const historyData = await historyRes.json();
+        setHistory(
+          Array.isArray(historyData?.history) ? historyData.history : []
+        );
       }
     } catch (err) {
       console.error(err);
@@ -227,6 +269,62 @@ export default function WalletPage() {
               <Step number="2" title="Tutar blokeye alınır" />
               <Step number="3" title="Teslimat sonrası aktarılır" />
             </div>
+          </section>
+
+          <section style={{ ...historyPanelStyle, marginTop: 24 }}>
+            <div>
+              <div style={smallLabelStyle}>CÜZDAN HAREKETLERİ</div>
+              <h2 style={panelTitleStyle}>İşlem Geçmişi</h2>
+              <p style={panelTextStyle}>
+                Sipariş gelirlerinizi, escrow hareketlerini ve para çekme
+                işlemlerinizi buradan takip edebilirsiniz.
+              </p>
+            </div>
+
+            {history.length === 0 ? (
+              <p style={panelTextStyle}>Henüz cüzdan hareketi bulunmuyor.</p>
+            ) : (
+              <div style={historyListStyle}>
+                {history.map((item) => (
+                  <div key={item.id} style={historyItemStyle}>
+                    <div style={historyTopStyle}>
+                      <div>
+                        <strong style={historyTitleStyle}>
+                          {getHistoryLabel(item.type)}
+                        </strong>
+
+                        {item.orderId && (
+                          <div style={requestMetaStyle}>
+                            Sipariş: {item.orderId}
+                          </div>
+                        )}
+                      </div>
+
+                      <strong
+                        style={
+                          item.direction === "IN"
+                            ? historyInStyle
+                            : item.direction === "OUT"
+                            ? historyOutStyle
+                            : historyInfoStyle
+                        }
+                      >
+                        {getHistoryPrefix(item.direction)}
+                        {formatMoney(item.amount)}
+                      </strong>
+                    </div>
+
+                    <div style={requestMetaStyle}>
+                      {new Date(item.createdAt).toLocaleString("tr-TR")}
+                    </div>
+
+                    {item.note && (
+                      <div style={requestMetaStyle}>{item.note}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           <section style={{ ...infoPanelStyle, marginTop: 24 }}>
@@ -522,6 +620,54 @@ const withdrawButtonStyle: CSSProperties = {
   color: "white",
   fontWeight: 900,
   cursor: "pointer",
+};
+
+const historyPanelStyle: CSSProperties = {
+  maxWidth: 1180,
+  margin: "0 auto",
+  background: "white",
+  border: "1px solid #e2e8f0",
+  borderRadius: 24,
+  padding: 28,
+  boxShadow: "0 14px 34px rgba(15,23,42,0.08)",
+};
+
+const historyListStyle: CSSProperties = {
+  display: "grid",
+  gap: 12,
+  marginTop: 20,
+};
+
+const historyItemStyle: CSSProperties = {
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+  borderRadius: 14,
+  padding: 16,
+  display: "grid",
+  gap: 6,
+};
+
+const historyTopStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 12,
+};
+
+const historyTitleStyle: CSSProperties = {
+  color: "#0f172a",
+};
+
+const historyInStyle: CSSProperties = {
+  color: "#16a34a",
+};
+
+const historyOutStyle: CSSProperties = {
+  color: "#dc2626",
+};
+
+const historyInfoStyle: CSSProperties = {
+  color: "#64748b",
 };
 
 const requestListStyle: CSSProperties = {
