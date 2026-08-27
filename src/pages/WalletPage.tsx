@@ -54,6 +54,8 @@ function getHistoryNote(note?: string | null) {
       "Platform komisyonu ayrıldı.",
     "Buyer payment deposited into escrow":
       "Alıcı ödemesi güvenli hesaba alındı.",
+    "Iyzico payment deposited into escrow":
+      "Ödeme güvenli hesaba alındı.",
     "Seller payout request created":
       "Para çekme talebi oluşturuldu.",
     "Payout request approved":
