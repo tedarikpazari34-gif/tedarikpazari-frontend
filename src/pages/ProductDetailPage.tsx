@@ -78,7 +78,6 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [mainImageError, setMainImageError] = useState(false);
   const [thumbErrors, setThumbErrors] = useState<Record<string, boolean>>({});
-  const [sellerProducts, setSellerProducts] = useState<Product[]>([]);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
@@ -189,55 +188,27 @@ export default function ProductDetailPage() {
       try {
         const requests: Promise<Response>[] = [];
 
-        if (product.seller?.id) {
-          requests.push(
-            fetch(
-              `${BASE_URL}/api/products?sellerId=${encodeURIComponent(
-                product.seller.id
-              )}`
-            )
-          );
-        } else {
-          requests.push(Promise.resolve(new Response("[]")));
-        }
-
         if (product.category?.id) {
-          requests.push(
-            fetch(
-              `${BASE_URL}/api/products?categoryId=${encodeURIComponent(
-                product.category.id
-              )}`
-            )
+          const similarRes = await fetch(
+            `${BASE_URL}/api/products?categoryId=${encodeURIComponent(
+              product.category.id
+            )}`
+          );
+
+          const similarData = await similarRes.json().catch(() => []);
+
+          setSimilarProducts(
+            Array.isArray(similarData)
+              ? similarData
+                  .filter((item: Product) => item.id !== product.id)
+                  .slice(0, 4)
+              : []
           );
         } else {
-          requests.push(Promise.resolve(new Response("[]")));
+          setSimilarProducts([]);
         }
-
-        const [sellerRes, similarRes] = await Promise.all(requests);
-
-        const sellerData = await sellerRes.json().catch(() => []);
-        const similarData = await similarRes.json().catch(() => []);
-
-        setSellerProducts(
-          Array.isArray(sellerData)
-            ? sellerData.filter((item: Product) => item.id !== product.id).slice(0, 4)
-            : []
-        );
-
-        setSimilarProducts(
-          Array.isArray(similarData)
-            ? similarData
-                .filter(
-                  (item: Product) =>
-                    item.id !== product.id &&
-                    item.seller?.id !== product.seller?.id
-                )
-                .slice(0, 4)
-            : []
-        );
       } catch (error) {
         console.error("RELATED PRODUCTS ERROR:", error);
-        setSellerProducts([]);
         setSimilarProducts([]);
       }
     }
@@ -673,14 +644,6 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </section>
-
-      {product.seller && sellerProducts.length > 0 && (
-        <ProductCollection
-          title="Benzer Ürünler"
-          description="Bu kategorideki diğer ürünleri keşfedin"
-          products={sellerProducts}
-        />
-      )}
 
       {similarProducts.length > 0 && (
         <ProductCollection
