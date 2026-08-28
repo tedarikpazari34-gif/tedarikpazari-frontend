@@ -280,6 +280,17 @@ export default function HomePage() {
       .then((data: unknown) => {
         if (Array.isArray(data) && data.length > 0) {
           const mapped = (data as ApiProduct[])
+            .filter((product) => {
+              const title = (product.title || product.name || "")
+                .trim()
+                .toLocaleLowerCase("tr-TR");
+
+              if (!title) return false;
+              if (title === "test" || title.includes(" test ")) return false;
+              if (title === "çorap" || title === "çorap üretimi") return false;
+
+              return true;
+            })
             .slice(0, 8)
             .map(mapApiProductToCard);
 
@@ -918,7 +929,7 @@ export default function HomePage() {
                     scrollSnapAlign: isMobile ? "start" : undefined,
                     overflow: "hidden",
                     borderRadius: isMobile ? 16 : 20,
-                    backgroundImage: `linear-gradient(180deg, rgba(8,17,32,0.20) 0%, rgba(8,17,32,0.82) 100%), url('${sector.image}')`,
+                    backgroundImage: `linear-gradient(180deg, rgba(8,17,32,0.04) 0%, rgba(8,17,32,0.46) 100%), url('${sector.image}')`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     border: "1px solid rgba(148, 163, 184, 0.14)",
