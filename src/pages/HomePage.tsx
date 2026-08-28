@@ -44,6 +44,15 @@ type ApiProduct = {
   images?: Array<string | ProductImageObject>;
   category?: ProductCategory | string | null;
   categoryName?: string;
+  moq?: number;
+  unitType?: string;
+  leadTimeDays?: number | null;
+  seller?: {
+    name?: string;
+    verified?: boolean;
+    city?: string | null;
+    rating?: number;
+  };
 };
 
 type ProductCard = {
@@ -52,6 +61,9 @@ type ProductCard = {
   category: string;
   price: string;
   image: string;
+  moq?: number;
+  unitType?: string;
+  leadTimeDays?: number | null;
 };
 
 const sectors: Sector[] = [
@@ -237,6 +249,9 @@ function mapApiProductToCard(product: ApiProduct): ProductCard {
     category: getCategoryName(product),
     price: formatPrice(product.price ?? product.basePrice),
     image: getImageUrl(product),
+    moq: product.moq,
+    unitType: product.unitType,
+    leadTimeDays: product.leadTimeDays,
   };
 }
 
@@ -265,7 +280,7 @@ export default function HomePage() {
       .then((data: unknown) => {
         if (Array.isArray(data) && data.length > 0) {
           const mapped = (data as ApiProduct[])
-            .slice(0, 3)
+            .slice(0, 8)
             .map(mapApiProductToCard);
 
           setFeaturedProducts(mapped);
@@ -957,7 +972,7 @@ export default function HomePage() {
                     marginBottom: 8,
                   }}
                 >
-                  ÖNE ÇIKAN ÜRÜNLER
+                  YENİ EKLENEN ÜRÜNLER
                 </div>
                 <h2
                   style={{
@@ -966,7 +981,7 @@ export default function HomePage() {
                     lineHeight: 1.2,
                   }}
                 >
-                  Popüler toptan ürünler
+                  Tedarik Pazarı'na yeni eklenen ürünler
                 </h2>
               </div>
 
@@ -1048,11 +1063,45 @@ export default function HomePage() {
                       {item.title}
                     </h3>
 
-                    {!isMobile && (
-                      <div style={{ color: "#6b7280", marginBottom: 14 }}>
-                        Toptan alım için uygun
-                      </div>
-                    )}
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        flexWrap: "wrap",
+                        marginBottom: 14,
+                      }}
+                    >
+                      {item.moq !== undefined && (
+                        <span
+                          style={{
+                            background: "#f1f5f9",
+                            color: "#475569",
+                            padding: "6px 9px",
+                            borderRadius: 999,
+                            fontSize: 12,
+                            fontWeight: 700,
+                          }}
+                        >
+                          Min. {item.moq} {item.unitType || "Adet"}
+                        </span>
+                      )}
+
+                      {item.leadTimeDays !== undefined &&
+                        item.leadTimeDays !== null && (
+                          <span
+                            style={{
+                              background: "#eff6ff",
+                              color: "#1d4ed8",
+                              padding: "6px 9px",
+                              borderRadius: 999,
+                              fontSize: 12,
+                              fontWeight: 700,
+                            }}
+                          >
+                            {item.leadTimeDays} gün teslim
+                          </span>
+                        )}
+                    </div>
 
                     <div
                       style={{
