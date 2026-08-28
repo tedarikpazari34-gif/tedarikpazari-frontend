@@ -884,7 +884,7 @@ export default function HomePage() {
                   POPÜLER TEDARİK ALANLARI
                 </div>
                 <h2 style={{ margin: 0, fontSize: 30 }}>
-                  Sık aranan sektörler ve kategoriler
+                  Sektörlere Göre Keşfedin
                 </h2>
               </div>
 
@@ -929,7 +929,7 @@ export default function HomePage() {
                     scrollSnapAlign: isMobile ? "start" : undefined,
                     overflow: "hidden",
                     borderRadius: isMobile ? 16 : 20,
-                    backgroundImage: `linear-gradient(180deg, rgba(8,17,32,0.04) 0%, rgba(8,17,32,0.46) 100%), url('${sector.image}')`,
+                    backgroundImage: `linear-gradient(180deg, rgba(8,17,32,0.00) 0%, rgba(8,17,32,0.28) 100%), url('${sector.image}')`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     border: "1px solid rgba(148, 163, 184, 0.14)",
