@@ -403,8 +403,6 @@ export default function ProductDetailPage() {
           </div>
 
           <div style={badgeRowStyle}>
-            <span style={verifiedBadgeStyle}>✔ Doğrulanmış Firma</span>
-
             {product.rfqEnabled && <span style={rfqBadgeStyle}>RFQ Uygun</span>}
 
             <span
