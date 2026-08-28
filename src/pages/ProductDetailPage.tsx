@@ -431,71 +431,6 @@ export default function ProductDetailPage() {
             </div>
             <div style={unitStyle}>/ {product.unitType}</div>
           </div>
-          {product.seller && (
-            <div style={sellerCardStyle}>
-              <div style={sellerIdentityStyle}>
-                <div style={sellerLogoStyle}>
-                  {product.seller.logo ? (
-                    <img
-                      src={resolveImageUrl(product.seller.logo) || ""}
-                      alt={product.seller.name || "Satıcı"}
-                      style={sellerLogoImageStyle}
-                    />
-                  ) : (
-                    <span>
-                      {(product.seller.name || "TP")
-                        .split(" ")
-                        .slice(0, 2)
-                        .map((word) => word[0])
-                        .join("")
-                        .toUpperCase()}
-                    </span>
-                  )}
-                </div>
-
-                <div>
-                  <div style={sellerLabelStyle}>SATICI FİRMA</div>
-
-                  <div style={sellerNameRowStyle}>
-                    <strong style={sellerNameStyle}>
-                      {product.seller.name || "Satıcı"}
-                    </strong>
-
-                    {product.seller.verified && (
-                      <span style={sellerVerifiedStyle}>✓ Doğrulandı</span>
-                    )}
-                  </div>
-
-                  <div style={sellerMetaStyle}>
-                    ⭐ {Number(product.seller.rating || 0).toFixed(1)}
-                    {" · "}
-                    {product.seller.reviewCount || 0} değerlendirme
-                    {" · "}
-                    {product.seller.completedDeals || 0} satış
-                  </div>
-
-                  <div style={sellerLocationStyle}>
-                    📍{" "}
-                    {[product.seller.city, product.seller.country || "Türkiye"]
-                      .filter(Boolean)
-                      .join(", ")}
-                    {" · "}
-                    ⏱{" "}
-                    {product.seller.responseTime
-                      ? `${product.seller.responseTime} saat yanıt`
-                      : "Yanıt süresi ölçülüyor"}
-                  </div>
-                </div>
-              </div>
-
-              <Link
-                to={`/store/${product.seller.id}`}
-                style={sellerStoreButtonStyle}
-              >
-                Tedarikçi Bilgisi Gizli
-              </Link>
-            </div>
-          )}
           <div style={infoGridStyle}>
             <InfoBox label="Birim" value={product.unitType} />
             <InfoBox label="MOQ" value={product.moq} />
@@ -512,7 +447,7 @@ export default function ProductDetailPage() {
                   : "-"
               }
             />
-            <InfoBox label="Tedarikçi" value="Platform Onaylı" green />
+            <InfoBox label="Tedarikçi" value="Bilgisi Gizli" green />
           </div>
 
           <div style={noticeStyle}>
@@ -525,7 +460,7 @@ export default function ProductDetailPage() {
           <div style={supplierCardStyle}>
   <div>
     <div style={supplierTitleStyle}>Tedarikçi Profili</div>
-    <div style={supplierNameStyle}>Platform Onaylı Tedarikçi</div>
+    <div style={supplierNameStyle}>Tedarikçi Bilgisi Gizli</div>
     <p style={supplierDescStyle}>
       Tedarikçi kimliği, platform içi güvenli ticaret akışını korumak amacıyla gizli tutulur.
     </p>
