@@ -521,7 +521,7 @@ export default function ProductDetailPage() {
                 to={`/store/${product.seller.id}`}
                 style={sellerStoreButtonStyle}
               >
-                Mağazayı Gör
+                Tedarikçi Bilgisi Gizli
               </Link>
             </div>
           )}
@@ -541,7 +541,7 @@ export default function ProductDetailPage() {
                   : "-"
               }
             />
-            <InfoBox label="Tedarikçi" value="Doğrulanmış Firma" green />
+            <InfoBox label="Tedarikçi" value="Platform Onaylı" green />
           </div>
 
           <div style={noticeStyle}>
@@ -554,16 +554,16 @@ export default function ProductDetailPage() {
           <div style={supplierCardStyle}>
   <div>
     <div style={supplierTitleStyle}>Tedarikçi Profili</div>
-    <div style={supplierNameStyle}>Doğrulanmış Firma</div>
+    <div style={supplierNameStyle}>Platform Onaylı Tedarikçi</div>
     <p style={supplierDescStyle}>
-      Bu tedarikçi platform kalite ve güven kontrolünden geçmiştir.
+      Tedarikçi kimliği, platform içi güvenli ticaret akışını korumak amacıyla gizli tutulur.
     </p>
   </div>
 
   <div style={supplierStatsStyle}>
-    <span>✓ Güvenli teklif</span>
-    <span>✓ B2B satış</span>
-    <span>✓ Hızlı dönüş</span>
+    <span>✓ Platform içi teklif</span>
+    <span>✓ Güvenli ödeme akışı</span>
+    <span>✓ Kontrollü ticaret</span>
   </div>
 </div>
           <div style={purchaseBoxStyle}>
@@ -676,8 +676,8 @@ export default function ProductDetailPage() {
 
       {product.seller && sellerProducts.length > 0 && (
         <ProductCollection
-          title="Bu tedarikçinin diğer ürünleri"
-          description={`${product.seller.name || "Satıcı"} tarafından yayınlanan diğer ürünler`}
+          title="Benzer Ürünler"
+          description="Bu kategorideki diğer ürünleri keşfedin"
           products={sellerProducts}
         />
       )}
