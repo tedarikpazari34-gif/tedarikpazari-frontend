@@ -546,37 +546,16 @@ const res = await fetch(`${API}/products?${query.toString()}`);
 
                   <div style={sellerRow}>
                     <div style={{ minWidth: 0 }}>
-                      {product.seller?.id ? (
-                        <Link
-                          to={`/store/${product.seller.id}`}
-                          style={sellerNameLink}
-                        >
-                          {product.seller.name || "Tedarikçi"}
-                        </Link>
-                      ) : (
-                        <span style={sellerNameText}>Tedarikçi</span>
-                      )}
+                      <div style={sellerNameText}>
+                        Platform Onaylı Tedarikçi
+                      </div>
 
                       <div style={sellerMeta}>
-                        {Number(product.seller?.rating || 0) > 0
-                          ? `⭐ ${Number(product.seller?.rating).toFixed(1)}`
-                          : "⭐ Yeni satıcı"}
-
-                        {product.seller?.reviewCount
-                          ? ` · ${product.seller.reviewCount} yorum`
-                          : ""}
-
-                        {product.seller?.city
-                          ? ` · 📍 ${product.seller.city}`
-                          : ""}
+                        Tedarikçi bilgileri güvenli ticaret için gizlidir
                       </div>
                     </div>
 
-                    {product.seller?.verified ? (
-                      <span style={supplierBadge}>✓ Onaylı</span>
-                    ) : (
-                      <span style={standardSupplierBadge}>Standart</span>
-                    )}
+                    <span style={supplierBadge}>✓ Platform İçi</span>
                   </div>
 
                   <div style={featureGrid}>
