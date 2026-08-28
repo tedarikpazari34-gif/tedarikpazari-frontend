@@ -67,14 +67,14 @@ type ProductCard = {
 };
 
 const sectors: Sector[] = [
-  { title: "Ambalaj ve Paketleme", image: "/images/category-ambalaj.jpg" },
-  { title: "Temizlik ve Hijyen", image: "/images/category-temizlik.jpg" },
-  { title: "Gıda ve Horeca", image: "/images/category-gida.jpg" },
-  { title: "Elektrik ve Aydınlatma", image: "/images/category-elektrik.jpg" },
-  { title: "İş Güvenliği", image: "/images/category-is-guvenligi.jpg" },
-  { title: "Otomotiv ve Yedek Parça", image: "/images/category-otomotiv.jpg" },
-  { title: "Hırdavat", image: "/images/category-hirdavat.jpg" },
-  { title: "Lojistik ve Depolama", image: "/images/category-lojistik.jpg" },
+  { title: "Ambalaj ve Paketleme", image: "/images/category-ambalaj-ai.png" },
+  { title: "Temizlik ve Hijyen", image: "/images/category-temizlik-ai.png" },
+  { title: "Gıda ve Horeca", image: "/images/category-gida-ai.png" },
+  { title: "Elektrik ve Aydınlatma", image: "/images/category-elektrik-ai.png" },
+  { title: "İş Güvenliği", image: "/images/category-is-guvenligi-ai.png" },
+  { title: "Otomotiv ve Yedek Parça", image: "/images/category-otomotiv-ai.png" },
+  { title: "Hırdavat", image: "/images/category-hirdavat-ai.png" },
+  { title: "Lojistik ve Depolama", image: "/images/category-lojistik-ai.png" },
 ];
 
 const highlights: Highlight[] = [
