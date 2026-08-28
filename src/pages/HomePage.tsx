@@ -386,6 +386,30 @@ export default function HomePage() {
                   tek ekranda karşılaştırın. Satıcıysanız yeni satın alma taleplerine
                   ulaşın ve işletmeniz için yeni iş fırsatları oluşturun.
                 </p>
+                <div style={{ marginBottom: 14, maxWidth: 650 }}>
+                  <div
+                    style={{
+                      fontSize: isMobile ? 20 : 24,
+                      fontWeight: 900,
+                      marginBottom: 6,
+                      color: "#ffffff",
+                    }}
+                  >
+                    İşletmeniz için neye ihtiyacınız var?
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: isMobile ? 13 : 15,
+                      lineHeight: 1.5,
+                      color: "#dbeafe",
+                    }}
+                  >
+                    Ürün, kategori veya tedarikçi arayın; dilerseniz ihtiyacınızı
+                    yayınlayıp teklif toplayın.
+                  </div>
+                </div>
+
                 <div
                   style={{
                     display: "flex",
