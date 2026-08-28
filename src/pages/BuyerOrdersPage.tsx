@@ -15,6 +15,7 @@ type Order = {
 
   rfq?: {
     quantity?: number;
+    unitType?: string | null;
     title?: string | null;
     product?: {
       title?: string;
@@ -460,7 +461,11 @@ export default function BuyerOrdersPage() {
               <div style={infoGridStyle}>
                 <Info
                   label="Miktar"
-                  value={o.rfq?.quantity || "-"}
+                  value={
+                    o.rfq?.quantity
+                      ? `${o.rfq.quantity} ${o.rfq.unitType || "Adet"}`
+                      : "-"
+                  }
                 />
 
                 <Info
