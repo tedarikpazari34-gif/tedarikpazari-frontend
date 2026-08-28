@@ -5,6 +5,7 @@ type RFQ = {
   id: string;
   title?: string | null;
   quantity: number;
+  unitType?: string | null;
   note?: string | null;
   status: string;
   createdAt?: string;
@@ -564,7 +565,7 @@ setRfq(found || null);
               </div>
 
               <div style={calculationStyle}>
-                {rfq.quantity} adet × {formatPrice(quote.unitPrice)}
+                {rfq.quantity} {rfq.unitType || "Adet"} × {formatPrice(quote.unitPrice)}
                 <strong>{formatPrice(totalAmount)}</strong>
               </div>
 
