@@ -5,6 +5,7 @@ const API = 'https://tedarik-backend.onrender.com/api';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
+  const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deactivatingId, setDeactivatingId] = useState('');
 
@@ -24,6 +25,23 @@ export default function AdminProductsPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadReports() {
+    try {
+      const res = await fetch(`${API}/admin/product-reports`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json().catch(() => []);
+
+      setReports(res.ok && Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("PRODUCT REPORTS ERROR:", err);
+      setReports([]);
     }
   }
 
@@ -50,6 +68,7 @@ export default function AdminProductsPage() {
       }
 
       loadProducts();
+      loadReports();
     } catch (err) {
       console.error(err);
       alert("Ürün pasife alınırken hata oluştu.");
@@ -75,6 +94,7 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     loadProducts();
+    loadReports();
   }, []);
 
   return (
@@ -102,6 +122,88 @@ export default function AdminProductsPage() {
         >
           Ürün Yönetimi
         </h1>
+
+        <section style={{ marginBottom: 40 }}>
+          <h2 style={{ fontSize: 24, marginBottom: 18 }}>
+            Bildirilen Ürünler
+          </h2>
+
+          {reports.length === 0 ? (
+            <div
+              style={{
+                background: '#fff',
+                padding: 20,
+                borderRadius: 14,
+                color: '#64748b',
+              }}
+            >
+              Açık ürün bildirimi yok.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: 16 }}>
+              {reports.map((report) => (
+                <div
+                  key={report.id}
+                  style={{
+                    background: '#fff7ed',
+                    border: '1px solid #fed7aa',
+                    borderRadius: 16,
+                    padding: 20,
+                  }}
+                >
+                  <div style={{ fontWeight: 800, fontSize: 18 }}>
+                    {report.product?.title || 'Ürün'}
+                  </div>
+
+                  <div style={{ marginTop: 10 }}>
+                    <strong>Bildirim nedeni:</strong> {report.reason}
+                  </div>
+
+                  {report.note && (
+                    <div style={{ marginTop: 8 }}>
+                      <strong>Açıklama:</strong> {report.note}
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: 8, color: '#64748b' }}>
+                    {new Date(report.createdAt).toLocaleString('tr-TR')}
+                  </div>
+
+                  {report.product?.isActive !== false ? (
+                    <button
+                      onClick={() => deactivateProduct(report.product.id)}
+                      disabled={deactivatingId === report.product?.id}
+                      style={{
+                        marginTop: 16,
+                        background: '#dc2626',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '11px 16px',
+                        borderRadius: 10,
+                        cursor: 'pointer',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {deactivatingId === report.product?.id
+                        ? 'İşleniyor...'
+                        : 'Ürünü Pasife Al'}
+                    </button>
+                  ) : (
+                    <div
+                      style={{
+                        marginTop: 14,
+                        color: '#64748b',
+                        fontWeight: 700,
+                      }}
+                    >
+                      Ürün zaten pasif
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         {loading ? (
           <div>Yükleniyor...</div>
