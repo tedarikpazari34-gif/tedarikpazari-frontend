@@ -44,6 +44,13 @@ export default function RegisterPage() {
       return;
     }
 
+    const normalizedPhone = phone.replace(/\D/g, "");
+
+    if (!/^05\d{9}$/.test(normalizedPhone)) {
+      setError("Telefon numarası 05XXXXXXXXX formatında 11 haneli olmalıdır");
+      return;
+    }
+
     if (!recaptchaToken) {
       setError("Lütfen reCAPTCHA doğrulamasını tamamlayın");
       return;
@@ -60,7 +67,7 @@ export default function RegisterPage() {
         role: membershipType,
         recaptchaToken,
         fullName: fullName.trim(),
-        phone: phone.trim(),
+        phone: normalizedPhone,
         companyType,
         category,
         city,
@@ -141,9 +148,14 @@ export default function RegisterPage() {
               <label style={labelStyle}>Telefon *</label>
               <input
                 style={inputStyle}
-                placeholder="0555 555 55 55"
+                placeholder="05XXXXXXXXX"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                inputMode="numeric"
+                maxLength={11}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "").slice(0, 11);
+                  setPhone(value);
+                }}
                 required
               />
             </div>
