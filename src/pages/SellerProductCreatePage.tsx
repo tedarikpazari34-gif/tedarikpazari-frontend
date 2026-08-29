@@ -26,6 +26,10 @@ export default function SellerProductCreatePage() {
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [basePrice, setBasePrice] = useState("");
+  const [unitType, setUnitType] = useState("adet");
+  const [moq, setMoq] = useState("1");
+  const [leadTimeDays, setLeadTimeDays] = useState("3");
+  const [vatRate, setVatRate] = useState("20");
 
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [selectedFileNames, setSelectedFileNames] = useState<string[]>([]);
@@ -153,12 +157,12 @@ export default function SellerProductCreatePage() {
           title,
           description,
           categoryId,
-          unitType: "adet",
-          moq: 1,
+          unitType,
+          moq: Number(moq),
           basePrice: Number(basePrice),
-          leadTimeDays: 3,
+          leadTimeDays: Number(leadTimeDays),
           stockType: "STOCK",
-          vatRate: 20,
+          vatRate: Number(vatRate),
           rfqEnabled: true,
           imageUrl: coverImage,
         }),
@@ -190,6 +194,10 @@ export default function SellerProductCreatePage() {
       setDescription("");
       setCategoryId("");
       setBasePrice("");
+      setUnitType("adet");
+      setMoq("1");
+      setLeadTimeDays("3");
+      setVatRate("20");
       setUploadedImages([]);
       setSelectedFileNames([]);
     } catch (err) {
@@ -271,6 +279,50 @@ export default function SellerProductCreatePage() {
                     {c.name}
                   </option>
                 ))}
+              </select>
+
+              <select
+                value={unitType}
+                onChange={(e) => setUnitType(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="adet">Adet</option>
+                <option value="koli">Koli</option>
+                <option value="kg">Kg</option>
+                <option value="litre">Litre</option>
+                <option value="metre">Metre</option>
+                <option value="paket">Paket</option>
+              </select>
+
+              <input
+                type="number"
+                min="1"
+                placeholder="Minimum sipariş miktarı (MOQ)"
+                value={moq}
+                onChange={(e) => setMoq(e.target.value)}
+                style={inputStyle}
+                required
+              />
+
+              <input
+                type="number"
+                min="1"
+                placeholder="Teslim süresi (gün)"
+                value={leadTimeDays}
+                onChange={(e) => setLeadTimeDays(e.target.value)}
+                style={inputStyle}
+                required
+              />
+
+              <select
+                value={vatRate}
+                onChange={(e) => setVatRate(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="0">%0 KDV</option>
+                <option value="1">%1 KDV</option>
+                <option value="10">%10 KDV</option>
+                <option value="20">%20 KDV</option>
               </select>
 
               <input
