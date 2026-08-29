@@ -6,12 +6,13 @@ const API = 'https://tedarik-backend.onrender.com/api';
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deactivatingId, setDeactivatingId] = useState('');
 
   const token = localStorage.getItem('token');
 
   async function loadProducts() {
     try {
-      const res = await fetch(`${API}/admin/products/pending`, {
+      const res = await fetch(`${API}/admin/products`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -23,6 +24,37 @@ export default function AdminProductsPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function deactivateProduct(id: string) {
+    if (!window.confirm("Bu ürünü pasife almak istediğinize emin misiniz?")) {
+      return;
+    }
+
+    try {
+      setDeactivatingId(id);
+
+      const res = await fetch(`${API}/admin/products/${id}/deactivate`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        alert(data?.message || "Ürün pasife alınamadı.");
+        return;
+      }
+
+      loadProducts();
+    } catch (err) {
+      console.error(err);
+      alert("Ürün pasife alınırken hata oluştu.");
+    } finally {
+      setDeactivatingId('');
     }
   }
 
@@ -68,13 +100,13 @@ export default function AdminProductsPage() {
             marginBottom: 30,
           }}
         >
-          Bekleyen Ürünler
+          Ürün Yönetimi
         </h1>
 
         {loading ? (
           <div>Yükleniyor...</div>
         ) : products.length === 0 ? (
-          <div>Bekleyen ürün yok</div>
+          <div>Ürün bulunamadı</div>
         ) : (
           <div
             style={{
@@ -105,21 +137,47 @@ export default function AdminProductsPage() {
   {product.seller?.name || '-'}
 </div>
 
-                <button
-                  onClick={() => approveProduct(product.id)}
-                  style={{
-                    marginTop: 20,
-                    background: '#2563eb',
-                    color: '#fff',
-                    border: 'none',
-                    padding: '12px 18px',
-                    borderRadius: 10,
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                  }}
-                >
-                  Ürünü Onayla
-                </button>
+                <div style={{ display: 'flex', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
+                  {!product.isApproved && (
+                    <button
+                      onClick={() => approveProduct(product.id)}
+                      style={{
+                        background: '#2563eb',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '12px 18px',
+                        borderRadius: 10,
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Ürünü Onayla
+                    </button>
+                  )}
+
+                  {product.isActive ? (
+                    <button
+                      onClick={() => deactivateProduct(product.id)}
+                      disabled={deactivatingId === product.id}
+                      style={{
+                        background: '#dc2626',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '12px 18px',
+                        borderRadius: 10,
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        opacity: deactivatingId === product.id ? 0.6 : 1,
+                      }}
+                    >
+                      {deactivatingId === product.id ? 'İşleniyor...' : 'Pasife Al'}
+                    </button>
+                  ) : (
+                    <span style={{ color: '#64748b', fontWeight: 700 }}>
+                      Pasif
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
