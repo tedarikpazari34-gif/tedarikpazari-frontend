@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -89,6 +90,7 @@ export default function App() {
         <Route path="/uyelik" element={<RegisterPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         {/* LEGAL */}
         <Route path="/kvkk" element={<LegalPage />} />
