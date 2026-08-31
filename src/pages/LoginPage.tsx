@@ -33,6 +33,10 @@ export default function LoginPage() {
       localStorage.setItem("role", role || "");
       localStorage.setItem("emailVerified", String(emailVerified));
 
+      if (!emailVerified) {
+        alert("E-posta adresiniz henüz doğrulanmamış. Lütfen doğrulama e-postasındaki bağlantıya tıklayın.");
+      }
+
       window.dispatchEvent(new Event("storage"));
 
       if (role === "LOGISTICS") {
