@@ -9,6 +9,38 @@ export default function LoginPage() {
   const [password, setPassword] = useState("123456");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
+
+  const resendVerification = async () => {
+    const cleanEmail = email.trim();
+
+    if (!cleanEmail) {
+      setResendMessage("Önce e-posta adresinizi yazın.");
+      return;
+    }
+
+    try {
+      setResendLoading(true);
+      setResendMessage("");
+
+      const res = await axios.post(
+        `${API_URL}/auth/resend-verification`,
+        { email: cleanEmail },
+      );
+
+      setResendMessage(
+        res.data?.message || "Doğrulama e-postası gönderildi.",
+      );
+    } catch (err: any) {
+      setResendMessage(
+        err?.response?.data?.message ||
+          "Doğrulama e-postası gönderilemedi.",
+      );
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const login = async () => {
     try {
@@ -92,6 +124,20 @@ export default function LoginPage() {
         <button onClick={login} disabled={loading} style={buttonStyle}>
           {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
         </button>
+
+        <button
+          onClick={resendVerification}
+          disabled={resendLoading}
+          style={resendButtonStyle}
+        >
+          {resendLoading
+            ? "Gönderiliyor..."
+            : "Doğrulama e-postasını tekrar gönder"}
+        </button>
+
+        {resendMessage && (
+          <div style={resendMessageStyle}>{resendMessage}</div>
+        )}
       </div>
     </div>
   );
@@ -179,4 +225,26 @@ const errorStyle: React.CSSProperties = {
   padding: 12,
   borderRadius: 12,
   fontSize: 14,
+};
+
+
+const resendButtonStyle: React.CSSProperties = {
+  background: "transparent",
+  color: "#93c5fd",
+  border: "1px solid #334155",
+  padding: "12px",
+  borderRadius: 12,
+  fontWeight: 700,
+  fontSize: 14,
+  cursor: "pointer",
+};
+
+const resendMessageStyle: React.CSSProperties = {
+  background: "rgba(59,130,246,0.10)",
+  border: "1px solid rgba(59,130,246,0.30)",
+  color: "#bfdbfe",
+  padding: 12,
+  borderRadius: 12,
+  fontSize: 14,
+  textAlign: "center",
 };
