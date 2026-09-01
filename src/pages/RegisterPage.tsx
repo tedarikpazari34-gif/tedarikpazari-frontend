@@ -20,7 +20,7 @@ export default function RegisterPage() {
   const [membershipType, setMembershipType] =
     useState<MembershipType>("BUYER");
   const [companyType, setCompanyType] = useState("Şahıs");
-  const [category, setCategory] = useState(sectors[0]?.name || "");
+  const [categories, setCategories] = useState<string[]>([]);
   const [city, setCity] = useState("");
   const [district, setDistrict] = useState("");
   const [taxNumber, setTaxNumber] = useState("");
@@ -38,9 +38,12 @@ export default function RegisterPage() {
       !fullName.trim() ||
       !phone.trim() ||
       !email.trim() ||
-      !password.trim()
+      !password.trim() ||
+      categories.length === 0
     ) {
-      setError("Firma adı, yetkili kişi, telefon, email ve şifre zorunludur");
+      setError(
+        "Firma adı, yetkili kişi, telefon, email, şifre ve en az 1 kategori zorunludur"
+      );
       return;
     }
 
@@ -69,7 +72,7 @@ export default function RegisterPage() {
         fullName: fullName.trim(),
         phone: normalizedPhone,
         companyType,
-        category,
+        categories,
         city,
         district,
         taxNumber,
@@ -200,18 +203,60 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Kategori</label>
-              <select
-                style={inputStyle}
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+              <label style={labelStyle}>Kategoriler</label>
+
+              <div
+                style={{
+                  border: "1px solid #d1d5db",
+                  borderRadius: 10,
+                  padding: 12,
+                  maxHeight: 220,
+                  overflowY: "auto",
+                  background: "#fff",
+                }}
               >
-                {sectors.map((sector) => (
-                  <option key={sector.id} value={sector.name}>
-                    {sector.name}
-                  </option>
-                ))}
-              </select>
+                {sectors.map((sector) => {
+                  const checked = categories.includes(sector.name);
+
+                  return (
+                    <label
+                      key={sector.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "6px 0",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          setCategories((prev) => {
+                            if (prev.includes(sector.name)) {
+                              return prev.filter((x) => x !== sector.name);
+                            }
+
+                            if (prev.length >= 3) {
+                              alert("En fazla 3 kategori seçebilirsiniz.");
+                              return prev;
+                            }
+
+                            return [...prev, sector.name];
+                          });
+                        }}
+                      />
+
+                      {sector.name}
+                    </label>
+                  );
+                })}
+              </div>
+
+              <div style={{ marginTop: 6, fontSize: 12, color: "#6b7280" }}>
+                En fazla 3 kategori seçebilirsiniz.
+              </div>
             </div>
 
             <div>
