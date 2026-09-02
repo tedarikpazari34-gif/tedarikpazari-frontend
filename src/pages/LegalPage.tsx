@@ -10,7 +10,7 @@ type LegalContent = {
 };
 
 const companyName = "Tedarik Pazarı";
-const contactEmail = "info@tedarikpazarı.com";
+const contactEmail = "tedarikpazari34@gmail.com";
 
 const pages: Record<string, LegalContent> = {
   "/kvkk": {
