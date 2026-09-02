@@ -236,6 +236,160 @@ const pages: Record<string, LegalContent> = {
     ),
   },
 
+  "/teslimat-ve-iade": {
+    title: "Teslimat ve İade Şartları",
+    description:
+      "Tedarik Pazarı üzerinden gerçekleştirilen siparişlerin teslimat, iptal, iade ve geri ödeme şartları.",
+    updatedAt: "2 Eylül 2026",
+    content: (
+      <>
+        <h2>1. Teslimat</h2>
+        <p>
+          Tedarik Pazarı üzerinden oluşturulan siparişler, ilgili satıcı
+          tarafından sipariş sırasında belirtilen teslimat süresi ve koşulları
+          çerçevesinde hazırlanır ve alıcıya gönderilir.
+        </p>
+
+        <h2>2. Kargo ve teslimat bilgileri</h2>
+        <p>
+          Siparişin kargoya verilmesinin ardından, mevcut olması halinde kargo
+          firması ve takip bilgileri alıcıya platform üzerinden bildirilir.
+          Teslimat süreleri; ürünün niteliğine, satıcının hazırlık süresine,
+          teslimat adresine ve kargo firmasına göre değişebilir.
+        </p>
+
+        <h2>3. Teslimat sırasında kontrol</h2>
+        <p>
+          Alıcının ürünü teslim alırken mümkün olduğu ölçüde ambalajı ve ürünü
+          kontrol etmesi; görünür hasar, eksiklik veya yanlış ürün bulunması
+          halinde durumu kargo görevlisine bildirmesi ve gerekli tutanağı
+          düzenletmesi önerilir.
+        </p>
+
+        <h2>4. İptal ve iade</h2>
+        <p>
+          Siparişlerin iptal ve iade koşulları; ürünün niteliğine, siparişin
+          hazırlanma durumuna, alıcı ile satıcının ticari veya tüketici
+          sıfatına ve yürürlükteki mevzuata göre değerlendirilir.
+        </p>
+
+        <h2>5. Cayma hakkı</h2>
+        <p>
+          Tüketici işlemi niteliğindeki siparişlerde, yürürlükteki tüketici
+          mevzuatı kapsamında cayma hakkının bulunduğu durumlarda tüketicinin
+          yasal hakları saklıdır. Mevzuatta cayma hakkının istisnası olarak
+          düzenlenen ürün ve hizmetlerde cayma hakkı kullanılamayabilir.
+        </p>
+
+        <h2>6. Ticari işlemlerde iadeler</h2>
+        <p>
+          Tacir veya ticari işletme adına gerçekleştirilen B2B siparişlerde
+          iade koşulları, ilgili sipariş ve teklif şartları ile taraflar
+          arasındaki anlaşmaya göre belirlenir. Ayıplı, eksik veya siparişe
+          uygun olmayan ürünlere ilişkin yasal haklar saklıdır.
+        </p>
+
+        <h2>7. Geri ödeme</h2>
+        <p>
+          İade veya iptal talebinin kabul edilmesi halinde geri ödeme,
+          kullanılan ödeme yöntemine ve ödeme hizmeti sağlayıcısının işlem
+          sürelerine bağlı olarak gerçekleştirilir. Banka ve kart kuruluşlarının
+          işlem sürelerinden kaynaklanan gecikmeler Tedarik Pazarı'nın doğrudan
+          kontrolü dışında olabilir.
+        </p>
+
+        <h2>8. İletişim</h2>
+        <p>
+          Teslimat, iptal ve iade talepleriniz için {contactEmail} adresi
+          üzerinden bizimle iletişime geçebilirsiniz.
+        </p>
+      </>
+    ),
+  },
+
+  "/mesafeli-satis-sozlesmesi": {
+    title: "Mesafeli Satış Sözleşmesi",
+    description:
+      "Tedarik Pazarı üzerinden gerçekleştirilen mesafeli satış işlemlerine ilişkin sözleşme koşulları.",
+    updatedAt: "2 Eylül 2026",
+    content: (
+      <>
+        <h2>1. Taraflar</h2>
+        <p>
+          İşbu Mesafeli Satış Sözleşmesi, Tedarik Pazarı platformu üzerinden
+          ürün veya hizmet satın alan alıcı ile ilgili ürün veya hizmeti sunan
+          satıcı arasında elektronik ortamda kurulur.
+        </p>
+
+        <h2>2. Sözleşmenin konusu</h2>
+        <p>
+          Sözleşmenin konusu; alıcının platform üzerinden sipariş verdiği ürün
+          veya hizmetin satışı, bedelinin ödenmesi, teslimatı ve tarafların
+          karşılıklı hak ve yükümlülüklerinin belirlenmesidir.
+        </p>
+
+        <h2>3. Ürün, fiyat ve sipariş bilgileri</h2>
+        <p>
+          Ürün veya hizmetin temel özellikleri, miktarı, birim fiyatı, toplam
+          sipariş bedeli, teslim süresi ve diğer ticari koşullar sipariş
+          oluşturulmadan önce ilgili teklif ve sipariş ekranlarında gösterilir.
+        </p>
+
+        <h2>4. Ödeme</h2>
+        <p>
+          Sipariş bedeli, platformda sunulan ödeme yöntemlerinden biri
+          kullanılarak tahsil edilir. Ödeme işlemleri yetkili ödeme hizmeti
+          sağlayıcıları aracılığıyla gerçekleştirilebilir.
+        </p>
+
+        <h2>5. Teslimat</h2>
+        <p>
+          Satıcı, sipariş konusu ürün veya hizmeti sipariş sırasında belirtilen
+          teslim süresi ve koşulları çerçevesinde alıcıya teslim etmekle
+          yükümlüdür. Kargo veya taşıma yoluyla yapılan teslimatlarda ilgili
+          teslimat bilgileri alıcıya bildirilebilir.
+        </p>
+
+        <h2>6. Cayma hakkı</h2>
+        <p>
+          İşlemin tüketici işlemi niteliğinde olması ve yürürlükteki mevzuat
+          uyarınca cayma hakkı bulunması halinde tüketici, yasal süre ve
+          koşullar kapsamında cayma hakkını kullanabilir. Kanunda belirtilen
+          cayma hakkı istisnaları saklıdır.
+        </p>
+
+        <h2>7. İade ve geri ödeme</h2>
+        <p>
+          İade ve geri ödeme süreçleri, ürünün niteliğine, sipariş durumuna,
+          tarafların sıfatına ve yürürlükteki mevzuata göre yürütülür.
+          Kabul edilen iadelerde geri ödeme, kullanılan ödeme yöntemine göre
+          gerçekleştirilir.
+        </p>
+
+        <h2>8. B2B işlemler</h2>
+        <p>
+          Tacirler veya ticari işletmeler arasında gerçekleştirilen işlemlerde,
+          tüketici mevzuatına özgü hükümler uygulanmayabilir. Bu tür işlemlerde
+          tarafların teklif, sipariş ve ticari anlaşma koşulları esas alınır.
+        </p>
+
+        <h2>9. Uyuşmazlıklar</h2>
+        <p>
+          Taraflar, siparişe ilişkin uyuşmazlıklarda öncelikle platform
+          üzerinden iletişim ve uyuşmazlık çözüm yöntemlerini kullanabilir.
+          Tüketici işlemlerinde tüketicinin ilgili mevzuattan doğan başvuru
+          hakları saklıdır.
+        </p>
+
+        <h2>10. İletişim</h2>
+        <p>
+          Sözleşme ve sipariş süreçlerine ilişkin sorularınız için
+          {contactEmail} adresinden bizimle iletişime geçebilirsiniz.
+        </p>
+      </>
+    ),
+  },
+
   "/cerez-politikasi": {
     title: "Çerez Politikası",
     description: "Tedarik Pazarı çerez kullanımı hakkında bilgilendirme.",

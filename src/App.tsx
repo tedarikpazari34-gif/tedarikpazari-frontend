@@ -97,6 +97,8 @@ export default function App() {
         <Route path="/aydinlatma-metni" element={<LegalPage />} />
         <Route path="/gizlilik-politikasi" element={<LegalPage />} />
         <Route path="/kullanim-kosullari" element={<LegalPage />} />
+        <Route path="/teslimat-ve-iade" element={<LegalPage />} />
+        <Route path="/mesafeli-satis-sozlesmesi" element={<LegalPage />} />
         <Route path="/cerez-politikasi" element={<LegalPage />} />
 
         {/* CORPORATE */}

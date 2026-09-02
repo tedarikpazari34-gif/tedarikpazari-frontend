@@ -62,6 +62,8 @@ export default function Footer() {
             ["KVKK Politikası", "/kvkk"],
             ["Gizlilik Politikası", "/gizlilik-politikasi"],
             ["Kullanım Koşulları", "/kullanim-kosullari"],
+            ["Teslimat ve İade Şartları", "/teslimat-ve-iade"],
+            ["Mesafeli Satış Sözleşmesi", "/mesafeli-satis-sozlesmesi"],
             ["Çerez Politikası", "/cerez-politikasi"],
           ]}
         />
@@ -117,6 +119,60 @@ export default function Footer() {
               LinkedIn
             </a>
           </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 1180,
+          margin: isMobile ? "28px auto 0" : "38px auto 0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: isMobile ? "center" : "flex-start",
+          flexWrap: "wrap",
+          gap: 18,
+        }}
+      >
+        <strong style={{ color: "#ffffff", fontSize: 14 }}>
+          Güvenli Ödeme
+        </strong>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            flexWrap: "wrap",
+          }}
+        >
+          <span
+            style={{
+              background: "#ffffff",
+              borderRadius: 8,
+              padding: "7px 10px",
+              display: "inline-flex",
+              alignItems: "center",
+            }}
+          >
+            <img
+              src="/images/payments/visa.png"
+              alt="Visa"
+              style={{ width: 62, height: "auto", display: "block" }}
+            />
+          </span>
+
+          <img
+            src="/images/payments/mastercard.png"
+            alt="Mastercard"
+            style={{ width: 58, height: "auto", display: "block" }}
+          />
+
+          <img
+            src="/images/payments/iyzico-ile-ode.svg"
+            alt="iyzico ile Öde"
+            style={{ width: 360, height: "auto", display: "block" }}
+          />
         </div>
       </div>
 
