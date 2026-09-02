@@ -154,6 +154,12 @@ const pages: Record<string, PageContent> = {
           açıklamasını paylaşın.
         </p>
 
+        <h2>Yasal İşletme Bilgileri</h2>
+        <div style={{ margin: "20px 0 28px", padding: 22, borderRadius: 16, background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+          <p><strong>İşletme / Marka:</strong> Tedarik Pazarı</p>
+          <p><strong>E-posta:</strong> tedarikpazari34@gmail.com</p>
+        </div>
+
         <h2>Güvenlik uyarısı</h2>
         <p>
           Şifrenizi, kart bilgilerinizi veya tek kullanımlık doğrulama
