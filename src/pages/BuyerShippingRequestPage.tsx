@@ -11,6 +11,7 @@ import {
 } from "react-router-dom";
 
 import { TURKEY_CITIES } from "../constants/turkeyCities";
+import { useTranslation } from "react-i18next";
 
 const API =
   import.meta.env.VITE_API_URL ||
@@ -30,6 +31,53 @@ const VEHICLE_TYPES = [
   { value: "Diğer", icon: "➕" },
 ];
 
+function vehicleLabel(value: string, t: any) {
+  const labels: Record<string, string> = {
+    "Kamyonet": t("buyerShippingRequestPage.van"),
+    "Kamyon": t("buyerShippingRequestPage.truck"),
+    "Tır": t("buyerShippingRequestPage.semiTruck"),
+    "Tenteli Tır": t("buyerShippingRequestPage.curtainSideTruck"),
+    "Frigorifik Araç": t("buyerShippingRequestPage.refrigeratedVehicle"),
+    "Konteyner Taşıma": t("buyerShippingRequestPage.containerTransport"),
+    "Parsiyel Taşıma": t("buyerShippingRequestPage.partialTransport"),
+    "Panelvan": t("buyerShippingRequestPage.panelVan"),
+    "Açık Kasa": t("buyerShippingRequestPage.openBody"),
+    "Kapalı Kasa": t("buyerShippingRequestPage.closedBody"),
+    "Diğer": t("buyerShippingRequestPage.other"),
+  };
+
+  return labels[value] || value;
+}
+
+function unitLabel(value: string | undefined, t: any) {
+  if (!value) return "";
+
+  const labels: Record<string, string> = {
+    "Adet": t("buyerShippingRequestPage.piece"),
+    "Koli": t("buyerShippingRequestPage.box"),
+    "Paket": t("buyerShippingRequestPage.package"),
+    "Kilogram": t("buyerShippingRequestPage.kilogram"),
+    "Ton": t("buyerShippingRequestPage.ton"),
+    "Litre": t("buyerShippingRequestPage.litre"),
+    "Metre": t("buyerShippingRequestPage.meter"),
+    "Palet": t("buyerShippingRequestPage.pallet"),
+  };
+
+  return labels[value] || value;
+}
+
+function orderStatusLabel(status: string, t: any) {
+  const labels: Record<string, string> = {
+    PENDING_PAYMENT: t("buyerShippingRequestPage.pendingPayment"),
+    PAID: t("buyerShippingRequestPage.paid"),
+    PREPARING: t("buyerShippingRequestPage.preparing"),
+    SHIPPED: t("buyerShippingRequestPage.shipped"),
+    COMPLETED: t("buyerShippingRequestPage.completed"),
+  };
+
+  return labels[status] || status;
+}
+
 type Order = {
   id: string;
   status: string;
@@ -43,6 +91,7 @@ type Order = {
 };
 
 export default function BuyerShippingRequestPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
@@ -99,7 +148,7 @@ export default function BuyerShippingRequestPage() {
         const token = localStorage.getItem("token");
 
         if (!token) {
-          setError("Nakliye talebi oluşturmak için giriş yapmalısınız.");
+          setError(t("buyerShippingRequestPage.loginRequired"));
           return;
         }
 
@@ -112,7 +161,7 @@ export default function BuyerShippingRequestPage() {
         const data = await res.json().catch(() => null);
 
         if (!res.ok) {
-          setError(data?.message || "Siparişler alınamadı.");
+          setError(data?.message || t("buyerShippingRequestPage.ordersFailed"));
           setOrders([]);
           return;
         }
@@ -135,7 +184,7 @@ export default function BuyerShippingRequestPage() {
         }
       } catch (err) {
         console.error("SHIPPING ORDER LOAD ERROR:", err);
-        setError("Siparişler alınırken hata oluştu.");
+        setError(t("buyerShippingRequestPage.ordersError"));
         setOrders([]);
       } finally {
         setLoading(false);
@@ -146,22 +195,22 @@ export default function BuyerShippingRequestPage() {
   }, [requestedOrderId]);
 
   const validate = () => {
-    if (!orderId) return "Sipariş seçmelisiniz.";
+    if (!orderId) return t("buyerShippingRequestPage.selectOrderValidation");
 
     if (!fromCity || !fromDistrict.trim()) {
-      return "Çıkış ili ve ilçesi zorunludur.";
+      return t("buyerShippingRequestPage.originRequired");
     }
 
     if (!fromOpenAddress.trim()) {
-      return "Yükleme açık adresini yazmalısınız.";
+      return t("buyerShippingRequestPage.originAddressRequired");
     }
 
     if (!toCity || !toDistrict.trim()) {
-      return "Varış ili ve ilçesi zorunludur.";
+      return t("buyerShippingRequestPage.destinationRequired");
     }
 
     if (!toOpenAddress.trim()) {
-      return "Teslimat açık adresini yazmalısınız.";
+      return t("buyerShippingRequestPage.destinationAddressRequired");
     }
 
     if (
@@ -171,38 +220,38 @@ export default function BuyerShippingRequestPage() {
       fromOpenAddress.trim().toLocaleLowerCase("tr-TR") ===
         toOpenAddress.trim().toLocaleLowerCase("tr-TR")
     ) {
-      return "Çıkış ve varış adresleri aynı olamaz.";
+      return t("buyerShippingRequestPage.sameAddress");
     }
 
     if (palletCount && Number(palletCount) < 0) {
-      return "Palet sayısı geçersiz.";
+      return t("buyerShippingRequestPage.invalidPallet");
     }
 
     if (packageCount && Number(packageCount) < 0) {
-      return "Koli sayısı geçersiz.";
+      return t("buyerShippingRequestPage.invalidPackage");
     }
 
     if (weight && Number(weight) <= 0) {
-      return "Ağırlık sıfırdan büyük olmalıdır.";
+      return t("buyerShippingRequestPage.invalidWeight");
     }
 
     if (volume && Number(volume) <= 0) {
-      return "Hacim sıfırdan büyük olmalıdır.";
+      return t("buyerShippingRequestPage.invalidVolume");
     }
 
     if (!vehicleType) {
-      return "Araç veya taşıma tipini seçmelisiniz.";
+      return t("buyerShippingRequestPage.vehicleRequired");
     }
 
     if (!loadingDate) {
-      return "Yükleme tarihini seçmelisiniz.";
+      return t("buyerShippingRequestPage.loadingDateRequired");
     }
 
     if (
       requestedDeliveryDate &&
       requestedDeliveryDate < loadingDate
     ) {
-      return "Teslim tarihi yükleme tarihinden önce olamaz.";
+      return t("buyerShippingRequestPage.invalidDeliveryDate");
     }
 
     return "";
@@ -263,16 +312,16 @@ export default function BuyerShippingRequestPage() {
 
       if (!res.ok) {
         setError(
-          data?.message || "Nakliye talebi oluşturulamadı."
+          data?.message || t("buyerShippingRequestPage.createFailed")
         );
         return;
       }
 
-      alert("Nakliye talebi başarıyla oluşturuldu ✅");
+      alert(t("buyerShippingRequestPage.createSuccess"));
       navigate("/buyer/shipping-quotes");
     } catch (err) {
       console.error("SHIPPING RFQ CREATE ERROR:", err);
-      setError("Nakliye talebi oluşturulurken hata oluştu.");
+      setError(t("buyerShippingRequestPage.createError"));
     } finally {
       setSubmitting(false);
     }
@@ -282,7 +331,7 @@ export default function BuyerShippingRequestPage() {
     return (
       <main style={pageStyle}>
         <div style={emptyCardStyle}>
-          Nakliye formu yükleniyor...
+          {t("buyerShippingRequestPage.loading")}
         </div>
       </main>
     );
@@ -293,22 +342,20 @@ export default function BuyerShippingRequestPage() {
       <section style={heroStyle}>
         <div>
           <div style={eyebrowStyle}>
-            ALICI LOJİSTİK PANELİ
+            {t("buyerShippingRequestPage.panel")}
           </div>
 
           <h1 style={heroTitleStyle}>
-            Nakliye Teklifi İste
+            {t("buyerShippingRequestPage.title")}
           </h1>
 
           <p style={heroTextStyle}>
-            Yük, rota ve teslimat bilgilerini eksiksiz
-            doldurun; lojistik firmalarından karşılaştırılabilir
-            teklifler alın.
+            {t("buyerShippingRequestPage.description")}
           </p>
         </div>
 
         <Link to="/buyer/orders" style={backLinkStyle}>
-          ← Siparişlerime Dön
+          {t("buyerShippingRequestPage.backOrders")}
         </Link>
       </section>
 
@@ -317,11 +364,11 @@ export default function BuyerShippingRequestPage() {
 
         <FormSection
           number="1"
-          title="Sipariş ve yük bilgileri"
-          description="Nakliyesi yapılacak siparişi ve yük özelliklerini belirtin."
+          title={t("buyerShippingRequestPage.section1Title")}
+          description={t("buyerShippingRequestPage.section1Description")}
         >
           <label style={fieldStyle}>
-            <span style={labelStyle}>Sipariş *</span>
+            <span style={labelStyle}>{t("buyerShippingRequestPage.order")}</span>
 
             <select
               value={orderId}
@@ -330,13 +377,13 @@ export default function BuyerShippingRequestPage() {
               }
               style={inputStyle}
             >
-              <option value="">Sipariş seçin</option>
+              <option value="">{t("buyerShippingRequestPage.selectOrder")}</option>
 
               {orders.map((order) => (
                 <option key={order.id} value={order.id}>
                   #{order.id.slice(0, 8)} —{" "}
-                  {order.rfq?.product?.title || "Ürün"} —{" "}
-                  {order.status}
+                  {order.rfq?.product?.title || t("buyerShippingRequestPage.product")} —{" "}
+                  {orderStatusLabel(order.status, t)}
                 </option>
               ))}
             </select>
@@ -345,17 +392,17 @@ export default function BuyerShippingRequestPage() {
           {selectedOrder && (
             <div style={selectedOrderStyle}>
               <div>
-                <span>Seçilen ürün</span>
+                <span>{t("buyerShippingRequestPage.selectedProduct")}</span>
                 <strong>
-                  {selectedOrder.rfq?.product?.title || "Ürün"}
+                  {selectedOrder.rfq?.product?.title || t("buyerShippingRequestPage.product")}
                 </strong>
               </div>
 
               <div>
-                <span>Sipariş miktarı</span>
+                <span>{t("buyerShippingRequestPage.orderQuantity")}</span>
                 <strong>
                   {selectedOrder.rfq?.quantity || "-"}{" "}
-                  {selectedOrder.rfq?.product?.unitType || ""}
+                  {unitLabel(selectedOrder.rfq?.product?.unitType, t)}
                 </strong>
               </div>
             </div>
@@ -363,39 +410,39 @@ export default function BuyerShippingRequestPage() {
 
           <div style={twoColumnStyle}>
             <NumberField
-              label="Palet Sayısı"
+              label={t("buyerShippingRequestPage.palletCount")}
               value={palletCount}
               onChange={setPalletCount}
-              placeholder="Örn: 10"
+              placeholder={t("buyerShippingRequestPage.example10")}
             />
 
             <NumberField
-              label="Koli Sayısı"
+              label={t("buyerShippingRequestPage.packageCount")}
               value={packageCount}
               onChange={setPackageCount}
-              placeholder="Örn: 240"
+              placeholder={t("buyerShippingRequestPage.example240")}
             />
 
             <NumberField
-              label="Toplam Ağırlık (kg)"
+              label={t("buyerShippingRequestPage.totalWeight")}
               value={weight}
               onChange={setWeight}
-              placeholder="Örn: 7500"
+              placeholder={t("buyerShippingRequestPage.example7500")}
               step="0.01"
             />
 
             <NumberField
-              label="Toplam Hacim (m³)"
+              label={t("buyerShippingRequestPage.totalVolume")}
               value={volume}
               onChange={setVolume}
-              placeholder="Örn: 18.5"
+              placeholder={t("buyerShippingRequestPage.example185")}
               step="0.01"
             />
           </div>
 
           <div style={fieldStyle}>
             <span style={labelStyle}>
-              Araç / Taşıma Tipi *
+              {t("buyerShippingRequestPage.vehicleType")}
             </span>
 
             <div style={vehicleGridStyle}>
@@ -413,7 +460,7 @@ export default function BuyerShippingRequestPage() {
                     }}
                   >
                     <span style={vehicleIconStyle}>{item.icon}</span>
-                    <span>{item.value}</span>
+                    <span>{vehicleLabel(item.value, t)}</span>
                   </button>
                 );
               })}
@@ -423,27 +470,28 @@ export default function BuyerShippingRequestPage() {
 
         <FormSection
           number="2"
-          title="Yükleme noktası"
-          description="Nakliyecinin yükü teslim alacağı adresi belirtin."
+          title={t("buyerShippingRequestPage.section2Title")}
+          description={t("buyerShippingRequestPage.section2Description")}
         >
           <div style={twoColumnStyle}>
             <CityField
-              label="Çıkış İli *"
+              label={t("buyerShippingRequestPage.originCity")}
               value={fromCity}
               onChange={setFromCity}
+              placeholder={t("buyerShippingRequestPage.selectCity")}
             />
 
             <TextField
-              label="Çıkış İlçesi *"
+              label={t("buyerShippingRequestPage.originDistrict")}
               value={fromDistrict}
               onChange={setFromDistrict}
-              placeholder="Örn: Başakşehir"
+              placeholder={t("buyerShippingRequestPage.originDistrictExample")}
             />
           </div>
 
           <label style={fieldStyle}>
             <span style={labelStyle}>
-              Yükleme Açık Adresi *
+              {t("buyerShippingRequestPage.loadingAddress")}
             </span>
 
             <textarea
@@ -452,34 +500,35 @@ export default function BuyerShippingRequestPage() {
                 setFromOpenAddress(event.target.value)
               }
               style={textareaStyle}
-              placeholder="Mahalle, cadde, sokak, bina/depo numarası ve yükleme noktası bilgileri..."
+              placeholder={t("buyerShippingRequestPage.loadingAddressPlaceholder")}
             />
           </label>
         </FormSection>
 
         <FormSection
           number="3"
-          title="Teslimat noktası"
-          description="Yükün teslim edileceği adresi belirtin."
+          title={t("buyerShippingRequestPage.section3Title")}
+          description={t("buyerShippingRequestPage.section3Description")}
         >
           <div style={twoColumnStyle}>
             <CityField
-              label="Varış İli *"
+              label={t("buyerShippingRequestPage.destinationCity")}
               value={toCity}
               onChange={setToCity}
+              placeholder={t("buyerShippingRequestPage.selectCity")}
             />
 
             <TextField
-              label="Varış İlçesi *"
+              label={t("buyerShippingRequestPage.destinationDistrict")}
               value={toDistrict}
               onChange={setToDistrict}
-              placeholder="Örn: Yenimahalle"
+              placeholder={t("buyerShippingRequestPage.destinationDistrictExample")}
             />
           </div>
 
           <label style={fieldStyle}>
             <span style={labelStyle}>
-              Teslimat Açık Adresi *
+              {t("buyerShippingRequestPage.deliveryAddress")}
             </span>
 
             <textarea
@@ -488,20 +537,20 @@ export default function BuyerShippingRequestPage() {
                 setToOpenAddress(event.target.value)
               }
               style={textareaStyle}
-              placeholder="Mahalle, cadde, sokak, bina/depo numarası ve teslim noktası bilgileri..."
+              placeholder={t("buyerShippingRequestPage.deliveryAddressPlaceholder")}
             />
           </label>
         </FormSection>
 
         <FormSection
           number="4"
-          title="Tarih ve özel talepler"
-          description="Yükleme zamanı ile varsa teslimat beklentinizi paylaşın."
+          title={t("buyerShippingRequestPage.section4Title")}
+          description={t("buyerShippingRequestPage.section4Description")}
         >
           <div style={twoColumnStyle}>
             <label style={fieldStyle}>
               <span style={labelStyle}>
-                Yükleme Tarihi *
+                {t("buyerShippingRequestPage.loadingDate")}
               </span>
 
               <input
@@ -517,7 +566,7 @@ export default function BuyerShippingRequestPage() {
 
             <label style={fieldStyle}>
               <span style={labelStyle}>
-                İstenen Teslim Tarihi
+                {t("buyerShippingRequestPage.requestedDeliveryDate")}
               </span>
 
               <input
@@ -539,7 +588,7 @@ export default function BuyerShippingRequestPage() {
 
           <label style={fieldStyle}>
             <span style={labelStyle}>
-              Teslimat Beklentisi
+              {t("buyerShippingRequestPage.deliveryExpectation")}
             </span>
 
             <select
@@ -549,47 +598,47 @@ export default function BuyerShippingRequestPage() {
               }
               style={inputStyle}
             >
-              <option value="">Seçiniz</option>
-              <option value="ACIL">Acil</option>
-              <option value="1_3_GUN">1–3 gün</option>
-              <option value="1_HAFTA">1 hafta</option>
-              <option value="ESNEK">Esnek / Fark etmez</option>
+              <option value="">{t("buyerShippingRequestPage.select")}</option>
+              <option value="ACIL">{t("buyerShippingRequestPage.urgent")}</option>
+              <option value="1_3_GUN">{t("buyerShippingRequestPage.oneToThreeDays")}</option>
+              <option value="1_HAFTA">{t("buyerShippingRequestPage.oneWeek")}</option>
+              <option value="ESNEK">{t("buyerShippingRequestPage.flexible")}</option>
             </select>
           </label>
 
           <div style={featureGridStyle}>
             <CheckField
-              label="Kırılabilir yük"
+              label={t("buyerShippingRequestPage.fragile")}
               checked={isFragile}
               onChange={setIsFragile}
             />
 
             <CheckField
-              label="Tehlikeli madde"
+              label={t("buyerShippingRequestPage.dangerous")}
               checked={isDangerous}
               onChange={setIsDangerous}
             />
 
             <CheckField
-              label="Soğuk zincir gerekli"
+              label={t("buyerShippingRequestPage.coldChain")}
               checked={coldChain}
               onChange={setColdChain}
             />
 
             <CheckField
-              label="Üst üste konulabilir"
+              label={t("buyerShippingRequestPage.stackable")}
               checked={stackable}
               onChange={setStackable}
             />
 
             <CheckField
-              label="Forklift gerekli"
+              label={t("buyerShippingRequestPage.forklift")}
               checked={needForklift}
               onChange={setNeedForklift}
             />
 
             <CheckField
-              label="Vinç gerekli"
+              label={t("buyerShippingRequestPage.crane")}
               checked={needCrane}
               onChange={setNeedCrane}
             />
@@ -597,7 +646,7 @@ export default function BuyerShippingRequestPage() {
 
           <label style={fieldStyle}>
             <span style={labelStyle}>
-              Yük Fotoğrafı URL
+              {t("buyerShippingRequestPage.photoUrl")}
             </span>
 
             <input
@@ -605,13 +654,13 @@ export default function BuyerShippingRequestPage() {
               onChange={(event) =>
                 setPhotoUrl(event.target.value)
               }
-              placeholder="İsteğe bağlı görsel bağlantısı"
+              placeholder={t("buyerShippingRequestPage.photoUrlPlaceholder")}
               style={inputStyle}
             />
           </label>
 
           <label style={fieldStyle}>
-            <span style={labelStyle}>Ek Not</span>
+            <span style={labelStyle}>{t("buyerShippingRequestPage.additionalNote")}</span>
 
             <textarea
               value={note}
@@ -622,18 +671,15 @@ export default function BuyerShippingRequestPage() {
                 ...textareaStyle,
                 minHeight: 140,
               }}
-              placeholder="Yükleme saati, forklift ihtiyacı, hassas ürün, soğuk zincir, kat bilgisi veya diğer özel talepler..."
+              placeholder={t("buyerShippingRequestPage.notePlaceholder")}
             />
           </label>
         </FormSection>
 
         <div style={summaryStyle}>
           <div>
-            <strong>Talep gönderilmeden önce</strong>
-            <span>
-              Nakliye firmaları verdiğiniz rota ve yük
-              bilgilerine göre teklif oluşturacaktır.
-            </span>
+            <strong>{t("buyerShippingRequestPage.beforeSubmit")}</strong>
+            <span>{t("buyerShippingRequestPage.beforeSubmitText")}</span>
           </div>
 
           <button
@@ -649,8 +695,8 @@ export default function BuyerShippingRequestPage() {
             }}
           >
             {submitting
-              ? "Nakliye talebi oluşturuluyor..."
-              : "🚚 Nakliye Talebini Yayınla"}
+              ? t("buyerShippingRequestPage.submitting")
+              : t("buyerShippingRequestPage.submit")}
           </button>
         </div>
       </section>
@@ -691,10 +737,12 @@ function CityField({
   label,
   value,
   onChange,
+  placeholder,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  placeholder: string;
 }) {
   return (
     <label style={fieldStyle}>
@@ -705,7 +753,7 @@ function CityField({
         onChange={(event) => onChange(event.target.value)}
         style={inputStyle}
       >
-        <option value="">Şehir seçin</option>
+        <option value="">{placeholder}</option>
 
         {TURKEY_CITIES.map((cityName) => (
           <option key={cityName} value={cityName}>

@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import AdminSidebar from "../components/admin/AdminSidebar";
 
 const API = "https://tedarik-backend.onrender.com/api";
 
 export default function AdminDisputesPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [disputes, setDisputes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
@@ -65,17 +69,17 @@ export default function AdminDisputesPage() {
       OPEN: {
         bg: "#FEF3C7",
         color: "#92400E",
-        text: "Açık",
+        text: t("adminDisputesPage.statusOpen"),
       },
       RESOLVED: {
         bg: "#DCFCE7",
         color: "#166534",
-        text: "Çözüldü",
+        text: t("adminDisputesPage.statusResolved"),
       },
       CLOSED: {
         bg: "#E2E8F0",
         color: "#334155",
-        text: "Kapandı",
+        text: t("adminDisputesPage.statusClosed"),
       },
     };
 
@@ -120,7 +124,7 @@ export default function AdminDisputesPage() {
             marginBottom: 8,
           }}
         >
-          Dispute Yönetimi
+          {t("adminDisputesPage.title")}
         </h1>
 
         <p
@@ -129,7 +133,7 @@ export default function AdminDisputesPage() {
             marginBottom: 30,
           }}
         >
-          Buyer ve seller arasındaki anlaşmazlıkları yönetin.
+          {t("adminDisputesPage.description")}
         </p>
 
         <div
@@ -153,15 +157,19 @@ export default function AdminDisputesPage() {
                 fontWeight: 600,
               }}
             >
-              {x}
+              {x === "ALL"
+                ? t("adminDisputesPage.filterAll")
+                : x === "OPEN"
+                  ? t("adminDisputesPage.statusOpen")
+                  : t("adminDisputesPage.statusResolved")}
             </button>
           ))}
         </div>
 
         {loading ? (
-          <div>Yükleniyor...</div>
+          <div>{t("adminDisputesPage.loading")}</div>
         ) : filtered.length === 0 ? (
-          <div>Aktif dispute bulunamadı.</div>
+          <div>{t("adminDisputesPage.empty")}</div>
         ) : (
           <div
             style={{
@@ -197,7 +205,7 @@ export default function AdminDisputesPage() {
                 </div>
 
                 <div style={{ marginTop: 20 }}>
-                  <strong>Buyer:</strong>{" "}
+                  <strong>{t("adminDisputesPage.buyer")}</strong>{" "}
                   {item.buyerCompany?.name ||
                     item.order?.buyerCompany?.name ||
                     item.order?.buyer?.name ||
@@ -205,7 +213,7 @@ export default function AdminDisputesPage() {
                 </div>
 
                 <div style={{ marginTop: 8 }}>
-                  <strong>Seller:</strong>{" "}
+                  <strong>{t("adminDisputesPage.seller")}</strong>{" "}
                   {item.sellerCompany?.name ||
                     item.order?.sellerCompany?.name ||
                     item.order?.seller?.name ||
@@ -213,16 +221,17 @@ export default function AdminDisputesPage() {
                 </div>
 
                 <div style={{ marginTop: 8 }}>
-                  <strong>Sipariş:</strong> {item.order?.id || "-"}
+                  <strong>{t("adminDisputesPage.order")}</strong>{" "}
+                  {item.order?.id || "-"}
                 </div>
 
                 <div style={{ marginTop: 8 }}>
-                  <strong>Oluşturma:</strong>{" "}
-                  {new Date(item.createdAt).toLocaleString("tr-TR")}
+                  <strong>{t("adminDisputesPage.createdAt")}</strong>{" "}
+                  {new Date(item.createdAt).toLocaleString(locale)}
                 </div>
 
                 <div style={{ marginTop: 16 }}>
-                  <strong>Açıklama</strong>
+                  <strong>{t("adminDisputesPage.descriptionLabel")}</strong>
 
                   <p
                     style={{
@@ -237,7 +246,7 @@ export default function AdminDisputesPage() {
 
                 {Array.isArray(item.files) && item.files.length > 0 && (
                   <div style={{ marginTop: 16 }}>
-                    <strong>Ekler</strong>
+                    <strong>{t("adminDisputesPage.attachments")}</strong>
 
                     <div
                       style={{
@@ -261,7 +270,7 @@ export default function AdminDisputesPage() {
                           {file.originalName ||
                             file.filename ||
                             file.name ||
-                            "Dosyayı görüntüle"}
+                            t("adminDisputesPage.viewFile")}
                         </a>
                       ))}
                     </div>
@@ -276,7 +285,12 @@ export default function AdminDisputesPage() {
                       fontWeight: 700,
                     }}
                   >
-                    Çözüm: {item.resolution}
+                    {t("adminDisputesPage.resolution")}{" "}
+                    {item.resolution === "REFUND_BUYER"
+                      ? t("adminDisputesPage.resolutionRefundBuyer")
+                      : item.resolution === "RELEASE_SELLER"
+                        ? t("adminDisputesPage.resolutionReleaseSeller")
+                        : item.resolution}
                   </div>
                 )}
 
@@ -300,7 +314,7 @@ export default function AdminDisputesPage() {
                         fontWeight: 700,
                       }}
                     >
-                      Buyer Refund
+                      {t("adminDisputesPage.refundBuyer")}
                     </button>
 
                     <button
@@ -315,7 +329,7 @@ export default function AdminDisputesPage() {
                         fontWeight: 700,
                       }}
                     >
-                      Seller Release
+                      {t("adminDisputesPage.releaseSeller")}
                     </button>
                   </div>
                 )}

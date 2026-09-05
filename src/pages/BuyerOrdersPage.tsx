@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
+import { useTranslation } from "react-i18next";
 
 type Order = {
   id: string;
@@ -33,30 +34,53 @@ const API =
   import.meta.env.VITE_API_URL ||
   "https://tedarik-backend.onrender.com/api";
 
-function statusLabel(status: string, shippingCompany?: string | null) {
+function statusLabel(
+  status: string,
+  shippingCompany: string | null | undefined,
+  t: (key: string) => string
+) {
   switch (status) {
     case "PENDING_PAYMENT":
-      return "Ödeme Bekleniyor";
+      return t("buyerOrdersPage.pendingPayment");
 
     case "PAID":
-      return "Ödeme Alındı";
+      return t("buyerOrdersPage.paid");
 
     case "PREPARING":
-      return "Hazırlanıyor";
+      return t("buyerOrdersPage.preparing");
 
     case "SHIPPED":
       return shippingCompany === "Kendi Teslimatım"
-        ? "Teslime Hazır"
-        : "Kargoda";
+        ? t("buyerOrdersPage.readyForDelivery")
+        : t("buyerOrdersPage.shipped");
 
     case "COMPLETED":
-      return "Tamamlandı";
+      return t("buyerOrdersPage.completed");
 
     default:
       return status;
   }
 }
 
+function unitLabel(
+  unit: string | null | undefined,
+  t: (key: string) => string
+) {
+  const map: Record<string, string> = {
+    Adet: "piece",
+    Koli: "box",
+    Paket: "package",
+    Kilogram: "kilogram",
+    Ton: "ton",
+    Litre: "litre",
+    Metre: "meter",
+    Palet: "pallet",
+  };
+
+  return unit && map[unit]
+    ? t(`buyerOrdersPage.${map[unit]}`)
+    : unit || t("buyerOrdersPage.piece");
+}
 function statusStyle(status: string): CSSProperties {
   switch (status) {
     case "PENDING_PAYMENT":
@@ -99,6 +123,8 @@ function statusStyle(status: string): CSSProperties {
 
 export default function BuyerOrdersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [paymentLoadingId, setPaymentLoadingId] = useState("");
@@ -115,7 +141,7 @@ export default function BuyerOrdersPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Giriş yapmanız gerekiyor");
+        setError(t("buyerOrdersPage.loginRequired"));
         return;
       }
 
@@ -127,7 +153,7 @@ export default function BuyerOrdersPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data?.message || "Siparişler alınamadı");
+        setError(data?.message || t("buyerOrdersPage.loadFailed"));
         setOrders([]);
         return;
       }
@@ -141,7 +167,7 @@ export default function BuyerOrdersPage() {
       setOrders(safeOrders);
     } catch (err) {
       console.error(err);
-      setError("Siparişler alınamadı");
+      setError(t("buyerOrdersPage.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -161,8 +187,8 @@ export default function BuyerOrdersPage() {
     setPaymentNotice({
       type: isSuccess ? "success" : "error",
       message: isSuccess
-        ? "Ödemeniz başarıyla doğrulandı. Sipariş durumu güncellendi."
-        : "Ödeme tamamlanamadı. Kartınızdan çekim yapıldıysa destek ekibimizle iletişime geçin.",
+        ? t("buyerOrdersPage.paymentSuccessMessage")
+        : t("buyerOrdersPage.paymentFailedMessage"),
     });
 
     loadOrders();
@@ -195,8 +221,8 @@ export default function BuyerOrdersPage() {
       setPaymentNotice({
         type: isSuccess ? "success" : "error",
         message: isSuccess
-          ? "Ödemeniz başarıyla doğrulandı. Sipariş durumu güncellendi."
-          : "Ödeme tamamlanamadı.",
+          ? t("buyerOrdersPage.paymentSuccessMessage")
+          : t("buyerOrdersPage.paymentFailedShort"),
       });
 
       setPaymentLoadingId("");
@@ -230,15 +256,15 @@ export default function BuyerOrdersPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "İşlem başarısız");
+        alert(data?.message || t("buyerOrdersPage.actionFailed"));
         return;
       }
 
-      alert("İşlem başarılı ✅");
+      alert(t("buyerOrdersPage.actionSuccess"));
      await loadOrders();
     } catch (err) {
       console.error(err);
-      alert("İstek hatası");
+      alert(t("buyerOrdersPage.requestError"));
     }
   };
 
@@ -252,7 +278,7 @@ export default function BuyerOrdersPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Ödeme yapmak için giriş yapmalısınız.");
+        alert(t("buyerOrdersPage.paymentLoginRequired"));
         return;
       }
 
@@ -269,14 +295,14 @@ export default function BuyerOrdersPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "iyzico ödeme formu başlatılamadı");
+        alert(data?.message || t("buyerOrdersPage.iyzicoStartFailed"));
         return;
       }
 
       if (Capacitor.isNativePlatform()) {
         if (!data?.paymentPageUrl) {
           setPaymentLoadingId("");
-          alert("Mobil ödeme sayfası alınamadı");
+          alert(t("buyerOrdersPage.mobilePaymentMissing"));
           return;
         }
 
@@ -298,7 +324,7 @@ export default function BuyerOrdersPage() {
       }
 
       if (!data?.checkoutFormContent) {
-        alert("iyzico ödeme formu alınamadı");
+        alert(t("buyerOrdersPage.iyzicoFormMissing"));
         return;
       }
 
@@ -309,7 +335,7 @@ export default function BuyerOrdersPage() {
       );
 
       if (!paymentWindow) {
-        alert("Ödeme penceresi açılamadı. Tarayıcı popup iznini kontrol edin.");
+        alert(t("buyerOrdersPage.popupBlocked"));
         return;
       }
 
@@ -320,7 +346,7 @@ export default function BuyerOrdersPage() {
           <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>Tedarik Pazarı - Güvenli Ödeme</title>
+            <title>${t("buyerOrdersPage.paymentTitle")}</title>
           </head>
           <body>
             ${data.checkoutFormContent}
@@ -339,7 +365,7 @@ export default function BuyerOrdersPage() {
     } catch (err) {
       console.error("IYZICO PAYMENT ERROR:", err);
       setPaymentLoadingId("");
-      alert("Ödeme başlatılırken hata oluştu");
+      alert(t("buyerOrdersPage.paymentStartError"));
     }
   };
 
@@ -357,21 +383,21 @@ export default function BuyerOrdersPage() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data?.message || "Chat başlatılamadı");
+      alert(data?.message || t("buyerOrdersPage.chatFailed"));
       return;
     }
 
     window.location.href = "/chat";
   } catch (err) {
     console.error("START ORDER CHAT ERROR:", err);
-    alert("Chat başlatılamadı");
+    alert(t("buyerOrdersPage.chatFailed"));
   }
 };
   if (loading) {
     return (
       <main style={pageStyle}>
         <div style={emptyCardStyle}>
-          Siparişler yükleniyor...
+          {t("buyerOrdersPage.loading")}
         </div>
       </main>
     );
@@ -382,17 +408,15 @@ export default function BuyerOrdersPage() {
       <section style={heroStyle}>
         <div>
           <div style={eyebrowStyle}>
-            BUYER PANELİ
+            {t("buyerOrdersPage.buyerPanel")}
           </div>
 
           <h1 style={titleStyle}>
-            Siparişlerim
+            {t("buyerOrdersPage.title")}
           </h1>
 
           <p style={descStyle}>
-            Siparişlerinizi, ödeme durumlarını,
-            kargo süreçlerini ve teslimatları
-            tek ekrandan takip edin.
+            {t("buyerOrdersPage.description")}
           </p>
         </div>
       </section>
@@ -408,8 +432,8 @@ export default function BuyerOrdersPage() {
         >
           <strong>
             {paymentNotice.type === "success"
-              ? "✓ Ödeme başarılı"
-              : "⚠ Ödeme başarısız"}
+              ? t("buyerOrdersPage.paymentSuccess")
+              : t("buyerOrdersPage.paymentFailed")}
           </strong>
 
           <span>{paymentNotice.message}</span>
@@ -423,12 +447,11 @@ export default function BuyerOrdersPage() {
       ) : orders.length === 0 ? (
         <div style={emptyCardStyle}>
           <h2 style={{ marginTop: 0 }}>
-            Henüz sipariş yok
+            {t("buyerOrdersPage.noOrders")}
           </h2>
 
           <p style={{ color: "#64748b" }}>
-            Kabul ettiğiniz teklifler burada
-            görünecek.
+            {t("buyerOrdersPage.noOrdersText")}
           </p>
         </div>
       ) : (
@@ -438,13 +461,13 @@ export default function BuyerOrdersPage() {
               <div style={cardTopStyle}>
                 <div>
                   <div style={smallLabelStyle}>
-                    Sipariş / Talep
+                    {t("buyerOrdersPage.orderRequest")}
                   </div>
 
                   <h2 style={cardTitleStyle}>
                     {o.rfq?.product?.title ||
                       o.rfq?.title ||
-                      "Alım Talebi"}
+                      t("buyerOrdersPage.buyingRequest")}
                   </h2>
                 </div>
 
@@ -454,48 +477,50 @@ export default function BuyerOrdersPage() {
                     ...statusStyle(o.status),
                   }}
                 >
-                  {statusLabel(o.status, o.shippingCompany)}
+                  {statusLabel(o.status, o.shippingCompany, t)}
                 </span>
               </div>
 
               <div style={infoGridStyle}>
                 <Info
-                  label="Miktar"
+                  label={t("buyerOrdersPage.quantity")}
                   value={
                     o.rfq?.quantity
-                      ? `${o.rfq.quantity} ${o.rfq.unitType || "Adet"}`
+                      ? `${o.rfq.quantity} ${unitLabel(o.rfq.unitType, t)}`
                       : "-"
                   }
                 />
 
                 <Info
-                  label="Birim Fiyat"
+                  label={t("buyerOrdersPage.unitPrice")}
                   value={`${Number(
                     o.quote?.unitPrice || 0
-                  ).toLocaleString("tr-TR")} ₺`}
+                  ).toLocaleString(locale)} ₺`}
                 />
 
                 <Info
-                  label="Teslim"
-                  value={`${
-                    o.quote?.deliveryDays || "-"
-                  } gün`}
+                  label={t("buyerOrdersPage.delivery")}
+                  value={
+                    o.quote?.deliveryDays
+                      ? t("buyerOrdersPage.days", { count: o.quote.deliveryDays })
+                      : "-"
+                  }
                 />
 
                 <Info
-                  label="Toplam"
+                  label={t("buyerOrdersPage.total")}
                   value={`${Number(
                     o.totalAmount || 0
-                  ).toLocaleString("tr-TR")} ₺`}
+                  ).toLocaleString(locale)} ₺`}
                 />
               </div>
 
               <div style={noteBoxStyle}>
-                <strong>Satıcı Notu</strong>
+                <strong>{t("buyerOrdersPage.sellerNote")}</strong>
 
                 <p>
                   {o.quote?.sellerNote ||
-                    "Not bulunmuyor"}
+                    t("buyerOrdersPage.noNote")}
                 </p>
               </div>
 
@@ -503,14 +528,14 @@ export default function BuyerOrdersPage() {
                 <div style={shippingBoxStyle}>
                   {o.shippingCompany === "Kendi Teslimatım" ? (
                     <>
-                      <div>🤝 Teslimat: Kendi Teslimatım</div>
+                      <div>🤝 {t("buyerOrdersPage.delivery")}: {t("buyerOrdersPage.selfDelivery")}</div>
                       <div>
-                        Durum: Teslime Hazır
+                        {t("buyerOrdersPage.deliveryStatus")}: {t("buyerOrdersPage.readyForDelivery")}
                       </div>
                       <div>
-                        Hazır Olma Tarihi:{" "}
+                        {t("buyerOrdersPage.readyDate")}:{" "}
                         {o.shippedAt
-                          ? new Date(o.shippedAt).toLocaleString("tr-TR")
+                          ? new Date(o.shippedAt).toLocaleString(locale)
                           : "-"}
                       </div>
                     </>
@@ -521,14 +546,14 @@ export default function BuyerOrdersPage() {
                       </div>
 
                       <div>
-                        Takip No:{" "}
+                        {t("buyerOrdersPage.trackingNo")}:{" "}
                         {o.shippingTrackingNo || "-"}
                       </div>
 
                       <div>
-                        Çıkış Tarihi:{" "}
+                        {t("buyerOrdersPage.shippingDate")}:{" "}
                         {o.shippedAt
-                          ? new Date(o.shippedAt).toLocaleString("tr-TR")
+                          ? new Date(o.shippedAt).toLocaleString(locale)
                           : "-"}
                       </div>
                     </>
@@ -549,7 +574,7 @@ export default function BuyerOrdersPage() {
         fontWeight: 700,
       }}
     >
-      ⭐ Satıcıyı Değerlendir
+      ⭐ {t("buyerOrdersPage.reviewSeller")}
     </Link>
   </div>
 )}
@@ -559,7 +584,7 @@ export default function BuyerOrdersPage() {
     style={chatButtonStyle}
     onClick={() => startOrderChat(o.id)}
   >
-    💬 Mesajlaş
+    💬 {t("buyerOrdersPage.message")}
   </button>
 
   {["PAID", "PREPARING", "SHIPPED", "COMPLETED"].includes(
@@ -572,7 +597,7 @@ export default function BuyerOrdersPage() {
         textDecoration: "none",
       }}
     >
-      🚚 Nakliye Teklifi Al
+      🚚 {t("buyerOrdersPage.getShippingQuote")}
     </Link>
   )}
 
@@ -593,8 +618,8 @@ export default function BuyerOrdersPage() {
                     }
                   >
                     {paymentLoadingId === o.id
-                      ? "Ödeme açılıyor..."
-                      : "💳 Ödeme Yap"}
+                      ? t("buyerOrdersPage.openingPayment")
+                      : t("buyerOrdersPage.pay")}
                   </button>
                 )}
 
@@ -608,7 +633,7 @@ export default function BuyerOrdersPage() {
                       )
                     }
                   >
-                    ✅ Teslim Aldım
+                    {t("buyerOrdersPage.received")}
                   </button>
                 )}
               </div>

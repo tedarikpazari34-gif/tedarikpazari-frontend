@@ -1,10 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 
 const API_URL =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("123456");
   const [loading, setLoading] = useState(false);
@@ -16,7 +18,7 @@ export default function LoginPage() {
     const cleanEmail = email.trim();
 
     if (!cleanEmail) {
-      setResendMessage("Önce e-posta adresinizi yazın.");
+      setResendMessage(t("loginPage.enterEmailFirst"));
       return;
     }
 
@@ -30,12 +32,12 @@ export default function LoginPage() {
       );
 
       setResendMessage(
-        res.data?.message || "Doğrulama e-postası gönderildi.",
+        res.data?.message || t("loginPage.verificationSent"),
       );
     } catch (err: any) {
       setResendMessage(
         err?.response?.data?.message ||
-          "Doğrulama e-postası gönderilemedi.",
+          t("loginPage.verificationFailed"),
       );
     } finally {
       setResendLoading(false);
@@ -57,7 +59,7 @@ export default function LoginPage() {
       const emailVerified = res.data?.user?.emailVerified === true;
 
       if (!token) {
-        setError("Token gelmedi");
+        setError(t("loginPage.tokenMissing"));
         return;
       }
 
@@ -66,7 +68,7 @@ export default function LoginPage() {
       localStorage.setItem("emailVerified", String(emailVerified));
 
       if (!emailVerified) {
-        alert("E-posta adresiniz henüz doğrulanmamış. Lütfen doğrulama e-postasındaki bağlantıya tıklayın.");
+        alert(t("loginPage.emailNotVerified"));
       }
 
       window.dispatchEvent(new Event("storage"));
@@ -86,7 +88,7 @@ export default function LoginPage() {
       setError(
         err?.response?.data?.message ||
           err?.response?.data?.error ||
-          "Giriş başarısız",
+          t("loginPage.loginFailed"),
       );
     } finally {
       setLoading(false);
@@ -101,13 +103,13 @@ export default function LoginPage() {
         <h1 style={titleStyle}>Tedarik Pazarı</h1>
 
         <p style={subtitleStyle}>
-          Türkiye B2B tedarik ve toptan satın alma platformu
+          {t("loginPage.subtitle")}
         </p>
 
         {error && <div style={errorStyle}>{error}</div>}
 
         <input
-          placeholder="Email adresiniz"
+          placeholder={t("loginPage.emailPlaceholder")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={inputStyle}
@@ -115,14 +117,14 @@ export default function LoginPage() {
 
         <input
           type="password"
-          placeholder="Şifreniz"
+          placeholder={t("loginPage.passwordPlaceholder")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={inputStyle}
         />
 
         <button onClick={login} disabled={loading} style={buttonStyle}>
-          {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
+          {loading ? t("loginPage.loggingIn") : t("loginPage.login")}
         </button>
 
         <button
@@ -131,8 +133,8 @@ export default function LoginPage() {
           style={resendButtonStyle}
         >
           {resendLoading
-            ? "Gönderiliyor..."
-            : "Doğrulama e-postasını tekrar gönder"}
+            ? t("loginPage.sending")
+            : t("loginPage.resendVerification")}
         </button>
 
         {resendMessage && (

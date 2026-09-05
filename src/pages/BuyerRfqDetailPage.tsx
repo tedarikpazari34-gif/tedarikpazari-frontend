@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type RFQ = {
   id: string;
@@ -36,26 +37,42 @@ type Quote = {
 
 const API = "https://tedarik-backend.onrender.com/api";
 
-function formatPrice(value?: string | number) {
+function formatPrice(value: string | number | undefined, locale: string) {
   if (value === undefined || value === null || value === "") return "-";
   const numeric = Number(value);
   if (Number.isNaN(numeric)) return String(value);
-  return `${numeric.toLocaleString("tr-TR")} ₺`;
+  return `${numeric.toLocaleString(locale)} ₺`;
 }
 
-function statusLabel(status?: string) {
+function statusLabel(status: string | undefined, t: (key: string) => string) {
   const value = status?.toUpperCase();
 
-  if (value === "SENT") return "Gönderildi";
-  if (value === "ACCEPTED") return "Kabul edildi";
-  if (value === "REJECTED") return "Reddedildi";
-  if (value === "OPEN") return "Açık";
-  if (value === "PENDING") return "Beklemede";
-  if (value === "CLOSED") return "Kapandı";
+  if (value === "SENT") return t("buyerRfqDetailPage.sent");
+  if (value === "ACCEPTED") return t("buyerRfqDetailPage.accepted");
+  if (value === "REJECTED") return t("buyerRfqDetailPage.rejected");
+  if (value === "OPEN") return t("buyerRfqDetailPage.open");
+  if (value === "PENDING") return t("buyerRfqDetailPage.pending");
+  if (value === "CLOSED") return t("buyerRfqDetailPage.closed");
 
   return status || "-";
 }
 
+function unitLabel(unit: string | null | undefined, t: (key: string) => string) {
+  const map: Record<string, string> = {
+    Adet: "piece",
+    Koli: "box",
+    Paket: "package",
+    Kilogram: "kilogram",
+    Ton: "ton",
+    Litre: "litre",
+    Metre: "meter",
+    Palet: "pallet",
+  };
+
+  return unit && map[unit]
+    ? t(`buyerRfqDetailPage.${map[unit]}`)
+    : unit || t("buyerRfqDetailPage.piece");
+}
 function statusStyle(status?: string): CSSProperties {
   const value = status?.toUpperCase();
 
@@ -77,6 +94,8 @@ function statusStyle(status?: string): CSSProperties {
 export default function BuyerRfqDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
 
   const [rfq, setRfq] = useState<RFQ | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -92,7 +111,7 @@ export default function BuyerRfqDetailPage() {
         const token = localStorage.getItem("token");
 
         if (!token) {
-          setError("Bu sayfayı görmek için giriş yapmalısınız.");
+          setError(t("buyerRfqDetailPage.loginRequired"));
           setLoading(false);
           return;
         }
@@ -130,7 +149,7 @@ setRfq(found || null);
         }
       } catch (err) {
         console.error(err);
-        setError("Teklif detayları alınamadı.");
+        setError(t("buyerRfqDetailPage.loadFailed"));
         setQuotes([]);
       } finally {
         setLoading(false);
@@ -144,7 +163,7 @@ setRfq(found || null);
     if (!rfq || rfq.status === "CLOSED") return;
 
     const confirmed = window.confirm(
-      "Bu teklif talebini kapatmak istediğinize emin misiniz? Kapattıktan sonra yeni teklif alınamaz."
+      t("buyerRfqDetailPage.closeConfirm")
     );
 
     if (!confirmed) return;
@@ -164,7 +183,7 @@ setRfq(found || null);
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "RFQ kapatılamadı.");
+        alert(data?.message || t("buyerRfqDetailPage.closeFailed"));
         return;
       }
 
@@ -172,10 +191,10 @@ setRfq(found || null);
         current ? { ...current, status: "CLOSED" } : current
       );
 
-      alert("Teklif talebi kapatıldı.");
+      alert(t("buyerRfqDetailPage.closedSuccess"));
     } catch (err) {
       console.error("RFQ CLOSE ERROR:", err);
-      alert("RFQ kapatılırken hata oluştu.");
+      alert(t("buyerRfqDetailPage.closeError"));
     } finally {
       setClosing(false);
     }
@@ -215,15 +234,15 @@ setRfq(found || null);
       });
 
       if (!res.ok) {
-        alert("Sipariş oluşturulamadı ❌");
+        alert(t("buyerRfqDetailPage.orderFailed"));
         return;
       }
 
-      alert("Teklif kabul edildi ✅");
+      alert(t("buyerRfqDetailPage.quoteAccepted"));
       window.location.reload();
     } catch (err) {
       console.error(err);
-      alert("Hata oluştu ❌");
+      alert(t("buyerRfqDetailPage.generalError"));
     } finally {
       setAcceptingId(null);
     }
@@ -232,7 +251,7 @@ setRfq(found || null);
   if (loading) {
     return (
       <main style={pageStyle}>
-        <div style={emptyCardStyle}>Teklif detayları yükleniyor...</div>
+        <div style={emptyCardStyle}>{t("buyerRfqDetailPage.loading")}</div>
       </main>
     );
   }
@@ -241,10 +260,10 @@ setRfq(found || null);
     return (
       <main style={pageStyle}>
         <div style={errorCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Bir sorun oluştu</h2>
+          <h2 style={{ marginTop: 0 }}>{t("buyerRfqDetailPage.problem")}</h2>
           <p>{error}</p>
           <Link to="/login" style={primaryLinkStyle}>
-            Giriş Yap
+            {t("buyerRfqDetailPage.login")}
           </Link>
         </div>
       </main>
@@ -255,10 +274,10 @@ setRfq(found || null);
     return (
       <main style={pageStyle}>
         <div style={emptyCardStyle}>
-          <h2 style={{ marginTop: 0 }}>RFQ bulunamadı</h2>
-          <p>Bu teklif talebi kaldırılmış olabilir veya erişiminiz olmayabilir.</p>
+          <h2 style={{ marginTop: 0 }}>{t("buyerRfqDetailPage.notFound")}</h2>
+          <p>{t("buyerRfqDetailPage.notFoundText")}</p>
           <Link to="/buyer/rfqs" style={primaryLinkStyle}>
-            Taleplerime Dön
+            {t("buyerRfqDetailPage.backRequests")}
           </Link>
         </div>
       </main>
@@ -305,15 +324,14 @@ setRfq(found || null);
     <main style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <div style={eyebrowStyle}>RFQ DETAYI</div>
+          <div style={eyebrowStyle}>{t("buyerRfqDetailPage.detail")}</div>
 
           <h1 style={titleStyle}>
-            {rfq.product?.title || rfq.title || "Genel Teklif Talebi"}
+            {rfq.product?.title || rfq.title || t("buyerRfqDetailPage.generalRequest")}
           </h1>
 
           <p style={descriptionStyle}>
-            Gelen teklifleri karşılaştırın, fiyat ve teslim süresine göre en uygun
-            teklifi seçin.
+            {t("buyerRfqDetailPage.description")}
           </p>
         </div>
 
@@ -323,7 +341,7 @@ setRfq(found || null);
             onClick={copyRfq}
             style={copyButtonStyle}
           >
-            Talebi Kopyala
+            {t("buyerRfqDetailPage.copyRequest")}
           </button>
 
           {rfq.status === "OPEN" && (
@@ -336,31 +354,31 @@ setRfq(found || null);
                 opacity: closing ? 0.65 : 1,
               }}
             >
-              {closing ? "Kapatılıyor..." : "Talebi Kapat"}
+              {closing ? t("buyerRfqDetailPage.closing") : t("buyerRfqDetailPage.closeRequest")}
             </button>
           )}
 
           <Link to="/buyer/rfqs" style={backButtonStyle}>
-            Taleplerime Dön
+            {t("buyerRfqDetailPage.backRequests")}
           </Link>
         </div>
       </section>
 
       <section style={summaryGridStyle}>
-        <InfoCard label="Miktar" value={rfq.quantity || "-"} />
-        <InfoCard label="RFQ Durumu" value={statusLabel(rfq.status)} />
-        <InfoCard label="Gelen Teklif" value={quotes.length} />
+        <InfoCard label={t("buyerRfqDetailPage.quantity")} value={rfq.quantity || "-"} />
+        <InfoCard label={t("buyerRfqDetailPage.rfqStatus")} value={statusLabel(rfq.status, t)} />
+        <InfoCard label={t("buyerRfqDetailPage.incomingQuotes")} value={quotes.length} />
         <InfoCard
-          label="En İyi Fiyat"
-          value={bestQuote ? formatPrice(bestQuote.unitPrice) : "-"}
+          label={t("buyerRfqDetailPage.bestPrice")}
+          value={bestQuote ? formatPrice(bestQuote.unitPrice, locale) : "-"}
         />
       </section>
 
       <section style={detailCardStyle}>
         <div style={detailTopStyle}>
           <div>
-            <div style={smallLabelStyle}>Talep Notu</div>
-            <p style={noteStyle}>{rfq.note || "Not eklenmemiş."}</p>
+            <div style={smallLabelStyle}>{t("buyerRfqDetailPage.requestNote")}</div>
+            <p style={noteStyle}>{rfq.note || t("buyerRfqDetailPage.noNote")}</p>
           </div>
 
           <span
@@ -369,7 +387,7 @@ setRfq(found || null);
               ...statusStyle(rfq.status),
             }}
           >
-            {statusLabel(rfq.status)}
+            {statusLabel(rfq.status, t)}
           </span>
         </div>
       </section>
@@ -377,45 +395,45 @@ setRfq(found || null);
       {quotes.length > 0 && (
         <section style={comparisonPanelStyle}>
           <div>
-            <div style={eyebrowDarkStyle}>TEKLİF KARŞILAŞTIRMA</div>
-            <h2 style={comparisonTitleStyle}>Öne Çıkan Teklifler</h2>
+            <div style={eyebrowDarkStyle}>{t("buyerRfqDetailPage.comparison")}</div>
+            <h2 style={comparisonTitleStyle}>{t("buyerRfqDetailPage.featuredQuotes")}</h2>
             <p style={comparisonTextStyle}>
-              Fiyat, teslim süresi ve satıcı puanını tek bakışta karşılaştırın.
+              {t("buyerRfqDetailPage.comparisonText")}
             </p>
           </div>
 
           <div style={comparisonGridStyle}>
             <div style={comparisonCardStyle}>
-              <span style={comparisonLabelStyle}>🏆 En İyi Fiyat</span>
+              <span style={comparisonLabelStyle}>🏆 {t("buyerRfqDetailPage.bestPrice")}</span>
               <strong style={comparisonValueStyle}>
-                {bestQuote ? formatPrice(bestQuote.unitPrice) : "-"}
+                {bestQuote ? formatPrice(bestQuote.unitPrice, locale) : "-"}
               </strong>
               <small style={comparisonMetaStyle}>
-                {bestQuote?.seller?.name || "Tedarikçi"}
+                {bestQuote?.seller?.name || t("buyerRfqDetailPage.supplier")}
               </small>
             </div>
 
             <div style={comparisonCardStyle}>
-              <span style={comparisonLabelStyle}>⚡ En Hızlı Teslim</span>
+              <span style={comparisonLabelStyle}>⚡ {t("buyerRfqDetailPage.fastestDelivery")}</span>
               <strong style={comparisonValueStyle}>
                 {fastestQuote?.deliveryDays !== undefined
-                  ? `${fastestQuote.deliveryDays} gün`
+                  ? t("buyerRfqDetailPage.days", { count: fastestQuote.deliveryDays })
                   : "-"}
               </strong>
               <small style={comparisonMetaStyle}>
-                {fastestQuote?.seller?.name || "Tedarikçi"}
+                {fastestQuote?.seller?.name || t("buyerRfqDetailPage.supplier")}
               </small>
             </div>
 
             <div style={comparisonCardStyle}>
-              <span style={comparisonLabelStyle}>⭐ En Yüksek Puan</span>
+              <span style={comparisonLabelStyle}>⭐ {t("buyerRfqDetailPage.highestRating")}</span>
               <strong style={comparisonValueStyle}>
                 {highestRatedQuote
                   ? Number(highestRatedQuote.seller?.rating || 0).toFixed(1)
                   : "-"}
               </strong>
               <small style={comparisonMetaStyle}>
-                {highestRatedQuote?.seller?.name || "Henüz puan yok"}
+                {highestRatedQuote?.seller?.name || t("buyerRfqDetailPage.noRating")}
               </small>
             </div>
           </div>
@@ -424,8 +442,8 @@ setRfq(found || null);
 
       <section style={quotesHeaderStyle}>
         <div>
-          <div style={eyebrowDarkStyle}>TEDARİKÇİ TEKLİFLERİ</div>
-          <h2 style={sectionTitleStyle}>Gelen Teklifler</h2>
+          <div style={eyebrowDarkStyle}>{t("buyerRfqDetailPage.supplierQuotes")}</div>
+          <h2 style={sectionTitleStyle}>{t("buyerRfqDetailPage.quotes")}</h2>
         </div>
 
         <div style={quoteHeaderActionsStyle}>
@@ -439,22 +457,22 @@ setRfq(found || null);
               }
               style={sortSelectStyle}
             >
-              <option value="price">Fiyata göre sırala</option>
-              <option value="delivery">Teslim süresine göre sırala</option>
+              <option value="price">{t("buyerRfqDetailPage.sortPrice")}</option>
+              <option value="delivery">{t("buyerRfqDetailPage.sortDelivery")}</option>
             </select>
           )}
 
           <Link to="/products" style={secondaryLinkStyle}>
-            Yeni ürün keşfet
+            {t("buyerRfqDetailPage.discoverNewProduct")}
           </Link>
         </div>
       </section>
 
       {quotes.length === 0 ? (
         <div style={emptyCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Henüz teklif yok</h2>
+          <h2 style={{ marginTop: 0 }}>{t("buyerRfqDetailPage.noQuotes")}</h2>
           <p style={{ color: "#64748b", lineHeight: 1.7 }}>
-            Tedarikçiler teklif verdiğinde burada listelenecek.
+            {t("buyerRfqDetailPage.noQuotesText")}
           </p>
         </div>
       ) : (
@@ -479,28 +497,28 @@ setRfq(found || null);
             >
               <div style={recommendationRowStyle}>
                 {isBestPrice && (
-                  <span style={bestPriceBadgeStyle}>🏆 En iyi fiyat</span>
+                  <span style={bestPriceBadgeStyle}>🏆 {t("buyerRfqDetailPage.bestPriceBadge")}</span>
                 )}
 
                 {isFastest && (
                   <span style={fastDeliveryBadgeStyle}>
-                    ⚡ En hızlı teslim
+                    ⚡ {t("buyerRfqDetailPage.fastestBadge")}
                   </span>
                 )}
               </div>
 
               <div style={sellerSummaryStyle}>
                 <div>
-                  <div style={sellerLabelStyle}>TEDARİKÇİ</div>
+                  <div style={sellerLabelStyle}>{t("buyerRfqDetailPage.supplierLabel")}</div>
 
                   <div style={sellerNameRowStyle}>
                     <strong style={sellerNameStyle}>
-                      {quote.seller?.name || "Tedarikçi"}
+                      {quote.seller?.name || t("buyerRfqDetailPage.supplier")}
                     </strong>
 
                     {quote.seller?.verified && (
                       <span style={verifiedSellerStyle}>
-                        ✓ Doğrulandı
+                        ✓ {t("buyerRfqDetailPage.verified")}
                       </span>
                     )}
                   </div>
@@ -508,10 +526,10 @@ setRfq(found || null);
                   <div style={sellerMetaStyle}>
                     {Number(quote.seller?.rating || 0) > 0
                       ? `⭐ ${Number(quote.seller?.rating).toFixed(1)}`
-                      : "⭐ Yeni satıcı"}
+                      : `⭐ ${t("buyerRfqDetailPage.newSeller")}`}
 
                     {quote.seller?.reviewCount
-                      ? ` · ${quote.seller.reviewCount} değerlendirme`
+                      ? ` · ${t("buyerRfqDetailPage.reviews", { count: quote.seller.reviewCount })}`
                       : ""}
 
                     {quote.seller?.city
@@ -525,15 +543,15 @@ setRfq(found || null);
                     to={`/store/${quote.seller.id}`}
                     style={storeLinkStyle}
                   >
-                    Mağazayı Gör
+                    {t("buyerRfqDetailPage.viewStore")}
                   </Link>
                 )}
               </div>
 
               <div style={quoteTopStyle}>
                 <div>
-                  <div style={smallLabelStyle}>Birim fiyat</div>
-                  <h3 style={priceStyle}>{formatPrice(quote.unitPrice)}</h3>
+                  <div style={smallLabelStyle}>{t("buyerRfqDetailPage.unitPrice")}</div>
+                  <h3 style={priceStyle}>{formatPrice(quote.unitPrice, locale)}</h3>
                 </div>
 
                 <span
@@ -542,36 +560,36 @@ setRfq(found || null);
                     ...statusStyle(quote.status),
                   }}
                 >
-                  {statusLabel(quote.status)}
+                  {statusLabel(quote.status, t)}
                 </span>
               </div>
 
               <div style={quoteInfoGridStyle}>
                 <InfoCard
-                  label="Teslim Süresi"
+                  label={t("buyerRfqDetailPage.deliveryTime")}
                   value={
                     quote.deliveryDays !== undefined
-                      ? `${quote.deliveryDays} gün`
+                      ? t("buyerRfqDetailPage.days", { count: quote.deliveryDays })
                       : "-"
                   }
                   compact
                 />
 
                 <InfoCard
-                  label="Toplam Tutar"
-                  value={formatPrice(totalAmount)}
+                  label={t("buyerRfqDetailPage.totalAmount")}
+                  value={formatPrice(totalAmount, locale)}
                   compact
                 />
               </div>
 
               <div style={calculationStyle}>
-                {rfq.quantity} {rfq.unitType || "Adet"} × {formatPrice(quote.unitPrice)}
-                <strong>{formatPrice(totalAmount)}</strong>
+                {rfq.quantity} {rfq.unitType || "Adet"} × {formatPrice(quote.unitPrice, locale)}
+                <strong>{formatPrice(totalAmount, locale)}</strong>
               </div>
 
               <div style={sellerNoteStyle}>
-                <strong>Satıcı Notu</strong>
-                <p>{quote.sellerNote || "Satıcı notu eklenmemiş."}</p>
+                <strong>{t("buyerRfqDetailPage.sellerNote")}</strong>
+                <p>{quote.sellerNote || t("buyerRfqDetailPage.noSellerNote")}</p>
               </div>
 
               {quote.status === "SENT" && rfq.status === "OPEN" ? (
@@ -586,12 +604,12 @@ setRfq(found || null);
                   }}
                 >
                   {acceptingId === quote.id
-                    ? "Sipariş oluşturuluyor..."
-                    : "Teklifi Kabul Et"}
+                    ? t("buyerRfqDetailPage.creatingOrder")
+                    : t("buyerRfqDetailPage.acceptQuote")}
                 </button>
               ) : (
                 <div style={disabledActionStyle}>
-                  Bu teklif için işlem yapılamaz.
+                  {t("buyerRfqDetailPage.actionUnavailable")}
                 </div>
               )}
             </article>

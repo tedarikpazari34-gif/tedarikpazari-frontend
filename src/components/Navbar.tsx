@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { disconnectSocket, getSocket } from "../lib/socket";
 import { enablePushNotifications } from "../pushNotifications";
 
 type NavItem = {
-  label: string;
+  labelKey: string;
   to: string;
 };
 
@@ -12,55 +13,56 @@ const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
 const publicLinks: NavItem[] = [
-  { label: "Ana Sayfa", to: "/" },
-  { label: "Ürünler", to: "/products" },
+  { labelKey: "common.home", to: "/" },
+  { labelKey: "common.products", to: "/products" },
 ];
 
 const buyerLinks: NavItem[] = [
-  { label: "Dashboard", to: "/buyer/dashboard" },
-  { label: "Ana Sayfa", to: "/" },
-  { label: "Ürünler", to: "/products" },
-  { label: "Tekliflerim", to: "/tekliflerim" },
-  { label: "Siparişlerim", to: "/buyer/orders" },
-  { label: "Nakliye Teklifleri", to: "/buyer/shipping-quotes" },
-  { label: "Favorilerim", to: "/favorites" },
-  { label: "Mesajlar", to: "/chat" },
-  { label: "Cüzdanım", to: "/wallet" },
-  { label: "Firma Doğrulama", to: "/company/verification" },
+  { labelKey: "common.dashboard", to: "/buyer/dashboard" },
+  { labelKey: "common.home", to: "/" },
+  { labelKey: "common.products", to: "/products" },
+  { labelKey: "common.myQuotes", to: "/tekliflerim" },
+  { labelKey: "common.myOrders", to: "/buyer/orders" },
+  { labelKey: "common.shippingQuotes", to: "/buyer/shipping-quotes" },
+  { labelKey: "common.favorites", to: "/favorites" },
+  { labelKey: "common.messages", to: "/chat" },
+  { labelKey: "common.wallet", to: "/wallet" },
+  { labelKey: "common.companyVerification", to: "/company/verification" },
 ];
 
 const sellerLinks: NavItem[] = [
-  { label: "Dashboard", to: "/seller/dashboard" },
-  { label: "Gelen Talepler", to: "/seller/rfqs" },
-  { label: "Tekliflerim", to: "/seller/quotes" },
-  { label: "Siparişlerim", to: "/seller/orders" },
-  { label: "Ürünlerim", to: "/seller/products" },
-  { label: "Firma Profilim", to: "/seller/profile" },
-  { label: "Cüzdanım", to: "/wallet" },
-  { label: "Mesajlar", to: "/chat" },
-  { label: "Firma Doğrulama", to: "/company/verification" },
+  { labelKey: "common.dashboard", to: "/seller/dashboard" },
+  { labelKey: "common.incomingRequests", to: "/seller/rfqs" },
+  { labelKey: "common.myQuotes", to: "/seller/quotes" },
+  { labelKey: "common.myOrders", to: "/seller/orders" },
+  { labelKey: "common.myProducts", to: "/seller/products" },
+  { labelKey: "common.companyProfile", to: "/seller/profile" },
+  { labelKey: "common.wallet", to: "/wallet" },
+  { labelKey: "common.messages", to: "/chat" },
+  { labelKey: "common.companyVerification", to: "/company/verification" },
 ];
 
 const logisticsLinks: NavItem[] = [
-  { label: "Dashboard", to: "/logistics/dashboard" },
-  { label: "Açık Yükler", to: "/logistics/shipping" },
-  { label: "Taşımalarım", to: "/logistics/orders" },
-  { label: "Mesajlar", to: "/chat" },
+  { labelKey: "common.dashboard", to: "/logistics/dashboard" },
+  { labelKey: "common.openLoads", to: "/logistics/shipping" },
+  { labelKey: "common.myShipments", to: "/logistics/orders" },
+  { labelKey: "common.messages", to: "/chat" },
 ];
 
 const adminLinks: NavItem[] = [
-  { label: "Dashboard", to: "/admin" },
-  { label: "Şirketler", to: "/admin/companies" },
-  { label: "Doğrulama Başvuruları", to: "/admin/verification-requests" },
-  { label: "Ürün Yönetimi", to: "/admin/products" },
-  { label: "Ödemeler", to: "/admin/payouts" },
-  { label: "Uyuşmazlıklar", to: "/admin/disputes" },
-  { label: "Finans", to: "/admin/finance" },
-  { label: "Mesaj Denetimi", to: "/admin/chat-moderation" },
+  { labelKey: "common.dashboard", to: "/admin" },
+  { labelKey: "common.companies", to: "/admin/companies" },
+  { labelKey: "common.verificationRequests", to: "/admin/verification-requests" },
+  { labelKey: "common.productManagement", to: "/admin/products" },
+  { labelKey: "common.payments", to: "/admin/payouts" },
+  { labelKey: "common.disputes", to: "/admin/disputes" },
+  { labelKey: "common.finance", to: "/admin/finance" },
+  { labelKey: "common.chatModeration", to: "/admin/chat-moderation" },
 ];
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [pushEnabled, setPushEnabled] = useState(
@@ -86,14 +88,14 @@ export default function Navbar() {
 
   const mobileSectionTitle =
     role === "BUYER"
-      ? "Alıcı Paneli"
+      ? t("common.buyerPanel")
       : role === "SELLER"
-        ? "Satıcı Paneli"
+        ? t("common.sellerPanel")
         : role === "LOGISTICS"
-          ? "Lojistik Paneli"
+          ? t("common.logisticsPanel")
           : role === "ADMIN"
-            ? "Yönetim Paneli"
-            : "Menü";
+            ? t("common.adminPanel")
+            : t("common.menu");
 
   useEffect(() => {
     const loadUnreadCount = async () => {
@@ -180,9 +182,9 @@ export default function Navbar() {
       setPushLoading(true);
       await enablePushNotifications();
       setPushEnabled(true);
-      alert("Telefon bildirimleri başarıyla açıldı.");
+      alert(t("navbar.pushEnabledSuccess"));
     } catch (err: any) {
-      alert(err?.message || "Bildirimler açılamadı.");
+      alert(err?.message || t("navbar.pushEnableFailed"));
     } finally {
       setPushLoading(false);
     }
@@ -190,7 +192,14 @@ export default function Navbar() {
 
   const logout = () => {
     disconnectSocket();
+
+    const language = localStorage.getItem("language");
     localStorage.clear();
+
+    if (language) {
+      localStorage.setItem("language", language);
+    }
+
     setUnreadCount(0);
     setOpen(false);
     navigate("/login");
@@ -204,12 +213,14 @@ export default function Navbar() {
 
           <span>
             TEDARİK PAZARI
-            <small style={brandSubStyle}>B2B Pazaryeri</small>
+            <small style={brandSubStyle}>{t("common.marketplace")}</small>
           </span>
         </Link>
 
         <nav style={desktopNavStyle}>
           <NavGroup items={roleLinks} />
+
+          <LanguageSwitcher />
 
           <Link to="/notifications" style={bellStyle}>
             🔔
@@ -227,22 +238,22 @@ export default function Navbar() {
               disabled={pushLoading}
               style={pushButtonStyle}
             >
-              {pushLoading ? "Açılıyor..." : "Bildirimleri Aç"}
+              {pushLoading ? t("common.enabling") : t("common.enableNotifications")}
             </button>
           )}
 
           {token ? (
             <button onClick={logout} style={logoutButtonStyle}>
-              Çıkış Yap
+              {t("common.logout")}
             </button>
           ) : (
             <div style={authGroupStyle}>
               <Link to="/login" style={loginButtonStyle}>
-                Giriş Yap
+                {t("common.login")}
               </Link>
 
               <Link to="/register" style={registerButtonStyle}>
-                Üye Ol
+                {t("common.register")}
               </Link>
             </div>
           )}
@@ -265,12 +276,14 @@ export default function Navbar() {
             close={() => setOpen(false)}
           />
 
+          <LanguageSwitcher mobile />
+
           <Link
             to="/notifications"
             onClick={() => setOpen(false)}
             style={mobileNotificationStyle}
           >
-            🔔 Bildirimler
+            🔔 {t("common.notifications")}
             {unreadCount > 0 && (
               <span style={mobileBadgeStyle}>
                 {unreadCount > 9 ? "9+" : unreadCount}
@@ -280,7 +293,7 @@ export default function Navbar() {
 
           {token ? (
             <button onClick={logout} style={mobileLogoutStyle}>
-              Çıkış Yap
+              {t("common.logout")}
             </button>
           ) : (
             <div style={mobileAuthStyle}>
@@ -289,7 +302,7 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 style={loginButtonStyle}
               >
-                Giriş Yap
+                {t("common.login")}
               </Link>
 
               <Link
@@ -297,7 +310,7 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 style={registerButtonStyle}
               >
-                Üye Ol
+                {t("common.register")}
               </Link>
             </div>
           )}
@@ -307,12 +320,55 @@ export default function Navbar() {
   );
 }
 
+function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.resolvedLanguage || i18n.language || "tr";
+
+  const changeLanguage = (language: "tr" | "en") => {
+    i18n.changeLanguage(language);
+  };
+
+  return (
+    <div style={mobile ? mobileLanguageStyle : languageStyle}>
+      <button
+        type="button"
+        onClick={() => changeLanguage("tr")}
+        style={{
+          ...languageButtonStyle,
+          ...(currentLanguage.startsWith("tr")
+            ? activeLanguageButtonStyle
+            : {}),
+        }}
+      >
+        TR
+      </button>
+
+      <span style={languageDividerStyle}>|</span>
+
+      <button
+        type="button"
+        onClick={() => changeLanguage("en")}
+        style={{
+          ...languageButtonStyle,
+          ...(currentLanguage.startsWith("en")
+            ? activeLanguageButtonStyle
+            : {}),
+        }}
+      >
+        EN
+      </button>
+    </div>
+  );
+}
+
 function NavGroup({ items }: { items: NavItem[] }) {
+  const { t } = useTranslation();
+
   return (
     <div style={navGroupStyle}>
       {items.map((item) => (
         <Link key={item.to} to={item.to} style={linkStyle}>
-          {item.label}
+          {t(item.labelKey)}
         </Link>
       ))}
     </div>
@@ -328,6 +384,8 @@ function MobileSection({
   items: NavItem[];
   close: () => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div style={mobileSectionStyle}>
       <div style={mobileTitleStyle}>{title}</div>
@@ -339,7 +397,7 @@ function MobileSection({
           onClick={close}
           style={mobileLinkStyle}
         >
-          {item.label}
+          {t(item.labelKey)}
         </Link>
       ))}
     </div>
@@ -416,6 +474,41 @@ const linkStyle: React.CSSProperties = {
   fontSize: 13,
   padding: "9px 10px",
   borderRadius: 10,
+};
+
+const languageStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 5,
+  padding: "6px 8px",
+  borderRadius: 10,
+  border: "1px solid rgba(255,255,255,0.14)",
+  background: "rgba(255,255,255,0.06)",
+};
+
+const mobileLanguageStyle: React.CSSProperties = {
+  ...languageStyle,
+  justifyContent: "center",
+  padding: 10,
+};
+
+const languageButtonStyle: React.CSSProperties = {
+  border: "none",
+  background: "transparent",
+  color: "#94a3b8",
+  cursor: "pointer",
+  fontSize: 12,
+  fontWeight: 900,
+  padding: "3px 4px",
+};
+
+const activeLanguageButtonStyle: React.CSSProperties = {
+  color: "#38bdf8",
+};
+
+const languageDividerStyle: React.CSSProperties = {
+  color: "#64748b",
+  fontSize: 12,
 };
 
 const bellStyle: React.CSSProperties = {

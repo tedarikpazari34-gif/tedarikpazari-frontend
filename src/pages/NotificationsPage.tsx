@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type Notification = {
   id: string;
@@ -15,6 +16,9 @@ const API =
   "https://tedarik-backend.onrender.com/api";
 
 export default function NotificationsPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
   );
@@ -117,7 +121,7 @@ export default function NotificationsPage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <div style={emptyCardStyle}>Bildirimler yükleniyor...</div>
+        <div style={emptyCardStyle}>{t("notificationsPage.loading")}</div>
       </main>
     );
   }
@@ -133,10 +137,10 @@ export default function NotificationsPage() {
         }}
       >
         <div>
-          <div style={eyebrowStyle}>BİLDİRİM MERKEZİ</div>
-          <h1 style={titleStyle}>Bildirimler</h1>
+          <div style={eyebrowStyle}>{t("notificationsPage.eyebrow")}</div>
+          <h1 style={titleStyle}>{t("notificationsPage.title")}</h1>
           <p style={descStyle}>
-            Teklif, sipariş, ödeme ve kargo güncellemelerini buradan takip edin.
+            {t("notificationsPage.description")}
           </p>
         </div>
 
@@ -155,7 +159,7 @@ export default function NotificationsPage() {
       boxSizing: "border-box",
     }}
   >
-    <span>Okunmamış</span>
+    <span>{t("notificationsPage.unread")}</span>
     <strong>{unreadCount}</strong>
   </div>
 
@@ -169,7 +173,7 @@ export default function NotificationsPage() {
         boxSizing: "border-box",
       }}
     >
-      Tümünü Okundu Yap
+      {t("notificationsPage.markAllRead")}
     </button>
   )}
 </div>
@@ -177,13 +181,12 @@ export default function NotificationsPage() {
 
       {items.length === 0 ? (
         <div style={emptyCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Bildirim yok</h2>
+          <h2 style={{ marginTop: 0 }}>{t("notificationsPage.emptyTitle")}</h2>
           <p style={{ color: "#64748b", lineHeight: 1.7 }}>
-            Yeni teklif, sipariş veya ödeme güncellemesi geldiğinde burada
-            görünecek.
+            {t("notificationsPage.emptyDescription")}
           </p>
           <Link to="/" style={primaryLinkStyle}>
-            Ana Sayfaya Dön
+            {t("notificationsPage.backHome")}
           </Link>
         </div>
       ) : (
@@ -204,11 +207,11 @@ export default function NotificationsPage() {
                   <div>
                     <h2 style={cardTitleStyle}>{item.title}</h2>
                     <p style={dateStyle}>
-                      {new Date(item.createdAt).toLocaleString("tr-TR")}
+                      {new Date(item.createdAt).toLocaleString(locale)}
                     </p>
                   </div>
 
-                  {!item.isRead && <span style={badgeStyle}>Yeni</span>}
+                  {!item.isRead && <span style={badgeStyle}>{t("notificationsPage.new")}</span>}
                 </div>
 
                 <p style={messageStyle}>{item.message}</p>
@@ -220,7 +223,7 @@ export default function NotificationsPage() {
                       onClick={() => markRead(item.id)}
                       style={buttonStyle}
                     >
-                      Okundu İşaretle
+                      {t("notificationsPage.markRead")}
                     </button>
                   )}
 
@@ -230,7 +233,7 @@ export default function NotificationsPage() {
                       onClick={() => openNotification(item)}
                       style={detailButtonStyle}
                     >
-                      Detaya Git →
+                      {t("notificationsPage.goToDetail")}
                     </button>
                   )}
                 </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const API =
   import.meta.env.VITE_API_URL ||
@@ -12,16 +13,17 @@ const statusIndex: Record<string, number> = {
   DELIVERED: 4,
 };
 
-const timelineSteps = [
-  "Talep oluşturuldu",
-  "Nakliyeci seçildi",
-  "Yük teslim alındı",
-  "Araç yola çıktı",
-  "Teslim edildi",
-];
-
 function BuyerTimeline({ order }: { order: any }) {
+  const { t } = useTranslation();
   const currentIndex = statusIndex[order.status] ?? 0;
+
+  const timelineSteps = [
+    t("buyerShippingQuotesPage.timelineRequestCreated"),
+    t("buyerShippingQuotesPage.timelineCarrierSelected"),
+    t("buyerShippingQuotesPage.timelinePickedUp"),
+    t("buyerShippingQuotesPage.timelineInTransit"),
+    t("buyerShippingQuotesPage.timelineDelivered"),
+  ];
 
   return (
     <div style={timelineStyle}>
@@ -55,6 +57,9 @@ function BuyerTimeline({ order }: { order: any }) {
 }
 
 export default function BuyerShippingQuotesPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [quotes, setQuotes] = useState<any[]>([]);
   const [shippingOrders, setShippingOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,7 +90,7 @@ export default function BuyerShippingQuotesPage() {
       ]);
 
       if (!quotesRes.ok) {
-        alert(quotesData?.message || "Teklifler alınamadı");
+        alert(quotesData?.message || t("buyerShippingQuotesPage.quotesFailed"));
         setQuotes([]);
       } else {
         setQuotes(Array.isArray(quotesData) ? quotesData : []);
@@ -130,15 +135,15 @@ export default function BuyerShippingQuotesPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "Nakliye seçilemedi");
+        alert(data?.message || t("buyerShippingQuotesPage.selectFailed"));
         return;
       }
 
-      alert("Nakliye firması seçildi ✅");
+      alert(t("buyerShippingQuotesPage.selectSuccess"));
       await load();
     } catch (err) {
       console.error("ACCEPT SHIPPING QUOTE ERROR:", err);
-      alert("İşlem sırasında hata oluştu");
+      alert(t("buyerShippingQuotesPage.actionError"));
     } finally {
       setAcceptingId("");
     }
@@ -147,7 +152,7 @@ export default function BuyerShippingQuotesPage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <div style={emptyStyle}>Nakliye teklifleri yükleniyor...</div>
+        <div style={emptyStyle}>{t("buyerShippingQuotesPage.loading")}</div>
       </main>
     );
   }
@@ -156,20 +161,21 @@ export default function BuyerShippingQuotesPage() {
     <main style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <div style={eyebrowStyle}>ALICI LOJİSTİK PANELİ</div>
-          <h1 style={titleStyle}>Nakliye Tekliflerim</h1>
+          <div style={eyebrowStyle}>{t("buyerShippingQuotesPage.panel")}</div>
+          <h1 style={titleStyle}>{t("buyerShippingQuotesPage.title")}</h1>
           <p style={descStyle}>
-            Nakliye tekliflerini karşılaştırın, taşıyıcıyı seçin ve
-            teslimat sürecini adım adım takip edin.
+            {t("buyerShippingQuotesPage.description")}
           </p>
         </div>
       </section>
 
       {quotes.length === 0 ? (
         <div style={emptyStyle}>
-          <h2 style={{ marginTop: 0 }}>Henüz nakliye teklifi yok</h2>
+          <h2 style={{ marginTop: 0 }}>
+            {t("buyerShippingQuotesPage.noQuotes")}
+          </h2>
           <p style={{ color: "#64748b" }}>
-            Lojistik firmaları teklif verdiğinde burada görünecek.
+            {t("buyerShippingQuotesPage.noQuotesText")}
           </p>
         </div>
       ) : (
@@ -185,11 +191,11 @@ export default function BuyerShippingQuotesPage() {
               <article key={quote.id} style={cardStyle}>
                 <div style={cardTopStyle}>
                   <div>
-                    <div style={smallLabelStyle}>NAKLİYE TEKLİFİ</div>
+                    <div style={smallLabelStyle}>{t("buyerShippingQuotesPage.shippingQuote")}</div>
                     <h2 style={companyTitleStyle}>
                       {quote.company?.name ||
                         quote.company?.companyName ||
-                        "Lojistik Firması"}
+                        t("buyerShippingQuotesPage.logisticsCompany")}
                     </h2>
                   </div>
 
@@ -204,35 +210,41 @@ export default function BuyerShippingQuotesPage() {
                     }}
                   >
                     {quote.status === "ACCEPTED"
-                      ? "Seçildi"
+                      ? t("buyerShippingQuotesPage.selected")
                       : quote.status === "REJECTED"
-                      ? "Reddedildi"
-                      : "Teklif Geldi"}
+                      ? t("buyerShippingQuotesPage.rejected")
+                      : t("buyerShippingQuotesPage.quoteReceived")}
                   </span>
                 </div>
 
                 <div style={infoGridStyle}>
                   <Info
-                    label="Ürün"
+                    label={t("buyerShippingQuotesPage.product")}
                     value={
                       quote.rfq?.order?.rfq?.product?.title || "-"
                     }
                   />
                   <Info
-                    label="Nakliye Bedeli"
+                    label={t("buyerShippingQuotesPage.shippingCost")}
                     value={`${Number(
                       quote.price || 0
-                    ).toLocaleString("tr-TR")} ₺`}
+                    ).toLocaleString(locale)} ₺`}
                   />
                   <Info
-                    label="Teslim Süresi"
-                    value={`${quote.deliveryDays || "-"} gün`}
+                    label={t("buyerShippingQuotesPage.deliveryTime")}
+                    value={
+                      quote.deliveryDays
+                        ? t("buyerShippingQuotesPage.days", {
+                            count: quote.deliveryDays,
+                          })
+                        : "-"
+                    }
                   />
                 </div>
 
                 <div style={noteStyle}>
-                  <strong>Nakliyeci Notu</strong>
-                  <p>{quote.note || "Not eklenmemiş."}</p>
+                  <strong>{t("buyerShippingQuotesPage.carrierNote")}</strong>
+                  <p>{quote.note || t("buyerShippingQuotesPage.noNote")}</p>
                 </div>
 
                 {quote.status === "SENT" && (
@@ -246,8 +258,8 @@ export default function BuyerShippingQuotesPage() {
                     }}
                   >
                     {acceptingId === quote.id
-                      ? "Nakliyeci seçiliyor..."
-                      : "Nakliyeciyi Seç"}
+                      ? t("buyerShippingQuotesPage.selecting")
+                      : t("buyerShippingQuotesPage.selectCarrier")}
                   </button>
                 )}
 
@@ -256,7 +268,7 @@ export default function BuyerShippingQuotesPage() {
                     <div style={trackingHeaderStyle}>
                       <div>
                         <span style={trackingLabelStyle}>
-                          TAŞIMA TAKİBİ
+                          {t("buyerShippingQuotesPage.tracking")}
                         </span>
                         <strong>
                           {shippingOrder.trackingNo || "-"}
@@ -264,7 +276,7 @@ export default function BuyerShippingQuotesPage() {
                       </div>
 
                       <Link to="/chat" style={chatLinkStyle}>
-                        💬 Nakliye Sohbeti
+                        {t("buyerShippingQuotesPage.shippingChat")}
                       </Link>
                     </div>
 
@@ -274,8 +286,7 @@ export default function BuyerShippingQuotesPage() {
 
                 {quote.status === "ACCEPTED" && !shippingOrder && (
                   <div style={acceptedNoticeStyle}>
-                    ✅ Nakliye firması seçildi. Taşıma siparişi
-                    hazırlanıyor.
+                    {t("buyerShippingQuotesPage.preparingOrder")}
                   </div>
                 )}
               </article>

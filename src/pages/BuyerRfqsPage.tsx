@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type RFQ = {
   id: string;
@@ -16,18 +17,17 @@ type RFQ = {
 
 const API = "https://tedarik-backend.onrender.com/api";
 
-function getStatusLabel(status: string) {
+function getStatusLabel(status: string, t: (key: string) => string) {
   const value = status?.toUpperCase();
 
-  if (value === "OPEN") return "Açık";
-  if (value === "PENDING") return "Beklemede";
-  if (value === "CLOSED") return "Kapandı";
-  if (value === "APPROVED") return "Onaylandı";
-  if (value === "REJECTED") return "Reddedildi";
+  if (value === "OPEN") return t("buyerRfqsPage.statusOpen");
+  if (value === "PENDING") return t("buyerRfqsPage.statusPending");
+  if (value === "CLOSED") return t("buyerRfqsPage.statusClosed");
+  if (value === "APPROVED") return t("buyerRfqsPage.statusApproved");
+  if (value === "REJECTED") return t("buyerRfqsPage.statusRejected");
 
-  return status || "Durum yok";
+  return status || t("buyerRfqsPage.noStatus");
 }
-
 function getStatusStyle(status: string): CSSProperties {
   const value = status?.toUpperCase();
 
@@ -59,6 +59,9 @@ function getStatusStyle(status: string): CSSProperties {
 }
 
 export default function BuyerRfqsPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [rfqs, setRfqs] = useState<RFQ[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -69,7 +72,7 @@ export default function BuyerRfqsPage() {
         const token = localStorage.getItem("token");
 
         if (!token) {
-          setError("Teklif taleplerinizi görmek için giriş yapmalısınız.");
+          setError(t("buyerRfqsPage.loginRequired"));
           return;
         }
 
@@ -82,14 +85,14 @@ export default function BuyerRfqsPage() {
         const data = await res.json();
 
         if (!res.ok) {
-          setError(data?.message || "RFQ talepleri alınamadı");
+          setError(data?.message || t("buyerRfqsPage.loadFailed"));
           return;
         }
 
         setRfqs(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
-        setError("RFQ talepleri alınamadı");
+        setError(t("buyerRfqsPage.loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -111,48 +114,47 @@ export default function BuyerRfqsPage() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data?.message || "Chat başlatılamadı");
+      alert(data?.message || t("buyerRfqsPage.chatFailed"));
       return;
     }
 
     window.location.href = "/chat";
   } catch (err) {
     console.error("START CHAT ERROR:", err);
-    alert("Chat başlatılamadı");
+    alert(t("buyerRfqsPage.chatFailed"));
   }
 };
   return (
     <main style={page}>
       <section style={hero}>
         <div>
-          <div style={eyebrow}>ALICI PANELİ</div>
-          <h1 style={heading}>Teklif Taleplerim</h1>
+          <div style={eyebrow}>{t("buyerRfqsPage.buyerPanel")}</div>
+          <h1 style={heading}>{t("buyerRfqsPage.title")}</h1>
           <p style={description}>
-            Gönderdiğiniz RFQ taleplerini takip edin, gelen teklifleri inceleyin
-            ve satın alma sürecinizi tek yerden yönetin.
+            {t("buyerRfqsPage.description")}
           </p>
         </div>
 
         <Link to="/buyer/rfqs/new" style={newButton}>
-          Yeni Teklif Talebi
+          {t("buyerRfqsPage.newRequest")}
         </Link>
       </section>
 
       <section style={statsRow}>
         <div style={statCard}>
-          <span style={statLabel}>Toplam Talep</span>
+          <span style={statLabel}>{t("buyerRfqsPage.totalRequests")}</span>
           <strong style={statValue}>{rfqs.length}</strong>
         </div>
 
         <div style={statCard}>
-          <span style={statLabel}>Açık Talepler</span>
+          <span style={statLabel}>{t("buyerRfqsPage.openRequests")}</span>
           <strong style={statValue}>
             {rfqs.filter((r) => r.status?.toUpperCase() === "OPEN").length}
           </strong>
         </div>
 
         <div style={statCard}>
-          <span style={statLabel}>Bekleyen</span>
+          <span style={statLabel}>{t("buyerRfqsPage.pendingRequests")}</span>
           <strong style={statValue}>
             {rfqs.filter((r) => r.status?.toUpperCase() === "PENDING").length}
           </strong>
@@ -160,23 +162,23 @@ export default function BuyerRfqsPage() {
       </section>
 
       {loading ? (
-        <div style={emptyCard}>Teklif talepleri yükleniyor...</div>
+        <div style={emptyCard}>{t("buyerRfqsPage.loading")}</div>
       ) : error ? (
         <div style={errorCard}>
-          <strong>Bir sorun oluştu</strong>
+          <strong>{t("buyerRfqsPage.problem")}</strong>
           <span>{error}</span>
           <Link to="/login" style={loginLink}>
-            Giriş yap
+            {t("buyerRfqsPage.login")}
           </Link>
         </div>
       ) : rfqs.length === 0 ? (
         <div style={emptyCard}>
-          <h2 style={{ marginTop: 0 }}>Henüz teklif talebiniz yok</h2>
+          <h2 style={{ marginTop: 0 }}>{t("buyerRfqsPage.noRequests")}</h2>
           <p style={{ color: "#64748b", lineHeight: 1.7 }}>
-            Ürün veya kategori seçerek tedarikçilerden hızlıca teklif alabilirsiniz.
+            {t("buyerRfqsPage.noRequestsText")}
           </p>
           <Link to="/products" style={primaryLink}>
-            Ürünleri keşfet
+            {t("buyerRfqsPage.discoverProducts")}
           </Link>
         </div>
       ) : (
@@ -185,8 +187,8 @@ export default function BuyerRfqsPage() {
             <article key={rfq.id} style={card}>
               <div style={cardTop}>
                 <div>
-                  <div style={productLabel}>Ürün / Talep</div>
-                  <h2 style={title}>{rfq.product?.title || rfq.title || "Genel Teklif Talebi"}</h2>
+                  <div style={productLabel}>{t("buyerRfqsPage.productRequest")}</div>
+                  <h2 style={title}>{rfq.product?.title || rfq.title || t("buyerRfqsPage.generalRequest")}</h2>
                 </div>
 
                 <span
@@ -195,30 +197,30 @@ export default function BuyerRfqsPage() {
                     ...getStatusStyle(rfq.status),
                   }}
                 >
-                  {getStatusLabel(rfq.status)}
+                  {getStatusLabel(rfq.status, t)}
                 </span>
               </div>
 
               <div style={infoGrid}>
-                <Info label="Miktar" value={rfq.quantity ? `${rfq.quantity} ${rfq.unitType || ""}`.trim() : "-"} />
+                <Info label={t("buyerRfqsPage.quantity")} value={rfq.quantity ? `${rfq.quantity} ${rfq.unitType || ""}`.trim() : "-"} />
                 <Info
-                  label="Tarih"
+                  label={t("buyerRfqsPage.date")}
                   value={
                     rfq.createdAt
-                      ? new Date(rfq.createdAt).toLocaleDateString("tr-TR")
+                      ? new Date(rfq.createdAt).toLocaleDateString(locale)
                       : "-"
                   }
                 />
               </div>
 
               <div style={noteBox}>
-                <strong>Not</strong>
-                <p>{rfq.note || "Not eklenmemiş."}</p>
+                <strong>{t("buyerRfqsPage.note")}</strong>
+                <p>{rfq.note || t("buyerRfqsPage.noNote")}</p>
               </div>
 
               <div style={actions}>
   <Link to={`/buyer/rfqs/${rfq.id}`} style={detailButton}>
-    Teklifleri Gör
+    {t("buyerRfqsPage.viewQuotes")}
   </Link>
 
   <button
@@ -226,11 +228,11 @@ export default function BuyerRfqsPage() {
     onClick={() => startChat(rfq.id)}
     style={chatButton}
   >
-    Mesajlaş
+    {t("buyerRfqsPage.message")}
   </button>
 
   <Link to="/buyer/rfqs/new" style={secondaryButton}>
-    Yeni Talep
+    {t("buyerRfqsPage.newShort")}
   </Link>
 </div>
             </article>

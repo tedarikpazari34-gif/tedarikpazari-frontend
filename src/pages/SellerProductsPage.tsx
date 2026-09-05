@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import SellerLayout from "../components/SellerLayout";
+import { useTranslation } from "react-i18next";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
 
@@ -24,7 +25,29 @@ type Product = {
   };
 };
 
+function unitLabel(value: string | undefined, t: any) {
+  if (!value) return "";
+
+  const labels: Record<string, string> = {
+    "Adet": t("sellerProductsPage.piece"),
+    "adet": t("sellerProductsPage.piece"),
+    "Koli": t("sellerProductsPage.box"),
+    "Paket": t("sellerProductsPage.package"),
+    "Kilogram": t("sellerProductsPage.kilogram"),
+    "Kg": t("sellerProductsPage.kilogram"),
+    "Ton": t("sellerProductsPage.ton"),
+    "Litre": t("sellerProductsPage.litre"),
+    "Metre": t("sellerProductsPage.meter"),
+    "Palet": t("sellerProductsPage.pallet"),
+  };
+
+  return labels[value] || value;
+}
+
 export default function SellerProductsPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -37,7 +60,7 @@ export default function SellerProductsPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Lütfen tekrar giriş yapın");
+        setError(t("sellerProductsPage.loginAgain"));
         setProducts([]);
         return;
       }
@@ -51,7 +74,7 @@ export default function SellerProductsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "Ürünler yüklenemedi");
+        setError(data?.message || t("sellerProductsPage.loadFailed"));
         setProducts([]);
         return;
       }
@@ -59,7 +82,7 @@ export default function SellerProductsPage() {
       setProducts(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("SELLER PRODUCTS ERROR:", err);
-      setError("Ürünler alınırken hata oluştu");
+      setError(t("sellerProductsPage.loadError"));
       setProducts([]);
     } finally {
       setLoading(false);
@@ -71,7 +94,7 @@ export default function SellerProductsPage() {
   }, []);
 
   return (
-    <SellerLayout title="Ürünlerim">
+    <SellerLayout title={t("sellerProductsPage.title")}>
       <main style={pageStyle}>
         <div style={headerStyle}>
           <div>
@@ -81,25 +104,29 @@ export default function SellerProductsPage() {
                 marginTop: 0,
               }}
             >
-              Satıcı hesabınıza ait ürünleri buradan yönetin.
+              {t("sellerProductsPage.description")}
             </p>
           </div>
 
           <a href="/seller/products/new" style={addButtonStyle}>
-            + Yeni Ürün
+            {t("sellerProductsPage.newProduct")}
           </a>
         </div>
 
-        {loading && <div style={infoBoxStyle}>Ürünler yükleniyor...</div>}
+        {loading && (
+          <div style={infoBoxStyle}>{t("sellerProductsPage.loading")}</div>
+        )}
 
         {!loading && error && <div style={errorBoxStyle}>{error}</div>}
 
         {!loading && !error && products.length === 0 && (
           <div style={emptyStyle}>
-            <h2 style={{ marginTop: 0 }}>Henüz ürününüz yok</h2>
-            <p>İlk ürününüzü ekleyerek satıcı panelinizi kullanmaya başlayın.</p>
+            <h2 style={{ marginTop: 0 }}>
+              {t("sellerProductsPage.emptyTitle")}
+            </h2>
+            <p>{t("sellerProductsPage.emptyText")}</p>
             <a href="/seller/products/new" style={addButtonStyle}>
-              İlk Ürünü Ekle
+              {t("sellerProductsPage.addFirstProduct")}
             </a>
           </div>
         )}
@@ -120,7 +147,9 @@ export default function SellerProductsPage() {
                       style={imageStyle}
                     />
                   ) : (
-                    <div style={imagePlaceholderStyle}>Ürün Görseli Yok</div>
+                    <div style={imagePlaceholderStyle}>
+                      {t("sellerProductsPage.noImage")}
+                    </div>
                   )}
 
                   <span
@@ -131,30 +160,46 @@ export default function SellerProductsPage() {
                         : pendingBadgeStyle),
                     }}
                   >
-                    {product.isApproved ? "Onaylı" : "Onay Bekliyor"}
+                    {product.isApproved
+                      ? t("sellerProductsPage.approved")
+                      : t("sellerProductsPage.pendingApproval")}
                   </span>
                 </div>
 
                 <div style={contentStyle}>
                   <div style={categoryStyle}>
-                    {product.category?.name || "Kategori yok"}
+                    {product.category?.name || t("sellerProductsPage.noCategory")}
                   </div>
 
                   <h2 style={productTitleStyle}>{product.title}</h2>
 
                   <p style={descriptionStyle}>
-                    {product.description || "Açıklama girilmemiş."}
+                    {product.description || t("sellerProductsPage.noDescription")}
                   </p>
 
                   <div style={priceStyle}>
-                    {Number(product.basePrice || 0).toLocaleString("tr-TR")} ₺
+                    {Number(product.basePrice || 0).toLocaleString(locale)} ₺
                   </div>
 
                   <div style={detailsGridStyle}>
-                    <Info label="Birim" value={product.unitType} />
-                    <Info label="MOQ" value={product.moq} />
-                    <Info label="Tedarik" value={`${product.leadTimeDays} gün`} />
-                    <Info label="KDV" value={`%${product.vatRate}`} />
+                    <Info
+                      label={t("sellerProductsPage.unit")}
+                      value={unitLabel(product.unitType, t)}
+                    />
+                    <Info
+                      label={t("sellerProductsPage.minimumShort")}
+                      value={product.moq}
+                    />
+                    <Info
+                      label={t("sellerProductsPage.leadTime")}
+                      value={t("sellerProductsPage.dayCount", {
+                        count: product.leadTimeDays,
+                      })}
+                    />
+                    <Info
+                      label={t("sellerProductsPage.vat")}
+                      value={`%${product.vatRate}`}
+                    />
                   </div>
 
                   <div style={badgeRowStyle}>
@@ -165,7 +210,9 @@ export default function SellerProductsPage() {
                         color: product.rfqEnabled ? "#1d4ed8" : "#374151",
                       }}
                     >
-                      {product.rfqEnabled ? "RFQ Açık" : "RFQ Kapalı"}
+                      {product.rfqEnabled
+                        ? t("sellerProductsPage.rfqOpen")
+                        : t("sellerProductsPage.rfqClosed")}
                     </span>
 
                     <span
@@ -175,13 +222,15 @@ export default function SellerProductsPage() {
                         color: product.isActive ? "#166534" : "#991b1b",
                       }}
                     >
-                      {product.isActive ? "Aktif" : "Pasif"}
+                      {product.isActive
+                        ? t("sellerProductsPage.active")
+                        : t("sellerProductsPage.inactive")}
                     </span>
                   </div>
 
                   <div style={actionsStyle}>
                     <a href={`/product/${product.id}`} style={viewButtonStyle}>
-                      Ürünü Gör
+                      {t("sellerProductsPage.viewProduct")}
                     </a>
                   </div>
                 </div>

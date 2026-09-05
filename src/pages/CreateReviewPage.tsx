@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const API =
   import.meta.env.VITE_API_URL ||
   "https://tedarik-backend.onrender.com/api";
 export default function CreateReviewPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
 
 const [orderId, setOrderId] = useState(
@@ -35,11 +37,11 @@ console.log("ORDER ID:", orderId);
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Yorum gönderilemedi");
+        alert(data?.message || t("createReviewPage.submitFailed"));
         return;
       }
 
-      alert("Yorum gönderildi ⭐");
+      alert(t("createReviewPage.submitSuccess"));
     } catch (err) {
   console.error("REVIEW ERROR:", err);
   alert(String(err));
@@ -49,10 +51,10 @@ console.log("ORDER ID:", orderId);
   return (
     <main style={page}>
       <div style={card}>
-        <h1 style={title}>Satıcı Değerlendir</h1>
+        <h1 style={title}>{t("createReviewPage.title")}</h1>
 
         <input
-          placeholder="Order ID"
+          placeholder={t("createReviewPage.orderId")}
           value={orderId}
           onChange={(e) => setOrderId(e.target.value)}
           style={input}
@@ -71,14 +73,14 @@ console.log("ORDER ID:", orderId);
         </select>
 
         <textarea
-          placeholder="Yorumunuz"
+          placeholder={t("createReviewPage.commentPlaceholder")}
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           style={textarea}
         />
 
         <button onClick={submit} style={button}>
-          Yorumu Gönder
+          {t("createReviewPage.submit")}
         </button>
       </div>
     </main>

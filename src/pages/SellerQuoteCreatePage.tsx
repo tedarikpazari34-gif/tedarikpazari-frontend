@@ -1,10 +1,13 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const API = "https://tedarik-backend.onrender.com/api";
 
 export default function CreateQuotePage() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
   const [searchParams] = useSearchParams();
 
   const rfqIdFromUrl = searchParams.get("rfqId") || "";
@@ -57,12 +60,12 @@ export default function CreateQuotePage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Teklif hazırlamak için giriş yapmalısınız.");
+        setError(t("sellerQuoteCreatePage.aiLoginRequired"));
         return;
       }
 
       if (!rfqData) {
-        setError("Talep bilgileri henüz yüklenmedi.");
+        setError(t("sellerQuoteCreatePage.requestNotLoaded"));
         return;
       }
 
@@ -83,7 +86,7 @@ export default function CreateQuotePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "AI teklif taslağı oluşturulamadı.");
+        setError(data?.message || t("sellerQuoteCreatePage.aiDraftFailed"));
         return;
       }
 
@@ -96,7 +99,7 @@ export default function CreateQuotePage() {
       }
     } catch (err) {
       console.error("AI QUOTE ERROR:", err);
-      setError("AI teklif hazırlama sırasında hata oluştu.");
+      setError(t("sellerQuoteCreatePage.aiDraftError"));
     } finally {
       setAiLoading(false);
     }
@@ -104,17 +107,17 @@ export default function CreateQuotePage() {
 
   const handleSubmit = async () => {
     if (!rfqId.trim()) {
-      setError("RFQ ID bulunamadı.");
+      setError(t("sellerQuoteCreatePage.rfqMissing"));
       return;
     }
 
     if (!price || Number(price) <= 0) {
-      setError("Geçerli bir fiyat girin.");
+      setError(t("sellerQuoteCreatePage.invalidPrice"));
       return;
     }
 
     if (!days || Number(days) < 1) {
-      setError("Teslim süresi en az 1 gün olmalı.");
+      setError(t("sellerQuoteCreatePage.invalidDeliveryDays"));
       return;
     }
 
@@ -126,7 +129,7 @@ export default function CreateQuotePage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Teklif vermek için giriş yapmalısınız.");
+        setError(t("sellerQuoteCreatePage.loginRequired"));
         return;
       }
 
@@ -147,18 +150,22 @@ export default function CreateQuotePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || data?.error || "Teklif gönderilemedi.");
+        setError(
+          data?.message ||
+            data?.error ||
+            t("sellerQuoteCreatePage.submitFailed")
+        );
         return;
       }
 
-      setSuccess("Teklif başarıyla gönderildi.");
+      setSuccess(t("sellerQuoteCreatePage.submitSuccess"));
 
       setTimeout(() => {
         navigate("/seller/quotes");
       }, 1000);
     } catch (err) {
       console.error("QUOTE CREATE ERROR:", err);
-      setError("Teklif gönderilirken hata oluştu.");
+      setError(t("sellerQuoteCreatePage.submitError"));
     } finally {
       setLoading(false);
     }
@@ -168,36 +175,35 @@ export default function CreateQuotePage() {
     <main style={pageStyle}>
       <section style={heroStyle}>
         <Link to="/seller/rfqs" style={backLinkStyle}>
-          ← Gelen taleplere dön
+          {t("sellerQuoteCreatePage.backToRequests")}
         </Link>
 
         <div>
-          <div style={heroBadgeStyle}>SATICI TEKLİF FORMU</div>
+          <div style={heroBadgeStyle}>{t("sellerQuoteCreatePage.heroBadge")}</div>
 
-          <h1 style={heroTitleStyle}>Alıcı talebine teklif verin</h1>
+          <h1 style={heroTitleStyle}>{t("sellerQuoteCreatePage.heroTitle")}</h1>
 
           <p style={heroTextStyle}>
-            Fiyatınızı, teslim sürenizi ve teklif notunuzu girerek alıcıya hızlıca
-            dönüş yapın.
+            {t("sellerQuoteCreatePage.heroDescription")}
           </p>
         </div>
 
         <div style={benefitGridStyle}>
-          <div style={benefitStyle}>✓ Hızlı teklif gönderimi</div>
-          <div style={benefitStyle}>✓ RFQ bazlı satış fırsatı</div>
-          <div style={benefitStyle}>✓ Siparişe dönüşen teklif akışı</div>
+          <div style={benefitStyle}>{t("sellerQuoteCreatePage.benefitFast")}</div>
+          <div style={benefitStyle}>{t("sellerQuoteCreatePage.benefitRfq")}</div>
+          <div style={benefitStyle}>{t("sellerQuoteCreatePage.benefitOrder")}</div>
         </div>
       </section>
 
       <section style={cardStyle}>
         <div style={cardHeaderStyle}>
           <div>
-            <div style={eyebrowStyle}>TEKLİF BİLGİLERİ</div>
-            <h2 style={titleStyle}>Teklif Ver</h2>
+            <div style={eyebrowStyle}>{t("sellerQuoteCreatePage.eyebrow")}</div>
+            <h2 style={titleStyle}>{t("sellerQuoteCreatePage.title")}</h2>
           </div>
 
           <Link to="/seller/quotes" style={secondaryLinkStyle}>
-            Tekliflerim
+            {t("sellerQuoteCreatePage.myQuotes")}
           </Link>
         </div>
 
@@ -205,23 +211,22 @@ export default function CreateQuotePage() {
         {success && <div style={successStyle}>{success}</div>}
 
         <label style={fieldStyle}>
-          <span style={labelStyle}>RFQ ID</span>
+          <span style={labelStyle}>{t("sellerQuoteCreatePage.rfqId")}</span>
           <input
             style={inputStyle}
             value={rfqId}
             onChange={(e) => setRfqId(e.target.value)}
-            placeholder="RFQ ID"
+            placeholder={t("sellerQuoteCreatePage.rfqId")}
           />
         </label>
 
         <div style={aiBoxStyle}>
-          <div style={aiBadgeStyle}>✨ AI DESTEKLİ</div>
+          <div style={aiBadgeStyle}>{t("sellerQuoteCreatePage.aiBadge")}</div>
 
-          <h3 style={aiTitleStyle}>AI ile Teklif Hazırla</h3>
+          <h3 style={aiTitleStyle}>{t("sellerQuoteCreatePage.aiTitle")}</h3>
 
           <p style={aiTextStyle}>
-            AI, alıcının talebini analiz ederek teslim süresi ve profesyonel
-            teklif notu hazırlasın. Fiyatı siz belirleyin.
+            {t("sellerQuoteCreatePage.aiDescription")}
           </p>
 
           <button
@@ -234,50 +239,57 @@ export default function CreateQuotePage() {
               cursor: aiLoading ? "not-allowed" : "pointer",
             }}
           >
-            {aiLoading ? "AI hazırlanıyor..." : "✨ AI ile Teklif Hazırla"}
+            {aiLoading
+              ? t("sellerQuoteCreatePage.aiLoading")
+              : t("sellerQuoteCreatePage.aiButton")}
           </button>
         </div>
 
         <div style={gridStyle}>
           <label style={fieldStyle}>
-            <span style={labelStyle}>Birim Fiyat (₺) *</span>
+            <span style={labelStyle}>{t("sellerQuoteCreatePage.unitPrice")}</span>
             <input
               type="number"
               style={inputStyle}
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              placeholder="Örn: 250"
+              placeholder={t("sellerQuoteCreatePage.pricePlaceholder")}
             />
           </label>
 
           <label style={fieldStyle}>
-            <span style={labelStyle}>Teslim Süresi (Gün) *</span>
+            <span style={labelStyle}>{t("sellerQuoteCreatePage.deliveryDays")}</span>
             <input
               type="number"
               min="1"
               style={inputStyle}
               value={days}
               onChange={(e) => setDays(e.target.value)}
-              placeholder="Örn: 3"
+              placeholder={t("sellerQuoteCreatePage.daysPlaceholder")}
             />
           </label>
         </div>
 
         <label style={fieldStyle}>
-          <span style={labelStyle}>Satıcı Notu</span>
+          <span style={labelStyle}>{t("sellerQuoteCreatePage.sellerNote")}</span>
           <textarea
             style={textareaStyle}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Stok durumu, teslimat koşulları, minimum sipariş veya özel açıklamalar..."
+            placeholder={t("sellerQuoteCreatePage.notePlaceholder")}
           />
         </label>
 
         <div style={summaryBoxStyle}>
-          <strong>Teklif Özeti</strong>
+          <strong>{t("sellerQuoteCreatePage.summary")}</strong>
           <span>
-            {price ? `${Number(price).toLocaleString("tr-TR")} ₺` : "Fiyat girilmedi"} ·{" "}
-            {days || "-"} gün teslim
+            {price
+              ? `${Number(price).toLocaleString(locale)} ₺`
+              : t("sellerQuoteCreatePage.noPrice")}{" "}
+            ·{" "}
+            {t("sellerQuoteCreatePage.deliverySummary", {
+              days: days || "-",
+            })}
           </span>
         </div>
 
@@ -290,7 +302,9 @@ export default function CreateQuotePage() {
             cursor: loading ? "not-allowed" : "pointer",
           }}
         >
-          {loading ? "Gönderiliyor..." : "Teklifi Gönder"}
+          {loading
+            ? t("sellerQuoteCreatePage.sending")
+            : t("sellerQuoteCreatePage.submit")}
         </button>
       </section>
     </main>

@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type PageContent = {
   title: string;
@@ -8,54 +9,43 @@ type PageContent = {
   content: ReactNode;
 };
 
-const pages: Record<string, PageContent> = {
+const buildPages = (t: (key: string) => string): Record<string, PageContent> => ({
   "/hakkimizda": {
-    title: "Hakkımızda",
-    description:
-      "Tedarik Pazarı, işletmeleri güvenilir tedarikçilerle buluşturan B2B teklif ve sipariş platformudur.",
+    title: t("corporatePage.about.title"),
+    description: t("corporatePage.about.description"),
     content: (
       <>
-        <h2>Tedarik süreçlerini kolaylaştırıyoruz</h2>
+        <h2>{t("corporatePage.about.processTitle")}</h2>
         <p>
-          Tedarik Pazarı; alıcı işletmelerin ihtiyaç duydukları ürünler için
-          talep oluşturmasını, satıcıların teklif vermesini ve ticaret
-          sürecinin güvenli biçimde yürütülmesini sağlayan B2B pazaryeridir.
+          {t("corporatePage.about.processText")}
         </p>
 
-        <h2>Nasıl çalışır?</h2>
+        <h2>{t("corporatePage.about.howTitle")}</h2>
         <p>
-          Alıcı ürün veya tedarik talebi oluşturur. Uygun satıcılar fiyat,
-          teslim süresi ve açıklamalarını içeren teklifler gönderir. Alıcı
-          uygun teklifi seçer ve sipariş oluşturulur.
+          {t("corporatePage.about.howText")}
         </p>
 
-        <h2>Güvenli ticaret</h2>
+        <h2>{t("corporatePage.about.safeTitle")}</h2>
         <p>
-          Ödeme, sipariş tamamlanana kadar güvenli ödeme altyapısı üzerinden
-          korunur. Teslimat onayından sonra satıcının hak edişi bakiyesine
-          aktarılır.
+          {t("corporatePage.about.safeText")}
         </p>
 
-        <h2>Vizyonumuz</h2>
+        <h2>{t("corporatePage.about.visionTitle")}</h2>
         <p>
-          Türkiye’deki işletmelerin daha hızlı, şeffaf ve güvenilir tedarik
-          ilişkileri kurmasını sağlayan güçlü bir dijital ticaret ağı
-          oluşturmaktır.
+          {t("corporatePage.about.visionText")}
         </p>
       </>
     ),
   },
 
   "/iletisim": {
-    title: "İletişim",
-    description:
-      "Tedarik Pazarı destek ve iletişim bilgileri.",
+    title: t("corporatePage.contact.title"),
+    description: t("corporatePage.contact.description"),
     content: (
       <>
-        <h2>Bizimle iletişime geçin</h2>
+        <h2>{t("corporatePage.contact.contactTitle")}</h2>
         <p>
-          Üyelik, firma onayı, ürünler, teklifler, siparişler ve ödeme
-          süreçleri hakkında destek alabilirsiniz.
+          {t("corporatePage.contact.contactText")}
         </p>
 
         <div
@@ -69,7 +59,7 @@ const pages: Record<string, PageContent> = {
             background: "#eff6ff",
           }}
         >
-          <strong>E-posta</strong>
+          <strong>{t("corporatePage.contact.email")}</strong>
           <a
             href="mailto:tedarikpazari34@gmail.com"
             style={{
@@ -82,9 +72,9 @@ const pages: Record<string, PageContent> = {
           </a>
         </div>
 
-        <h2>Sosyal medya</h2>
+        <h2>{t("corporatePage.contact.socialTitle")}</h2>
         <p>
-          Tedarik Pazarı'nı sosyal medya hesaplarımızdan da takip edebilirsiniz.
+          {t("corporatePage.contact.socialText")}
         </p>
 
         <div
@@ -147,77 +137,68 @@ const pages: Record<string, PageContent> = {
           </a>
         </div>
 
-        <h2>Destek talebinizde bulunması gerekenler</h2>
+        <h2>{t("corporatePage.contact.supportTitle")}</h2>
         <p>
-          Daha hızlı yardımcı olabilmemiz için firma adınızı, hesabınızda
-          kullandığınız e-posta adresini ve yaşadığınız sorunun kısa
-          açıklamasını paylaşın.
+          {t("corporatePage.contact.supportText")}
         </p>
 
-        <h2>Yasal İşletme Bilgileri</h2>
+        <h2>{t("corporatePage.contact.legalTitle")}</h2>
         <div style={{ margin: "20px 0 28px", padding: 22, borderRadius: 16, background: "#f8fafc", border: "1px solid #e2e8f0" }}>
-          <p><strong>İşletme / Marka:</strong> Tedarik Pazarı</p>
-          <p><strong>E-posta:</strong> tedarikpazari34@gmail.com</p>
+          <p><strong>{t("corporatePage.contact.businessBrand")}</strong> Tedarik Pazarı</p>
+          <p><strong>{t("corporatePage.contact.email")}:</strong> tedarikpazari34@gmail.com</p>
         </div>
 
-        <h2>Güvenlik uyarısı</h2>
+        <h2>{t("corporatePage.contact.securityTitle")}</h2>
         <p>
-          Şifrenizi, kart bilgilerinizi veya tek kullanımlık doğrulama
-          kodlarınızı hiçbir destek mesajında paylaşmayın.
+          {t("corporatePage.contact.securityText")}
         </p>
       </>
     ),
   },
 
   "/yardim": {
-    title: "Yardım Merkezi",
-    description:
-      "Tedarik Pazarı üyelik, RFQ, teklif, sipariş ve ödeme yardım merkezi.",
+    title: t("corporatePage.help.title"),
+    description: t("corporatePage.help.description"),
     content: (
       <>
-        <h2>Nasıl üye olurum?</h2>
+        <h2>{t("corporatePage.help.membershipTitle")}</h2>
         <p>
-          Üyelik sayfasından alıcı veya satıcı rolünü seçerek firma
-          bilgilerinizi girin. Firma hesabınız yönetici kontrolünden sonra
-          aktif hale gelir.
+          {t("corporatePage.help.membershipText")}
         </p>
 
-        <h2>Nasıl teklif alırım?</h2>
+        <h2>{t("corporatePage.help.quoteTitle")}</h2>
         <p>
-          Ürünü seçerek miktar ve talep notunuzu girin. Satıcı tarafından
-          gönderilen teklifleri talep detay sayfasından karşılaştırabilirsiniz.
+          {t("corporatePage.help.quoteText")}
         </p>
 
-        <h2>Satıcı nasıl teklif verir?</h2>
+        <h2>{t("corporatePage.help.sellerQuoteTitle")}</h2>
         <p>
-          Satıcı panelindeki gelen talepler bölümünden birim fiyat, teslim
-          süresi ve teklif notu girilerek teklif gönderilir.
+          {t("corporatePage.help.sellerQuoteText")}
         </p>
 
-        <h2>Ödeme nasıl çalışır?</h2>
+        <h2>{t("corporatePage.help.paymentTitle")}</h2>
         <p>
-          Kabul edilen teklif siparişe dönüştürülür. Ödeme güvenli ödeme
-          ekranından tamamlanır ve sipariş teslim edilene kadar korunur.
+          {t("corporatePage.help.paymentText")}
         </p>
 
-        <h2>Para çekme talebi nasıl oluşturulur?</h2>
+        <h2>{t("corporatePage.help.payoutTitle")}</h2>
         <p>
-          Satıcı, tamamlanan siparişlerden kazandığı kullanılabilir bakiyeyi
-          Cüzdanım sayfasından IBAN hesabına çekmek için talep oluşturabilir.
+          {t("corporatePage.help.payoutText")}
         </p>
 
-        <h2>Uyuşmazlık yaşarsam ne yapmalıyım?</h2>
+        <h2>{t("corporatePage.help.disputeTitle")}</h2>
         <p>
-          İlgili sipariş üzerinden uyuşmazlık oluşturabilir ve açıklamanızı
-          platform yönetimine iletebilirsiniz.
+          {t("corporatePage.help.disputeText")}
         </p>
       </>
     ),
   },
-};
+});
 
 export default function CorporatePage() {
+  const { t } = useTranslation();
   const location = useLocation();
+  const pages = buildPages(t);
   const page = pages[location.pathname] || pages["/hakkimizda"];
 
   return (
@@ -233,10 +214,10 @@ export default function CorporatePage() {
 
       <article style={cardStyle}>
         <Link to="/" style={backStyle}>
-          ← Ana sayfaya dön
+          {t("corporatePage.backHome")}
         </Link>
 
-        <div style={eyebrowStyle}>TEDARİK PAZARI</div>
+        <div style={eyebrowStyle}>{t("corporatePage.brand")}</div>
         <h1 style={titleStyle}>{page.title}</h1>
 
         <div style={contentStyle}>{page.content}</div>

@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   ResponsiveContainer,
@@ -83,21 +84,24 @@ type AdminMetrics = {
 const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
-function formatMoney(value: number | string) {
-  return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;
+function formatMoney(value: number | string, locale: string) {
+  return `${Number(value || 0).toLocaleString(locale)} ₺`;
 }
 
-function statusLabel(status?: string) {
-  if (status === "PENDING_PAYMENT") return "Ödeme Bekliyor";
-  if (status === "PAID") return "Ödendi";
-  if (status === "PREPARING") return "Hazırlanıyor";
-  if (status === "SHIPPED") return "Kargoda";
-  if (status === "COMPLETED") return "Tamamlandı";
-  if (status === "OPEN") return "Açık";
+function statusLabel(status: string | undefined, t: any) {
+  if (status === "PENDING_PAYMENT") return t("adminDashboardPage.statusPendingPayment");
+  if (status === "PAID") return t("adminDashboardPage.statusPaid");
+  if (status === "PREPARING") return t("adminDashboardPage.statusPreparing");
+  if (status === "SHIPPED") return t("adminDashboardPage.statusShipped");
+  if (status === "COMPLETED") return t("adminDashboardPage.statusCompleted");
+  if (status === "OPEN") return t("adminDashboardPage.statusOpen");
   return status || "-";
 }
 
 export default function AdminDashboardPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [rfqs, setRfqs] = useState<RFQ[]>([]);
   const [loading, setLoading] = useState(true);
@@ -112,7 +116,7 @@ export default function AdminDashboardPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Admin panelini görmek için giriş yapmalısınız.");
+        setError(t("adminDashboardPage.loginRequired"));
         return;
       }
 
@@ -146,7 +150,7 @@ export default function AdminDashboardPage() {
       const rfqsData = await rfqsRes.json();
 
       if (!ordersRes.ok) {
-        setError(ordersData?.message || "Siparişler alınamadı");
+        setError(ordersData?.message || t("adminDashboardPage.ordersLoadFailed"));
         setOrders([]);
       } else {
         const safeOrders = Array.isArray(ordersData)
@@ -165,7 +169,7 @@ export default function AdminDashboardPage() {
       }
     } catch (err) {
       console.error("ADMIN DASHBOARD ERROR:", err);
-      setError("Admin verileri alınamadı");
+      setError(t("adminDashboardPage.dataLoadFailed"));
       setOrders([]);
       setRfqs([]);
     } finally {
@@ -197,7 +201,7 @@ export default function AdminDashboardPage() {
   const totalOrders = metrics?.totalOrders ?? orders.length;
   const revenueData = [
     {
-      name: "Sipariş",
+      name: t("adminDashboardPage.chartOrder"),
       revenue: totalRevenue,
       commission: totalCommission,
     },
@@ -207,15 +211,15 @@ export default function AdminDashboardPage() {
 
   const orderStatusData = [
     {
-      name: "Ödendi",
+      name: t("adminDashboardPage.chartPaid"),
       value: paidOrders,
     },
     {
-      name: "Tamamlandı",
+      name: t("adminDashboardPage.chartCompleted"),
       value: completedOrders,
     },
     {
-      name: "Diğer",
+      name: t("adminDashboardPage.chartOther"),
       value: orders.length - paidOrders - completedOrders,
     },
   ];
@@ -237,7 +241,7 @@ export default function AdminDashboardPage() {
             flex: 1,
           }}
         >
-          <div style={emptyCardStyle}>Admin verileri yükleniyor...</div>
+          <div style={emptyCardStyle}>{t("adminDashboardPage.loading")}</div>
         </main>
       </div>
     );
@@ -260,20 +264,19 @@ export default function AdminDashboardPage() {
       >
         <section style={heroStyle}>
           <div>
-            <div style={eyebrowStyle}>ADMIN PANELİ</div>
+            <div style={eyebrowStyle}>{t("adminDashboardPage.eyebrow")}</div>
 
-            <h1 style={titleStyle}>Platform Dashboard</h1>
+            <h1 style={titleStyle}>{t("adminDashboardPage.title")}</h1>
 
             <p style={descStyle}>
-              RFQ, sipariş, işlem hacmi ve platform komisyonlarını tek ekrandan
-              takip edin.
+              {t("adminDashboardPage.description")}
             </p>
           </div>
 
           <div style={heroAmountStyle}>
-            <span>Toplam Hacim</span>
+            <span>{t("adminDashboardPage.totalVolume")}</span>
 
-            <strong>{formatMoney(totalRevenue)}</strong>
+            <strong>{formatMoney(totalRevenue, locale)}</strong>
           </div>
         </section>
 
@@ -281,44 +284,45 @@ export default function AdminDashboardPage() {
 
         <section style={priorityStatsStyle}>
           <PriorityStat
-            label="Onay Bekleyen Firma"
+            label={t("adminDashboardPage.pendingCompany")}
             value={overview?.companies.pending ?? 0}
             to="/admin/companies"
             tone="warning"
           />
 
           <PriorityStat
-            label="Onay Bekleyen Ürün"
+            label={t("adminDashboardPage.pendingProduct")}
             value={overview?.marketplace.productsPending ?? 0}
             to="/admin/products"
             tone="warning"
           />
 
           <PriorityStat
-            label="Açık Anlaşmazlık"
+            label={t("adminDashboardPage.openDispute")}
             value={overview?.marketplace.disputesOpen ?? 0}
             to="/admin/disputes"
             tone="danger"
           />
 
           <PriorityStat
-            label="Bekleyen Satıcı Ödemesi"
+            label={t("adminDashboardPage.pendingPayout")}
             value={overview?.marketplace.payoutsPending ?? 0}
             to="/admin/payouts"
             tone="money"
           />
 
           <PriorityStat
-            label="Toplam Sipariş"
+            label={t("adminDashboardPage.totalOrders")}
             value={overview?.orders.total ?? totalOrders}
             to="/admin/finance"
             tone="info"
           />
 
           <PriorityStat
-            label="Escrow İşlem Hacmi"
+            label={t("adminDashboardPage.escrowVolume")}
             value={formatMoney(
               overview?.finance.escrowDepositedTotal ?? totalRevenue,
+              locale,
             )}
             to="/admin/finance"
             tone="money"
@@ -326,69 +330,69 @@ export default function AdminDashboardPage() {
         </section>
 
         <section style={statsStyle}>
-          <Stat label="Toplam RFQ" value={metrics?.totalRfqs ?? rfqs.length} />
+          <Stat label={t("adminDashboardPage.totalRfqs")} value={metrics?.totalRfqs ?? rfqs.length} />
 
-          <Stat label="Aktif RFQ" value={activeRfqs} />
+          <Stat label={t("adminDashboardPage.activeRfqs")} value={activeRfqs} />
 
-          <Stat label="Toplam Sipariş" value={totalOrders} />
+          <Stat label={t("adminDashboardPage.totalOrders")} value={totalOrders} />
 
-          <Stat label="Ödenen Sipariş" value={paidOrders} />
+          <Stat label={t("adminDashboardPage.paidOrders")} value={paidOrders} />
 
-          <Stat label="Tamamlanan" value={completedOrders} />
+          <Stat label={t("adminDashboardPage.completed")} value={completedOrders} />
 
           <Stat
-            label="Komisyon"
-            value={formatMoney(totalCommission)}
+            label={t("adminDashboardPage.commission")}
+            value={formatMoney(totalCommission, locale)}
             highlight
           />
-          <Stat label="Şirketler" value={metrics?.totalCompanies ?? "-"} />
-          <Stat label="Ürünler" value={metrics?.totalProducts ?? "-"} />
-          <Stat label="Dispute" value={metrics?.disputes ?? "-"} />
+          <Stat label={t("adminDashboardPage.companies")} value={metrics?.totalCompanies ?? "-"} />
+          <Stat label={t("adminDashboardPage.products")} value={metrics?.totalProducts ?? "-"} />
+          <Stat label={t("adminDashboardPage.disputes")} value={metrics?.disputes ?? "-"} />
         </section>
 
         <section style={quickActionsStyle}>
           <Link to="/admin/companies" style={actionCardStyle}>
-            <strong>Şirket Onayları</strong>
+            <strong>{t("adminDashboardPage.companyApprovals")}</strong>
 
-            <span>Firma ve kullanıcı kayıtlarını incele</span>
+            <span>{t("adminDashboardPage.companyApprovalsText")}</span>
           </Link>
 
           <Link to="/admin/products" style={actionCardStyle}>
-            <strong>Ürün Yönetimi</strong>
+            <strong>{t("adminDashboardPage.productManagement")}</strong>
 
-            <span>Bekleyen ürünleri onayla</span>
+            <span>{t("adminDashboardPage.productManagementText")}</span>
           </Link>
           <Link to="/admin/chat-moderation" style={actionCardStyle}>
-            <strong>Chat Moderation</strong>
+            <strong>{t("adminDashboardPage.chatModeration")}</strong>
             <span>
-              Şüpheli mesajları ve platform dışı iletişim denemelerini incele
+              {t("adminDashboardPage.chatModerationText")}
             </span>
           </Link>
           <Link to="/admin/payouts" style={actionCardStyle}>
-            <strong>Payout Yönetimi</strong>
+            <strong>{t("adminDashboardPage.payoutManagement")}</strong>
 
-            <span>Satıcı ödeme taleplerini yönet</span>
+            <span>{t("adminDashboardPage.payoutManagementText")}</span>
           </Link>
 
           <Link to="/admin/disputes" style={actionCardStyle}>
-            <strong>Dispute Yönetimi</strong>
+            <strong>{t("adminDashboardPage.disputeManagement")}</strong>
 
-            <span>Escrow dispute süreçlerini çöz</span>
+            <span>{t("adminDashboardPage.disputeManagementText")}</span>
           </Link>
 
           <Link to="/admin/finance" style={actionCardStyle}>
-            <strong>Finans Dashboard</strong>
+            <strong>{t("adminDashboardPage.financeDashboard")}</strong>
 
-            <span>Ledger ve işlem geçmişini görüntüle</span>
+            <span>{t("adminDashboardPage.financeDashboardText")}</span>
           </Link>
         </section>
         <section style={chartGridStyle}>
           <div style={chartCardStyle}>
             <div style={chartHeaderStyle}>
               <div>
-                <div style={eyebrowDarkStyle}>GELİR ANALİTİĞİ</div>
+                <div style={eyebrowDarkStyle}>{t("adminDashboardPage.revenueAnalytics")}</div>
 
-                <h2 style={sectionTitleStyle}>Platform Geliri</h2>
+                <h2 style={sectionTitleStyle}>{t("adminDashboardPage.platformRevenue")}</h2>
               </div>
             </div>
 
@@ -432,9 +436,9 @@ export default function AdminDashboardPage() {
           <div style={chartCardStyle}>
             <div style={chartHeaderStyle}>
               <div>
-                <div style={eyebrowDarkStyle}>SİPARİŞ DURUMU</div>
+                <div style={eyebrowDarkStyle}>{t("adminDashboardPage.orderStatus")}</div>
 
-                <h2 style={sectionTitleStyle}>Sipariş Dağılımı</h2>
+                <h2 style={sectionTitleStyle}>{t("adminDashboardPage.orderDistribution")}</h2>
               </div>
             </div>
 
@@ -463,26 +467,26 @@ export default function AdminDashboardPage() {
         <section style={tableSectionStyle}>
           <div style={sectionHeaderStyle}>
             <div>
-              <div style={eyebrowDarkStyle}>SON HAREKETLER</div>
+              <div style={eyebrowDarkStyle}>{t("adminDashboardPage.latestActivity")}</div>
 
-              <h2 style={sectionTitleStyle}>Son Siparişler</h2>
+              <h2 style={sectionTitleStyle}>{t("adminDashboardPage.latestOrders")}</h2>
             </div>
           </div>
 
           {orders.length === 0 ? (
-            <div style={emptyTableStyle}>Sipariş yok.</div>
+            <div style={emptyTableStyle}>{t("adminDashboardPage.noOrders")}</div>
           ) : (
             <div style={tableStyle}>
               {orders.slice(0, 10).map((order) => (
                 <div key={order.id} style={rowStyle}>
                   <span style={orderIdStyle}>#{order.id.slice(0, 8)}</span>
 
-                  <span>{formatMoney(order.totalAmount || 0)}</span>
+                  <span>{formatMoney(order.totalAmount || 0, locale)}</span>
 
-                  <span>{formatMoney(order.commissionAmount || 0)}</span>
+                  <span>{formatMoney(order.commissionAmount || 0, locale)}</span>
 
                   <span style={statusPillStyle}>
-                    {statusLabel(order.status)}
+                    {statusLabel(order.status, t)}
                   </span>
                 </div>
               ))}
@@ -505,6 +509,8 @@ function PriorityStat({
   to: string;
   tone: "warning" | "danger" | "money" | "info";
 }) {
+  const { t } = useTranslation();
+
   const tones = {
     warning: {
       background: "#fffbeb",
@@ -542,7 +548,7 @@ function PriorityStat({
     >
       <span style={priorityStatLabelStyle}>{label}</span>
       <strong style={priorityStatValueStyle}>{value}</strong>
-      <span style={priorityStatLinkStyle}>Yönet →</span>
+      <span style={priorityStatLinkStyle}>{t("adminDashboardPage.manage")}</span>
     </Link>
   );
 }

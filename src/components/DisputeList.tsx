@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const API = "https://tedarik-backend.onrender.com/api";
 
@@ -26,6 +27,8 @@ export default function DisputeList({
   disputes,
   panelCardStyle,
 }: Props) {
+  const { t } = useTranslation();
+
   const uploadFile = async (
     disputeId: string,
     e: React.ChangeEvent<HTMLInputElement>,
@@ -48,7 +51,7 @@ export default function DisputeList({
       const uploadData = await uploadRes.json();
 
       if (!uploadRes.ok) {
-        alert(uploadData.message || "Dosya yüklenemedi");
+        alert(uploadData.message || t("disputeList.uploadFailed"));
         return;
       }
 
@@ -69,41 +72,41 @@ export default function DisputeList({
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Dosya eklenemedi");
+        alert(data.message || t("disputeList.attachFailed"));
         return;
       }
 
-      alert("✅ Dosya eklendi");
+      alert(t("disputeList.attachSuccess"));
 
       // Sayfayı yenilemek yerine sonra state güncelleyeceğiz.
       window.location.reload();
     } catch (err) {
       console.error(err);
-      alert("Hata oluştu");
+      alert(t("disputeList.genericError"));
     }
   };
 
   return (
     <>
-      <h2>Disputes</h2>
+      <h2>{t("disputeList.title")}</h2>
 
       {disputes.map((d) => (
         <div key={d.id} style={panelCardStyle}>
           <div>
-            <strong>Order:</strong> {d.orderId}
+            <strong>{t("disputeList.order")}:</strong> {d.orderId}
           </div>
 
           <div>
-            <strong>Sebep:</strong> {d.reason}
+            <strong>{t("disputeList.reason")}:</strong> {d.reason}
           </div>
 
           <div>
-            <strong>Durum:</strong> {d.status}
+            <strong>{t("disputeList.status")}:</strong> {d.status}
           </div>
 
           {d.description && (
             <div>
-              <strong>Açıklama:</strong> {d.description}
+              <strong>{t("disputeList.description")}:</strong> {d.description}
             </div>
           )}
 
@@ -117,7 +120,7 @@ export default function DisputeList({
 
           {d.files && d.files.length > 0 && (
             <div style={{ marginTop: 10 }}>
-              <strong>Ekler</strong>
+              <strong>{t("disputeList.attachments")}</strong>
 
               {d.files.map((f) => (
                 <div key={f.id}>
@@ -126,7 +129,7 @@ export default function DisputeList({
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {f.fileName || "Dosyayı Aç"}
+                    {f.fileName || t("disputeList.openFile")}
                   </a>
                 </div>
               ))}

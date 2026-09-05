@@ -1,27 +1,15 @@
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type Sector = {
   title: string;
   image: string;
 };
 
-type Highlight = {
-  title: string;
-  description: string;
-};
 
-type StepItem = {
-  step: string;
-  title: string;
-  description: string;
-};
 
-type StatItem = {
-  value: string;
-  label: string;
-};
 
 type ProductCategory = {
   id?: string;
@@ -77,80 +65,9 @@ const sectors: Sector[] = [
   { title: "Lojistik ve Depolama", image: "/images/category-lojistik-ai.png" },
 ];
 
-const highlights: Highlight[] = [
-  {
-    title: "Belgeyle firma doğrulama",
-    description:
-      "Doğrulama başvurusu yapan firmalar belgelerini iletebilir ve kontrol sonrasında doğrulanmış firma rozeti alabilir.",
-  },
-  {
-    title: "Teklif toplama altyapısı",
-    description:
-      "Tek bir talep üzerinden birden fazla satıcıdan fiyat ve termin alın.",
-  },
-  {
-    title: "Kategori bazlı keşif",
-    description:
-      "Temizlikten ambalaja, gıdadan sanayiye kadar geniş tedarik ağına ulaşın.",
-  },
-  {
-    title: "Kurumsal satın alma deneyimi",
-    description:
-      "Ürün, teklif ve tedarik sürecinizi tek panelden daha verimli yönetin.",
-  },
-];
 
-const steps: StepItem[] = [
-  {
-    step: "1",
-    title: "İhtiyacını ara",
-    description:
-      "Ürün veya kategori bazında ihtiyacına uygun tedarik seçeneklerini hızlıca bul.",
-  },
-  {
-    step: "2",
-    title: "Tedarikçileri karşılaştır",
-    description:
-      "Fiyat, minimum sipariş, teslim süresi ve güven durumuna göre en doğru seçimi yap.",
-  },
-  {
-    step: "3",
-    title: "Teklif al ve yönet",
-    description:
-      "RFQ ile teklif topla, süreci takip et ve kurumsal satın almanı tek yerden yönet.",
-  },
-];
 
-const fallbackFeaturedProducts: ProductCard[] = [
-  {
-    id: "fallback-1",
-    title: "Endüstriyel Koli Bandı",
-    category: "Ambalaj",
-    price: "₺100+",
-    image: "/images/product-1.jpg",
-  },
-  {
-    id: "fallback-2",
-    title: "Hijyenik Kağıt Ürünleri",
-    category: "Temizlik",
-    price: "₺250+",
-    image: "/images/product-2.jpg",
-  },
-  {
-    id: "fallback-3",
-    title: "LED Armatür Seti",
-    category: "Elektrik",
-    price: "₺450+",
-    image: "/images/product-3.jpg",
-  },
-];
 
-const statItems: StatItem[] = [
-  { value: "🛡️", label: "Güvenli B2B Ticaret" },
-  { value: "📄", label: "RFQ ile Teklif Toplama" },
-  { value: "💳", label: "Güvenli Ödeme Sistemi" },
-  { value: "🚚", label: "Sipariş ve Teslimat Takibi" },
-];
 
 const primaryButtonStyle: React.CSSProperties = {
   textDecoration: "none",
@@ -172,7 +89,7 @@ const secondaryButtonStyle: React.CSSProperties = {
   boxShadow: "0 10px 24px rgba(15, 23, 42, 0.16)",
 };
 
-function formatPrice(value?: number | string, fallback = "Teklif Al"): string {
+function formatPrice(value: number | string | undefined, fallback: string): string {
   if (value === undefined || value === null || value === "") return fallback;
 
   if (typeof value === "number") return `₺${value}`;
@@ -183,7 +100,7 @@ function formatPrice(value?: number | string, fallback = "Teklif Al"): string {
   return String(value);
 }
 
-function getCategoryName(product: ApiProduct): string {
+function getCategoryName(product: ApiProduct, fallback: string): string {
   if (typeof product.category === "string" && product.category.trim()) {
     return product.category;
   }
@@ -199,7 +116,7 @@ function getCategoryName(product: ApiProduct): string {
 
   if (product.categoryName) return product.categoryName;
 
-  return "Kategori";
+  return fallback;
 }
 
 function getImageUrl(product: ApiProduct): string {
@@ -242,12 +159,12 @@ function getImageUrl(product: ApiProduct): string {
   return "/images/product-1.jpg";
 }
 
-function mapApiProductToCard(product: ApiProduct): ProductCard {
+function mapApiProductToCard(product: ApiProduct, fallbackCategory: string, fallbackProduct: string, fallbackQuote: string): ProductCard {
   return {
     id: product.id,
-    title: product.title || product.name || "Ürün",
-    category: getCategoryName(product),
-    price: formatPrice(product.price ?? product.basePrice),
+    title: product.title || product.name || fallbackProduct,
+    category: getCategoryName(product, fallbackCategory),
+    price: formatPrice(product.price ?? product.basePrice, fallbackQuote),
     image: getImageUrl(product),
     moq: product.moq,
     unitType: product.unitType,
@@ -256,6 +173,7 @@ function mapApiProductToCard(product: ApiProduct): ProductCard {
 }
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] =
   useState<ProductCard[]>([]);
@@ -292,7 +210,12 @@ export default function HomePage() {
               return true;
             })
             .slice(0, 8)
-            .map(mapApiProductToCard);
+            .map((product) => mapApiProductToCard(
+              product,
+              t("homePage.categoryFallback"),
+              t("homePage.productFallback"),
+              t("homePage.getQuote")
+            ));
 
           setFeaturedProducts(mapped);
         }
@@ -306,17 +229,17 @@ export default function HomePage() {
     <>
       <Helmet>
         <title>
-          Tedarik Pazarı | İşletmeler için B2B Toptan Tedarik Platformu
+          {t("homePage.seoTitle")}
         </title>
         <meta
           name="description"
-          content="Tedarik Pazarı ile işletmeniz için toptan ürünleri keşfedin, tedarikçilerden teklif alın ve B2B satın alma sürecinizi tek platformdan yönetin."
+          content={t("homePage.seoDescription")}
         />
         <link rel="canonical" href="https://xn--tedarikpazar-d5b.com/" />
         <meta property="og:title" content="Tedarik Pazarı" />
         <meta
           property="og:description"
-          content="İşletmeler için güvenli ve hızlı B2B tedarik platformu."
+          content={t("homePage.ogDescription")}
         />
         <meta property="og:url" content="https://xn--tedarikpazar-d5b.com/" />
         <meta property="og:type" content="website" />
@@ -383,7 +306,7 @@ export default function HomePage() {
                     border: "1px solid rgba(255,255,255,0.18)",
                   }}
                 >
-                  TÜRKİYE B2B MARKETPLACE
+                  {t("homePage.heroBadge")}
                 </div>
 
                 <h1
@@ -396,7 +319,7 @@ export default function HomePage() {
                     textShadow: "0 8px 30px rgba(0,0,0,0.38)",
                   }}
                 >
-                  Tedarik Aramayı Bırakın. Teklifler Size Gelsin
+                  {t("homePage.heroTitle")}
                 </h1>
 
                 <p
@@ -408,9 +331,7 @@ export default function HomePage() {
                     color: "rgba(255,255,255,0.96)",
                   }}
                 >
-                  İhtiyacınızı yayınlayın, uygun firmalardan gelen teklifleri
-                  tek ekranda karşılaştırın. Satıcıysanız yeni satın alma taleplerine
-                  ulaşın ve işletmeniz için yeni iş fırsatları oluşturun.
+                  {t("homePage.heroDescription")}
                 </p>
                 <div style={{ marginBottom: 14, maxWidth: 650 }}>
                   <div
@@ -421,7 +342,7 @@ export default function HomePage() {
                       color: "#ffffff",
                     }}
                   >
-                    İşletmeniz için neye ihtiyacınız var?
+                    {t("homePage.heroQuestion")}
                   </div>
 
                   <div
@@ -431,8 +352,7 @@ export default function HomePage() {
                       color: "#dbeafe",
                     }}
                   >
-                    Ürün, kategori veya tedarikçi arayın; dilerseniz ihtiyacınızı
-                    yayınlayıp teklif toplayın.
+                    {t("homePage.heroSearchDescription")}
                   </div>
                 </div>
 
@@ -456,7 +376,7 @@ export default function HomePage() {
                         );
                       }
                     }}
-                    placeholder="Ürün, kategori veya marka ara..."
+                    placeholder={t("homePage.searchPlaceholder")}
                     style={{
                       flex: "1 1 340px",
                       height: 52,
@@ -492,7 +412,7 @@ export default function HomePage() {
                       cursor: "pointer",
                     }}
                   >
-                    Ürün Ara
+                    {t("homePage.searchButton")}
                   </button>
                 </div>
 
@@ -503,7 +423,7 @@ export default function HomePage() {
                     marginBottom: 20,
                   }}
                 >
-                  Aradığınız ürünü bulamadınız mı?{" "}
+                  {t("homePage.productNotFound")}{" "}
                   <Link
                     to="/buyer/rfqs/new"
                     style={{
@@ -512,7 +432,7 @@ export default function HomePage() {
                       textDecoration: "underline",
                     }}
                   >
-                    Doğrudan teklif talebi oluşturun
+                    {t("homePage.directRfq")}
                   </Link>
                 </div>
 
@@ -534,7 +454,7 @@ export default function HomePage() {
                       boxSizing: "border-box",
                     }}
                   >
-                    Ücretsiz Teklif Al
+                    {t("homePage.freeQuote")}
                   </Link>
 
                   <Link
@@ -547,7 +467,7 @@ export default function HomePage() {
                       boxSizing: "border-box",
                     }}
                   >
-                    Satıcı Olarak Başla
+                    {t("homePage.startAsSeller")}
                   </Link>
                 </div>
 
@@ -562,10 +482,10 @@ export default function HomePage() {
                   }}
                 >
                   {[
-                    "Belgeyle Doğrulanabilen Firmalar",
-                    "RFQ ile Teklif Toplama",
-                    "Güvenli Ödeme",
-                    "Türkiye Geneli",
+                    t("homePage.badges.verified"),
+                    t("homePage.badges.rfq"),
+                    t("homePage.badges.payment"),
+                    t("homePage.badges.nationwide"),
                   ].map((item) => (
                       <span
                         key={item}
@@ -591,7 +511,12 @@ export default function HomePage() {
                     gap: 12,
                   }}
                 >
-                  {statItems.map((item) => (
+                  {[
+                    { value: "🛡️", label: t("homePage.stats.safeTrade") },
+                    { value: "📄", label: t("homePage.stats.rfq") },
+                    { value: "💳", label: t("homePage.stats.payment") },
+                    { value: "🚚", label: t("homePage.stats.delivery") },
+                  ].map((item) => (
                     <div
                       key={item.label}
                       style={{
@@ -638,7 +563,7 @@ export default function HomePage() {
                   fontSize: isMobile ? 12 : 14,
                 }}
               >
-                ÖNE ÇIKAN AVANTAJLAR
+                {t("homePage.advantagesEyebrow")}
               </div>
 
               <h2
@@ -648,7 +573,7 @@ export default function HomePage() {
                   lineHeight: 1.2,
                 }}
               >
-                Tedarik sürecinizi hızlandırın
+                {t("homePage.advantagesTitle")}
               </h2>
 
               <div
@@ -660,7 +585,24 @@ export default function HomePage() {
                   gap: isMobile ? 9 : 14,
                 }}
               >
-                {highlights.map((item) => (
+                {[
+                  {
+                    title: t("homePage.highlights.verificationTitle"),
+                    description: t("homePage.highlights.verificationDescription"),
+                  },
+                  {
+                    title: t("homePage.highlights.quotesTitle"),
+                    description: t("homePage.highlights.quotesDescription"),
+                  },
+                  {
+                    title: t("homePage.highlights.discoveryTitle"),
+                    description: t("homePage.highlights.discoveryDescription"),
+                  },
+                  {
+                    title: t("homePage.highlights.purchasingTitle"),
+                    description: t("homePage.highlights.purchasingDescription"),
+                  },
+                ].map((item) => (
                   <div
                     key={item.title}
                     style={{
@@ -739,7 +681,7 @@ export default function HomePage() {
                   marginBottom: 8,
                 }}
               >
-                ALICILAR İÇİN
+                {t("homePage.buyerEyebrow")}
               </div>
 
               <h2
@@ -749,7 +691,7 @@ export default function HomePage() {
                   lineHeight: 1.2,
                 }}
               >
-                İhtiyacınızı yayınlayın, teklifler size gelsin
+                {t("homePage.buyerTitle")}
               </h2>
 
               <p
@@ -759,8 +701,7 @@ export default function HomePage() {
                   lineHeight: 1.65,
                 }}
               >
-                Tek tek tedarikçi aramak yerine talebinizi oluşturun,
-                gelen teklifleri fiyat ve teslim süresine göre karşılaştırın.
+                {t("homePage.buyerDescription")}
               </p>
 
               <Link
@@ -775,7 +716,7 @@ export default function HomePage() {
                   fontWeight: 900,
                 }}
               >
-                Teklif Talebi Oluştur
+                {t("homePage.createRfq")}
               </Link>
             </div>
 
@@ -813,7 +754,7 @@ export default function HomePage() {
                   marginBottom: 8,
                 }}
               >
-                SATICILAR İÇİN
+                {t("homePage.sellerEyebrow")}
               </div>
 
               <h2
@@ -823,7 +764,7 @@ export default function HomePage() {
                   lineHeight: 1.2,
                 }}
               >
-                Yeni taleplere ulaşın, satış fırsatlarınızı büyütün
+                {t("homePage.sellerTitle")}
               </h2>
 
               <p
@@ -833,8 +774,7 @@ export default function HomePage() {
                   lineHeight: 1.65,
                 }}
               >
-                Ürünlerinizi yayınlayın, size uygun satın alma taleplerini görün
-                ve teklif vererek yeni müşterilere ulaşın.
+                {t("homePage.sellerDescription")}
               </p>
 
               <Link
@@ -849,7 +789,7 @@ export default function HomePage() {
                   fontWeight: 900,
                 }}
               >
-                Satıcı Olarak Üye Ol
+                {t("homePage.sellerJoin")}
               </Link>
             </div>
           </section>
@@ -881,10 +821,10 @@ export default function HomePage() {
                     marginBottom: 8,
                   }}
                 >
-                  POPÜLER TEDARİK ALANLARI
+                  {t("homePage.popularEyebrow")}
                 </div>
                 <h2 style={{ margin: 0, fontSize: 30 }}>
-                  Sektörlere Göre Keşfedin
+                  {t("homePage.sectorsTitle")}
                 </h2>
               </div>
 
@@ -896,7 +836,7 @@ export default function HomePage() {
                   fontWeight: 700,
                 }}
               >
-                Tüm kategorileri incele
+                {t("homePage.allCategories")}
               </Link>
             </div>
 
@@ -913,7 +853,19 @@ export default function HomePage() {
                 WebkitOverflowScrolling: "touch",
               }}
             >
-              {sectors.map((sector) => (
+              {sectors.map((sector, index) => {
+                const sectorLabel = [
+                  t("homePage.sectors.packaging"),
+                  t("homePage.sectors.cleaning"),
+                  t("homePage.sectors.food"),
+                  t("homePage.sectors.electric"),
+                  t("homePage.sectors.safety"),
+                  t("homePage.sectors.automotive"),
+                  t("homePage.sectors.hardware"),
+                  t("homePage.sectors.logistics"),
+                ][index];
+
+                return (
   <div
     key={sector.title}
     onClick={() =>
@@ -953,14 +905,15 @@ export default function HomePage() {
                         border: "1px solid rgba(56, 189, 248, 0.18)",
                       }}
                     >
-                      {sector.title.charAt(0)}
+                      {sectorLabel.charAt(0)}
                     </div>
                     <div style={{ fontWeight: 700, fontSize: 18 }}>
-                      {sector.title}
+                      {sectorLabel}
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -976,7 +929,23 @@ export default function HomePage() {
               marginBottom: isMobile ? 18 : 28,
             }}
           >
-            {steps.map((item) => (
+            {[
+              {
+                step: "1",
+                title: t("homePage.steps.oneTitle"),
+                description: t("homePage.steps.oneDescription"),
+              },
+              {
+                step: "2",
+                title: t("homePage.steps.twoTitle"),
+                description: t("homePage.steps.twoDescription"),
+              },
+              {
+                step: "3",
+                title: t("homePage.steps.threeTitle"),
+                description: t("homePage.steps.threeDescription"),
+              },
+            ].map((item) => (
               <div
                 key={item.step}
                 style={{
@@ -1045,7 +1014,7 @@ export default function HomePage() {
                   marginBottom: 8,
                 }}
               >
-                GÜVENLİ B2B TİCARET
+                {t("homePage.trustEyebrow")}
               </div>
 
               <h2
@@ -1055,7 +1024,7 @@ export default function HomePage() {
                   lineHeight: 1.2,
                 }}
               >
-                Firma bilgileri paylaşılmadan güvenli ticaret altyapısı
+                {t("homePage.trustTitle")}
               </h2>
 
               <p
@@ -1066,8 +1035,7 @@ export default function HomePage() {
                   fontSize: isMobile ? 13 : 16,
                 }}
               >
-                TedarikPazarı, alıcı ve satıcıların teklif ve sipariş sürecini
-                platform içinde yönetebilmesi için tasarlanmıştır.
+                {t("homePage.trustDescription")}
               </p>
             </div>
 
@@ -1083,18 +1051,18 @@ export default function HomePage() {
               {[
                 {
                   icon: "✓",
-                  title: "Belgeyle Doğrulama",
-                  text: "Firmalar doğrulama belgelerini iletebilir. Kontrol edilen firmalar doğrulanmış firma rozeti kazanır.",
+                  title: t("homePage.trustCards.verificationTitle"),
+                  text: t("homePage.trustCards.verificationText"),
                 },
                 {
                   icon: "🔒",
-                  title: "Platform İçi İletişim",
-                  text: "Teklif ve satın alma süreci boyunca ticari iletişim platform içinde tutulur.",
+                  title: t("homePage.trustCards.communicationTitle"),
+                  text: t("homePage.trustCards.communicationText"),
                 },
                 {
                   icon: "🛡️",
-                  title: "Kontrollü İşlem Akışı",
-                  text: "Teklif, sipariş, ödeme ve teslimat adımları tek sistem üzerinden takip edilir.",
+                  title: t("homePage.trustCards.flowTitle"),
+                  text: t("homePage.trustCards.flowText"),
                 },
               ].map((item) => (
                 <div
@@ -1155,7 +1123,7 @@ export default function HomePage() {
                   fontWeight: 800,
                 }}
               >
-                Ücretsiz Firma Hesabı Oluştur
+                {t("homePage.createFreeCompany")}
               </Link>
             </div>
           </section>
@@ -1182,7 +1150,7 @@ export default function HomePage() {
                 lineHeight: 1.2,
               }}
             >
-              Alıcı veya satıcı olarak ticaret ağınızı büyütün
+              {t("homePage.ctaTitle")}
             </h2>
             <p
               style={{
@@ -1193,8 +1161,7 @@ export default function HomePage() {
                 lineHeight: isMobile ? 1.4 : 1.7,
               }}
             >
-              Alıcı olarak ihtiyaçlarınıza teklif alın; satıcı olarak yeni
-              taleplere ulaşın. Tedarik sürecinizi tek platformdan yönetin.
+              {t("homePage.ctaDescription")}
             </p>
             
             <div
@@ -1221,7 +1188,7 @@ export default function HomePage() {
                   boxSizing: "border-box",
                 }}
               >
-                Ücretsiz Başla
+                {t("homePage.startFree")}
               </Link>
               <Link
                 to="/buyer/rfqs/new"
@@ -1235,7 +1202,7 @@ export default function HomePage() {
                   fontSize: isMobile ? 13 : 16,
                 }}
               >
-                Teklif Talebi Oluştur
+                {t("homePage.createRfq")}
               </Link>
               {!isMobile && (
                 <Link
@@ -1251,7 +1218,7 @@ export default function HomePage() {
                     textAlign: "center",
                   }}
                 >
-                  Ürünleri İncele
+                  {t("homePage.browseProducts")}
                 </Link>
               )}
             </div>

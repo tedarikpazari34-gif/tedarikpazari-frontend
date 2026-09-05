@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 
 const API = "https://tedarik-backend.onrender.com/api/admin";
 const BACKEND = "https://tedarik-backend.onrender.com";
@@ -56,18 +57,18 @@ type Company = {
   }[];
 };
 
-function getRoleLabel(role?: string | null) {
-  if (role === "BUYER") return "Alıcı";
-  if (role === "SELLER") return "Satıcı";
-  if (role === "LOGISTICS") return "Nakliyeci";
-  if (role === "ADMIN") return "Admin";
+function getRoleLabel(role: string | null | undefined, t: any) {
+  if (role === "BUYER") return t("adminCompaniesPage.roleBuyer");
+  if (role === "SELLER") return t("adminCompaniesPage.roleSeller");
+  if (role === "LOGISTICS") return t("adminCompaniesPage.roleLogistics");
+  if (role === "ADMIN") return t("adminCompaniesPage.roleAdmin");
   return role || "-";
 }
 
-function getStatusLabel(status?: string | null) {
-  if (status === "PENDING") return "Bekliyor";
-  if (status === "APPROVED") return "Onaylı";
-  if (status === "BLOCKED") return "Bloklu";
+function getStatusLabel(status: string | null | undefined, t: any) {
+  if (status === "PENDING") return t("adminCompaniesPage.statusPending");
+  if (status === "APPROVED") return t("adminCompaniesPage.statusApproved");
+  if (status === "BLOCKED") return t("adminCompaniesPage.statusBlocked");
   return status || "-";
 }
 
@@ -93,6 +94,9 @@ function statusStyle(status?: string | null): CSSProperties {
 }
 
 export default function AdminCompaniesPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState("");
@@ -107,7 +111,7 @@ export default function AdminCompaniesPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Admin olarak giriş yapmalısınız");
+        setError(t("adminCompaniesPage.adminLoginRequired"));
         setCompanies([]);
         return;
       }
@@ -121,7 +125,7 @@ export default function AdminCompaniesPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "Şirketler alınamadı");
+        setError(data?.message || t("adminCompaniesPage.companiesLoadFailed"));
         setCompanies([]);
         return;
       }
@@ -129,7 +133,7 @@ export default function AdminCompaniesPage() {
       setCompanies(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      setError("Şirketler alınamadı");
+      setError(t("adminCompaniesPage.companiesLoadFailed"));
       setCompanies([]);
     } finally {
       setLoading(false);
@@ -156,14 +160,14 @@ export default function AdminCompaniesPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Onaylanamadı");
+        alert(data?.message || t("adminCompaniesPage.approveFailed"));
         return;
       }
 
       await loadCompanies();
     } catch (err) {
       console.error(err);
-      alert("İşlem hatası");
+      alert(t("adminCompaniesPage.actionError"));
     } finally {
       setActionId("");
     }
@@ -185,14 +189,14 @@ export default function AdminCompaniesPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Bloklanamadı");
+        alert(data?.message || t("adminCompaniesPage.blockFailed"));
         return;
       }
 
       await loadCompanies();
     } catch (err) {
       console.error(err);
-      alert("İşlem hatası");
+      alert(t("adminCompaniesPage.actionError"));
     } finally {
       setActionId("");
     }
@@ -213,7 +217,7 @@ export default function AdminCompaniesPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Firma doğrulanamadı");
+        alert(data?.message || t("adminCompaniesPage.verifyFailed"));
         return;
       }
 
@@ -226,7 +230,7 @@ export default function AdminCompaniesPage() {
       );
     } catch (err) {
       console.error(err);
-      alert("Doğrulama işlemi başarısız");
+      alert(t("adminCompaniesPage.verifyActionFailed"));
     } finally {
       setActionId("");
     }
@@ -247,7 +251,7 @@ export default function AdminCompaniesPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Doğrulama kaldırılamadı");
+        alert(data?.message || t("adminCompaniesPage.unverifyFailed"));
         return;
       }
 
@@ -260,7 +264,7 @@ export default function AdminCompaniesPage() {
       );
     } catch (err) {
       console.error(err);
-      alert("İşlem başarısız");
+      alert(t("adminCompaniesPage.operationFailed"));
     } finally {
       setActionId("");
     }
@@ -282,7 +286,7 @@ export default function AdminCompaniesPage() {
     return (
       <main style={pageStyle}>
         <div style={emptyCardStyle}>
-          Şirketler yükleniyor...
+          {t("adminCompaniesPage.loading")}
         </div>
       </main>
     );
@@ -292,18 +296,17 @@ export default function AdminCompaniesPage() {
     <main style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <div style={eyebrowStyle}>ADMIN PANELİ</div>
+          <div style={eyebrowStyle}>{t("adminCompaniesPage.eyebrow")}</div>
 
-          <h1 style={titleStyle}>Şirket Yönetimi</h1>
+          <h1 style={titleStyle}>{t("adminCompaniesPage.title")}</h1>
 
           <p style={descStyle}>
-            Platforma kayıt olan şirketleri
-            yönetin, onaylayın veya bloklayın.
+            {t("adminCompaniesPage.description")}
           </p>
         </div>
 
         <div style={heroStatStyle}>
-          <span>Toplam Şirket</span>
+          <span>{t("adminCompaniesPage.totalCompanies")}</span>
           <strong>{companies.length}</strong>
         </div>
       </section>
@@ -314,22 +317,22 @@ export default function AdminCompaniesPage() {
 
       <section style={statsGridStyle}>
         <Stat
-          label="Toplam Şirket"
+          label={t("adminCompaniesPage.totalCompanies")}
           value={companies.length}
         />
 
         <Stat
-          label="Bekleyen"
+          label={t("adminCompaniesPage.pending")}
           value={pendingCompanies.length}
         />
 
         <Stat
-          label="Onaylı"
+          label={t("adminCompaniesPage.approved")}
           value={approvedCompanies.length}
         />
 
         <Stat
-          label="Bloklu"
+          label={t("adminCompaniesPage.blocked")}
           value={blockedCompanies.length}
         />
       </section>
@@ -337,17 +340,17 @@ export default function AdminCompaniesPage() {
       <section style={sectionStyle}>
         <div style={sectionHeaderStyle}>
           <div style={eyebrowDarkStyle}>
-            ONAY BEKLEYENLER
+            {t("adminCompaniesPage.pendingEyebrow")}
           </div>
 
           <h2 style={sectionTitleStyle}>
-            Bekleyen Şirketler
+            {t("adminCompaniesPage.pendingCompanies")}
           </h2>
         </div>
 
         {pendingCompanies.length === 0 ? (
           <div style={emptyInlineStyle}>
-            Bekleyen şirket yok.
+            {t("adminCompaniesPage.noPendingCompanies")}
           </div>
         ) : (
           <div style={gridStyle}>
@@ -367,21 +370,21 @@ export default function AdminCompaniesPage() {
       <section style={sectionStyle}>
         <div style={sectionHeaderStyle}>
           <div style={eyebrowDarkStyle}>
-            TÜM ŞİRKETLER
+            {t("adminCompaniesPage.allCompaniesEyebrow")}
           </div>
 
           <h2 style={sectionTitleStyle}>
-            Şirket Listesi
+            {t("adminCompaniesPage.companyList")}
           </h2>
         </div>
 
         <div style={tableStyle}>
           <div style={tableHeadStyle}>
-            <span>Şirket</span>
-            <span>Email</span>
-            <span>Rol</span>
-            <span>Durum</span>
-            <span>İşlem</span>
+            <span>{t("adminCompaniesPage.company")}</span>
+            <span>{t("adminCompaniesPage.email")}</span>
+            <span>{t("adminCompaniesPage.role")}</span>
+            <span>{t("adminCompaniesPage.status")}</span>
+            <span>{t("adminCompaniesPage.action")}</span>
           </div>
 
           {companies.map((company) => {
@@ -400,7 +403,7 @@ export default function AdminCompaniesPage() {
                 <span style={companyNameStyle}>
                   {company.companyName ||
                     company.name ||
-                    "İsimsiz şirket"}
+                    t("adminCompaniesPage.unnamedCompany")}
                 </span>
 
                 <span>
@@ -410,7 +413,7 @@ export default function AdminCompaniesPage() {
                 </span>
 
                 <span>
-                  {getRoleLabel(role)}
+                  {getRoleLabel(role, t)}
                 </span>
 
                 <span>
@@ -421,7 +424,8 @@ export default function AdminCompaniesPage() {
                     }}
                   >
                     {getStatusLabel(
-                      company.status
+                      company.status,
+                      t
                     )}
                   </span>
                 </span>
@@ -431,12 +435,12 @@ export default function AdminCompaniesPage() {
                     onClick={() => setSelectedCompany(company)}
                     style={detailButtonStyle}
                   >
-                    Detay
+                    {t("adminCompaniesPage.detail")}
                   </button>
 
                   {isAdmin ? (
                     <span style={adminBadgeStyle}>
-                      Admin korunuyor
+                      {t("adminCompaniesPage.adminProtected")}
                     </span>
                   ) : company.status ===
                     "PENDING" ? (
@@ -452,7 +456,7 @@ export default function AdminCompaniesPage() {
                           miniApproveButtonStyle
                         }
                       >
-                        Onayla
+                        {t("adminCompaniesPage.approve")}
                       </button>
 
                       <button
@@ -466,7 +470,7 @@ export default function AdminCompaniesPage() {
                           miniBlockButtonStyle
                         }
                       >
-                        Blokla
+                        {t("adminCompaniesPage.block")}
                       </button>
                     </>
                   ) : company.status ===
@@ -482,7 +486,7 @@ export default function AdminCompaniesPage() {
                         miniBlockButtonStyle
                       }
                     >
-                      Blokla
+                      {t("adminCompaniesPage.block")}
                     </button>
                   ) : (
                     <button
@@ -496,7 +500,7 @@ export default function AdminCompaniesPage() {
                         miniApproveButtonStyle
                       }
                     >
-                      Onayla
+                      {t("adminCompaniesPage.approve")}
                     </button>
                   )}
                 </span>
@@ -511,11 +515,13 @@ export default function AdminCompaniesPage() {
           <div style={modalStyle}>
             <div style={modalHeaderStyle}>
               <div>
-                <div style={eyebrowDarkStyle}>FİRMA DETAYI</div>
+                <div style={eyebrowDarkStyle}>
+                  {t("adminCompaniesPage.companyDetail")}
+                </div>
                 <h2 style={{ margin: 0 }}>
                   {selectedCompany.companyName ||
                     selectedCompany.name ||
-                    "İsimsiz şirket"}
+                    t("adminCompaniesPage.unnamedCompany")}
                 </h2>
               </div>
 
@@ -529,7 +535,7 @@ export default function AdminCompaniesPage() {
 
             <div style={detailGridStyle}>
               <Info
-                label="Firma Adı"
+                label={t("adminCompaniesPage.companyName")}
                 value={
                   selectedCompany.companyName ||
                   selectedCompany.name ||
@@ -538,17 +544,17 @@ export default function AdminCompaniesPage() {
               />
 
               <Info
-                label="Yetkili Kişi"
+                label={t("adminCompaniesPage.authorizedPerson")}
                 value={selectedCompany.address?.fullName || "-"}
               />
 
               <Info
-                label="Telefon"
+                label={t("adminCompaniesPage.phone")}
                 value={selectedCompany.phone || "-"}
               />
 
               <Info
-                label="E-posta"
+                label={t("adminCompaniesPage.email")}
                 value={
                   selectedCompany.email ||
                   selectedCompany.users?.[0]?.email ||
@@ -557,76 +563,77 @@ export default function AdminCompaniesPage() {
               />
 
               <Info
-                label="Rol"
+                label={t("adminCompaniesPage.role")}
                 value={getRoleLabel(
                   selectedCompany.role ||
-                    selectedCompany.users?.[0]?.role
+                    selectedCompany.users?.[0]?.role,
+                  t
                 )}
               />
 
               <Info
-                label="Kategori / Sektör"
+                label={t("adminCompaniesPage.categorySector")}
                 value={selectedCompany.address?.category || "-"}
               />
 
               <Info
-                label="Şirket Türü"
+                label={t("adminCompaniesPage.companyType")}
                 value={selectedCompany.address?.companyType || "-"}
               />
 
               <Info
-                label="Şehir"
+                label={t("adminCompaniesPage.city")}
                 value={selectedCompany.city || "-"}
               />
 
               <Info
-                label="İlçe"
+                label={t("adminCompaniesPage.district")}
                 value={selectedCompany.address?.district || "-"}
               />
 
               <Info
-                label="Adres"
+                label={t("adminCompaniesPage.address")}
                 value={selectedCompany.address?.address || "-"}
               />
 
               <Info
-                label="Vergi No"
+                label={t("adminCompaniesPage.taxNumber")}
                 value={selectedCompany.taxNumber || "-"}
               />
 
               <Info
-                label="Vergi Dairesi"
+                label={t("adminCompaniesPage.taxOffice")}
                 value={selectedCompany.taxOffice || "-"}
               />
 
               <Info
-                label="Web Sitesi"
+                label={t("adminCompaniesPage.website")}
                 value={selectedCompany.website || "-"}
               />
 
               <Info
-                label="Kayıt Tarihi"
+                label={t("adminCompaniesPage.registrationDate")}
                 value={
                   selectedCompany.createdAt
                     ? new Date(
                         selectedCompany.createdAt
-                      ).toLocaleString("tr-TR")
+                      ).toLocaleString(locale)
                     : "-"
                 }
               />
 
               <Info
-                label="Durum"
-                value={getStatusLabel(selectedCompany.status)}
+                label={t("adminCompaniesPage.status")}
+                value={getStatusLabel(selectedCompany.status, t)}
               />
 
 
               <Info
-                label="Firma Doğrulaması"
+                label={t("adminCompaniesPage.companyVerification")}
                 value={
                   selectedCompany.verified
-                    ? "✓ Doğrulanmış Firma"
-                    : "Doğrulanmadı"
+                    ? t("adminCompaniesPage.verifiedCompany")
+                    : t("adminCompaniesPage.notVerified")
                 }
               />
             </div>
@@ -635,7 +642,7 @@ export default function AdminCompaniesPage() {
               <button
                 onClick={async () => {
                   const content = window.prompt(
-                    "Firmaya göndermek istediğiniz mesajı yazın:"
+                    t("adminCompaniesPage.messagePrompt")
                   );
 
                   if (!content?.trim()) return;
@@ -660,14 +667,14 @@ export default function AdminCompaniesPage() {
                     const data = await res.json();
 
                     if (!res.ok) {
-                      alert(data?.message || "Mesaj gönderilemedi");
+                      alert(data?.message || t("adminCompaniesPage.messageFailed"));
                       return;
                     }
 
-                    alert("Mesaj başarıyla gönderildi");
+                    alert(t("adminCompaniesPage.messageSuccess"));
                   } catch (err) {
                     console.error("ADMIN COMPANY MESSAGE ERROR:", err);
-                    alert("Mesaj gönderilemedi");
+                    alert(t("adminCompaniesPage.messageFailed"));
                   }
                 }}
                 style={{
@@ -678,28 +685,40 @@ export default function AdminCompaniesPage() {
                   fontWeight: 700,
                 }}
               >
-                ✉️ Mesaj Gönder
+                {t("adminCompaniesPage.sendMessage")}
               </button>
             </div>
 
             <div style={productsSectionStyle}>
               <div style={productsHeaderStyle}>
                 <div>
-                  <div style={eyebrowDarkStyle}>ÜRÜNLER</div>
+                  <div style={eyebrowDarkStyle}>
+                    {t("adminCompaniesPage.productsEyebrow")}
+                  </div>
                   <h3 style={{ margin: "4px 0 0" }}>
-                    Firma Ürünleri ({selectedCompany.productCount || 0})
+                    {t("adminCompaniesPage.companyProducts", {
+                      count: selectedCompany.productCount || 0,
+                    })}
                   </h3>
                 </div>
 
                 <div style={productStatsStyle}>
-                  <span>Onaylı: {selectedCompany.approvedProductCount || 0}</span>
-                  <span>Bekleyen: {selectedCompany.pendingProductCount || 0}</span>
+                  <span>
+                    {t("adminCompaniesPage.approvedProducts", {
+                      count: selectedCompany.approvedProductCount || 0,
+                    })}
+                  </span>
+                  <span>
+                    {t("adminCompaniesPage.pendingProducts", {
+                      count: selectedCompany.pendingProductCount || 0,
+                    })}
+                  </span>
                 </div>
               </div>
 
               {!selectedCompany.products?.length ? (
                 <div style={emptyInlineStyle}>
-                  Bu firma henüz ürün eklememiş.
+                  {t("adminCompaniesPage.noProducts")}
                 </div>
               ) : (
                 <div style={productGridStyle}>
@@ -721,7 +740,7 @@ export default function AdminCompaniesPage() {
                             />
                           ) : (
                             <div style={productImageFallbackStyle}>
-                              Görsel yok
+                              {t("adminCompaniesPage.noImage")}
                             </div>
                           )}
                         </div>
@@ -732,7 +751,7 @@ export default function AdminCompaniesPage() {
                           </strong>
 
                           <div style={productPriceStyle}>
-                            {Number(product.basePrice || 0).toLocaleString("tr-TR")} ₺
+                            {Number(product.basePrice || 0).toLocaleString(locale)} ₺
                           </div>
 
                           <span
@@ -749,12 +768,14 @@ export default function AdminCompaniesPage() {
                                   }),
                             }}
                           >
-                            {product.isApproved ? "Onaylı" : "Onay Bekliyor"}
+                            {product.isApproved
+                              ? t("adminCompaniesPage.approved")
+                              : t("adminCompaniesPage.awaitingApproval")}
                           </span>
 
                           <div style={productDateStyle}>
                             {product.createdAt
-                              ? new Date(product.createdAt).toLocaleString("tr-TR")
+                              ? new Date(product.createdAt).toLocaleString(locale)
                               : "-"}
                           </div>
                         </div>
@@ -773,7 +794,7 @@ export default function AdminCompaniesPage() {
                     disabled={actionId === selectedCompany.id}
                     style={unverifyButtonStyle}
                   >
-                    Doğrulamayı Kaldır
+                    {t("adminCompaniesPage.removeVerification")}
                   </button>
                 ) : (
                   <button
@@ -781,7 +802,7 @@ export default function AdminCompaniesPage() {
                     disabled={actionId === selectedCompany.id}
                     style={verifyButtonStyle}
                   >
-                    ✓ Firmayı Doğrula
+                    {t("adminCompaniesPage.verifyCompany")}
                   </button>
                 )}
                 {selectedCompany.status !== "APPROVED" && (
@@ -793,7 +814,7 @@ export default function AdminCompaniesPage() {
                     disabled={actionId === selectedCompany.id}
                     style={approveButtonStyle}
                   >
-                    Onayla
+                    {t("adminCompaniesPage.approve")}
                   </button>
                 )}
 
@@ -806,7 +827,7 @@ export default function AdminCompaniesPage() {
                     disabled={actionId === selectedCompany.id}
                     style={blockButtonStyle}
                   >
-                    Blokla
+                    {t("adminCompaniesPage.block")}
                   </button>
                 )}
               </div>
@@ -829,6 +850,8 @@ function CompanyCard({
   approveCompany: (id: string) => void;
   blockCompany: (id: string) => void;
 }) {
+  const { t } = useTranslation();
+
   const role =
     company.role ||
     company.users?.[0]?.role ||
@@ -841,13 +864,13 @@ function CompanyCard({
       <div style={cardTopStyle}>
         <div>
           <div style={smallLabelStyle}>
-            Şirket Başvurusu
+            {t("adminCompaniesPage.companyApplication")}
           </div>
 
           <h3 style={cardTitleStyle}>
             {company.companyName ||
               company.name ||
-              "İsimsiz şirket"}
+              t("adminCompaniesPage.unnamedCompany")}
           </h3>
         </div>
 
@@ -857,7 +880,7 @@ function CompanyCard({
             ...statusStyle(company.status),
           }}
         >
-          {getStatusLabel(company.status)}
+          {getStatusLabel(company.status, t)}
         </span>
       </div>
 
@@ -873,7 +896,7 @@ function CompanyCard({
 
         <Info
           label="Rol"
-          value={getRoleLabel(role)}
+          value={getRoleLabel(role, t)}
         />
       </div>
 
@@ -886,7 +909,7 @@ function CompanyCard({
             disabled={actionId === company.id}
             style={approveButtonStyle}
           >
-            Onayla
+            {t("adminCompaniesPage.approve")}
           </button>
 
           <button
@@ -896,12 +919,12 @@ function CompanyCard({
             disabled={actionId === company.id}
             style={blockButtonStyle}
           >
-            Blokla
+            {t("adminCompaniesPage.block")}
           </button>
         </div>
       ) : (
         <span style={adminBadgeStyle}>
-          Admin korunuyor
+          {t("adminCompaniesPage.adminProtected")}
         </span>
       )}
     </div>

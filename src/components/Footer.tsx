@@ -1,7 +1,10 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
   );
@@ -40,36 +43,35 @@ export default function Footer() {
           <div>
             <strong style={brandStyle}>Tedarik Pazarı</strong>
             <p style={textStyle}>
-              İşletmeleri güvenilir tedarikçilerle buluşturan B2B teklif,
-              sipariş ve güvenli ödeme platformu.
+              {t("footer.description")}
             </p>
           </div>
         </div>
 
         <FooterColumn
-          title="Kurumsal"
+          title={t("footer.corporate")}
           links={[
-            ["Hakkımızda", "/hakkimizda"],
-            ["İletişim", "/iletisim"],
-            ["Yardım Merkezi", "/yardim"],
+            [t("footer.about"), "/hakkimizda"],
+            [t("footer.contact"), "/iletisim"],
+            [t("footer.helpCenter"), "/yardim"],
           ]}
         />
 
         <FooterColumn
-          title="Yasal"
+          title={t("footer.legal")}
           links={[
-            ["Aydınlatma Metni", "/aydinlatma-metni"],
-            ["KVKK Politikası", "/kvkk"],
-            ["Gizlilik Politikası", "/gizlilik-politikasi"],
-            ["Kullanım Koşulları", "/kullanim-kosullari"],
-            ["Teslimat ve İade Şartları", "/teslimat-ve-iade"],
-            ["Mesafeli Satış Sözleşmesi", "/mesafeli-satis-sozlesmesi"],
-            ["Çerez Politikası", "/cerez-politikasi"],
+            [t("footer.disclosure"), "/aydinlatma-metni"],
+            [t("footer.kvkk"), "/kvkk"],
+            [t("footer.privacy"), "/gizlilik-politikasi"],
+            [t("footer.terms"), "/kullanim-kosullari"],
+            [t("footer.deliveryReturns"), "/teslimat-ve-iade"],
+            [t("footer.distanceSales"), "/mesafeli-satis-sozlesmesi"],
+            [t("footer.cookies"), "/cerez-politikasi"],
           ]}
         />
 
         <div style={columnStyle}>
-          <strong style={columnTitleStyle}>Destek</strong>
+          <strong style={columnTitleStyle}>{t("footer.support")}</strong>
 
           <a
             href="mailto:tedarikpazari34@gmail.com"
@@ -79,7 +81,7 @@ export default function Footer() {
           </a>
 
           <span style={smallTextStyle}>
-            Hesap bilgilerinizi ve kart şifrenizi kimseyle paylaşmayın.
+            {t("footer.securityWarning")}
           </span>
 
           <div
@@ -90,7 +92,7 @@ export default function Footer() {
               marginTop: 16,
             }}
           >
-            <strong style={columnTitleStyle}>Bizi Takip Edin</strong>
+            <strong style={columnTitleStyle}>{t("footer.followUs")}</strong>
 
             <a
               href="https://www.instagram.com/tedarikpazari/"
@@ -135,7 +137,7 @@ export default function Footer() {
         }}
       >
         <strong style={{ color: "#ffffff", fontSize: 14 }}>
-          Güvenli Ödeme
+          {t("footer.securePayment")}
         </strong>
 
         <div
@@ -170,7 +172,7 @@ export default function Footer() {
 
           <img
             src="/images/payments/iyzico-ile-ode.svg"
-            alt="iyzico ile Öde"
+            alt={t("footer.iyzicoAlt")}
             style={{ width: 360, height: "auto", display: "block" }}
           />
         </div>
@@ -184,8 +186,8 @@ export default function Footer() {
           fontSize: isMobile ? 12 : 13,
         }}
       >
-        <span>©️ 2026 Tedarik Pazarı. Tüm hakları saklıdır.</span>
-        <span>Güvenli B2B ticaret altyapısı</span>
+        <span>{t("footer.copyright")}</span>
+        <span>{t("footer.infrastructure")}</span>
       </div>
     </footer>
   );

@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 
 const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
@@ -29,39 +30,44 @@ type PayoutRequest = {
   processedAt?: string | null;
 };
 
-function formatMoney(value?: string | number) {
-  return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;
+function formatMoney(value: string | number | undefined, locale: string) {
+  return `${Number(value || 0).toLocaleString(locale)} ₺`;
 }
 
-function getHistoryLabel(type: string) {
-  if (type === "ESCROW_RELEASE_SELLER") return "Sipariş Geliri";
-  if (type === "ESCROW_DEPOSIT") return "Escrow Ödemesi";
-  if (type === "COMMISSION") return "Platform Komisyonu";
-  if (type === "PAYOUT_REQUEST") return "Para Çekme Talebi";
-  if (type === "PAYOUT_APPROVE") return "Para Çekme Onayı";
-  if (type === "PAYOUT_REJECT") return "Para Çekme Reddi";
-  if (type === "ADJUSTMENT") return "Bakiye İşlemi";
+function getHistoryLabel(
+  type: string,
+  t: (key: string) => string
+) {
+  if (type === "ESCROW_RELEASE_SELLER") return t("walletPage.orderIncome");
+  if (type === "ESCROW_DEPOSIT") return t("walletPage.escrowPayment");
+  if (type === "COMMISSION") return t("walletPage.platformCommission");
+  if (type === "PAYOUT_REQUEST") return t("walletPage.payoutRequest");
+  if (type === "PAYOUT_APPROVE") return t("walletPage.payoutApprove");
+  if (type === "PAYOUT_REJECT") return t("walletPage.payoutReject");
+  if (type === "ADJUSTMENT") return t("walletPage.adjustment");
   return type;
 }
-
-function getHistoryNote(note?: string | null) {
+function getHistoryNote(
+  note: string | null | undefined,
+  t: (key: string) => string
+) {
   if (!note) return "";
 
   const translations: Record<string, string> = {
     "Escrow released to seller after commission deduction":
-      "Komisyon sonrası tutar satıcı bakiyesine aktarıldı.",
+      t("walletPage.noteSellerRelease"),
     "Platform commission reserved":
-      "Platform komisyonu ayrıldı.",
+      t("walletPage.noteCommission"),
     "Buyer payment deposited into escrow":
-      "Alıcı ödemesi güvenli hesaba alındı.",
+      t("walletPage.noteBuyerEscrow"),
     "Iyzico payment deposited into escrow":
-      "Ödeme güvenli hesaba alındı.",
+      t("walletPage.notePaymentEscrow"),
     "Seller payout request created":
-      "Para çekme talebi oluşturuldu.",
+      t("walletPage.notePayoutCreated"),
     "Payout request approved":
-      "Para çekme talebi onaylandı.",
+      t("walletPage.notePayoutApproved"),
     "Admin wallet top-up":
-      "Admin tarafından bakiye yüklemesi yapıldı.",
+      t("walletPage.noteAdminTopup"),
   };
 
   if (translations[note]) {
@@ -72,28 +78,33 @@ function getHistoryNote(note?: string | null) {
 
   if (
     normalized.includes("payment deposited into escrow") ||
-    normalized.includes("ödeme") && normalized.includes("escrow")
+    (normalized.includes("ödeme") && normalized.includes("escrow"))
   ) {
-    return "Ödeme güvenli hesaba alındı.";
+    return t("walletPage.notePaymentEscrow");
   }
 
   return note;
 }
-
 function getHistoryPrefix(direction: WalletHistoryItem["direction"]) {
   if (direction === "IN") return "+";
   if (direction === "OUT") return "-";
   return "";
 }
 
-function getStatusLabel(status: PayoutRequest["status"]) {
-  if (status === "PENDING") return "Bekliyor";
-  if (status === "APPROVED") return "Onaylandı";
-  if (status === "REJECTED") return "Reddedildi";
+function getStatusLabel(
+  status: PayoutRequest["status"],
+  t: (key: string) => string
+) {
+  if (status === "PENDING") return t("walletPage.pending");
+  if (status === "APPROVED") return t("walletPage.approved");
+  if (status === "REJECTED") return t("walletPage.rejected");
   return status;
 }
 
 export default function WalletPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
   );
@@ -124,7 +135,7 @@ export default function WalletPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Cüzdan bilgilerini görmek için giriş yapmalısınız.");
+        setError(t("walletPage.loginRequired"));
         return;
       }
 
@@ -138,7 +149,7 @@ export default function WalletPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "Cüzdan bilgisi alınamadı");
+        setError(data?.message || t("walletPage.loadFailed"));
         return;
       }
 
@@ -169,7 +180,7 @@ export default function WalletPage() {
       }
     } catch (err) {
       console.error(err);
-      setError("Cüzdan yüklenirken hata oluştu");
+      setError(t("walletPage.loadError"));
     } finally {
       setLoading(false);
     }
@@ -180,19 +191,19 @@ export default function WalletPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Lütfen giriş yapın");
+        alert(t("walletPage.pleaseLogin"));
         return;
       }
 
       const numericAmount = Number(amount);
 
       if (!numericAmount || numericAmount <= 0) {
-        alert("Geçerli bir tutar girin");
+        alert(t("walletPage.invalidAmount"));
         return;
       }
 
       if (!iban.trim()) {
-        alert("IBAN girin");
+        alert(t("walletPage.enterIban"));
         return;
       }
 
@@ -211,17 +222,17 @@ export default function WalletPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Para çekme talebi oluşturulamadı");
+        alert(data?.message || t("walletPage.payoutFailed"));
         return;
       }
 
-      alert("Para çekme talebi oluşturuldu ✅");
+      alert(t("walletPage.payoutSuccess"));
       setAmount("");
       setIban("");
       await loadWallet();
     } catch (err) {
       console.error(err);
-      alert("Para çekme talebi sırasında hata oluştu");
+      alert(t("walletPage.payoutError"));
     }
   };
 
@@ -232,7 +243,7 @@ export default function WalletPage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <div style={emptyCardStyle}>Cüzdan yükleniyor...</div>
+        <div style={emptyCardStyle}>{t("walletPage.loading")}</div>
       </main>
     );
   }
@@ -248,12 +259,9 @@ export default function WalletPage() {
         }}
       >
         <div>
-          <div style={eyebrowStyle}>FİNANS PANELİ</div>
-          <h1 style={titleStyle}>Cüzdanım</h1>
-          <p style={descStyle}>
-            Kullanılabilir bakiyenizi, escrow/blokeli tutarları ve platform
-            finans akışınızı tek ekrandan takip edin.
-          </p>
+          <div style={eyebrowStyle}>{t("walletPage.financePanel")}</div>
+          <h1 style={titleStyle}>{t("walletPage.title")}</h1>
+          <p style={descStyle}>{t("walletPage.description")}</p>
         </div>
 
         <div
@@ -265,8 +273,8 @@ export default function WalletPage() {
             marginTop: isMobile ? 16 : 0,
           }}
         >
-          <span>Kullanılabilir</span>
-          <strong>{formatMoney(wallet?.available)}</strong>
+          <span>{t("walletPage.available")}</span>
+          <strong>{formatMoney(wallet?.available, locale)}</strong>
         </div>
       </section>
 
@@ -277,48 +285,42 @@ export default function WalletPage() {
           <section style={gridStyle}>
             <div style={balanceCardStyle}>
               <div style={cardIconStyle}>₺</div>
-              <p style={labelStyle}>Kullanılabilir Bakiye</p>
-              <h2 style={greenAmountStyle}>{formatMoney(wallet.available)}</h2>
-              <span style={hintStyle}>Çekilebilir veya kullanılabilir tutar</span>
+              <p style={labelStyle}>{t("walletPage.availableBalance")}</p>
+              <h2 style={greenAmountStyle}>{formatMoney(wallet.available, locale)}</h2>
+              <span style={hintStyle}>{t("walletPage.availableHint")}</span>
             </div>
 
             <div style={lockedCardStyle}>
               <div style={cardIconStyle}>🔒</div>
-              <p style={labelStyle}>Blokeli / Escrow</p>
-              <h2 style={blueAmountStyle}>{formatMoney(wallet.locked)}</h2>
-              <span style={hintStyle}>Sipariş tamamlanana kadar korunan tutar</span>
+              <p style={labelStyle}>{t("walletPage.lockedEscrow")}</p>
+              <h2 style={blueAmountStyle}>{formatMoney(wallet.locked, locale)}</h2>
+              <span style={hintStyle}>{t("walletPage.lockedHint")}</span>
             </div>
           </section>
 
           <section style={infoPanelStyle}>
             <div>
-              <div style={smallLabelStyle}>PLATFORM GÜVENCESİ</div>
-              <h2 style={panelTitleStyle}>Escrow ödeme akışı</h2>
-              <p style={panelTextStyle}>
-                Alıcı ödemesi güvenli şekilde blokede tutulur. Sipariş teslim
-                süreci tamamlandığında satıcı bakiyesine aktarılır.
-              </p>
+              <div style={smallLabelStyle}>{t("walletPage.platformSecurity")}</div>
+              <h2 style={panelTitleStyle}>{t("walletPage.escrowFlow")}</h2>
+              <p style={panelTextStyle}>{t("walletPage.escrowDescription")}</p>
             </div>
 
             <div style={stepGridStyle}>
-              <Step number="1" title="Ödeme alınır" />
-              <Step number="2" title="Tutar blokeye alınır" />
-              <Step number="3" title="Teslimat sonrası aktarılır" />
+              <Step number="1" title={t("walletPage.step1")} />
+              <Step number="2" title={t("walletPage.step2")} />
+              <Step number="3" title={t("walletPage.step3")} />
             </div>
           </section>
 
           <section style={{ ...historyPanelStyle, marginTop: 24 }}>
             <div>
-              <div style={smallLabelStyle}>CÜZDAN HAREKETLERİ</div>
-              <h2 style={panelTitleStyle}>İşlem Geçmişi</h2>
-              <p style={panelTextStyle}>
-                Sipariş gelirlerinizi, escrow hareketlerini ve para çekme
-                işlemlerinizi buradan takip edebilirsiniz.
-              </p>
+              <div style={smallLabelStyle}>{t("walletPage.walletTransactions")}</div>
+              <h2 style={panelTitleStyle}>{t("walletPage.transactionHistory")}</h2>
+              <p style={panelTextStyle}>{t("walletPage.historyDescription")}</p>
             </div>
 
             {history.length === 0 ? (
-              <p style={panelTextStyle}>Henüz cüzdan hareketi bulunmuyor.</p>
+              <p style={panelTextStyle}>{t("walletPage.noHistory")}</p>
             ) : (
               <div style={historyListStyle}>
                 {history.map((item) => (
@@ -326,12 +328,12 @@ export default function WalletPage() {
                     <div style={historyTopStyle}>
                       <div>
                         <strong style={historyTitleStyle}>
-                          {getHistoryLabel(item.type)}
+                          {getHistoryLabel(item.type, t)}
                         </strong>
 
                         {item.orderId && (
                           <div style={requestMetaStyle}>
-                            Sipariş: {item.orderId}
+                            {t("walletPage.order")}: {item.orderId}
                           </div>
                         )}
                       </div>
@@ -346,17 +348,17 @@ export default function WalletPage() {
                         }
                       >
                         {getHistoryPrefix(item.direction)}
-                        {formatMoney(item.amount)}
+                        {formatMoney(item.amount, locale)}
                       </strong>
                     </div>
 
                     <div style={requestMetaStyle}>
-                      {new Date(item.createdAt).toLocaleString("tr-TR")}
+                      {new Date(item.createdAt).toLocaleString(locale)}
                     </div>
 
                     {item.note && (
                       <div style={requestMetaStyle}>
-                        {getHistoryNote(item.note)}
+                        {getHistoryNote(item.note, t)}
                       </div>
                     )}
                   </div>
@@ -367,25 +369,22 @@ export default function WalletPage() {
 
           <section style={{ ...infoPanelStyle, marginTop: 24 }}>
             <div>
-              <div style={smallLabelStyle}>PARA ÇEKME</div>
-              <h2 style={panelTitleStyle}>Para çekme talebi oluştur</h2>
-              <p style={panelTextStyle}>
-                Satıcı bakiyenizden IBAN hesabınıza aktarım talebi oluşturun.
-                Admin onayından sonra talep işlenir.
-              </p>
+              <div style={smallLabelStyle}>{t("walletPage.withdrawal")}</div>
+              <h2 style={panelTitleStyle}>{t("walletPage.createWithdrawal")}</h2>
+              <p style={panelTextStyle}>{t("walletPage.withdrawalDescription")}</p>
 
               <div style={{ marginTop: 18 }}>
                 <input
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Tutar"
+                  placeholder={t("walletPage.amount")}
                   style={inputStyle}
                 />
 
                 <input
                   value={iban}
                   onChange={(e) => setIban(e.target.value)}
-                  placeholder="IBAN"
+                  placeholder={t("walletPage.iban")}
                   style={inputStyle}
                 />
 
@@ -393,39 +392,39 @@ export default function WalletPage() {
                   style={withdrawButtonStyle}
                   onClick={handlePayoutRequest}
                 >
-                  Para Çekme Talebi Gönder
+                  {t("walletPage.sendWithdrawal")}
                 </button>
               </div>
             </div>
 
             <div>
-              <div style={smallLabelStyle}>TALEP GEÇMİŞİ</div>
-              <h2 style={panelTitleStyle}>Para çekme taleplerim</h2>
+              <div style={smallLabelStyle}>{t("walletPage.requestHistory")}</div>
+              <h2 style={panelTitleStyle}>{t("walletPage.myWithdrawalRequests")}</h2>
 
               {requests.length === 0 ? (
-                <p style={panelTextStyle}>Henüz para çekme talebi yok.</p>
+                <p style={panelTextStyle}>{t("walletPage.noWithdrawalRequests")}</p>
               ) : (
                 <div style={requestListStyle}>
                   {requests.map((request) => (
                     <div key={request.id} style={requestItemStyle}>
                       <div style={requestTopStyle}>
-                        <strong>{formatMoney(request.amount)}</strong>
+                        <strong>{formatMoney(request.amount, locale)}</strong>
                         <span style={statusBadgeStyle}>
-                          {getStatusLabel(request.status)}
+                          {getStatusLabel(request.status, t)}
                         </span>
                       </div>
 
                       <div style={requestMetaStyle}>{request.iban}</div>
 
                       <div style={requestMetaStyle}>
-                        Oluşturma:{" "}
-                        {new Date(request.createdAt).toLocaleString("tr-TR")}
+                        {t("walletPage.created")}:{" "}
+                        {new Date(request.createdAt).toLocaleString(locale)}
                       </div>
 
                       {request.processedAt && (
                         <div style={requestMetaStyle}>
-                          İşlem:{" "}
-                          {new Date(request.processedAt).toLocaleString("tr-TR")}
+                          {t("walletPage.processed")}:{" "}
+                          {new Date(request.processedAt).toLocaleString(locale)}
                         </div>
                       )}
 
@@ -440,7 +439,7 @@ export default function WalletPage() {
           </section>
         </>
       ) : (
-        <div style={emptyCardStyle}>Cüzdan bilgisi bulunamadı.</div>
+        <div style={emptyCardStyle}>{t("walletPage.walletNotFound")}</div>
       )}
     </main>
   );

@@ -49,6 +49,7 @@ type Message = {
 };
 
 import { getSocket } from "../lib/socket";
+import { useTranslation } from "react-i18next";
 
 const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
@@ -56,6 +57,9 @@ const API =
 const socket = getSocket();
 
 export default function ChatPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [threads, setThreads] = useState<Thread[]>([]);
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -136,7 +140,7 @@ export default function ChatPage() {
 
       if (!res.ok) {
         const err = await res.json();
-        alert(err?.message || "Mesaj gönderilemedi");
+        alert(err?.message || t("chatPage.sendFailed"));
         return;
       }
 
@@ -169,7 +173,7 @@ export default function ChatPage() {
       if (!res.ok) {
         const err = await res.json();
 
-        alert(err?.message || "Dosya gönderilemedi");
+        alert(err?.message || t("chatPage.fileSendFailed"));
         return;
       }
 
@@ -237,15 +241,15 @@ export default function ChatPage() {
 
   const selectedTitle =
     selectedThread?.type === "SHIPPING"
-      ? `Nakliye Sohbeti${
+      ? `${t("chatPage.shippingChat")}${
           selectedThread.shippingOrder?.trackingNo
             ? ` • ${selectedThread.shippingOrder.trackingNo}`
             : ""
         }`
       : selectedThread?.rfq?.product?.title ||
         (selectedThread?.order?.id
-          ? `Sipariş #${selectedThread.order.id.slice(0, 8)}`
-          : "Chat");
+          ? t("chatPage.order", { id: selectedThread.order.id.slice(0, 8) })
+          : t("chatPage.chat"));
 
   return (
     <main style={pageStyle}>
@@ -263,33 +267,33 @@ export default function ChatPage() {
         >
           <div style={sidebarHeaderStyle}>
             <div>
-              <div style={eyebrowStyle}>GÜVENLİ MESAJLAŞMA</div>
-              <h1 style={sidebarTitleStyle}>Mesajlar</h1>
+              <div style={eyebrowStyle}>{t("chatPage.secureMessaging")}</div>
+              <h1 style={sidebarTitleStyle}>{t("chatPage.messages")}</h1>
             </div>
 
             <button onClick={loadThreads} style={refreshButtonStyle}>
-              Yenile
+              {t("chatPage.refresh")}
             </button>
           </div>
 
           {loading ? (
-            <div style={emptyStyle}>Yükleniyor...</div>
+            <div style={emptyStyle}>{t("chatPage.loading")}</div>
           ) : threads.length === 0 ? (
-            <div style={emptyStyle}>Henüz konuşma yok</div>
+            <div style={emptyStyle}>{t("chatPage.noConversation")}</div>
           ) : (
             threads.map((thread) => {
               const lastMessage = thread.messages?.[0];
               const title =
                 thread.type === "SHIPPING"
-                  ? `Nakliye Sohbeti${
+                  ? `${t("chatPage.shippingChat")}${
                       thread.shippingOrder?.trackingNo
                         ? ` • ${thread.shippingOrder.trackingNo}`
                         : ""
                     }`
                   : thread.rfq?.product?.title ||
                     (thread.order?.id
-                      ? `Sipariş #${thread.order.id.slice(0, 8)}`
-                      : "Platform Chat");
+                      ? t("chatPage.order", { id: thread.order.id.slice(0, 8) })
+                      : t("chatPage.platformChat"));
 
               return (
                 <button
@@ -305,19 +309,19 @@ export default function ChatPage() {
                 >
                   <div style={threadTopStyle}>
                     <strong>{title}</strong>
-                    <span style={secureBadgeStyle}>Güvenli</span>
+                    <span style={secureBadgeStyle}>{t("chatPage.secure")}</span>
                   </div>
 
                   <span style={threadSubStyle}>
-                    {thread.buyer?.name || "Alıcı"} ↔️{" "}
-                    {thread.seller?.name || "Satıcı"}
+                    {thread.buyer?.name || t("chatPage.buyer")} ↔️{" "}
+                    {thread.seller?.name || t("chatPage.seller")}
                     {thread.type === "SHIPPING" && thread.logistics?.name
                       ? ` ↔️ ${thread.logistics.name}`
                       : ""}
                   </span>
 
                   <span style={previewStyle}>
-                    {lastMessage?.content || "Henüz mesaj yok"}
+                    {lastMessage?.content || t("chatPage.noMessage")}
                   </span>
                 </button>
               );
@@ -334,8 +338,8 @@ export default function ChatPage() {
           {!selectedThread ? (
             <div style={emptyChatStyle}>
               <div style={emptyIconStyle}>💬</div>
-              <strong>Bir konuşma seçin</strong>
-              <span>Alıcı ve satıcı iletişim bilgileri gizli tutulur.</span>
+              <strong>{t("chatPage.selectConversation")}</strong>
+              <span>{t("chatPage.privacyNotice")}</span>
             </div>
           ) : (
             <>
@@ -351,8 +355,8 @@ export default function ChatPage() {
                     }}
                   >
                     <span>
-                      {selectedThread.buyer?.name || "Alıcı"} ↔️{" "}
-                      {selectedThread.seller?.name || "Satıcı"}
+                      {selectedThread.buyer?.name || t("chatPage.buyer")} ↔️{" "}
+                      {selectedThread.seller?.name || t("chatPage.seller")}
                       {selectedThread.type === "SHIPPING" &&
                       selectedThread.logistics?.name
                         ? ` ↔️ ${selectedThread.logistics.name}`
@@ -372,13 +376,13 @@ export default function ChatPage() {
                   </div>
                 </div>
 
-                <span style={headerBadgeStyle}>Platform içi iletişim</span>
+                <span style={headerBadgeStyle}>{t("chatPage.internalCommunication")}</span>
               </div>
 
               <div style={messagesStyle}>
                 {messages.length === 0 ? (
                   <div style={noMessageStyle}>
-                    Henüz mesaj yok. İlk mesajı gönderin.
+                    {t("chatPage.noMessagesYet")}
                   </div>
                 ) : (
                   messages.map((msg) => {
@@ -423,7 +427,7 @@ export default function ChatPage() {
                                     fontWeight: 800,
                                   }}
                                 >
-                                  📄 {msg.fileName || "Dosya"}
+                                  📄 {msg.fileName || t("chatPage.file")}
                                 </a>
                               )
                             ) : (
@@ -441,7 +445,7 @@ export default function ChatPage() {
                             }}
                           >
                             <span>
-                              {new Date(msg.createdAt).toLocaleString("tr-TR")}
+                              {new Date(msg.createdAt).toLocaleString(locale)}
                             </span>
 
                             {mine && <span>{msg.isRead ? "✓✓" : "✓"}</span>}
@@ -460,7 +464,7 @@ export default function ChatPage() {
                       fontStyle: "italic",
                     }}
                   >
-                    Yazıyor...
+                    {t("chatPage.typing")}
                   </div>
                 )}
                 <div ref={bottomRef} />
@@ -518,18 +522,17 @@ export default function ChatPage() {
                       sendMessage();
                     }
                   }}
-                  placeholder="Mesaj yaz..."
+                  placeholder={t("chatPage.placeholder")}
                   style={inputStyle}
                 />
 
                 <button onClick={sendMessage} style={sendButtonStyle}>
-                  Gönder
+                  {t("chatPage.send")}
                 </button>
               </div>
 
               <div style={warningStyle}>
-                Telefon, e-mail, link, WhatsApp ve platform dışı iletişim
-                paylaşımı yasaktır.
+                {t("chatPage.warning")}
               </div>
             </>
           )}

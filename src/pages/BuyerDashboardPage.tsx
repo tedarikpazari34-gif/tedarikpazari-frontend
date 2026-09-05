@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { authFetch } from "../api";
+import { useTranslation } from "react-i18next";
 
 type RecentOrder = {
   id: string;
@@ -49,28 +50,30 @@ const emptyDashboard: BuyerDashboard = {
   recentShippingOrders: [],
 };
 
-function money(value: number | string | undefined) {
-  return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;
+function money(value: number | string | undefined, locale = "tr-TR") {
+  return `${Number(value || 0).toLocaleString(locale)} ₺`;
 }
 
-function statusLabel(status: string) {
+function statusLabel(status: string, t: (key: string) => string) {
   const labels: Record<string, string> = {
-    PENDING_PAYMENT: "Ödeme Bekliyor",
-    PAID: "Ödendi",
-    PREPARING: "Hazırlanıyor",
-    SHIPPED: "Kargoda",
-    COMPLETED: "Tamamlandı",
-    CANCELLED: "İptal Edildi",
-    PENDING_PICKUP: "Yükleme Bekliyor",
-    PICKED_UP: "Teslim Alındı",
-    IN_TRANSIT: "Yolda",
-    DELIVERED: "Teslim Edildi",
+    PENDING_PAYMENT: t("buyerDashboard.pendingPaymentStatus"),
+    PAID: t("buyerDashboard.paidStatus"),
+    PREPARING: t("buyerDashboard.preparingStatus"),
+    SHIPPED: t("buyerDashboard.shippedStatus"),
+    COMPLETED: t("buyerDashboard.completedStatus"),
+    CANCELLED: t("buyerDashboard.cancelledStatus"),
+    PENDING_PICKUP: t("buyerDashboard.pendingPickupStatus"),
+    PICKED_UP: t("buyerDashboard.pickedUpStatus"),
+    IN_TRANSIT: t("buyerDashboard.inTransitStatus"),
+    DELIVERED: t("buyerDashboard.deliveredStatus"),
   };
 
   return labels[status] || status;
 }
-
 export default function BuyerDashboardPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [data, setData] = useState<BuyerDashboard>(emptyDashboard);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -88,7 +91,7 @@ export default function BuyerDashboardPage() {
           throw new Error(
             Array.isArray(result?.message)
               ? result.message.join(", ")
-              : result?.message || "Dashboard verileri alınamadı",
+              : result?.message || t("buyerDashboard.loadError"),
           );
         }
 
@@ -104,7 +107,7 @@ export default function BuyerDashboardPage() {
         });
       } catch (err: any) {
         console.error("Buyer dashboard error:", err);
-        setError(err?.message || "Dashboard verileri alınamadı");
+        setError(err?.message || t("buyerDashboard.loadError"));
       } finally {
         setLoading(false);
       }
@@ -114,52 +117,52 @@ export default function BuyerDashboardPage() {
   }, []);
 
   if (loading) {
-    return <main style={pageStyle}>Dashboard yükleniyor...</main>;
+    return <main style={pageStyle}>{t("buyerDashboard.loading")}</main>;
   }
 
   return (
     <main style={pageStyle}>
       <div style={headerStyle}>
         <div>
-          <h1 style={titleStyle}>Alıcı Dashboard</h1>
+          <h1 style={titleStyle}>{t("buyerDashboard.title")}</h1>
           <p style={subtitleStyle}>
-            Satın alma, teklif ve nakliye süreçlerinizi tek ekrandan yönetin.
+            {t("buyerDashboard.subtitle")}
           </p>
         </div>
 
         <Link to="/products" style={primaryLinkStyle}>
-          Ürünleri İncele
+          {t("buyerDashboard.browseProducts")}
         </Link>
       </div>
 
       {error && <div style={errorStyle}>{error}</div>}
 
       <div style={statGridStyle}>
-        <StatCard title="Açık RFQ" value={data.openRfqs} icon="📋" />
-        <StatCard title="Gelen Teklif" value={data.receivedQuotes} icon="💬" />
+        <StatCard title={t("buyerDashboard.openRfqs")} value={data.openRfqs} icon="📋" />
+        <StatCard title={t("buyerDashboard.receivedQuotes")} value={data.receivedQuotes} icon="💬" />
         <StatCard
-          title="Ödeme Bekleyen"
+          title={t("buyerDashboard.pendingPayment")}
           value={data.pendingPaymentOrders}
           icon="💳"
         />
-        <StatCard title="Aktif Sipariş" value={data.activeOrders} icon="📦" />
+        <StatCard title={t("buyerDashboard.activeOrders")} value={data.activeOrders} icon="📦" />
         <StatCard
-          title="Tamamlanan Sipariş"
+          title={t("buyerDashboard.completedOrders")}
           value={data.completedOrders}
           icon="✅"
         />
         <StatCard
-          title="Toplam Satın Alma"
-          value={money(data.totalPurchases)}
+          title={t("buyerDashboard.totalPurchases")}
+          value={money(data.totalPurchases, locale)}
           icon="₺"
         />
         <StatCard
-          title="Nakliye Talebi"
+          title={t("buyerDashboard.shippingRequests")}
           value={data.shippingRequests}
           icon="🚚"
         />
         <StatCard
-          title="Aktif Taşıma"
+          title={t("buyerDashboard.activeShipping")}
           value={data.activeShippingOrders}
           icon="🛣️"
         />
@@ -168,50 +171,50 @@ export default function BuyerDashboardPage() {
       <div style={quickGridStyle}>
         <Link to="/products" style={quickCardStyle}>
           <span style={quickIconStyle}>🔎</span>
-          <strong>Ürün Ara</strong>
+          <strong>{t("buyerDashboard.searchProducts")}</strong>
           <small style={quickTextStyle}>
-            Tedarikçilerin ürünlerini inceleyin
+            {t("buyerDashboard.searchProductsDesc")}
           </small>
         </Link>
 
         <Link to="/buyer/orders" style={quickCardStyle}>
           <span style={quickIconStyle}>📦</span>
-          <strong>Siparişlerim</strong>
+          <strong>{t("buyerDashboard.myOrders")}</strong>
           <small style={quickTextStyle}>
-            Sipariş ve ödeme durumlarını takip edin
+            {t("buyerDashboard.myOrdersDesc")}
           </small>
         </Link>
 
         <Link to="/buyer/shipping-quotes" style={quickCardStyle}>
           <span style={quickIconStyle}>🚛</span>
-          <strong>Nakliye Teklifleri</strong>
+          <strong>{t("buyerDashboard.shippingQuotes")}</strong>
           <small style={quickTextStyle}>
-            Lojistik firmalarının tekliflerini görün
+            {t("buyerDashboard.shippingQuotesDesc")}
           </small>
         </Link>
 
         <Link to="/chat" style={quickCardStyle}>
           <span style={quickIconStyle}>💬</span>
-          <strong>Mesajlar</strong>
-          <small style={quickTextStyle}>Ticari görüşmelerinizi yönetin</small>
+          <strong>{t("buyerDashboard.messages")}</strong>
+          <small style={quickTextStyle}>{t("buyerDashboard.messagesDesc")}</small>
         </Link>
       </div>
 
       <section style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Son Siparişler</h2>
+        <h2 style={sectionTitleStyle}>{t("buyerDashboard.recentOrders")}</h2>
 
         {data.recentOrders.length === 0 ? (
-          <div style={emptyStyle}>Henüz sipariş bulunmuyor.</div>
+          <div style={emptyStyle}>{t("buyerDashboard.noOrders")}</div>
         ) : (
           <div style={listStyle}>
             {data.recentOrders.map((order) => (
               <div key={order.id} style={listItemStyle}>
                 <div>
-                  <strong>Sipariş #{order.id.slice(-8)}</strong>
-                  <div style={mutedStyle}>{money(order.totalAmount)}</div>
+                  <strong>{t("buyerDashboard.order")} #{order.id.slice(-8)}</strong>
+                  <div style={mutedStyle}>{money(order.totalAmount, locale)}</div>
                 </div>
 
-                <span style={badgeStyle}>{statusLabel(order.status)}</span>
+                <span style={badgeStyle}>{statusLabel(order.status, t)}</span>
               </div>
             ))}
           </div>
@@ -219,24 +222,25 @@ export default function BuyerDashboardPage() {
       </section>
 
       <section style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Son Taşımalar</h2>
+        <h2 style={sectionTitleStyle}>{t("buyerDashboard.recentShipping")}</h2>
 
         {data.recentShippingOrders.length === 0 ? (
-          <div style={emptyStyle}>Henüz aktif taşıma bulunmuyor.</div>
+          <div style={emptyStyle}>{t("buyerDashboard.noShipping")}</div>
         ) : (
           <div style={listStyle}>
             {data.recentShippingOrders.map((order) => (
               <div key={order.id} style={listItemStyle}>
                 <div>
                   <strong>
-                    {order.shippingCompany || "Lojistik taşıması"}
+                    {order.shippingCompany || t("buyerDashboard.logisticsShipment")}
                   </strong>
                   <div style={mutedStyle}>
-                    Takip: {order.trackingNo || "Henüz oluşturulmadı"}
+                    {t("buyerDashboard.tracking")}:{" "}
+                    {order.trackingNo || t("buyerDashboard.trackingPending")}
                   </div>
                 </div>
 
-                <span style={badgeStyle}>{statusLabel(order.status)}</span>
+                <span style={badgeStyle}>{statusLabel(order.status, t)}</span>
               </div>
             ))}
           </div>

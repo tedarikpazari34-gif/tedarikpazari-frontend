@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   role: string;
@@ -32,6 +33,9 @@ export default function DashboardStats({
   buyerCompletedOrders,
   buyerPendingPayments,
 }: Props) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   return (
     <>
       {role === "BUYER" && (
@@ -45,22 +49,22 @@ export default function DashboardStats({
             }}
           >
             <div style={darkCardStyle}>
-              <div style={labelStyle}>Açık RFQ</div>
+              <div style={labelStyle}>{t("dashboardStats.openRfq")}</div>
               <div style={valueStyle}>{buyerOpenRfqs}</div>
             </div>
 
             <div style={darkCardStyle}>
-              <div style={labelStyle}>Kapanan RFQ</div>
+              <div style={labelStyle}>{t("dashboardStats.closedRfq")}</div>
               <div style={valueStyle}>{buyerClosedRfqs}</div>
             </div>
 
             <div style={darkCardStyle}>
-              <div style={labelStyle}>Gelen Teklif</div>
+              <div style={labelStyle}>{t("dashboardStats.receivedQuotes")}</div>
               <div style={valueStyle}>{buyerQuoteCount}</div>
             </div>
 
             <div style={darkCardStyle}>
-              <div style={labelStyle}>Sipariş Sayısı</div>
+              <div style={labelStyle}>{t("dashboardStats.orderCount")}</div>
               <div style={valueStyle}>{totalOrders}</div>
             </div>
           </div>
@@ -74,17 +78,17 @@ export default function DashboardStats({
             }}
           >
             <div style={lightCardStyle}>
-              <div style={lightLabelStyle}>Tamamlanan Sipariş</div>
+              <div style={lightLabelStyle}>{t("dashboardStats.completedOrders")}</div>
               <div style={lightValueStyle}>{buyerCompletedOrders}</div>
             </div>
 
             <div style={lightCardStyle}>
-              <div style={lightLabelStyle}>Bekleyen Ödeme</div>
+              <div style={lightLabelStyle}>{t("dashboardStats.pendingPayments")}</div>
               <div style={lightValueStyle}>{buyerPendingPayments}</div>
             </div>
 
             <div style={lightCardStyle}>
-              <div style={lightLabelStyle}>Açık Dispute</div>
+              <div style={lightLabelStyle}>{t("dashboardStats.openDisputes")}</div>
               <div style={lightValueStyle}>{buyerOpenDisputes}</div>
             </div>
           </div>
@@ -102,24 +106,24 @@ export default function DashboardStats({
             }}
           >
             <div style={darkCardStyle}>
-              <div style={labelStyle}>Toplam Satış</div>
+              <div style={labelStyle}>{t("dashboardStats.totalSales")}</div>
               <div style={valueStyle}>
-                {totalSales.toLocaleString("tr-TR")} ₺
+                {totalSales.toLocaleString(locale)} ₺
               </div>
             </div>
 
             <div style={darkCardStyle}>
-              <div style={labelStyle}>Aktif Sipariş</div>
+              <div style={labelStyle}>{t("dashboardStats.activeOrders")}</div>
               <div style={valueStyle}>{activeOrders}</div>
             </div>
 
             <div style={darkCardStyle}>
-              <div style={labelStyle}>Açık RFQ</div>
+              <div style={labelStyle}>{t("dashboardStats.openRfq")}</div>
               <div style={valueStyle}>{openRfqsCount}</div>
             </div>
 
             <div style={darkCardStyle}>
-              <div style={labelStyle}>Toplam Sipariş</div>
+              <div style={labelStyle}>{t("dashboardStats.totalOrders")}</div>
               <div style={valueStyle}>{totalOrders}</div>
             </div>
           </div>
@@ -133,17 +137,17 @@ export default function DashboardStats({
             }}
           >
             <div style={lightCardStyle}>
-              <div style={lightLabelStyle}>Tamamlanan Sipariş</div>
+              <div style={lightLabelStyle}>{t("dashboardStats.completedOrders")}</div>
               <div style={lightValueStyle}>{completedOrders}</div>
             </div>
 
             <div style={lightCardStyle}>
-              <div style={lightLabelStyle}>Ödeme Alınmış Sipariş</div>
+              <div style={lightLabelStyle}>{t("dashboardStats.paidOrders")}</div>
               <div style={lightValueStyle}>{paidOrders}</div>
             </div>
 
             <div style={lightCardStyle}>
-              <div style={lightLabelStyle}>Bekleyen RFQ Talepleri</div>
+              <div style={lightLabelStyle}>{t("dashboardStats.pendingRfqRequests")}</div>
               <div style={lightValueStyle}>{openRfqsCount}</div>
             </div>
           </div>

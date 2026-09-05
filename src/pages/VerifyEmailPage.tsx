@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
 export default function VerifyEmailPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const [status, setStatus] = useState("E-posta adresiniz doğrulanıyor...");
+  const [status, setStatus] = useState(() => t("verifyEmailPage.verifying"));
 
   useEffect(() => {
     const token = searchParams.get("token");
 
     if (!token) {
-      setStatus("Doğrulama bağlantısı geçersiz.");
+      setStatus(t("verifyEmailPage.invalidLink"));
       return;
     }
 
@@ -21,15 +23,15 @@ export default function VerifyEmailPage() {
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-          throw new Error(data?.message || "E-posta doğrulanamadı.");
+          throw new Error(data?.message || t("verifyEmailPage.verifyFailed"));
         }
 
-        setStatus("✅ E-posta adresiniz başarıyla doğrulandı.");
+        setStatus(t("verifyEmailPage.success"));
       })
       .catch((err) => {
-        setStatus(err.message || "E-posta doğrulanamadı.");
+        setStatus(err.message || t("verifyEmailPage.verifyFailed"));
       });
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   return (
     <main
@@ -77,7 +79,7 @@ export default function VerifyEmailPage() {
             fontWeight: 700,
           }}
         >
-          Giriş Yap
+          {t("verifyEmailPage.login")}
         </Link>
       </div>
     </main>

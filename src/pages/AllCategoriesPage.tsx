@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const API =
   import.meta.env.VITE_API_URL ||
@@ -12,6 +13,9 @@ type Category = {
 };
 
 export default function AllCategoriesPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en" : "tr";
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -39,7 +43,7 @@ export default function AllCategoriesPage() {
     .filter((category) =>
       category.name.toLowerCase().includes(search.trim().toLowerCase())
     )
-    .sort((a, b) => a.name.localeCompare(b.name, "tr"));
+    .sort((a, b) => a.name.localeCompare(b.name, locale));
 
   const getChildCount = (id: string) =>
     categories.filter((category) => category.parentId === id).length;
@@ -47,28 +51,26 @@ export default function AllCategoriesPage() {
   return (
     <main style={pageStyle}>
       <section style={heroStyle}>
-        <div style={eyebrowStyle}>TEDARİK KATEGORİLERİ</div>
+        <div style={eyebrowStyle}>{t("allCategoriesPage.eyebrow")}</div>
 
         <h1 style={titleStyle}>
-          İşletmeniz için doğru tedarik alanını bulun
+          {t("allCategoriesPage.title")}
         </h1>
 
         <p style={descStyle}>
-          Dentalden tekstile, medikalden sanayiye kadar tüm B2B tedarik
-          kategorilerini inceleyin. Ürün bulamazsanız doğrudan teklif talebi
-          oluşturabilirsiniz.
+          {t("allCategoriesPage.description")}
         </p>
 
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Kategori ara..."
+          placeholder={t("allCategoriesPage.searchPlaceholder")}
           style={searchStyle}
         />
       </section>
 
       {loading ? (
-        <div style={emptyStyle}>Kategoriler yükleniyor...</div>
+        <div style={emptyStyle}>{t("allCategoriesPage.loading")}</div>
       ) : (
         <section style={gridStyle}>
           {roots.map((category) => (
@@ -86,8 +88,10 @@ export default function AllCategoriesPage() {
 
                 <p style={categoryDescStyle}>
                   {getChildCount(category.id) > 0
-                    ? `${getChildCount(category.id)} alt kategori`
-                    : "Kategoriye göz at"}
+                    ? t("allCategoriesPage.subcategoryCount", {
+                        count: getChildCount(category.id),
+                      })
+                    : t("allCategoriesPage.browseCategory")}
                 </p>
               </div>
 
@@ -98,23 +102,24 @@ export default function AllCategoriesPage() {
       )}
 
       {!loading && roots.length === 0 && (
-        <div style={emptyStyle}>Aradığınız kategori bulunamadı.</div>
+        <div style={emptyStyle}>{t("allCategoriesPage.notFound")}</div>
       )}
 
       <section style={ctaStyle}>
         <div>
-          <div style={ctaEyebrowStyle}>ÜRÜNÜ BULAMADINIZ MI?</div>
+          <div style={ctaEyebrowStyle}>
+            {t("allCategoriesPage.ctaEyebrow")}
+          </div>
           <h2 style={ctaTitleStyle}>
-            İhtiyacınızı yayınlayın, teklifler size gelsin
+            {t("allCategoriesPage.ctaTitle")}
           </h2>
           <p style={ctaTextStyle}>
-            Aradığınız ürün mevcut kategorilerde yoksa talebinizi doğrudan
-            tedarikçilere iletebilirsiniz.
+            {t("allCategoriesPage.ctaText")}
           </p>
         </div>
 
         <Link to="/buyer/rfqs/new" style={ctaButtonStyle}>
-          Teklif Talebi Oluştur
+          {t("allCategoriesPage.createRequest")}
         </Link>
       </section>
     </main>

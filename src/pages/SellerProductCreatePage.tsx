@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import SellerLayout from "../components/SellerLayout";
+import { useTranslation } from "react-i18next";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
 
@@ -17,6 +18,8 @@ type UploadedImage = {
 };
 
 export default function SellerProductCreatePage() {
+  const { t } = useTranslation();
+
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
   );
@@ -67,7 +70,7 @@ export default function SellerProductCreatePage() {
           setCategories(flattenCategories(data));
         }
       } catch (err) {
-        console.error("Kategori yüklenemedi:", err);
+        console.error(t("sellerProductCreatePage.categoryLoadError"), err);
       }
     }
 
@@ -106,7 +109,7 @@ export default function SellerProductCreatePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "Dosyalar yüklenemedi");
+        setError(data?.message || t("sellerProductCreatePage.uploadFailed"));
         setUploadedImages([]);
         return;
       }
@@ -119,10 +122,10 @@ export default function SellerProductCreatePage() {
       }));
 
       setUploadedImages(withCover);
-      setMessage("Fotoğraflar başarıyla yüklendi");
+      setMessage(t("sellerProductCreatePage.uploadSuccess"));
     } catch (err) {
       console.error("UPLOAD ERROR:", err);
-      setError("Fotoğraf yüklenirken hata oluştu");
+      setError(t("sellerProductCreatePage.uploadError"));
       setUploadedImages([]);
     } finally {
       setUploading(false);
@@ -140,7 +143,7 @@ export default function SellerProductCreatePage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Lütfen giriş yapın");
+        setError(t("sellerProductCreatePage.loginRequired"));
         return;
       }
 
@@ -171,7 +174,7 @@ export default function SellerProductCreatePage() {
       const createdProduct = await createRes.json();
 
       if (!createRes.ok) {
-        setError(createdProduct?.message || "Ürün oluşturulamadı");
+        setError(createdProduct?.message || t("sellerProductCreatePage.createFailed"));
         return;
       }
 
@@ -188,7 +191,7 @@ export default function SellerProductCreatePage() {
         });
       }
 
-      setMessage("Ürün başarıyla oluşturuldu");
+      setMessage(t("sellerProductCreatePage.createSuccess"));
 
       setTitle("");
       setDescription("");
@@ -202,14 +205,14 @@ export default function SellerProductCreatePage() {
       setSelectedFileNames([]);
     } catch (err) {
       console.error("CREATE ERROR:", err);
-      setError("Ürün oluşturulurken hata oluştu");
+      setError(t("sellerProductCreatePage.createError"));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <SellerLayout title="Yeni Ürün Ekle">
+    <SellerLayout title={t("sellerProductCreatePage.title")}>
       <main
         style={{
           ...pageStyle,
@@ -232,7 +235,7 @@ export default function SellerProductCreatePage() {
               marginTop: 0,
             }}
           >
-            Satışa sunacağınız ürün bilgilerini girin.
+            {t("sellerProductCreatePage.subtitle")}
           </p>
 
           {message && <div style={successStyle}>{message}</div>}
@@ -252,7 +255,7 @@ export default function SellerProductCreatePage() {
               }}
             >
               <input
-                placeholder="Ürün adı"
+                placeholder={t("sellerProductCreatePage.productName")}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 style={inputStyle}
@@ -260,7 +263,7 @@ export default function SellerProductCreatePage() {
               />
 
               <input
-                placeholder="Fiyat"
+                placeholder={t("sellerProductCreatePage.price")}
                 value={basePrice}
                 onChange={(e) => setBasePrice(e.target.value)}
                 style={inputStyle}
@@ -273,7 +276,7 @@ export default function SellerProductCreatePage() {
                 style={inputStyle}
                 required
               >
-                <option value="">Kategori seç</option>
+                <option value="">{t("sellerProductCreatePage.selectCategory")}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -286,18 +289,18 @@ export default function SellerProductCreatePage() {
                 onChange={(e) => setUnitType(e.target.value)}
                 style={inputStyle}
               >
-                <option value="adet">Adet</option>
-                <option value="koli">Koli</option>
-                <option value="kg">Kg</option>
-                <option value="litre">Litre</option>
-                <option value="metre">Metre</option>
-                <option value="paket">Paket</option>
+                <option value="adet">{t("sellerProductCreatePage.piece")}</option>
+                <option value="koli">{t("sellerProductCreatePage.box")}</option>
+                <option value="kg">{t("sellerProductCreatePage.kilogramShort")}</option>
+                <option value="litre">{t("sellerProductCreatePage.litre")}</option>
+                <option value="metre">{t("sellerProductCreatePage.meter")}</option>
+                <option value="paket">{t("sellerProductCreatePage.package")}</option>
               </select>
 
               <input
                 type="number"
                 min="1"
-                placeholder="Minimum sipariş miktarı (MOQ)"
+                placeholder={t("sellerProductCreatePage.moq")}
                 value={moq}
                 onChange={(e) => setMoq(e.target.value)}
                 style={inputStyle}
@@ -307,7 +310,7 @@ export default function SellerProductCreatePage() {
               <input
                 type="number"
                 min="1"
-                placeholder="Teslim süresi (gün)"
+                placeholder={t("sellerProductCreatePage.leadTime")}
                 value={leadTimeDays}
                 onChange={(e) => setLeadTimeDays(e.target.value)}
                 style={inputStyle}
@@ -319,10 +322,10 @@ export default function SellerProductCreatePage() {
                 onChange={(e) => setVatRate(e.target.value)}
                 style={inputStyle}
               >
-                <option value="0">%0 KDV</option>
-                <option value="1">%1 KDV</option>
-                <option value="10">%10 KDV</option>
-                <option value="20">%20 KDV</option>
+                <option value="0">{t("sellerProductCreatePage.vat0")}</option>
+                <option value="1">{t("sellerProductCreatePage.vat1")}</option>
+                <option value="10">{t("sellerProductCreatePage.vat10")}</option>
+                <option value="20">{t("sellerProductCreatePage.vat20")}</option>
               </select>
 
               <input
@@ -334,7 +337,7 @@ export default function SellerProductCreatePage() {
             </div>
 
             <textarea
-              placeholder="Ürün açıklaması"
+              placeholder={t("sellerProductCreatePage.description")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               style={textareaStyle}
@@ -370,10 +373,10 @@ export default function SellerProductCreatePage() {
               }}
             >
               {uploading
-                ? "Fotoğraflar yükleniyor..."
+                ? t("sellerProductCreatePage.uploading")
                 : saving
-                ? "Kaydediliyor..."
-                : "Ürünü Kaydet"}
+                ? t("sellerProductCreatePage.saving")
+                : t("sellerProductCreatePage.save")}
             </button>
           </form>
         </div>

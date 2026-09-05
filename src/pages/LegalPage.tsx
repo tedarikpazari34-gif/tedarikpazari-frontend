@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type LegalContent = {
   title: string;
@@ -9,425 +10,226 @@ type LegalContent = {
   content: ReactNode;
 };
 
-const companyName = "Tedarik Pazarı";
 const contactEmail = "tedarikpazari34@gmail.com";
 
-const pages: Record<string, LegalContent> = {
+type TFunction = (
+  key: string,
+  options?: Record<string, string>
+) => string;
+
+const buildPages = (t: TFunction): Record<string, LegalContent> => ({
   "/kvkk": {
-    title: "Kişisel Verilerin Korunması Politikası",
-    description:
-      "Tedarik Pazarı kişisel verilerin korunması ve işlenmesine ilişkin genel politika.",
-    updatedAt: "15 Temmuz 2026",
+    title: t("legalPage.kvkk.title"),
+    description: t("legalPage.kvkk.description"),
+    updatedAt: t("legalPage.kvkk.updatedAt"),
     content: (
       <>
-        <h2>1. Amaç ve kapsam</h2>
-        <p>
-          Bu politika, {companyName} tarafından işlenen kişisel verilerin
-          korunmasına ilişkin genel esasları açıklar.
-        </p>
+        <h2>{t("legalPage.kvkk.h1")}</h2>
+        <p>{t("legalPage.kvkk.p1")}</p>
 
-        <h2>2. İşlenen veri kategorileri</h2>
-        <p>
-          Kimlik, iletişim, firma, işlem güvenliği, müşteri işlemi, finans,
-          sipariş, teklif, destek ve hukuki işlem verileri işlenebilir.
-        </p>
+        <h2>{t("legalPage.kvkk.h2")}</h2>
+        <p>{t("legalPage.kvkk.p2")}</p>
 
-        <h2>3. İşleme amaçları</h2>
-        <p>
-          Üyelik ve firma süreçlerinin yürütülmesi, RFQ ve teklif işlemlerinin
-          gerçekleştirilmesi, sipariş ve ödeme süreçlerinin yönetilmesi,
-          güvenliğin sağlanması, destek hizmetlerinin sunulması ve hukuki
-          yükümlülüklerin yerine getirilmesi amaçlarıyla veri işlenebilir.
-        </p>
+        <h2>{t("legalPage.kvkk.h3")}</h2>
+        <p>{t("legalPage.kvkk.p3")}</p>
 
-        <h2>4. Saklama ve güvenlik</h2>
-        <p>
-          Kişisel veriler, ilgili mevzuatta öngörülen süreler ve işleme amacı
-          için gerekli süre boyunca saklanır. Yetkisiz erişime karşı uygun
-          teknik ve idari tedbirler uygulanır.
-        </p>
+        <h2>{t("legalPage.kvkk.h4")}</h2>
+        <p>{t("legalPage.kvkk.p4")}</p>
 
-        <h2>5. Başvuru</h2>
-        <p>
-          Kişisel verilerinizle ilgili taleplerinizi {contactEmail} adresine
-          iletebilirsiniz.
-        </p>
+        <h2>{t("legalPage.kvkk.h5")}</h2>
+        <p>{t("legalPage.kvkk.p5", { email: contactEmail })}</p>
       </>
     ),
   },
 
   "/aydinlatma-metni": {
-    title: "KVKK Aydınlatma Metni",
-    description:
-      "Tedarik Pazarı kullanıcıları için kişisel veri işleme aydınlatma metni.",
-    updatedAt: "15 Temmuz 2026",
+    title: t("legalPage.disclosure.title"),
+    description: t("legalPage.disclosure.description"),
+    updatedAt: t("legalPage.disclosure.updatedAt"),
     content: (
       <>
-        <h2>Veri sorumlusu</h2>
-        <p>
-          Veri sorumlusu: {companyName}. Şirketin tam ticari unvanı, MERSİS
-          numarası, adresi ve iletişim bilgileri yayına alınmadan önce bu
-          bölüme eklenmelidir.
-        </p>
+        <h2>{t("legalPage.disclosure.h1")}</h2>
+        <p>{t("legalPage.disclosure.p1")}</p>
 
-        <h2>İşlenen kişisel veriler</h2>
-        <p>
-          Ad, soyad, e-posta, telefon, firma bilgileri, vergi ve ticaret
-          bilgileri, IP ve oturum kayıtları, teklif, sipariş, ödeme, kargo,
-          mesajlaşma ve destek verileri işlenebilir.
-        </p>
+        <h2>{t("legalPage.disclosure.h2")}</h2>
+        <p>{t("legalPage.disclosure.p2")}</p>
 
-        <h2>İşleme amaçları ve hukuki sebepler</h2>
-        <p>
-          Veriler; sözleşmenin kurulması ve ifası, hukuki yükümlülüklerin
-          yerine getirilmesi, hakkın tesisi veya korunması ve meşru menfaat
-          hukuki sebeplerine dayanılarak işlenebilir. Açık rıza gereken
-          faaliyetlerde ayrıca ve bağımsız açık rıza alınır.
-        </p>
+        <h2>{t("legalPage.disclosure.h3")}</h2>
+        <p>{t("legalPage.disclosure.p3")}</p>
 
-        <h2>Aktarım</h2>
-        <p>
-          Veriler; ödeme, barındırma, e-posta, kargo, destek ve güvenlik
-          hizmeti sunan tedarikçilere, yetkili kamu kurumlarına ve hukuken
-          yetkili kişilere amaçla sınırlı olarak aktarılabilir.
-        </p>
+        <h2>{t("legalPage.disclosure.h4")}</h2>
+        <p>{t("legalPage.disclosure.p4")}</p>
 
-        <h2>Haklarınız</h2>
-        <p>
-          6698 sayılı Kanun kapsamındaki bilgi alma, düzeltme, silme,
-          itiraz ve zararın giderilmesini talep etme haklarınızı
-          {contactEmail} adresi üzerinden kullanabilirsiniz.
-        </p>
+        <h2>{t("legalPage.disclosure.h5")}</h2>
+        <p>{t("legalPage.disclosure.p5", { email: contactEmail })}</p>
       </>
     ),
   },
 
   "/gizlilik-politikasi": {
-    title: "Gizlilik Politikası",
-    description:
-      "Tedarik Pazarı internet sitesi ve mobil uygulaması gizlilik politikası.",
-    updatedAt: "14 Ağustos 2026",
+    title: t("legalPage.privacy.title"),
+    description: t("legalPage.privacy.description"),
+    updatedAt: t("legalPage.privacy.updatedAt"),
     content: (
       <>
-        <h2>1. Kapsam</h2>
-        <p>
-          Bu Gizlilik Politikası, Tedarik Pazarı internet sitesi ve mobil
-          uygulamasının kullanımı sırasında işlenen bilgileri açıklar.
-        </p>
+        <h2>{t("legalPage.privacy.h1")}</h2>
+        <p>{t("legalPage.privacy.p1")}</p>
 
-        <h2>2. İşlenebilecek bilgiler</h2>
-        <p>
-          Hesap ve iletişim bilgileri, firma bilgileri, ürün ve hizmet
-          bilgileri, teklif talepleri, teklifler, siparişler, kargo ve
-          işlem kayıtları ile destek ve mesajlaşma verileri işlenebilir.
-        </p>
+        <h2>{t("legalPage.privacy.h2")}</h2>
+        <p>{t("legalPage.privacy.p2")}</p>
 
-        <h2>3. Fotoğraf, kamera ve dosya erişimi</h2>
-        <p>
-          Kullanıcılar ürün, firma, uyuşmazlık veya diğer gerekli görselleri
-          yüklemek istediklerinde cihazlarındaki fotoğraf arşivinden seçim
-          yapabilir, dosya seçebilir veya kamera ile yeni bir görsel
-          oluşturabilir. Bu erişimler yalnızca kullanıcı tarafından ilgili
-          özellik kullanıldığında gerçekleştirilir.
-        </p>
+        <h2>{t("legalPage.privacy.h3")}</h2>
+        <p>{t("legalPage.privacy.p3")}</p>
 
-        <h2>4. Verilerin kullanım amaçları</h2>
-        <p>
-          Bilgiler; hesap ve firma işlemlerinin yürütülmesi, alıcı ve
-          satıcıların buluşturulması, RFQ ve teklif süreçlerinin yönetilmesi,
-          sipariş ve teslimat işlemlerinin gerçekleştirilmesi, bildirimlerin
-          iletilmesi, güvenliğin sağlanması ve kullanıcı desteği sunulması
-          amacıyla kullanılabilir.
-        </p>
+        <h2>{t("legalPage.privacy.h4")}</h2>
+        <p>{t("legalPage.privacy.p4")}</p>
 
-        <h2>5. Bildirimler</h2>
-        <p>
-          Kullanıcılara teklif, sipariş, ödeme, teslimat ve hesap
-          hareketleriyle ilgili hizmet bildirimleri gönderilebilir.
-        </p>
+        <h2>{t("legalPage.privacy.h5")}</h2>
+        <p>{t("legalPage.privacy.p5")}</p>
 
-        <h2>6. Ödeme ve finansal bilgiler</h2>
-        <p>
-          Ödeme özellikleri kullanıma sunulduğunda ödeme işlemleri yetkili
-          ödeme hizmeti sağlayıcıları aracılığıyla gerçekleştirilebilir.
-          Kart bilgileri, kullanılan ödeme altyapısının güvenlik ve
-          saklama kurallarına tabi olabilir.
-        </p>
+        <h2>{t("legalPage.privacy.h6")}</h2>
+        <p>{t("legalPage.privacy.p6")}</p>
 
-        <h2>7. Hizmet sağlayıcıları</h2>
-        <p>
-          Platformun işletilmesi için barındırma, veritabanı, e-posta,
-          bildirim, dosya depolama, güvenlik ve gerektiğinde ödeme hizmeti
-          sağlayıcılarından yararlanılabilir. Bilgiler yalnızca hizmetin
-          gerektirdiği ölçüde paylaşılır.
-        </p>
+        <h2>{t("legalPage.privacy.h7")}</h2>
+        <p>{t("legalPage.privacy.p7")}</p>
 
-        <h2>8. Saklama ve güvenlik</h2>
-        <p>
-          Bilgiler, hizmetlerin sunulması ve yasal yükümlülüklerin yerine
-          getirilmesi için gerekli süre boyunca saklanır. Yetkisiz erişim,
-          kayıp ve kötüye kullanıma karşı uygun teknik ve idari tedbirler
-          uygulanır.
-        </p>
+        <h2>{t("legalPage.privacy.h8")}</h2>
+        <p>{t("legalPage.privacy.p8")}</p>
 
-        <h2>9. Kullanıcı hakları</h2>
-        <p>
-          Kullanıcılar kişisel verileriyle ilgili bilgi alma, düzeltme,
-          silme veya ilgili mevzuat kapsamındaki diğer haklarını kullanmak
-          üzere bizimle iletişime geçebilir.
-        </p>
+        <h2>{t("legalPage.privacy.h9")}</h2>
+        <p>{t("legalPage.privacy.p9")}</p>
 
-        <h2>10. İletişim</h2>
-        <p>
-          Gizlilik ve kişisel verilerle ilgili talepler:
-          {" "}{contactEmail}
-        </p>
+        <h2>{t("legalPage.privacy.h10")}</h2>
+        <p>{t("legalPage.privacy.p10", { email: contactEmail })}</p>
       </>
     ),
   },
 
   "/kullanim-kosullari": {
-    title: "Kullanım Koşulları",
-    description: "Tedarik Pazarı platform kullanım koşulları.",
-    updatedAt: "15 Temmuz 2026",
+    title: t("legalPage.terms.title"),
+    description: t("legalPage.terms.description"),
+    updatedAt: t("legalPage.terms.updatedAt"),
     content: (
       <>
-        <h2>1. Platformun niteliği</h2>
-        <p>
-          {companyName}, alıcılar ile satıcıları RFQ, teklif ve sipariş
-          süreçlerinde bir araya getiren elektronik ticaret platformudur.
-        </p>
+        <h2>{t("legalPage.terms.h1")}</h2>
+        <p>{t("legalPage.terms.p1")}</p>
 
-        <h2>2. Üyelik ve firma bilgileri</h2>
-        <p>
-          Kullanıcılar doğru, güncel ve hukuka uygun bilgi vermekle
-          yükümlüdür. Yanıltıcı, sahte veya üçüncü kişilere ait bilgi
-          kullanılması yasaktır.
-        </p>
+        <h2>{t("legalPage.terms.h2")}</h2>
+        <p>{t("legalPage.terms.p2")}</p>
 
-        <h2>3. Teklif ve siparişler</h2>
-        <p>
-          Teklifin kabul edilmesiyle taraflar arasında sipariş ilişkisi
-          kurulur. Satıcı ürün, fiyat, teslim süresi ve mevzuata uygunluktan;
-          alıcı ödeme ve teslim alma yükümlülüklerinden sorumludur.
-        </p>
+        <h2>{t("legalPage.terms.h3")}</h2>
+        <p>{t("legalPage.terms.p3")}</p>
 
-        <h2>4. Ödeme, komisyon ve bakiye</h2>
-        <p>
-          Ödemeler yetkili ödeme kuruluşu üzerinden alınabilir. Platform
-          komisyon oranı sipariş öncesinde gösterilir. Satıcı hak edişleri
-          teslim, uyuşmazlık ve ödeme şartlarına göre cüzdana aktarılır.
-        </p>
+        <h2>{t("legalPage.terms.h4")}</h2>
+        <p>{t("legalPage.terms.p4")}</p>
 
-        <h2>5. Yasaklı kullanım</h2>
-        <p>
-          Hukuka aykırı ürün, yanıltıcı ilan, sahte belge, sistem güvenliğini
-          tehlikeye atan işlem ve platform dışına yönlendirme amacı taşıyan
-          kötüye kullanım yasaktır.
-        </p>
+        <h2>{t("legalPage.terms.h5")}</h2>
+        <p>{t("legalPage.terms.p5")}</p>
 
-        <h2>6. Uyuşmazlıklar</h2>
-        <p>
-          Taraflar platform içi uyuşmazlık sistemini kullanabilir. Yetkili
-          hukuk ve mahkeme bilgileri, şirketin ticari merkezine göre hukukçu
-          tarafından son metinde belirlenmelidir.
-        </p>
+        <h2>{t("legalPage.terms.h6")}</h2>
+        <p>{t("legalPage.terms.p6")}</p>
       </>
     ),
   },
 
   "/teslimat-ve-iade": {
-    title: "Teslimat ve İade Şartları",
-    description:
-      "Tedarik Pazarı üzerinden gerçekleştirilen siparişlerin teslimat, iptal, iade ve geri ödeme şartları.",
-    updatedAt: "2 Eylül 2026",
+    title: t("legalPage.delivery.title"),
+    description: t("legalPage.delivery.description"),
+    updatedAt: t("legalPage.delivery.updatedAt"),
     content: (
       <>
-        <h2>1. Teslimat</h2>
-        <p>
-          Tedarik Pazarı üzerinden oluşturulan siparişler, ilgili satıcı
-          tarafından sipariş sırasında belirtilen teslimat süresi ve koşulları
-          çerçevesinde hazırlanır ve alıcıya gönderilir.
-        </p>
+        <h2>{t("legalPage.delivery.h1")}</h2>
+        <p>{t("legalPage.delivery.p1")}</p>
 
-        <h2>2. Kargo ve teslimat bilgileri</h2>
-        <p>
-          Siparişin kargoya verilmesinin ardından, mevcut olması halinde kargo
-          firması ve takip bilgileri alıcıya platform üzerinden bildirilir.
-          Teslimat süreleri; ürünün niteliğine, satıcının hazırlık süresine,
-          teslimat adresine ve kargo firmasına göre değişebilir.
-        </p>
+        <h2>{t("legalPage.delivery.h2")}</h2>
+        <p>{t("legalPage.delivery.p2")}</p>
 
-        <h2>3. Teslimat sırasında kontrol</h2>
-        <p>
-          Alıcının ürünü teslim alırken mümkün olduğu ölçüde ambalajı ve ürünü
-          kontrol etmesi; görünür hasar, eksiklik veya yanlış ürün bulunması
-          halinde durumu kargo görevlisine bildirmesi ve gerekli tutanağı
-          düzenletmesi önerilir.
-        </p>
+        <h2>{t("legalPage.delivery.h3")}</h2>
+        <p>{t("legalPage.delivery.p3")}</p>
 
-        <h2>4. İptal ve iade</h2>
-        <p>
-          Siparişlerin iptal ve iade koşulları; ürünün niteliğine, siparişin
-          hazırlanma durumuna, alıcı ile satıcının ticari veya tüketici
-          sıfatına ve yürürlükteki mevzuata göre değerlendirilir.
-        </p>
+        <h2>{t("legalPage.delivery.h4")}</h2>
+        <p>{t("legalPage.delivery.p4")}</p>
 
-        <h2>5. Cayma hakkı</h2>
-        <p>
-          Tüketici işlemi niteliğindeki siparişlerde, yürürlükteki tüketici
-          mevzuatı kapsamında cayma hakkının bulunduğu durumlarda tüketicinin
-          yasal hakları saklıdır. Mevzuatta cayma hakkının istisnası olarak
-          düzenlenen ürün ve hizmetlerde cayma hakkı kullanılamayabilir.
-        </p>
+        <h2>{t("legalPage.delivery.h5")}</h2>
+        <p>{t("legalPage.delivery.p5")}</p>
 
-        <h2>6. Ticari işlemlerde iadeler</h2>
-        <p>
-          Tacir veya ticari işletme adına gerçekleştirilen B2B siparişlerde
-          iade koşulları, ilgili sipariş ve teklif şartları ile taraflar
-          arasındaki anlaşmaya göre belirlenir. Ayıplı, eksik veya siparişe
-          uygun olmayan ürünlere ilişkin yasal haklar saklıdır.
-        </p>
+        <h2>{t("legalPage.delivery.h6")}</h2>
+        <p>{t("legalPage.delivery.p6")}</p>
 
-        <h2>7. Geri ödeme</h2>
-        <p>
-          İade veya iptal talebinin kabul edilmesi halinde geri ödeme,
-          kullanılan ödeme yöntemine ve ödeme hizmeti sağlayıcısının işlem
-          sürelerine bağlı olarak gerçekleştirilir. Banka ve kart kuruluşlarının
-          işlem sürelerinden kaynaklanan gecikmeler Tedarik Pazarı'nın doğrudan
-          kontrolü dışında olabilir.
-        </p>
+        <h2>{t("legalPage.delivery.h7")}</h2>
+        <p>{t("legalPage.delivery.p7")}</p>
 
-        <h2>8. İletişim</h2>
-        <p>
-          Teslimat, iptal ve iade talepleriniz için {contactEmail} adresi
-          üzerinden bizimle iletişime geçebilirsiniz.
-        </p>
+        <h2>{t("legalPage.delivery.h8")}</h2>
+        <p>{t("legalPage.delivery.p8", { email: contactEmail })}</p>
       </>
     ),
   },
 
   "/mesafeli-satis-sozlesmesi": {
-    title: "Mesafeli Satış Sözleşmesi",
-    description:
-      "Tedarik Pazarı üzerinden gerçekleştirilen mesafeli satış işlemlerine ilişkin sözleşme koşulları.",
-    updatedAt: "2 Eylül 2026",
+    title: t("legalPage.distanceSales.title"),
+    description: t("legalPage.distanceSales.description"),
+    updatedAt: t("legalPage.distanceSales.updatedAt"),
     content: (
       <>
-        <h2>1. Taraflar</h2>
-        <p>
-          İşbu Mesafeli Satış Sözleşmesi, Tedarik Pazarı platformu üzerinden
-          ürün veya hizmet satın alan alıcı ile ilgili ürün veya hizmeti sunan
-          satıcı arasında elektronik ortamda kurulur.
-        </p>
+        <h2>{t("legalPage.distanceSales.h1")}</h2>
+        <p>{t("legalPage.distanceSales.p1")}</p>
 
-        <h2>2. Sözleşmenin konusu</h2>
-        <p>
-          Sözleşmenin konusu; alıcının platform üzerinden sipariş verdiği ürün
-          veya hizmetin satışı, bedelinin ödenmesi, teslimatı ve tarafların
-          karşılıklı hak ve yükümlülüklerinin belirlenmesidir.
-        </p>
+        <h2>{t("legalPage.distanceSales.h2")}</h2>
+        <p>{t("legalPage.distanceSales.p2")}</p>
 
-        <h2>3. Ürün, fiyat ve sipariş bilgileri</h2>
-        <p>
-          Ürün veya hizmetin temel özellikleri, miktarı, birim fiyatı, toplam
-          sipariş bedeli, teslim süresi ve diğer ticari koşullar sipariş
-          oluşturulmadan önce ilgili teklif ve sipariş ekranlarında gösterilir.
-        </p>
+        <h2>{t("legalPage.distanceSales.h3")}</h2>
+        <p>{t("legalPage.distanceSales.p3")}</p>
 
-        <h2>4. Ödeme</h2>
-        <p>
-          Sipariş bedeli, platformda sunulan ödeme yöntemlerinden biri
-          kullanılarak tahsil edilir. Ödeme işlemleri yetkili ödeme hizmeti
-          sağlayıcıları aracılığıyla gerçekleştirilebilir.
-        </p>
+        <h2>{t("legalPage.distanceSales.h4")}</h2>
+        <p>{t("legalPage.distanceSales.p4")}</p>
 
-        <h2>5. Teslimat</h2>
-        <p>
-          Satıcı, sipariş konusu ürün veya hizmeti sipariş sırasında belirtilen
-          teslim süresi ve koşulları çerçevesinde alıcıya teslim etmekle
-          yükümlüdür. Kargo veya taşıma yoluyla yapılan teslimatlarda ilgili
-          teslimat bilgileri alıcıya bildirilebilir.
-        </p>
+        <h2>{t("legalPage.distanceSales.h5")}</h2>
+        <p>{t("legalPage.distanceSales.p5")}</p>
 
-        <h2>6. Cayma hakkı</h2>
-        <p>
-          İşlemin tüketici işlemi niteliğinde olması ve yürürlükteki mevzuat
-          uyarınca cayma hakkı bulunması halinde tüketici, yasal süre ve
-          koşullar kapsamında cayma hakkını kullanabilir. Kanunda belirtilen
-          cayma hakkı istisnaları saklıdır.
-        </p>
+        <h2>{t("legalPage.distanceSales.h6")}</h2>
+        <p>{t("legalPage.distanceSales.p6")}</p>
 
-        <h2>7. İade ve geri ödeme</h2>
-        <p>
-          İade ve geri ödeme süreçleri, ürünün niteliğine, sipariş durumuna,
-          tarafların sıfatına ve yürürlükteki mevzuata göre yürütülür.
-          Kabul edilen iadelerde geri ödeme, kullanılan ödeme yöntemine göre
-          gerçekleştirilir.
-        </p>
+        <h2>{t("legalPage.distanceSales.h7")}</h2>
+        <p>{t("legalPage.distanceSales.p7")}</p>
 
-        <h2>8. B2B işlemler</h2>
-        <p>
-          Tacirler veya ticari işletmeler arasında gerçekleştirilen işlemlerde,
-          tüketici mevzuatına özgü hükümler uygulanmayabilir. Bu tür işlemlerde
-          tarafların teklif, sipariş ve ticari anlaşma koşulları esas alınır.
-        </p>
+        <h2>{t("legalPage.distanceSales.h8")}</h2>
+        <p>{t("legalPage.distanceSales.p8")}</p>
 
-        <h2>9. Uyuşmazlıklar</h2>
-        <p>
-          Taraflar, siparişe ilişkin uyuşmazlıklarda öncelikle platform
-          üzerinden iletişim ve uyuşmazlık çözüm yöntemlerini kullanabilir.
-          Tüketici işlemlerinde tüketicinin ilgili mevzuattan doğan başvuru
-          hakları saklıdır.
-        </p>
+        <h2>{t("legalPage.distanceSales.h9")}</h2>
+        <p>{t("legalPage.distanceSales.p9")}</p>
 
-        <h2>10. İletişim</h2>
-        <p>
-          Sözleşme ve sipariş süreçlerine ilişkin sorularınız için
-          {contactEmail} adresinden bizimle iletişime geçebilirsiniz.
-        </p>
+        <h2>{t("legalPage.distanceSales.h10")}</h2>
+        <p>{t("legalPage.distanceSales.p10", { email: contactEmail })}</p>
       </>
     ),
   },
 
   "/cerez-politikasi": {
-    title: "Çerez Politikası",
-    description: "Tedarik Pazarı çerez kullanımı hakkında bilgilendirme.",
-    updatedAt: "15 Temmuz 2026",
+    title: t("legalPage.cookies.title"),
+    description: t("legalPage.cookies.description"),
+    updatedAt: t("legalPage.cookies.updatedAt"),
     content: (
       <>
-        <h2>Çerez nedir?</h2>
-        <p>
-          Çerezler, internet sitesinin çalışması ve tercihlerin hatırlanması
-          amacıyla cihazınıza kaydedilebilen küçük metin dosyalarıdır.
-        </p>
+        <h2>{t("legalPage.cookies.h1")}</h2>
+        <p>{t("legalPage.cookies.p1")}</p>
 
-        <h2>Kullanılabilecek çerezler</h2>
-        <p>
-          Zorunlu oturum, kimlik doğrulama, güvenlik ve tercih çerezleri
-          kullanılabilir. Analitik veya pazarlama çerezleri kullanılacaksa,
-          gerekli olduğu ölçüde önceden açık rıza alınır.
-        </p>
+        <h2>{t("legalPage.cookies.h2")}</h2>
+        <p>{t("legalPage.cookies.p2")}</p>
 
-        <h2>Çerez yönetimi</h2>
-        <p>
-          Çerez tercihleri tarayıcı ayarlarından değiştirilebilir. Zorunlu
-          çerezlerin kapatılması platformun bazı özelliklerinin çalışmamasına
-          yol açabilir.
-        </p>
+        <h2>{t("legalPage.cookies.h3")}</h2>
+        <p>{t("legalPage.cookies.p3")}</p>
 
-        <h2>Güncelleme</h2>
-        <p>
-          Gerçekte kullanılan her çerezin adı, sağlayıcısı, amacı ve saklama
-          süresi canlıya çıkmadan önce bu metne tablo halinde eklenmelidir.
-        </p>
+        <h2>{t("legalPage.cookies.h4")}</h2>
+        <p>{t("legalPage.cookies.p4")}</p>
       </>
     ),
   },
-};
+});
 
 export default function LegalPage() {
+  const { t } = useTranslation();
   const location = useLocation();
+  const pages = buildPages(t);
   const page = pages[location.pathname] || pages["/kullanim-kosullari"];
 
   return (
@@ -443,11 +245,13 @@ export default function LegalPage() {
 
       <article style={cardStyle}>
         <Link to="/" style={backStyle}>
-          ← Ana sayfaya dön
+          {t("legalPage.backHome")}
         </Link>
 
         <h1 style={titleStyle}>{page.title}</h1>
-        <p style={updatedStyle}>Son güncelleme: {page.updatedAt}</p>
+        <p style={updatedStyle}>
+          {t("legalPage.lastUpdated")} {page.updatedAt}
+        </p>
 
         <div style={contentStyle}>{page.content}</div>
       </article>

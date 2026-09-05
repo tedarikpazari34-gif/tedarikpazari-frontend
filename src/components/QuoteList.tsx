@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface QuoteItem {
   id: string;
@@ -25,24 +26,26 @@ export default function QuoteList({
   acceptQuote,
   panelCardStyle,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <>
-      <h2>Quotes</h2>
+      <h2>{t("quoteList.title")}</h2>
 
       {quotes.map((q) => (
         <div key={q.id} style={panelCardStyle}>
-          <div>Quote ID: {q.id}</div>
-          <div>RFQ: {q.rfqId || q.rfq?.id || "-"}</div>
-          <div>Fiyat: {q.unitPrice || q.price || "-"}</div>
-          <div>Teslim: {q.deliveryDays || "-"} gün</div>
-          <div>Durum: {q.status}</div>
+          <div>{t("quoteList.quoteId")}: {q.id}</div>
+          <div>{t("quoteList.rfq")}: {q.rfqId || q.rfq?.id || "-"}</div>
+          <div>{t("quoteList.price")}: {q.unitPrice || q.price || "-"}</div>
+          <div>{t("quoteList.delivery")}: {q.deliveryDays || "-"} {t("quoteList.days")}</div>
+          <div>{t("quoteList.status")}: {q.status}</div>
 
           {role === "BUYER" && q.status === "SENT" && (
             <button
               style={{ marginTop: 8 }}
               onClick={() => acceptQuote(q.id)}
             >
-              Teklifi Kabul Et
+              {t("quoteList.acceptQuote")}
             </button>
           )}
         </div>

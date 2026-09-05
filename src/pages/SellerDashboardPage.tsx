@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { authFetch } from "../api";
+import { useTranslation } from "react-i18next";
 
 type RecentOrder = {
   id: string;
@@ -39,24 +40,30 @@ const emptyDashboard: SellerDashboard = {
   recentOrders: [],
 };
 
-function money(value: number | string | undefined) {
-  return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;
+function money(
+  value: number | string | undefined,
+  locale: string,
+) {
+  return `${Number(value || 0).toLocaleString(locale)} ₺`;
 }
 
-function statusLabel(status: string) {
+function statusLabel(status: string, t: any) {
   const labels: Record<string, string> = {
-    PENDING_PAYMENT: "Ödeme Bekliyor",
-    PAID: "Ödendi",
-    PREPARING: "Hazırlanıyor",
-    SHIPPED: "Kargoda",
-    COMPLETED: "Tamamlandı",
-    CANCELLED: "İptal Edildi",
+    PENDING_PAYMENT: t("sellerDashboardPage.pendingPayment"),
+    PAID: t("sellerDashboardPage.paid"),
+    PREPARING: t("sellerDashboardPage.preparing"),
+    SHIPPED: t("sellerDashboardPage.shipped"),
+    COMPLETED: t("sellerDashboardPage.completed"),
+    CANCELLED: t("sellerDashboardPage.cancelled"),
   };
 
   return labels[status] || status;
 }
 
 export default function SellerDashboardPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [data, setData] = useState<SellerDashboard>(emptyDashboard);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -74,7 +81,7 @@ export default function SellerDashboardPage() {
           throw new Error(
             Array.isArray(result?.message)
               ? result.message.join(", ")
-              : result?.message || "Dashboard verileri alınamadı",
+              : result?.message || t("sellerDashboardPage.loadFailed"),
           );
         }
 
@@ -87,7 +94,7 @@ export default function SellerDashboardPage() {
         });
       } catch (err: any) {
         console.error("Seller dashboard error:", err);
-        setError(err?.message || "Dashboard verileri alınamadı");
+        setError(err?.message || t("sellerDashboardPage.loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -97,45 +104,69 @@ export default function SellerDashboardPage() {
   }, []);
 
   if (loading) {
-    return <main style={pageStyle}>Dashboard yükleniyor...</main>;
+    return (
+      <main style={pageStyle}>
+        {t("sellerDashboardPage.loading")}
+      </main>
+    );
   }
 
   return (
     <main style={pageStyle}>
       <div style={headerStyle}>
         <div>
-          <h1 style={titleStyle}>Satıcı Dashboard</h1>
+          <h1 style={titleStyle}>{t("sellerDashboardPage.title")}</h1>
           <p style={subtitleStyle}>
-            Ürün, teklif, sipariş ve kazanç özetinizi takip edin.
+            {t("sellerDashboardPage.subtitle")}
           </p>
         </div>
 
         <Link to="/seller/products/new" style={primaryLinkStyle}>
-          Yeni Ürün Ekle
+          {t("sellerDashboardPage.addProduct")}
         </Link>
       </div>
 
       {error && <div style={errorStyle}>{error}</div>}
 
       <div style={statGridStyle}>
-        <StatCard title="Aktif Ürün" value={data.activeProducts} icon="🏷️" />
-        <StatCard title="Açık RFQ" value={data.openRfqs} icon="📋" />
-        <StatCard title="Gönderilen Teklif" value={data.sentQuotes} icon="💬" />
-        <StatCard title="Aktif Sipariş" value={data.activeOrders} icon="📦" />
         <StatCard
-          title="Tamamlanan Sipariş"
+          title={t("sellerDashboardPage.activeProducts")}
+          value={data.activeProducts}
+          icon="🏷️"
+        />
+        <StatCard
+          title={t("sellerDashboardPage.openRfqs")}
+          value={data.openRfqs}
+          icon="📋"
+        />
+        <StatCard
+          title={t("sellerDashboardPage.sentQuotes")}
+          value={data.sentQuotes}
+          icon="💬"
+        />
+        <StatCard
+          title={t("sellerDashboardPage.activeOrders")}
+          value={data.activeOrders}
+          icon="📦"
+        />
+        <StatCard
+          title={t("sellerDashboardPage.completedOrders")}
           value={data.completedOrders}
           icon="✅"
         />
-        <StatCard title="Brüt Satış" value={money(data.grossSales)} icon="₺" />
         <StatCard
-          title="Net Hak Ediş"
-          value={money(data.totalPayout)}
+          title={t("sellerDashboardPage.grossSales")}
+          value={money(data.grossSales, locale)}
+          icon="₺"
+        />
+        <StatCard
+          title={t("sellerDashboardPage.totalPayout")}
+          value={money(data.totalPayout, locale)}
           icon="💰"
         />
         <StatCard
-          title="Kullanılabilir Bakiye"
-          value={money(data.walletAvailable)}
+          title={t("sellerDashboardPage.availableBalance")}
+          value={money(data.walletAvailable, locale)}
           icon="👛"
         />
       </div>
@@ -143,71 +174,99 @@ export default function SellerDashboardPage() {
       <div style={quickGridStyle}>
         <Link to="/seller/products" style={quickCardStyle}>
           <span style={quickIconStyle}>🏷️</span>
-          <strong>Ürünlerim</strong>
-          <small style={quickTextStyle}>Ürünlerinizi yönetin</small>
+          <strong>{t("sellerDashboardPage.myProducts")}</strong>
+          <small style={quickTextStyle}>
+            {t("sellerDashboardPage.manageProducts")}
+          </small>
         </Link>
 
         <Link to="/seller/quotes" style={quickCardStyle}>
           <span style={quickIconStyle}>📝</span>
-          <strong>Tekliflerim</strong>
+          <strong>{t("sellerDashboardPage.myQuotes")}</strong>
           <small style={quickTextStyle}>
-            Gönderdiğiniz teklifleri takip edin
+            {t("sellerDashboardPage.trackQuotes")}
           </small>
         </Link>
 
         <Link to="/seller/orders" style={quickCardStyle}>
           <span style={quickIconStyle}>📦</span>
-          <strong>Siparişlerim</strong>
-          <small style={quickTextStyle}>Sipariş durumlarını güncelleyin</small>
+          <strong>{t("sellerDashboardPage.myOrders")}</strong>
+          <small style={quickTextStyle}>
+            {t("sellerDashboardPage.updateOrders")}
+          </small>
         </Link>
 
         <Link to="/wallet" style={quickCardStyle}>
           <span style={quickIconStyle}>💳</span>
-          <strong>Cüzdan</strong>
+          <strong>{t("sellerDashboardPage.wallet")}</strong>
           <small style={quickTextStyle}>
-            Bakiye ve hak edişlerinizi görüntüleyin
+            {t("sellerDashboardPage.viewWallet")}
           </small>
         </Link>
       </div>
 
       <section style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Finansal Özet</h2>
+        <h2 style={sectionTitleStyle}>
+          {t("sellerDashboardPage.financialSummary")}
+        </h2>
 
         <div style={financeGridStyle}>
           <div style={financeCardStyle}>
-            <span style={mutedStyle}>Brüt satış</span>
-            <strong style={financeValueStyle}>{money(data.grossSales)}</strong>
-          </div>
-
-          <div style={financeCardStyle}>
-            <span style={mutedStyle}>Net hak ediş</span>
-            <strong style={financeValueStyle}>{money(data.totalPayout)}</strong>
-          </div>
-
-          <div style={financeCardStyle}>
-            <span style={mutedStyle}>Kilitli bakiye</span>
+            <span style={mutedStyle}>
+              {t("sellerDashboardPage.grossSalesLower")}
+            </span>
             <strong style={financeValueStyle}>
-              {money(data.walletLocked)}
+              {money(data.grossSales, locale)}
+            </strong>
+          </div>
+
+          <div style={financeCardStyle}>
+            <span style={mutedStyle}>
+              {t("sellerDashboardPage.totalPayoutLower")}
+            </span>
+            <strong style={financeValueStyle}>
+              {money(data.totalPayout, locale)}
+            </strong>
+          </div>
+
+          <div style={financeCardStyle}>
+            <span style={mutedStyle}>
+              {t("sellerDashboardPage.lockedBalance")}
+            </span>
+            <strong style={financeValueStyle}>
+              {money(data.walletLocked, locale)}
             </strong>
           </div>
         </div>
       </section>
 
       <section style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Son Siparişler</h2>
+        <h2 style={sectionTitleStyle}>
+          {t("sellerDashboardPage.recentOrders")}
+        </h2>
 
         {data.recentOrders.length === 0 ? (
-          <div style={emptyStyle}>Henüz sipariş bulunmuyor.</div>
+          <div style={emptyStyle}>
+            {t("sellerDashboardPage.noOrders")}
+          </div>
         ) : (
           <div style={listStyle}>
             {data.recentOrders.map((order) => (
               <div key={order.id} style={listItemStyle}>
                 <div>
-                  <strong>Sipariş #{order.id.slice(-8)}</strong>
-                  <div style={mutedStyle}>{money(order.totalAmount)}</div>
+                  <strong>
+                    {t("sellerDashboardPage.order", {
+                      id: order.id.slice(-8),
+                    })}
+                  </strong>
+                  <div style={mutedStyle}>
+                    {money(order.totalAmount, locale)}
+                  </div>
                 </div>
 
-                <span style={badgeStyle}>{statusLabel(order.status)}</span>
+                <span style={badgeStyle}>
+                  {statusLabel(order.status, t)}
+                </span>
               </div>
             ))}
           </div>

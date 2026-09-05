@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface Product {
   id: string;
@@ -21,17 +22,19 @@ export default function ProductGrid({
   onSelectProduct,
   onOpenRfq,
 }: Props) {
+  const { t } = useTranslation();
+
   if (!products || products.length === 0) {
     return (
       <div style={{ marginTop: 20, opacity: 0.7 }}>
-        Ürün bulunamadı
+        {t("productGrid.empty")}
       </div>
     );
   }
 
   return (
     <div style={{ marginTop: 24 }}>
-      <h2 style={{ marginBottom: 16 }}>Ürünler</h2>
+      <h2 style={{ marginBottom: 16 }}>{t("productGrid.title")}</h2>
 
       <div
         style={{
@@ -75,7 +78,7 @@ export default function ProductGrid({
                   lineHeight: 1.4,
                 }}
                >
-                {p.description || "Açıklama yok"}
+                {p.description || t("productGrid.noDescription")}
               </div>
 
               <div style={{ fontSize: 14, color: "#6b7280" }}>
@@ -91,14 +94,14 @@ export default function ProductGrid({
                   onClick={() => onSelectProduct?.(p)}
                   style={secondaryButton}
                 >
-                  Detay
+                  {t("productGrid.detail")}
                 </button>
 
                 <button
                   onClick={() => onOpenRfq?.(p)}
                   style={primaryButton}
                 >
-                  RFQ Gönder
+                  {t("productGrid.sendRfq")}
                 </button>
               </div>
             </div>

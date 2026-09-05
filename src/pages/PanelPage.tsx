@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 import {
   Chart as ChartJS,
@@ -140,6 +141,8 @@ function resolveAssetUrl(path?: string | null) {
 }
 
 export default function PanelPage() {
+  const { t } = useTranslation();
+
   const getStoredToken = () =>
     typeof window !== "undefined" ? localStorage.getItem("token") || "" : "";
 
@@ -203,7 +206,7 @@ export default function PanelPage() {
         setCategories(Array.isArray(res.data) ? res.data : []);
       })
       .catch((err) => {
-        console.error("Kategori yükleme hatası", err);
+        console.error(t("panelPage.errors.categoryLoad"), err);
       });
   }, []);
 
@@ -234,8 +237,8 @@ export default function PanelPage() {
       const r = await axios.get(url);
       setProducts(Array.isArray(r.data) ? r.data : []);
     } catch (err) {
-      console.error("Ürün yükleme hatası:", err);
-      alert("Ürün yükleme hatası");
+      console.error(t("panelPage.errors.productLoad"), err);
+      alert(t("panelPage.errors.productLoad"));
     }
   }
 
@@ -259,7 +262,7 @@ export default function PanelPage() {
         "";
 
       if (!newToken) {
-        alert("Token dönmedi");
+        alert(t("panelPage.errors.noToken"));
         return;
       }
 
@@ -269,10 +272,10 @@ export default function PanelPage() {
       setToken(newToken);
       setRole(newRole);
 
-      alert("Login başarılı");
+      alert(t("panelPage.errors.loginSuccess"));
     } catch (err: any) {
       console.error(err);
-      alert(JSON.stringify(err?.response?.data || err.message || "Login hata"));
+      alert(JSON.stringify(err?.response?.data || err.message || t("panelPage.errors.loginError")));
     }
   };
 
@@ -319,7 +322,7 @@ export default function PanelPage() {
         return;
       }
 
-      alert("RFQ gönderildi");
+      alert(t("panelPage.errors.rfqSent"));
 
       setRfqProduct(null);
       setRfqQuantity(100);
@@ -328,7 +331,7 @@ export default function PanelPage() {
       loadMyRFQs();
     } catch (err) {
       console.error(err);
-      alert("RFQ hatası");
+      alert(t("panelPage.errors.rfqError"));
     }
   };
 
@@ -348,7 +351,7 @@ export default function PanelPage() {
       setRfqs(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      alert("RFQ yükleme hatası");
+      alert(t("panelPage.errors.rfqLoadError"));
     }
   };
 
@@ -368,7 +371,7 @@ export default function PanelPage() {
       setOpenRfqs(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      alert("OPEN RFQ yükleme hatası");
+      alert(t("panelPage.errors.openRfqLoadError"));
     }
   };
 
@@ -397,12 +400,12 @@ export default function PanelPage() {
         return;
       }
 
-      alert("Teklif gönderildi");
+      alert(t("panelPage.errors.quoteSent"));
       loadQuotes();
       loadOpenRFQs();
     } catch (err) {
       console.error(err);
-      alert("Teklif gönderme hatası");
+      alert(t("panelPage.errors.quoteSendError"));
     }
   };
 
@@ -429,7 +432,7 @@ export default function PanelPage() {
       setQuotes(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      alert("Quote yükleme hatası");
+      alert(t("panelPage.errors.quoteLoadError"));
     }
   };
 
@@ -447,13 +450,13 @@ export default function PanelPage() {
         return;
       }
 
-      alert("Sipariş oluşturuldu");
+      alert(t("panelPage.errors.orderCreated"));
       loadQuotes();
       loadOrders();
       loadMyRFQs();
     } catch (err) {
       console.error(err);
-      alert("Teklif kabul hatası");
+      alert(t("panelPage.errors.quoteAcceptError"));
     }
   };
 
@@ -481,7 +484,7 @@ export default function PanelPage() {
       );
     } catch (err) {
       console.error(err);
-      alert("Order yükleme hatası");
+      alert(t("panelPage.errors.orderLoadError"));
     }
   };
 
@@ -499,11 +502,11 @@ export default function PanelPage() {
         return;
       }
 
-      alert("Ödeme başarılı");
+      alert(t("panelPage.errors.paymentSuccess"));
       loadOrders();
     } catch (err) {
       console.error(err);
-      alert("Ödeme hatası");
+      alert(t("panelPage.errors.paymentError"));
     }
   };
 
@@ -521,11 +524,11 @@ export default function PanelPage() {
         return;
       }
 
-      alert("Sipariş hazırlığa alındı");
+      alert(t("panelPage.errors.preparingSuccess"));
       loadOrders();
     } catch (err) {
       console.error(err);
-      alert("Prepare hatası");
+      alert(t("panelPage.errors.preparingError"));
     }
   };
 
@@ -543,11 +546,11 @@ export default function PanelPage() {
         return;
       }
 
-      alert("Sipariş kargoya verildi");
+      alert(t("panelPage.errors.shippedSuccess"));
       loadOrders();
     } catch (err) {
       console.error(err);
-      alert("Ship hatası");
+      alert(t("panelPage.errors.shippedError"));
     }
   };
 
@@ -565,11 +568,11 @@ export default function PanelPage() {
         return;
       }
 
-      alert("Sipariş tamamlandı");
+      alert(t("panelPage.errors.completedSuccess"));
       loadOrders();
     } catch (err) {
       console.error(err);
-      alert("Complete hatası");
+      alert(t("panelPage.errors.completedError"));
     }
   };
 
@@ -589,12 +592,12 @@ export default function PanelPage() {
       setDisputes(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      alert("Dispute yükleme hatası");
+      alert(t("panelPage.errors.disputeLoadError"));
     }
   };
 
   const openDispute = async (orderId: string) => {
-    const reason = prompt("Dispute sebebi");
+    const reason = prompt(t("panelPage.errors.disputeReason"));
     if (!reason) return;
 
     try {
@@ -611,11 +614,11 @@ export default function PanelPage() {
         return;
       }
 
-      alert("Dispute açıldı");
+      alert(t("panelPage.errors.disputeOpened"));
       loadDisputes();
     } catch (err) {
       console.error(err);
-      alert("Dispute açma hatası");
+      alert(t("panelPage.errors.disputeOpenError"));
     }
   };
 
@@ -632,7 +635,7 @@ export default function PanelPage() {
       setAdminCompanies(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      alert("Şirketler yüklenirken hata oluştu");
+      alert(t("panelPage.errors.companiesLoadError"));
     }
   };
 
@@ -649,12 +652,12 @@ export default function PanelPage() {
         return;
       }
 
-      alert("Şirket onaylandı");
+      alert(t("panelPage.errors.companyApproved"));
       loadCompanies();
       loadAdminMetricsOverview();
     } catch (err) {
       console.error(err);
-      alert("Şirket onaylanırken hata oluştu");
+      alert(t("panelPage.errors.companyApproveError"));
     }
   };
 
@@ -671,12 +674,12 @@ export default function PanelPage() {
         return;
       }
 
-      alert("Şirket bloklandı");
+      alert(t("panelPage.errors.companyBlocked"));
       loadCompanies();
       loadAdminMetricsOverview();
     } catch (err) {
       console.error(err);
-      alert("Şirket bloklanırken hata oluştu");
+      alert(t("panelPage.errors.companyBlockError"));
     }
   };
 
@@ -693,7 +696,7 @@ export default function PanelPage() {
       setAdminMetrics(data);
     } catch (err) {
       console.error(err);
-      alert("Metrics overview yüklenirken hata oluştu");
+      alert(t("panelPage.errors.metricsOverviewError"));
     }
   };
 
@@ -710,7 +713,7 @@ export default function PanelPage() {
       setAdminTimeseries(data);
     } catch (err) {
       console.error(err);
-      alert("Metrics timeseries yüklenirken hata oluştu");
+      alert(t("panelPage.errors.metricsTimeseriesError"));
     }
   };
 
@@ -727,7 +730,7 @@ export default function PanelPage() {
       setAdminLedger(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      alert("Ledger yüklenirken hata oluştu");
+      alert(t("panelPage.errors.ledgerLoadError"));
     }
   };
 
@@ -744,7 +747,7 @@ export default function PanelPage() {
       setAdminPendingProducts(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      alert("Bekleyen ürünler yüklenirken hata oluştu");
+      alert(t("panelPage.errors.pendingProductsError"));
     }
   };
 
@@ -761,13 +764,13 @@ export default function PanelPage() {
         return;
       }
 
-      alert("Ürün onaylandı");
+      alert(t("panelPage.errors.productApproved"));
       loadPendingProducts();
       loadAdminMetricsOverview();
       loadProducts();
     } catch (err) {
       console.error(err);
-      alert("Ürün onaylanırken hata oluştu");
+      alert(t("panelPage.errors.productApproveError"));
     }
   };
 
@@ -840,25 +843,25 @@ export default function PanelPage() {
     if (!adminMetrics) return [];
 
     return [
-      { title: "Toplam Şirket", value: adminMetrics?.companies?.total ?? 0 },
-      { title: "Onaylı Şirket", value: adminMetrics?.companies?.approved ?? 0 },
-      { title: "Toplam Kullanıcı", value: adminMetrics?.users?.total ?? 0 },
+      { title: t("panelPage.admin.totalCompanies"), value: adminMetrics?.companies?.total ?? 0 },
+      { title: t("panelPage.admin.approvedCompanies"), value: adminMetrics?.companies?.approved ?? 0 },
+      { title: t("panelPage.admin.totalUsers"), value: adminMetrics?.users?.total ?? 0 },
       {
-        title: "Toplam Ürün",
+        title: t("panelPage.admin.totalProducts"),
         value: adminMetrics?.marketplace?.productsTotal ?? 0,
       },
-      { title: "Toplam RFQ", value: adminMetrics?.marketplace?.rfqsTotal ?? 0 },
+      { title: t("panelPage.admin.totalRfqs"), value: adminMetrics?.marketplace?.rfqsTotal ?? 0 },
       {
-        title: "Toplam Teklif",
+        title: t("panelPage.admin.totalQuotes"),
         value: adminMetrics?.marketplace?.quotesTotal ?? 0,
       },
-      { title: "Toplam Sipariş", value: adminMetrics?.orders?.total ?? 0 },
+      { title: t("panelPage.admin.totalOrders"), value: adminMetrics?.orders?.total ?? 0 },
       {
-        title: "Tamamlanan Sipariş",
+        title: t("panelPage.admin.completedOrders"),
         value: adminMetrics?.orders?.completed ?? 0,
       },
     ];
-  }, [adminMetrics]);
+  }, [adminMetrics, t]);
 
   const timeseriesChartData = useMemo(() => {
     if (!adminTimeseries) return null;
@@ -867,7 +870,7 @@ export default function PanelPage() {
       labels: adminTimeseries.labels,
       datasets: [
         {
-          label: "Orders",
+          label: t("panelPage.admin.orders"),
           data: adminTimeseries.series.ordersCreated,
           borderColor: "#3b82f6",
           backgroundColor: "rgba(59,130,246,0.25)",
@@ -878,7 +881,7 @@ export default function PanelPage() {
           fill: true,
         },
         {
-          label: "Disputes",
+          label: t("panelPage.admin.disputes"),
           data: adminTimeseries.series.disputesCreated,
           borderColor: "#ef4444",
           backgroundColor: "rgba(239,68,68,0.20)",
@@ -890,7 +893,7 @@ export default function PanelPage() {
         },
       ],
     };
-  }, [adminTimeseries]);
+  }, [adminTimeseries, t]);
 
   const chartOptions = {
     responsive: true,
@@ -922,7 +925,7 @@ export default function PanelPage() {
     <div style={pageStyle}>
       {role === "ADMIN" && (
         <div style={{ ...sectionCardStyle, marginTop: 24 }}>
-          <h2 style={{ marginBottom: 20 }}>Admin Dashboard</h2>
+          <h2 style={{ marginBottom: 20 }}>{t("panelPage.admin.dashboard")}</h2>
 
           {adminOverviewCards.length > 0 && (
             <div
@@ -957,7 +960,7 @@ export default function PanelPage() {
 
           {timeseriesChartData && (
             <div style={{ marginBottom: 24 }}>
-              <h3 style={{ marginBottom: 12 }}>Sipariş / Dispute Grafiği</h3>
+              <h3 style={{ marginBottom: 12 }}>{t("panelPage.admin.chartTitle")}</h3>
               <div
                 style={{
                   background: "#0f172a",
@@ -972,7 +975,7 @@ export default function PanelPage() {
 
           {adminPendingProducts.length > 0 && (
             <div style={{ marginBottom: 24 }}>
-              <h3 style={{ marginBottom: 12 }}>Bekleyen Ürünler</h3>
+              <h3 style={{ marginBottom: 12 }}>{t("panelPage.admin.pendingProducts")}</h3>
 
               <div
                 style={{
@@ -1023,7 +1026,7 @@ export default function PanelPage() {
                             marginBottom: 10,
                           }}
                         >
-                          PENDING
+                          {t("panelPage.admin.pending")}
                         </div>
 
                         <div
@@ -1044,7 +1047,7 @@ export default function PanelPage() {
                             marginBottom: 8,
                           }}
                         >
-                          {product.description || "Açıklama yok"}
+                          {product.description || t("panelPage.admin.noDescription")}
                         </div>
 
                         <div
@@ -1055,19 +1058,19 @@ export default function PanelPage() {
                           }}
                         >
                           <div>
-                            <strong>Kategori:</strong> {product.category?.name || "-"}
+                            <strong>{t("panelPage.admin.category")}</strong> {product.category?.name || "-"}
                           </div>
                           <div>
-                            <strong>Satıcı:</strong> {product.seller?.name || "-"}
+                            <strong>{t("panelPage.admin.seller")}</strong> {product.seller?.name || "-"}
                           </div>
                           <div>
-                            <strong>Fiyat:</strong> {product.basePrice} ₺
+                            <strong>{t("panelPage.admin.price")}</strong> {product.basePrice} ₺
                           </div>
                           <div>
-                            <strong>MOQ:</strong> {product.moq}
+                            <strong>{t("panelPage.admin.moq")}</strong> {product.moq}
                           </div>
                           <div>
-                            <strong>Birim:</strong> {product.unitType}
+                            <strong>{t("panelPage.admin.unit")}</strong> {product.unitType}
                           </div>
                         </div>
 
@@ -1084,7 +1087,7 @@ export default function PanelPage() {
                             fontWeight: 700,
                           }}
                         >
-                          Approve Product
+                          {t("panelPage.admin.approveProduct")}
                         </button>
                       </div>
                     </div>
@@ -1096,7 +1099,7 @@ export default function PanelPage() {
 
           {adminCompanies.length > 0 && (
             <div style={{ marginBottom: 24 }}>
-              <h3 style={{ marginBottom: 12 }}>Şirketler</h3>
+              <h3 style={{ marginBottom: 12 }}>{t("panelPage.admin.companies")}</h3>
 
               <div style={{ overflowX: "auto" }}>
                 <table
@@ -1110,12 +1113,12 @@ export default function PanelPage() {
                 >
                   <thead>
                     <tr style={{ background: "#f3f4f6", textAlign: "left" }}>
-                      <th style={tableHeadStyle}>Ad</th>
-                      <th style={tableHeadStyle}>E-posta</th>
-                      <th style={tableHeadStyle}>Rol</th>
-                      <th style={tableHeadStyle}>Durum</th>
-                      <th style={tableHeadStyle}>Verified</th>
-                      <th style={tableHeadStyle}>İşlem</th>
+                      <th style={tableHeadStyle}>{t("panelPage.admin.name")}</th>
+                      <th style={tableHeadStyle}>{t("panelPage.admin.email")}</th>
+                      <th style={tableHeadStyle}>{t("panelPage.admin.role")}</th>
+                      <th style={tableHeadStyle}>{t("panelPage.admin.status")}</th>
+                      <th style={tableHeadStyle}>{t("panelPage.admin.verified")}</th>
+                      <th style={tableHeadStyle}>{t("panelPage.admin.action")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1129,7 +1132,7 @@ export default function PanelPage() {
                         <td style={tableCellStyle}>{company.role || "-"}</td>
                         <td style={tableCellStyle}>{company.status || "-"}</td>
                         <td style={tableCellStyle}>
-                          {company.verified ? "Evet" : "Hayır"}
+                          {company.verified ? t("panelPage.admin.yes") : t("panelPage.admin.no")}
                         </td>
                         <td style={tableCellStyle}>
                           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -1145,7 +1148,7 @@ export default function PanelPage() {
                                 fontWeight: 600,
                               }}
                             >
-                              Approve
+                              {t("panelPage.admin.approve")}
                             </button>
 
                             <button
@@ -1160,7 +1163,7 @@ export default function PanelPage() {
                                 fontWeight: 600,
                               }}
                             >
-                              Block
+                              {t("panelPage.admin.block")}
                             </button>
                           </div>
                         </td>
@@ -1174,7 +1177,7 @@ export default function PanelPage() {
 
           {adminLedger.length > 0 && (
             <div style={{ marginBottom: 24 }}>
-              <h3 style={{ marginBottom: 12 }}>Ledger Kayıtları</h3>
+              <h3 style={{ marginBottom: 12 }}>{t("panelPage.admin.ledgerRecords")}</h3>
 
               <div style={{ overflowX: "auto" }}>
                 <table
@@ -1188,11 +1191,11 @@ export default function PanelPage() {
                 >
                   <thead>
                     <tr style={{ background: "#f3f4f6", textAlign: "left" }}>
-                      <th style={tableHeadStyle}>Tip</th>
-                      <th style={tableHeadStyle}>Order ID</th>
-                      <th style={tableHeadStyle}>Tutar</th>
-                      <th style={tableHeadStyle}>Para Birimi</th>
-                      <th style={tableHeadStyle}>Not</th>
+                      <th style={tableHeadStyle}>{t("panelPage.admin.type")}</th>
+                      <th style={tableHeadStyle}>{t("panelPage.admin.orderId")}</th>
+                      <th style={tableHeadStyle}>{t("panelPage.admin.amount")}</th>
+                      <th style={tableHeadStyle}>{t("panelPage.admin.currency")}</th>
+                      <th style={tableHeadStyle}>{t("panelPage.admin.note")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1253,7 +1256,7 @@ export default function PanelPage() {
     textDecoration: "none",
   }}
 >
-  Üye Ol
+  {t("panelPage.hero.register")}
 </Link>
 
 <Link
@@ -1267,7 +1270,7 @@ export default function PanelPage() {
     textDecoration: "none",
   }}
 >
-  Giriş Yap
+  {t("panelPage.hero.login")}
 </Link>
               </>
             ) : (
@@ -1283,7 +1286,7 @@ export default function PanelPage() {
                   fontWeight: 700,
                 }}
               >
-                Çıkış Yap
+                {t("panelPage.hero.logout")}
               </button>
             )}
           </div>
@@ -1301,7 +1304,7 @@ export default function PanelPage() {
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="E-posta"
+              placeholder={t("panelPage.hero.email")}
               style={{
                 border: "none",
                 borderRadius: 12,
@@ -1314,7 +1317,7 @@ export default function PanelPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Şifre"
+              placeholder={t("panelPage.hero.password")}
               style={{
                 border: "none",
                 borderRadius: 12,
@@ -1341,7 +1344,7 @@ export default function PanelPage() {
             }}
           >
             <div style={{ letterSpacing: 2, opacity: 0.9, marginBottom: 16 }}>
-              TÜRKİYE B2B MARKETPLACE
+              {t("panelPage.hero.eyebrow")}
             </div>
 
             <h1
@@ -1352,9 +1355,9 @@ export default function PanelPage() {
                 fontWeight: 800,
               }}
             >
-              İşletmeler için güvenli
+              {t("panelPage.hero.title1")}
               <br />
-              toptan tedarik platformu
+              {t("panelPage.hero.title2")}
             </h1>
 
             <p
@@ -1366,12 +1369,11 @@ export default function PanelPage() {
                 marginBottom: 20,
               }}
             >
-              Tedarikçileri keşfedin, ürünleri inceleyin, teklif isteyin ve
-              ticaretinizi tek platformdan yönetin.
+              {t("panelPage.hero.description")}
             </p>
 
             <div style={{ opacity: 0.9, marginBottom: 22 }}>
-              10.000+ ürün • 500+ tedarikçi • RFQ destekli güvenli ticaret
+              {t("panelPage.hero.stats")}
             </div>
 
             <div
@@ -1385,7 +1387,7 @@ export default function PanelPage() {
               <input
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                placeholder="Ürün ara... örn: temizlik bezi, ambalaj, gıda"
+                placeholder={t("panelPage.hero.searchPlaceholder")}
                 style={{
                   flex: 1,
                   minWidth: 260,
@@ -1410,7 +1412,7 @@ export default function PanelPage() {
                   minWidth: 90,
                 }}
               >
-                Ara
+                {t("panelPage.hero.search")}
               </button>
             </div>
 
@@ -1426,7 +1428,7 @@ export default function PanelPage() {
     textDecoration: "none",
   }}
 >
-  Üye Ol
+  {t("panelPage.hero.register")}
 </Link>
 
 <Link
@@ -1440,7 +1442,7 @@ export default function PanelPage() {
     textDecoration: "none",
   }}
 >
-  Giriş Yap
+  {t("panelPage.hero.login")}
 </Link>
               
 
@@ -1455,12 +1457,16 @@ export default function PanelPage() {
                   cursor: "pointer",
                 }}
               >
-                Satıcı Ol
+                {t("panelPage.hero.becomeSeller")}
               </button>
             </div>
 
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              {["Doğrulanmış Firmalar", "RFQ Destekli", "Türkiye + Avrupa"].map((item) => (
+              {[
+                t("panelPage.hero.verifiedCompanies"),
+                t("panelPage.hero.rfqSupported"),
+                t("panelPage.hero.region"),
+              ].map((item) => (
                 <div
                   key={item}
                   style={{
@@ -1492,30 +1498,30 @@ export default function PanelPage() {
                 marginBottom: 10,
               }}
             >
-              Öne Çıkan Avantajlar
+              {t("panelPage.hero.advantages")}
             </div>
 
             <h3 style={{ marginTop: 0, fontSize: 24, marginBottom: 20 }}>
-              Tedarik sürecinizi hızlandırın
+              {t("panelPage.hero.advantagesTitle")}
             </h3>
 
             <div style={{ display: "grid", gap: 14 }}>
               {[
                 [
-                  "Tedarikçi doğrulama",
-                  "Platform dışı iletişimi azaltan güvenli tedarik modeli.",
+                  t("panelPage.hero.advantage1Title"),
+                  t("panelPage.hero.advantage1Desc"),
                 ],
                 [
-                  "Teklif toplama",
-                  "RFQ sistemi ile çoklu satıcıdan fiyat alabilme altyapısı.",
+                  t("panelPage.hero.advantage2Title"),
+                  t("panelPage.hero.advantage2Desc"),
                 ],
                 [
-                  "Kategori bazlı keşif",
-                  "Temizlikten ambalaja kadar işletmeler için organize tedarik.",
+                  t("panelPage.hero.advantage3Title"),
+                  t("panelPage.hero.advantage3Desc"),
                 ],
                 [
-                  "Kurumsal alım deneyimi",
-                  "Sipariş, teklif ve ürün yönetimini tek panelde toplayın.",
+                  t("panelPage.hero.advantage4Title"),
+                  t("panelPage.hero.advantage4Desc"),
                 ],
               ].map(([title, desc]) => (
                 <div
@@ -1536,7 +1542,7 @@ export default function PanelPage() {
         </div>
       </div>
 
-      <h2 style={{ marginBottom: 20 }}>Popüler Kategoriler</h2>
+      <h2 style={{ marginBottom: 20 }}>{t("panelPage.marketplace.popularCategories")}</h2>
 
       <div
         style={{
@@ -1602,11 +1608,11 @@ export default function PanelPage() {
                   searchProducts();
                 }
               }}
-              placeholder="ürün ara"
+              placeholder={t("panelPage.marketplace.searchPlaceholder")}
               style={{ ...inputStyle, marginRight: 8 }}
             />
             <button onClick={searchProducts} style={primaryButtonStyle}>
-              Ara
+              {t("panelPage.marketplace.search")}
             </button>
           </div>
 
@@ -1619,7 +1625,7 @@ export default function PanelPage() {
             />
           )}
 
-          <h2 style={{ marginBottom: 20 }}>Ürünler</h2>
+          <h2 style={{ marginBottom: 20 }}>{t("panelPage.marketplace.products")}</h2>
 
           <ProductGrid
             products={products}
@@ -1675,10 +1681,10 @@ export default function PanelPage() {
           textAlign: "center",
         }}
       >
-        <h2>Toplu Alım Yapmak mı İstiyorsunuz?</h2>
+        <h2>{t("panelPage.marketplace.bulkTitle")}</h2>
 
         <p style={{ opacity: 0.8 }}>
-          RFQ göndererek tedarikçilerden hızlı teklif alın.
+          {t("panelPage.marketplace.bulkText")}
         </p>
 
         <button
@@ -1688,7 +1694,7 @@ export default function PanelPage() {
           }}
           onClick={() => window.scrollTo({ top: 1200, behavior: "smooth" })}
         >
-          RFQ Oluştur
+          {t("panelPage.marketplace.createRfq")}
         </button>
       </div>
 
@@ -1722,7 +1728,7 @@ export default function PanelPage() {
               <h2 style={{ margin: 0 }}>{selectedProduct.title}</h2>
 
               <div style={{ color: "#6b7280", lineHeight: 1.6 }}>
-                {selectedProduct.description || "Açıklama yok"}
+                {selectedProduct.description || t("panelPage.productModal.noDescription")}
               </div>
 
               <div
@@ -1736,26 +1742,26 @@ export default function PanelPage() {
                 }}
               >
                 <div>
-                  <strong>Fiyat:</strong> {selectedProduct.basePrice} ₺
+                  <strong>{t("panelPage.admin.price")}</strong> {selectedProduct.basePrice} ₺
                 </div>
 
                 <div>
-                  <strong>MOQ:</strong> {selectedProduct.moq}{" "}
+                  <strong>{t("panelPage.admin.moq")}</strong> {selectedProduct.moq}{" "}
                   {selectedProduct.unitType}
                 </div>
 
                 <div>
-                  <strong>Teslim Süresi:</strong>{" "}
-                  {selectedProduct.leadTimeDays || "-"} gün
+                  <strong>{t("panelPage.productModal.deliveryTime")}</strong>{" "}
+                  {selectedProduct.leadTimeDays || "-"} {t("panelPage.productModal.days")}
                 </div>
 
                 <div>
-                  <strong>Kategori:</strong>{" "}
+                  <strong>{t("panelPage.admin.category")}</strong>{" "}
                   {selectedProduct.category?.name || "-"}
                 </div>
 
                 <div>
-                  <strong>Satıcı:</strong> {selectedProduct.seller?.name || "Doğrulanmış Firma"}
+                  <strong>{t("panelPage.admin.seller")}</strong> {selectedProduct.seller?.name || t("panelPage.productModal.verifiedCompany")}
                 </div>
 
                 {selectedProduct.seller?.verified && (
@@ -1766,7 +1772,7 @@ export default function PanelPage() {
                       marginTop: 4,
                     }}
                   >
-                    ✔ Doğrulanmış Firma
+                    ✔ {t("panelPage.productModal.verifiedCompany")}
                   </div>
                 )}
               </div>
@@ -1779,14 +1785,14 @@ export default function PanelPage() {
                   }}
                   style={primaryButtonStyle}
                 >
-                  RFQ Gönder
+                  {t("panelPage.productModal.sendRfq")}
                 </button>
 
                 <button
                   onClick={() => setSelectedProduct(null)}
                   style={secondaryButtonStyle}
                 >
-                  Kapat
+                  {t("panelPage.productModal.close")}
                 </button>
               </div>
             </div>
@@ -1803,28 +1809,28 @@ export default function PanelPage() {
             onClick={(e) => e.stopPropagation()}
             style={{ ...modalContentStyle, width: 400 }}
           >
-            <h2>Teklif Ver</h2>
+            <h2>{t("panelPage.quoteModal.title")}</h2>
 
             <p>
               <b>{selectedQuoteRfq.product?.title || "RFQ"}</b>
             </p>
 
             <input
-              placeholder="Birim fiyat"
+              placeholder={t("panelPage.quoteModal.unitPrice")}
               value={quotePrice}
               onChange={(e) => setQuotePrice(e.target.value)}
               style={{ ...inputStyle, width: "100%", marginTop: 8 }}
             />
 
             <input
-              placeholder="Teslim süresi (gün)"
+              placeholder={t("panelPage.quoteModal.deliveryDays")}
               value={quoteDays}
               onChange={(e) => setQuoteDays(e.target.value)}
               style={{ ...inputStyle, width: "100%", marginTop: 8 }}
             />
 
             <textarea
-              placeholder="Satıcı notu"
+              placeholder={t("panelPage.quoteModal.sellerNote")}
               value={quoteNote}
               onChange={(e) => setQuoteNote(e.target.value)}
               style={{
@@ -1845,7 +1851,7 @@ export default function PanelPage() {
                 }}
                 style={secondaryButtonStyle}
               >
-                İptal
+                {t("panelPage.quoteModal.cancel")}
               </button>
 
               <button
@@ -1866,7 +1872,7 @@ export default function PanelPage() {
                 }}
                 style={primaryButtonStyle}
               >
-                Gönder
+                {t("panelPage.quoteModal.send")}
               </button>
             </div>
           </div>
@@ -1879,14 +1885,14 @@ export default function PanelPage() {
             onClick={(e) => e.stopPropagation()}
             style={{ ...modalContentStyle, width: 400 }}
           >
-            <h2>Teklif İste</h2>
+            <h2>{t("panelPage.rfqModal.title")}</h2>
 
             <p>
               <b>{rfqProduct.title}</b>
             </p>
 
             <div style={{ marginTop: 12 }}>
-              Miktar
+              {t("panelPage.rfqModal.quantity")}
               <input
                 type="number"
                 value={rfqQuantity}
@@ -1896,7 +1902,7 @@ export default function PanelPage() {
             </div>
 
             <div style={{ marginTop: 12 }}>
-              Not
+              {t("panelPage.rfqModal.note")}
               <textarea
                 value={rfqNote}
                 onChange={(e) => setRfqNote(e.target.value)}
@@ -1915,10 +1921,10 @@ export default function PanelPage() {
                 onClick={() => setRfqProduct(null)}
                 style={secondaryButtonStyle}
               >
-                İptal
+                {t("panelPage.quoteModal.cancel")}
               </button>
               <button onClick={submitRFQ} style={primaryButtonStyle}>
-                Gönder
+                {t("panelPage.quoteModal.send")}
               </button>
             </div>
           </div>

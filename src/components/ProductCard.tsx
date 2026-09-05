@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 type Product = {
   id: string;
@@ -31,6 +32,8 @@ type Props = {
 };
 
 export default function ProductCard({ product, onRFQ, onDetail }: Props) {
+  const { t } = useTranslation();
+
   const imageSrc =
     product.images && product.images.length > 0
       ? product.images[0].url.startsWith("http")
@@ -112,7 +115,7 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
             marginBottom: 14,
           }}
         >
-          {product.description || "Açıklama yok"}
+          {product.description || t("productCard.noDescription")}
         </p>
 
         <div
@@ -143,7 +146,7 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
             marginBottom: 6,
           }}
         >
-          <strong>Birim:</strong> {product.unitType}
+          <strong>{t("productCard.unit")}:</strong> {product.unitType}
         </div>
 
         <div
@@ -153,7 +156,7 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
             marginBottom: 6,
           }}
         >
-          <strong>Teslim Süresi:</strong> {product.leadTimeDays || "-"} gün
+          <strong>{t("productCard.deliveryTime")}:</strong> {product.leadTimeDays || "-"} {t("productCard.days")}
         </div>
 
         <div
@@ -163,7 +166,7 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
             marginBottom: 6,
           }}
         >
-          <strong>Satıcı:</strong> Doğrulanmış Firma
+          <strong>{t("productCard.seller")}:</strong> {t("productCard.verifiedCompany")}
         </div>
 
         {product.seller?.verified && (
@@ -175,7 +178,7 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
               marginBottom: 16,
             }}
           >
-            ✔ Doğrulanmış Firma
+            ✔ {t("productCard.verifiedCompany")}
           </div>
         )}
 
@@ -195,7 +198,7 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
               cursor: "pointer",
             }}
           >
-            Detay
+            {t("productCard.detail")}
           </button>
 
           <button
@@ -211,7 +214,7 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
               cursor: "pointer",
             }}
           >
-            RFQ Gönder
+            {t("productCard.sendRfq")}
           </button>
         </div>
       </div>

@@ -6,6 +6,7 @@ import {
 } from "react";
 
 import { TURKEY_CITIES } from "../constants/turkeyCities";
+import { useTranslation } from "react-i18next";
 
 type CompanyProfile = {
   id: string;
@@ -39,6 +40,8 @@ function resolveImageUrl(value?: string | null) {
 }
 
 export default function SellerProfilePage() {
+  const { t } = useTranslation();
+
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
   );
@@ -79,7 +82,7 @@ export default function SellerProfilePage() {
       setError("");
 
       if (!token) {
-        setError("Firma profilini görmek için giriş yapmalısınız.");
+        setError(t("sellerProfilePage.loginRequired"));
         return;
       }
 
@@ -92,7 +95,7 @@ export default function SellerProfilePage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        setError(data?.message || "Firma bilgileri alınamadı.");
+        setError(data?.message || t("sellerProfilePage.loadFailed"));
         return;
       }
 
@@ -107,7 +110,7 @@ export default function SellerProfilePage() {
       setBanner(data.banner || "");
     } catch (err) {
       console.error("COMPANY PROFILE LOAD ERROR:", err);
-      setError("Firma bilgileri yüklenirken hata oluştu.");
+      setError(t("sellerProfilePage.loadError"));
     } finally {
       setLoading(false);
     }
@@ -126,7 +129,7 @@ export default function SellerProfilePage() {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      setError("Görsel en fazla 5 MB olabilir.");
+      setError(t("sellerProfilePage.imageTooLarge"));
       event.target.value = "";
       return;
     }
@@ -155,12 +158,12 @@ export default function SellerProfilePage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        setError(data?.message || "Görsel yüklenemedi.");
+        setError(data?.message || t("sellerProfilePage.imageUploadFailed"));
         return;
       }
 
       if (!data?.imageUrl) {
-        setError("Yüklenen görsel adresi alınamadı.");
+        setError(t("sellerProfilePage.imageUrlMissing"));
         return;
       }
 
@@ -172,12 +175,12 @@ export default function SellerProfilePage() {
 
       setSuccess(
         type === "logo"
-          ? "Logo yüklendi. Değişikliği kaydetmeyi unutmayın."
-          : "Banner yüklendi. Değişikliği kaydetmeyi unutmayın."
+          ? t("sellerProfilePage.logoUploaded")
+          : t("sellerProfilePage.bannerUploaded")
       );
     } catch (err) {
       console.error("COMPANY IMAGE UPLOAD ERROR:", err);
-      setError("Görsel yüklenirken hata oluştu.");
+      setError(t("sellerProfilePage.imageUploadError"));
     } finally {
       setUploadingLogo(false);
       setUploadingBanner(false);
@@ -187,7 +190,7 @@ export default function SellerProfilePage() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      setError("Firma adı zorunludur.");
+      setError(t("sellerProfilePage.companyNameRequired"));
       return;
     }
 
@@ -217,15 +220,15 @@ export default function SellerProfilePage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        setError(data?.message || "Firma profili güncellenemedi.");
+        setError(data?.message || t("sellerProfilePage.saveFailed"));
         return;
       }
 
       setProfile(data);
-      setSuccess("Firma profiliniz başarıyla güncellendi.");
+      setSuccess(t("sellerProfilePage.saveSuccess"));
     } catch (err) {
       console.error("COMPANY PROFILE SAVE ERROR:", err);
-      setError("Firma profili kaydedilirken hata oluştu.");
+      setError(t("sellerProfilePage.saveError"));
     } finally {
       setSaving(false);
     }
@@ -234,7 +237,7 @@ export default function SellerProfilePage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <div style={stateCardStyle}>Firma profili yükleniyor...</div>
+        <div style={stateCardStyle}>{t("sellerProfilePage.loading")}</div>
       </main>
     );
   }
@@ -243,23 +246,22 @@ export default function SellerProfilePage() {
     <main style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <div style={eyebrowStyle}>SATICI PANELİ</div>
-          <h1 style={heroTitleStyle}>Firma Profilim</h1>
+          <div style={eyebrowStyle}>{t("sellerProfilePage.eyebrow")}</div>
+          <h1 style={heroTitleStyle}>{t("sellerProfilePage.title")}</h1>
 
           <p style={heroTextStyle}>
-            Mağazanızda gösterilecek firma açıklamasını, logonuzu,
-            banner görselinizi ve konum bilgilerinizi yönetin.
+            {t("sellerProfilePage.description")}
           </p>
         </div>
 
         <div style={statusCardStyle}>
-          <span>Firma durumu</span>
+          <span>{t("sellerProfilePage.companyStatus")}</span>
 
           <strong>
             {profile?.verified
-              ? "✓ Doğrulanmış Firma"
+              ? t("sellerProfilePage.verifiedCompany")
               : profile?.status === "PENDING"
-                ? "Onay Bekliyor"
+                ? t("sellerProfilePage.pendingApproval")
                 : profile?.status || "-"}
           </strong>
         </div>
@@ -280,8 +282,8 @@ export default function SellerProfilePage() {
         >
           <div style={sectionHeaderStyle}>
             <div>
-              <div style={sectionEyebrowStyle}>FİRMA BİLGİLERİ</div>
-              <h2 style={sectionTitleStyle}>Profil bilgilerini düzenle</h2>
+              <div style={sectionEyebrowStyle}>{t("sellerProfilePage.companyInfo")}</div>
+              <h2 style={sectionTitleStyle}>{t("sellerProfilePage.editProfile")}</h2>
             </div>
           </div>
 
@@ -289,7 +291,7 @@ export default function SellerProfilePage() {
           {success && <div style={successStyle}>{success}</div>}
 
           <label style={fieldStyle}>
-            <span style={labelStyle}>Firma Adı *</span>
+            <span style={labelStyle}>{t("sellerProfilePage.companyName")}</span>
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
@@ -299,28 +301,28 @@ export default function SellerProfilePage() {
           </label>
 
           <label style={fieldStyle}>
-            <span style={labelStyle}>Firma Açıklaması</span>
+            <span style={labelStyle}>{t("sellerProfilePage.companyDescription")}</span>
             <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               style={textareaStyle}
               maxLength={3000}
-              placeholder="Firmanızın faaliyet alanlarını, üretim gücünü ve ürün gruplarını anlatın."
+              placeholder={t("sellerProfilePage.descriptionPlaceholder")}
             />
             <small style={helperStyle}>
-              Bu açıklama public mağazanızda gösterilir.
+              {t("sellerProfilePage.publicDescriptionHelp")}
             </small>
           </label>
 
           <div style={twoColumnStyle}>
             <label style={fieldStyle}>
-              <span style={labelStyle}>Şehir</span>
+              <span style={labelStyle}>{t("sellerProfilePage.city")}</span>
               <select
                 value={city}
                 onChange={(event) => setCity(event.target.value)}
                 style={inputStyle}
               >
-                <option value="">Şehir seçin</option>
+                <option value="">{t("sellerProfilePage.selectCity")}</option>
 
                 {TURKEY_CITIES.map((cityName) => (
                   <option key={cityName} value={cityName}>
@@ -331,7 +333,7 @@ export default function SellerProfilePage() {
             </label>
 
             <label style={fieldStyle}>
-              <span style={labelStyle}>Ülke</span>
+              <span style={labelStyle}>{t("sellerProfilePage.country")}</span>
               <input
                 value={country}
                 onChange={(event) => setCountry(event.target.value)}
@@ -342,16 +344,15 @@ export default function SellerProfilePage() {
           </div>
 
           <div style={privateSectionStyle}>
-            <div style={privateTitleStyle}>🔒 Özel iletişim bilgileri</div>
+            <div style={privateTitleStyle}>{t("sellerProfilePage.privateContact")}</div>
 
             <p style={privateTextStyle}>
-              Telefon ve web sitesi firma hesabınızda saklanır; public mağaza
-              profilinde ve ürün sayfalarında gösterilmez.
+              {t("sellerProfilePage.privateContactText")}
             </p>
 
             <div style={twoColumnStyle}>
               <label style={fieldStyle}>
-                <span style={labelStyle}>Telefon</span>
+                <span style={labelStyle}>{t("sellerProfilePage.phone")}</span>
                 <input
                   value={phone}
                   onChange={(event) => setPhone(event.target.value)}
@@ -362,7 +363,7 @@ export default function SellerProfilePage() {
               </label>
 
               <label style={fieldStyle}>
-                <span style={labelStyle}>Web Sitesi</span>
+                <span style={labelStyle}>{t("sellerProfilePage.website")}</span>
                 <input
                   value={website}
                   onChange={(event) => setWebsite(event.target.value)}
@@ -384,7 +385,9 @@ export default function SellerProfilePage() {
               cursor: saving ? "wait" : "pointer",
             }}
           >
-            {saving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
+            {saving
+              ? t("sellerProfilePage.saving")
+              : t("sellerProfilePage.saveChanges")}
           </button>
         </article>
 
@@ -394,25 +397,27 @@ export default function SellerProfilePage() {
             padding: isMobile ? 20 : 28,
           }}
         >
-          <div style={sectionEyebrowStyle}>MAĞAZA GÖRSELLERİ</div>
-          <h2 style={mediaTitleStyle}>Logo ve banner</h2>
+          <div style={sectionEyebrowStyle}>{t("sellerProfilePage.storeImages")}</div>
+          <h2 style={mediaTitleStyle}>{t("sellerProfilePage.logoAndBanner")}</h2>
 
           <div style={bannerPreviewStyle}>
             {banner ? (
               <img
                 src={resolveImageUrl(banner)}
-                alt="Firma banner"
+                alt={t("sellerProfilePage.companyBannerAlt")}
                 style={bannerImageStyle}
               />
             ) : (
               <div style={bannerPlaceholderStyle}>
-                Banner görseli eklenmedi
+                {t("sellerProfilePage.noBanner")}
               </div>
             )}
           </div>
 
           <label style={uploadButtonStyle}>
-            {uploadingBanner ? "Banner yükleniyor..." : "Banner Yükle"}
+            {uploadingBanner
+              ? t("sellerProfilePage.uploadingBanner")
+              : t("sellerProfilePage.uploadBanner")}
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
@@ -423,7 +428,7 @@ export default function SellerProfilePage() {
           </label>
 
           <small style={helperStyle}>
-            Önerilen ölçü: 1600 × 500 piksel. En fazla 5 MB.
+            {t("sellerProfilePage.bannerHelp")}
           </small>
 
           <div style={logoSectionStyle}>
@@ -431,7 +436,7 @@ export default function SellerProfilePage() {
               {logo ? (
                 <img
                   src={resolveImageUrl(logo)}
-                  alt="Firma logosu"
+                  alt={t("sellerProfilePage.companyLogoAlt")}
                   style={logoImageStyle}
                 />
               ) : (
@@ -447,14 +452,16 @@ export default function SellerProfilePage() {
             </div>
 
             <div style={{ flex: 1 }}>
-              <strong>Firma logosu</strong>
+              <strong>{t("sellerProfilePage.companyLogo")}</strong>
 
               <p style={logoTextStyle}>
-                Kare veya yatay logonuzu yükleyebilirsiniz.
+                {t("sellerProfilePage.logoHelp")}
               </p>
 
               <label style={secondaryUploadStyle}>
-                {uploadingLogo ? "Logo yükleniyor..." : "Logo Yükle"}
+                {uploadingLogo
+                  ? t("sellerProfilePage.uploadingLogo")
+                  : t("sellerProfilePage.uploadLogo")}
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
@@ -473,7 +480,7 @@ export default function SellerProfilePage() {
               rel="noreferrer"
               style={storeLinkStyle}
             >
-              Public mağazamı görüntüle →
+              {t("sellerProfilePage.viewPublicStore")}
             </a>
           )}
         </aside>

@@ -1,37 +1,39 @@
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const items = [
   {
-    label: "Dashboard",
+    labelKey: "adminSidebar.dashboard",
     path: "/admin",
   },
   {
-    label: "Kontrol Merkezi",
+    labelKey: "adminSidebar.controlCenter",
     path: "/admin/control-center",
   },
   {
-    label: "Şirketler",
+    labelKey: "adminSidebar.companies",
     path: "/admin/companies",
   },
   {
-    label: "Ürünler",
+    labelKey: "adminSidebar.products",
     path: "/admin/products",
   },
   {
-    label: "Payouts",
+    labelKey: "adminSidebar.payouts",
     path: "/admin/payouts",
   },
   {
-    label: "Disputes",
+    labelKey: "adminSidebar.disputes",
     path: "/admin/disputes",
   },
   {
-    label: "Finans",
+    labelKey: "adminSidebar.finance",
     path: "/admin/finance",
   },
 ];
 
 export default function AdminSidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
 
   return (
@@ -51,7 +53,7 @@ export default function AdminSidebar() {
           marginBottom: 40,
         }}
       >
-        Admin Panel
+        {t("adminSidebar.panel")}
       </h2>
 
       <div
@@ -77,7 +79,7 @@ export default function AdminSidebar() {
                 fontWeight: 600,
               }}
             >
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           );
         })}

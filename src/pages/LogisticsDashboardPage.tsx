@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { authFetch } from "../api";
+import { useTranslation } from "react-i18next";
 
 type ShippingOrder = {
   id: string;
@@ -51,22 +52,28 @@ const emptyDashboard: LogisticsDashboard = {
   recentShippingOrders: [],
 };
 
-function money(value: number | string | undefined) {
-  return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;
+function money(
+  value: number | string | undefined,
+  locale: string,
+) {
+  return `${Number(value || 0).toLocaleString(locale)} ₺`;
 }
 
-function statusLabel(status: string) {
+function statusLabel(status: string, t: any) {
   const labels: Record<string, string> = {
-    PENDING_PICKUP: "Yükleme Bekliyor",
-    PICKED_UP: "Teslim Alındı",
-    IN_TRANSIT: "Yolda",
-    DELIVERED: "Teslim Edildi",
+    PENDING_PICKUP: t("logisticsDashboardPage.statusPendingPickup"),
+    PICKED_UP: t("logisticsDashboardPage.statusPickedUp"),
+    IN_TRANSIT: t("logisticsDashboardPage.statusInTransit"),
+    DELIVERED: t("logisticsDashboardPage.statusDelivered"),
   };
 
   return labels[status] || status;
 }
 
 export default function LogisticsDashboardPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [data, setData] = useState<LogisticsDashboard>(emptyDashboard);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -84,7 +91,7 @@ export default function LogisticsDashboardPage() {
           throw new Error(
             Array.isArray(result?.message)
               ? result.message.join(", ")
-              : result?.message || "Dashboard verileri alınamadı",
+              : result?.message || t("logisticsDashboardPage.loadFailed"),
           );
         }
 
@@ -97,7 +104,7 @@ export default function LogisticsDashboardPage() {
         });
       } catch (err: any) {
         console.error("Logistics dashboard error:", err);
-        setError(err?.message || "Dashboard verileri alınamadı");
+        setError(err?.message || t("logisticsDashboardPage.loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -107,21 +114,27 @@ export default function LogisticsDashboardPage() {
   }, []);
 
   if (loading) {
-    return <main style={pageStyle}>Dashboard yükleniyor...</main>;
+    return (
+      <main style={pageStyle}>
+        {t("logisticsDashboardPage.loading")}
+      </main>
+    );
   }
 
   return (
     <main style={pageStyle}>
       <div style={headerStyle}>
         <div>
-          <h1 style={titleStyle}>Lojistik Dashboard</h1>
+          <h1 style={titleStyle}>
+            {t("logisticsDashboardPage.title")}
+          </h1>
           <p style={subtitleStyle}>
-            Açık yükleri, tekliflerinizi ve aktif taşımalarınızı yönetin.
+            {t("logisticsDashboardPage.subtitle")}
           </p>
         </div>
 
         <Link to="/logistics/shipping" style={primaryLinkStyle}>
-          Açık Yükleri Gör
+          {t("logisticsDashboardPage.viewOpenLoads")}
         </Link>
       </div>
 
@@ -129,39 +142,43 @@ export default function LogisticsDashboardPage() {
 
       <div style={statGridStyle}>
         <StatCard
-          title="Açık Nakliye Talebi"
+          title={t("logisticsDashboardPage.openShippingRequests")}
           value={data.openShippingRfqs}
           icon="📍"
         />
         <StatCard
-          title="Verilen Teklif"
+          title={t("logisticsDashboardPage.submittedQuotes")}
           value={data.submittedQuotes}
           icon="📝"
         />
         <StatCard
-          title="Kabul Edilen Teklif"
+          title={t("logisticsDashboardPage.acceptedQuotes")}
           value={data.acceptedQuotes}
           icon="✅"
         />
         <StatCard
-          title="Yükleme Bekleyen"
+          title={t("logisticsDashboardPage.pendingPickup")}
           value={data.pendingPickup}
           icon="📦"
         />
-        <StatCard title="Yolda" value={data.inTransit} icon="🚚" />
         <StatCard
-          title="Tamamlanan Taşıma"
+          title={t("logisticsDashboardPage.inTransit")}
+          value={data.inTransit}
+          icon="🚚"
+        />
+        <StatCard
+          title={t("logisticsDashboardPage.completedTransport")}
           value={data.completedShippingOrders}
           icon="🏁"
         />
         <StatCard
-          title="Aktif Taşıma"
+          title={t("logisticsDashboardPage.activeTransport")}
           value={data.activeShippingOrders}
           icon="🛣️"
         />
         <StatCard
-          title="Brüt Taşıma Tutarı"
-          value={money(data.grossTransportAmount)}
+          title={t("logisticsDashboardPage.grossTransportAmount")}
+          value={money(data.grossTransportAmount, locale)}
           icon="₺"
         />
       </div>
@@ -169,38 +186,44 @@ export default function LogisticsDashboardPage() {
       <div style={quickGridStyle}>
         <Link to="/logistics/shipping" style={quickCardStyle}>
           <span style={quickIconStyle}>🔎</span>
-          <strong>Açık Yükler</strong>
+          <strong>{t("logisticsDashboardPage.openLoads")}</strong>
           <small style={quickTextStyle}>
-            Yeni nakliye taleplerini inceleyin
+            {t("logisticsDashboardPage.openLoadsText")}
           </small>
         </Link>
 
         <Link to="/logistics/orders" style={quickCardStyle}>
           <span style={quickIconStyle}>🚚</span>
-          <strong>Taşımalarım</strong>
+          <strong>{t("logisticsDashboardPage.myTransports")}</strong>
           <small style={quickTextStyle}>
-            Aktif taşıma süreçlerini güncelleyin
+            {t("logisticsDashboardPage.myTransportsText")}
           </small>
         </Link>
 
         <Link to="/chat" style={quickCardStyle}>
           <span style={quickIconStyle}>💬</span>
-          <strong>Mesajlar</strong>
+          <strong>{t("logisticsDashboardPage.messages")}</strong>
           <small style={quickTextStyle}>
-            Alıcı ve satıcılarla iletişim kurun
+            {t("logisticsDashboardPage.messagesText")}
           </small>
         </Link>
       </div>
 
       <section style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Son Taşımalar</h2>
+        <h2 style={sectionTitleStyle}>
+          {t("logisticsDashboardPage.recentTransports")}
+        </h2>
 
         {data.recentShippingOrders.length === 0 ? (
-          <div style={emptyStyle}>Henüz taşıma siparişi bulunmuyor.</div>
+          <div style={emptyStyle}>
+            {t("logisticsDashboardPage.noTransports")}
+          </div>
         ) : (
           <div style={listStyle}>
             {data.recentShippingOrders.map((order) => {
-              const title = order.order?.rfq?.product?.title || "Ürün taşıması";
+              const title =
+                order.order?.rfq?.product?.title ||
+                t("logisticsDashboardPage.productTransport");
 
               const route = [
                 order.shippingRfq?.fromAddress,
@@ -214,14 +237,17 @@ export default function LogisticsDashboardPage() {
                   <div>
                     <strong>{title}</strong>
                     <div style={mutedStyle}>
-                      {route || "Güzergâh bilgisi bulunmuyor"}
+                      {route || t("logisticsDashboardPage.noRoute")}
                     </div>
                     <div style={mutedStyle}>
-                      Teklif: {money(order.shippingQuote?.price)}
+                      {t("logisticsDashboardPage.quote")}:{" "}
+                      {money(order.shippingQuote?.price, locale)}
                     </div>
                   </div>
 
-                  <span style={badgeStyle}>{statusLabel(order.status)}</span>
+                  <span style={badgeStyle}>
+                    {statusLabel(order.status, t)}
+                  </span>
                 </div>
               );
             })}
@@ -230,9 +256,7 @@ export default function LogisticsDashboardPage() {
       </section>
 
       <div style={noticeStyle}>
-        Brüt taşıma tutarı, kabul edilen taşıma siparişlerinin toplamıdır.
-        Lojistik ödeme ve komisyon sistemi tamamlandığında net kazanç ayrıca
-        gösterilecektir.
+        {t("logisticsDashboardPage.notice")}
       </div>
     </main>
   );

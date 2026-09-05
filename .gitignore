@@ -31,3 +31,4 @@ tsconfig.tsbuildinfo
 # Local backup files
 *.backup*
 *-backup.*
+.env*

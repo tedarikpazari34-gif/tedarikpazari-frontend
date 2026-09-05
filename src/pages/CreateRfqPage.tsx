@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { TURKEY_CITIES } from "../constants/turkeyCities";
+import { useTranslation } from "react-i18next";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
 
@@ -20,6 +21,8 @@ type Category = {
 
 export default function CreateRfqPage() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
   const [params] = useSearchParams();
 
   const productId = params.get("productId");
@@ -191,7 +194,7 @@ export default function CreateRfqPage() {
       }
 
       if (!aiPrompt.trim()) {
-        setError("AI için ihtiyacınızı kısa bir cümleyle yazın.");
+        setError(t("createRfqPage.aiPromptRequired"));
         return;
       }
 
@@ -209,7 +212,7 @@ export default function CreateRfqPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "AI taslağı oluşturulamadı");
+        setError(data?.message || t("createRfqPage.aiDraftFailed"));
         return;
       }
 
@@ -272,7 +275,7 @@ export default function CreateRfqPage() {
       if (data.note) setNote(String(data.note));
     } catch (err) {
       console.error("AI RFQ ERROR:", err);
-      setError("AI talep oluşturma sırasında hata oluştu.");
+      setError(t("createRfqPage.aiError"));
     } finally {
       setAiLoading(false);
     }
@@ -292,28 +295,28 @@ export default function CreateRfqPage() {
 
       if (!productId) {
         if (!selectedCategoryId) {
-          setError("Lütfen ana sektör ve kategori seçin.");
+          setError(t("createRfqPage.categoryRequired"));
           return;
         }
 
         if (!requestTitle.trim()) {
-          setError("Lütfen talebiniz için kısa bir başlık yazın.");
+          setError(t("createRfqPage.titleRequired"));
           return;
         }
       }
 
       if (!quantity || Number(quantity) < 1) {
-        setError("Lütfen geçerli bir miktar girin.");
+        setError(t("createRfqPage.quantityRequired"));
         return;
       }
 
       if (!deliveryCity.trim()) {
-        setError("Lütfen teslimat şehrini yazın.");
+        setError(t("createRfqPage.deliveryRequired"));
         return;
       }
 
       if (!note.trim()) {
-        setError("Satıcıların doğru teklif verebilmesi için kısa bir açıklama yazın.");
+        setError(t("createRfqPage.noteRequired"));
         return;
       }
 
@@ -355,7 +358,7 @@ export default function CreateRfqPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "Teklif talebi oluşturulamadı");
+        setError(data?.message || t("createRfqPage.createFailed"));
         return;
       }
 
@@ -363,7 +366,7 @@ export default function CreateRfqPage() {
       setCreatedRfqId(data?.id || "created");
     } catch (err) {
       console.error(err);
-      setError("İşlem sırasında hata oluştu");
+      setError(t("createRfqPage.generalError"));
     } finally {
       setLoading(false);
     }
@@ -377,7 +380,7 @@ export default function CreateRfqPage() {
     productName ||
     requestTitle ||
     selectedCategoryName ||
-    "Genel teklif talebi";
+    t("createRfqPage.generalRequest");
 
   const rootCategories = categories
     .filter((item) => !item.parentId)
@@ -393,32 +396,31 @@ export default function CreateRfqPage() {
         <section style={successCardStyle}>
           <div style={successIconStyle}>✓</div>
 
-          <div style={successEyebrowStyle}>TALEBİNİZ YAYINLANDI</div>
+          <div style={successEyebrowStyle}>{t("createRfqPage.published")}</div>
 
           <h1 style={successTitleStyle}>
-            Teklif talebiniz başarıyla oluşturuldu
+            {t("createRfqPage.successTitle")}
           </h1>
 
           <p style={successTextStyle}>
-            Talebiniz ilgili tedarikçilere gösterilmeye başlandı.
-            Yeni teklifler geldiğinde bildirim alacaksınız.
+            {t("createRfqPage.successText")}
           </p>
 
           <div style={successSummaryStyle}>
             <div>
-              <span style={successSummaryLabelStyle}>Talep</span>
+              <span style={successSummaryLabelStyle}>{t("createRfqPage.request")}</span>
               <strong>{selectedTitle}</strong>
             </div>
 
             <div>
-              <span style={successSummaryLabelStyle}>Miktar</span>
+              <span style={successSummaryLabelStyle}>{t("createRfqPage.quantity")}</span>
               <strong>
                 {quantity} {unitType}
               </strong>
             </div>
 
             <div>
-              <span style={successSummaryLabelStyle}>Teslimat</span>
+              <span style={successSummaryLabelStyle}>{t("createRfqPage.delivery")}</span>
               <strong>{deliveryCity}</strong>
             </div>
           </div>
@@ -429,7 +431,7 @@ export default function CreateRfqPage() {
               onClick={() => navigate("/buyer/rfqs")}
               style={successPrimaryButtonStyle}
             >
-              Tekliflerimi Gör
+              {t("createRfqPage.viewRequests")}
             </button>
 
             <button
@@ -447,7 +449,7 @@ export default function CreateRfqPage() {
               }}
               style={successSecondaryButtonStyle}
             >
-              Yeni Talep Oluştur
+              {t("createRfqPage.createNew")}
             </button>
           </div>
         </section>
@@ -459,45 +461,45 @@ export default function CreateRfqPage() {
     <main style={pageStyle}>
       <section style={heroStyle}>
         <Link to="/" style={backLinkStyle}>
-          ← Ana sayfaya dön
+          ← {t("createRfqPage.backHome")}
         </Link>
 
-        <div style={heroBadgeStyle}>RFQ / TEKLİF TALEBİ</div>
+        <div style={heroBadgeStyle}>{t("createRfqPage.heroBadge")}</div>
 
-        <h1 style={heroTitleStyle}>Tedarikçilerden hızlı teklif alın</h1>
+        <h1 style={heroTitleStyle}>{t("createRfqPage.heroTitle")}</h1>
 
         <p style={heroTextStyle}>
-          İhtiyacınızı belirtin, uygun satıcılardan fiyat ve teslim süresi teklifi toplayın.
+          {t("createRfqPage.heroText")}
         </p>
 
         <div style={benefitGridStyle}>
-          <div style={benefitStyle}>✓ Doğrulanmış tedarikçiler</div>
-          <div style={benefitStyle}>✓ Güvenli teklif süreci</div>
-          <div style={benefitStyle}>✓ Tek panelden takip</div>
+          <div style={benefitStyle}>✓ {t("createRfqPage.verifiedSuppliers")}</div>
+          <div style={benefitStyle}>✓ {t("createRfqPage.secureProcess")}</div>
+          <div style={benefitStyle}>✓ {t("createRfqPage.singlePanel")}</div>
         </div>
       </section>
 
       <section style={cardStyle}>
         <div style={cardHeaderStyle}>
           <div>
-            <div style={eyebrowStyle}>TEKLİF FORMU</div>
-            <h2 style={titleStyle}>Teklif Talebi Oluştur</h2>
+            <div style={eyebrowStyle}>{t("createRfqPage.formBadge")}</div>
+            <h2 style={titleStyle}>{t("createRfqPage.formTitle")}</h2>
           </div>
 
           <Link to="/products" style={secondaryLinkStyle}>
-            Ürünlere dön
+            {t("createRfqPage.backProducts")}
           </Link>
         </div>
 
         <div style={summaryBoxStyle}>
           <div>
-            <div style={summaryLabelStyle}>Seçilen ihtiyaç</div>
+            <div style={summaryLabelStyle}>{t("createRfqPage.selectedNeed")}</div>
             <strong style={summaryTitleStyle}>{selectedTitle}</strong>
           </div>
 
           {product?.basePrice && (
             <div style={pricePillStyle}>
-              {Number(product.basePrice).toLocaleString("tr-TR")} ₺ başlangıç
+              {Number(product.basePrice).toLocaleString(locale)} ₺ {t("createRfqPage.starting")}
             </div>
           )}
         </div>
@@ -505,20 +507,19 @@ export default function CreateRfqPage() {
         {error && <div style={errorStyle}>{error}</div>}
 
         <section style={aiBoxStyle}>
-          <div style={aiBadgeStyle}>✨ AI DESTEKLİ</div>
+          <div style={aiBadgeStyle}>{t("createRfqPage.aiBadge")}</div>
 
-          <h3 style={aiTitleStyle}>AI ile Talep Oluştur</h3>
+          <h3 style={aiTitleStyle}>{t("createRfqPage.aiTitle")}</h3>
 
           <p style={aiTextStyle}>
-            İhtiyacınızı kısa bir cümleyle yazın. AI; başlık, miktar,
-            birim, teslimat şehri ve açıklama alanlarını sizin için doldursun.
+            {t("createRfqPage.aiText")}
           </p>
 
           <textarea
             value={aiPrompt}
             onChange={(e) => setAiPrompt(e.target.value)}
             style={aiTextareaStyle}
-            placeholder="Örn: 100 koli ıslak mendil lazım, İstanbul teslim"
+            placeholder={t("createRfqPage.aiPlaceholder")}
           />
 
           <button
@@ -531,25 +532,25 @@ export default function CreateRfqPage() {
               cursor: aiLoading ? "not-allowed" : "pointer",
             }}
           >
-            {aiLoading ? "AI hazırlanıyor..." : "✨ AI ile Formu Doldur"}
+            {aiLoading ? t("createRfqPage.aiPreparing") : t("createRfqPage.fillWithAi")}
           </button>
         </section>
 
         {!productId && (
           <>
             <label style={fieldStyle}>
-              <span style={labelStyle}>Talep Başlığı *</span>
+              <span style={labelStyle}>{t("createRfqPage.requestTitle")}</span>
               <input
                 value={requestTitle}
                 onChange={(e) => setRequestTitle(e.target.value)}
                 style={inputStyle}
-                placeholder="Örn: Fantom çene ve endodonti malzemeleri"
+                placeholder={t("createRfqPage.requestTitlePlaceholder")}
               />
             </label>
 
             <div style={formGridStyle}>
               <label style={fieldStyle}>
-                <span style={labelStyle}>Ana Sektör *</span>
+                <span style={labelStyle}>{t("createRfqPage.mainSector")}</span>
                 <select
                   value={selectedRootId}
                   onChange={(e) => {
@@ -559,7 +560,7 @@ export default function CreateRfqPage() {
                   }}
                   style={inputStyle}
                 >
-                  <option value="">Ana sektör seçin</option>
+                  <option value="">{t("createRfqPage.selectMainSector")}</option>
 
                   {rootCategories.map((item) => (
                     <option key={item.id} value={item.id}>
@@ -570,7 +571,7 @@ export default function CreateRfqPage() {
               </label>
 
               <label style={fieldStyle}>
-                <span style={labelStyle}>Alt Kategori *</span>
+                <span style={labelStyle}>{t("createRfqPage.subCategory")}</span>
                 <select
                   value={selectedCategoryId}
                   onChange={(e) => setSelectedCategoryId(e.target.value)}
@@ -579,8 +580,8 @@ export default function CreateRfqPage() {
                 >
                   <option value="">
                     {selectedRootId
-                      ? "Alt kategori seçin"
-                      : "Önce ana sektör seçin"}
+                      ? t("createRfqPage.selectSubCategory")
+                      : t("createRfqPage.selectMainFirst")}
                   </option>
 
                   {childCategories.map((item) => (
@@ -591,7 +592,7 @@ export default function CreateRfqPage() {
 
                   {selectedRootId && childCategories.length === 0 && (
                     <option value={selectedRootId}>
-                      Ana kategori
+                      {t("createRfqPage.mainCategory")}
                     </option>
                   )}
                 </select>
@@ -600,7 +601,7 @@ export default function CreateRfqPage() {
 
             {selectedCategoryName && (
               <div style={infoBoxStyle}>
-                <strong>Seçilen kategori:</strong> {selectedCategoryName}
+                <strong>{t("createRfqPage.selectedCategory")}</strong> {selectedCategoryName}
               </div>
             )}
           </>
@@ -608,37 +609,37 @@ export default function CreateRfqPage() {
 
         <div style={formGridStyle}>
           <label style={fieldStyle}>
-            <span style={labelStyle}>Miktar *</span>
+            <span style={labelStyle}>{t("createRfqPage.quantity")} *</span>
             <input
               type="number"
               min="1"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               style={inputStyle}
-              placeholder="Örn: 100"
+              placeholder={t("createRfqPage.quantityPlaceholder")}
             />
           </label>
 
           <label style={fieldStyle}>
-            <span style={labelStyle}>Birim *</span>
+            <span style={labelStyle}>{t("createRfqPage.unit")}</span>
             <select
               value={unitType}
               onChange={(e) => setUnitType(e.target.value)}
               style={inputStyle}
             >
-              <option value="Adet">Adet</option>
-              <option value="Koli">Koli</option>
-              <option value="Paket">Paket</option>
-              <option value="Kilogram">Kilogram</option>
-              <option value="Ton">Ton</option>
-              <option value="Litre">Litre</option>
-              <option value="Metre">Metre</option>
-              <option value="Palet">Palet</option>
+              <option value="Adet">{t("createRfqPage.piece")}</option>
+              <option value="Koli">{t("createRfqPage.box")}</option>
+              <option value="Paket">{t("createRfqPage.package")}</option>
+              <option value="Kilogram">{t("createRfqPage.kilogram")}</option>
+              <option value="Ton">{t("createRfqPage.ton")}</option>
+              <option value="Litre">{t("createRfqPage.litre")}</option>
+              <option value="Metre">{t("createRfqPage.meter")}</option>
+              <option value="Palet">{t("createRfqPage.pallet")}</option>
             </select>
           </label>
 
           <label style={fieldStyle}>
-            <span style={labelStyle}>Hedef Fiyat</span>
+            <span style={labelStyle}>{t("createRfqPage.targetPrice")}</span>
             <input
               type="number"
               min="0"
@@ -646,19 +647,19 @@ export default function CreateRfqPage() {
               value={targetPrice}
               onChange={(e) => setTargetPrice(e.target.value)}
               style={inputStyle}
-              placeholder="İsteğe bağlı"
+              placeholder={t("createRfqPage.optional")}
             />
           </label>
         </div>
 
         <label style={fieldStyle}>
-          <span style={labelStyle}>Teslimat Şehri *</span>
+          <span style={labelStyle}>{t("createRfqPage.deliveryCity")}</span>
           <select
             value={deliveryCity}
             onChange={(e) => setDeliveryCity(e.target.value)}
             style={inputStyle}
           >
-            <option value="">Şehir seçin</option>
+            <option value="">{t("createRfqPage.selectCity")}</option>
 
             {TURKEY_CITIES.map((city) => (
               <option key={city} value={city}>
@@ -669,28 +670,28 @@ export default function CreateRfqPage() {
         </label>
 
         <label style={fieldStyle}>
-          <span style={labelStyle}>Ürün ve Teslimat Detayları *</span>
+          <span style={labelStyle}>{t("createRfqPage.productDeliveryDetails")}</span>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             style={textareaStyle}
-            placeholder="Ölçü, renk, kalite, marka tercihi, paketleme, teslim süresi gibi satıcının teklif vermesi için gerekli bilgileri yazın."
+            placeholder={t("createRfqPage.detailsPlaceholder")}
           />
         </label>
 
         <div style={draftNoticeStyle}>
-          ✓ Form değişiklikleri bu cihazda otomatik taslak olarak saklanır.
+          ✓ {t("createRfqPage.draftSaved")}
         </div>
 
         <div style={noticeStyle}>
-          <strong>Platform güvenceli süreç</strong>
+          <strong>{t("createRfqPage.platformSecure")}</strong>
           <span>
-            Talebiniz ilgili tedarikçilere yönlendirilir. Teklifleri panelinizden takip edebilirsiniz.
+            {t("createRfqPage.platformSecureText")}
           </span>
         </div>
 
         <button onClick={createRfq} disabled={loading} style={buttonStyle}>
-          {loading ? "Talebiniz oluşturuluyor..." : "Ücretsiz Teklif Talebi Oluştur"}
+          {loading ? t("createRfqPage.creating") : t("createRfqPage.createFree")}
         </button>
       </section>
     </main>

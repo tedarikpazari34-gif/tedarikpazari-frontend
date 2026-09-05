@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface RFQ {
   id: string;
@@ -23,13 +24,15 @@ export default function RFQMarketplace({
   rfqs,
   openQuoteModal,
 }: Props) {
+  const { t } = useTranslation();
+
   if (!rfqs.length) {
-    return <div>Açık RFQ bulunamadı.</div>;
+    return <div>{t("rfqMarketplace.empty")}</div>;
   }
 
   return (
     <div style={{ marginTop: 40 }}>
-      <h2>RFQ Marketplace</h2>
+      <h2>{t("rfqMarketplace.title")}</h2>
 
       <div
         style={{
@@ -49,19 +52,19 @@ export default function RFQMarketplace({
             }}
           >
             <div style={{ fontWeight: 600 }}>
-              {rfq.product?.title || "Ürün"}
+              {rfq.product?.title || t("rfqMarketplace.productFallback")}
             </div>
 
             <div style={{ marginTop: 6 }}>
-              Buyer: {rfq.buyer?.name || "-"}
+              {t("rfqMarketplace.buyer")}: {rfq.buyer?.name || "-"}
             </div>
 
             <div style={{ marginTop: 6 }}>
-              Miktar: {rfq.quantity}
+              {t("rfqMarketplace.quantity")}: {rfq.quantity}
             </div>
 
             <div style={{ marginTop: 6 }}>
-              Durum: {rfq.status}
+              {t("rfqMarketplace.status")}: {rfq.status}
             </div>
 
             <button
@@ -76,7 +79,7 @@ export default function RFQMarketplace({
               }}
               onClick={() => openQuoteModal(rfq)}
             >
-              Teklif Ver
+              {t("rfqMarketplace.makeOffer")}
             </button>
           </div>
         ))}

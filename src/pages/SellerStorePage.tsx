@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type ProductImage = {
   id?: string;
@@ -79,7 +80,7 @@ function getProductImage(product: Product) {
   return resolveImageUrl(cover || firstImage || product.imageUrl);
 }
 
-function getSellerBadges(company: Company, productCount: number) {
+function getSellerBadges(company: Company, productCount: number, t: any) {
   const badges: Array<{
     label: string;
     icon: string;
@@ -88,7 +89,7 @@ function getSellerBadges(company: Company, productCount: number) {
 
   if (company.verified) {
     badges.push({
-      label: "Doğrulanmış Firma",
+      label: t("sellerStorePage.verifiedCompany"),
       icon: "✓",
       tone: "green",
     });
@@ -96,7 +97,7 @@ function getSellerBadges(company: Company, productCount: number) {
 
   if ((company.stats?.profileCompletion || 0) >= 80) {
     badges.push({
-      label: "Güçlü Profil",
+      label: t("sellerStorePage.strongProfile"),
       icon: "★",
       tone: "blue",
     });
@@ -104,7 +105,7 @@ function getSellerBadges(company: Company, productCount: number) {
 
   if ((company.completedDeals || 0) > 0) {
     badges.push({
-      label: "Satış Geçmişi Var",
+      label: t("sellerStorePage.salesHistory"),
       icon: "🤝",
       tone: "purple",
     });
@@ -112,7 +113,7 @@ function getSellerBadges(company: Company, productCount: number) {
 
   if ((company.rating || 0) >= 4.5 && (company.reviewCount || 0) >= 3) {
     badges.push({
-      label: "Yüksek Puanlı",
+      label: t("sellerStorePage.highlyRated"),
       icon: "⭐",
       tone: "amber",
     });
@@ -120,7 +121,7 @@ function getSellerBadges(company: Company, productCount: number) {
 
   if (productCount >= 3) {
     badges.push({
-      label: "Aktif Katalog",
+      label: t("sellerStorePage.activeCatalog"),
       icon: "📦",
       tone: "blue",
     });
@@ -129,13 +130,32 @@ function getSellerBadges(company: Company, productCount: number) {
   return badges;
 }
 
-function formatPrice(value?: number | string) {
-  return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;
+function formatPrice(value: number | string | undefined, locale: string) {
+  return `${Number(value || 0).toLocaleString(locale)} ₺`;
+}
+
+function unitLabel(value: string | undefined, t: any) {
+  if (!value) return t("sellerStorePage.unitNotSpecified");
+
+  const normalized = value.toLocaleLowerCase("tr-TR");
+
+  if (normalized === "adet") return t("sellerStorePage.unitPiece");
+  if (normalized === "koli") return t("sellerStorePage.unitBox");
+  if (normalized === "kg" || normalized === "kilogram") return t("sellerStorePage.unitKg");
+  if (normalized === "ton") return t("sellerStorePage.unitTon");
+  if (normalized === "metre" || normalized === "meter") return t("sellerStorePage.unitMeter");
+  if (normalized === "litre" || normalized === "liter") return t("sellerStorePage.unitLiter");
+  if (normalized === "palet") return t("sellerStorePage.unitPallet");
+  if (normalized === "paket") return t("sellerStorePage.unitPackage");
+
+  return value;
 }
 
 
 export default function SellerStorePage() {
   const { id } = useParams();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
 
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
@@ -144,7 +164,7 @@ export default function SellerStorePage() {
   useEffect(() => {
     const loadCompany = async () => {
       if (!id) {
-        setError("Firma bilgisi bulunamadı.");
+        setError(t("sellerStorePage.companyNotFoundError"));
         setLoading(false);
         return;
       }
@@ -157,7 +177,7 @@ export default function SellerStorePage() {
         const data = await res.json().catch(() => null);
 
         if (!res.ok) {
-          setError(data?.message || "Firma bilgileri alınamadı.");
+          setError(data?.message || t("sellerStorePage.companyLoadFailed"));
           setCompany(null);
           return;
         }
@@ -165,7 +185,7 @@ export default function SellerStorePage() {
         setCompany(data);
       } catch (err) {
         console.error("SELLER STORE LOAD ERROR:", err);
-        setError("Firma bilgileri alınırken hata oluştu.");
+        setError(t("sellerStorePage.companyLoadError"));
         setCompany(null);
       } finally {
         setLoading(false);
@@ -178,7 +198,7 @@ export default function SellerStorePage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <div style={stateCardStyle}>Mağaza yükleniyor...</div>
+        <div style={stateCardStyle}>{t("sellerStorePage.loading")}</div>
       </main>
     );
   }
@@ -187,10 +207,10 @@ export default function SellerStorePage() {
     return (
       <main style={pageStyle}>
         <div style={stateCardStyle}>
-          <h1 style={{ marginTop: 0 }}>Firma bulunamadı</h1>
-          <p>{error || "Bu mağaza artık görüntülenemiyor."}</p>
+          <h1 style={{ marginTop: 0 }}>{t("sellerStorePage.companyNotFound")}</h1>
+          <p>{error || t("sellerStorePage.storeUnavailable")}</p>
           <Link to="/" style={primaryLinkStyle}>
-            Ana sayfaya dön
+            {t("sellerStorePage.backHome")}
           </Link>
         </div>
       </main>
@@ -199,7 +219,7 @@ export default function SellerStorePage() {
 
   const products = company.products || [];
   const reviews = company.sellerReviews || [];
-  const sellerBadges = getSellerBadges(company, products.length);
+  const sellerBadges = getSellerBadges(company, products.length, t);
   const rating = Number(company.rating || 0);
   const bannerUrl = resolveImageUrl(company.banner);
   const logoUrl = resolveImageUrl(company.logo);
@@ -218,7 +238,7 @@ export default function SellerStorePage() {
           name="description"
           content={
             company.description ||
-            `${company.name} ürünlerini, firma bilgilerini ve değerlendirmelerini inceleyin.`
+            t("sellerStorePage.metaDescription", { company: company.name })
           }
         />
         <link
@@ -245,7 +265,7 @@ export default function SellerStorePage() {
               {logoUrl ? (
                 <img
                   src={logoUrl}
-                  alt={`${company.name} logosu`}
+                  alt={t("sellerStorePage.companyLogoAlt", { company: company.name })}
                   style={logoImageStyle}
                 />
               ) : (
@@ -258,7 +278,9 @@ export default function SellerStorePage() {
                 <h1 style={companyTitleStyle}>{company.name}</h1>
 
                 {company.verified && (
-                  <span style={verifiedStyle}>✓ Doğrulanmış Firma</span>
+                  <span style={verifiedStyle}>
+                    ✓ {t("sellerStorePage.verifiedCompany")}
+                  </span>
                 )}
               </div>
 
@@ -272,15 +294,15 @@ export default function SellerStorePage() {
 
           <div style={metricGridStyle}>
             <Metric
-              label="Ortalama Puan"
-              value={rating > 0 ? `⭐ ${rating.toFixed(1)}` : "Yeni"}
+              label={t("sellerStorePage.averageRating")}
+              value={rating > 0 ? `⭐ ${rating.toFixed(1)}` : t("sellerStorePage.newSeller")}
             />
             <Metric
-              label="Değerlendirme"
+              label={t("sellerStorePage.reviews")}
               value={company.reviewCount || reviews.length}
             />
-            <Metric label="Tamamlanan Satış" value={company.completedDeals || 0} />
-            <Metric label="Aktif Ürün" value={products.length} />
+            <Metric label={t("sellerStorePage.completedSales")} value={company.completedDeals || 0} />
+            <Metric label={t("sellerStorePage.activeProducts")} value={products.length} />
           </div>
         </div>
       </section>
@@ -288,12 +310,14 @@ export default function SellerStorePage() {
       <section style={trustSummaryStyle}>
         <div style={trustSummaryHeaderStyle}>
           <div>
-            <div style={eyebrowStyle}>GÜVEN BİLGİLERİ</div>
-            <h2 style={sectionTitleStyle}>Satıcı güven özeti</h2>
+            <div style={eyebrowStyle}>{t("sellerStorePage.trustInfo")}</div>
+            <h2 style={sectionTitleStyle}>{t("sellerStorePage.trustSummary")}</h2>
           </div>
 
           {company.verified && (
-            <span style={verifiedStyle}>✓ Doğrulanmış Firma</span>
+            <span style={verifiedStyle}>
+              ✓ {t("sellerStorePage.verifiedCompany")}
+            </span>
           )}
         </div>
 
@@ -323,51 +347,51 @@ export default function SellerStorePage() {
         <div style={trustMetricGridStyle}>
           <TrustMetric
             icon="📦"
-            label="Yayındaki Ürün"
+            label={t("sellerStorePage.publishedProducts")}
             value={company.stats?.productCount ?? products.length}
           />
           <TrustMetric
             icon="🤝"
-            label="Tamamlanan Sipariş"
+            label={t("sellerStorePage.completedOrders")}
             value={company.stats?.completedDeals ?? company.completedDeals ?? 0}
           />
           <TrustMetric
             icon="⭐"
-            label="Ortalama Puan"
+            label={t("sellerStorePage.averageRating")}
             value={Number(
               company.stats?.rating ?? company.rating ?? 0
             ).toFixed(1)}
           />
           <TrustMetric
             icon="💬"
-            label="Değerlendirme"
+            label={t("sellerStorePage.reviews")}
             value={company.stats?.reviewCount ?? company.reviewCount ?? 0}
           />
           <TrustMetric
             icon="📅"
-            label="Üyelik Tarihi"
+            label={t("sellerStorePage.membershipDate")}
             value={
               company.stats?.memberSince
-                ? new Date(company.stats.memberSince).toLocaleDateString("tr-TR")
+                ? new Date(company.stats.memberSince).toLocaleDateString(locale)
                 : company.createdAt
-                  ? new Date(company.createdAt).toLocaleDateString("tr-TR")
+                  ? new Date(company.createdAt).toLocaleDateString(locale)
                   : "-"
             }
           />
           <TrustMetric
             icon="⚡"
-            label="Yanıt Süresi"
+            label={t("sellerStorePage.responseTime")}
             value={
               company.stats?.responseTime
-                ? `${company.stats.responseTime} saat`
-                : "Henüz ölçülmedi"
+                ? t("sellerStorePage.hours", { count: company.stats.responseTime })
+                : t("sellerStorePage.notMeasured")
             }
           />
         </div>
 
         <div style={completionBoxStyle}>
           <div style={completionTopStyle}>
-            <strong>Mağaza profil tamamlama</strong>
+            <strong>{t("sellerStorePage.profileCompletion")}</strong>
             <strong>
               {company.stats?.profileCompletion ?? 0}%
             </strong>
@@ -383,19 +407,19 @@ export default function SellerStorePage() {
           </div>
 
           <div style={completionChecklistStyle}>
-            <CompletionItem done={Boolean(company.logo)} label="Logo" />
-            <CompletionItem done={Boolean(company.banner)} label="Banner" />
+            <CompletionItem done={Boolean(company.logo)} label={t("sellerStorePage.logo")} />
+            <CompletionItem done={Boolean(company.banner)} label={t("sellerStorePage.banner")} />
             <CompletionItem
               done={Boolean(company.description)}
-              label="Firma açıklaması"
+              label={t("sellerStorePage.companyDescription")}
             />
             <CompletionItem
               done={products.length > 0}
-              label="İlk ürün"
+              label={t("sellerStorePage.firstProduct")}
             />
             <CompletionItem
               done={Boolean(company.verified)}
-              label="Firma doğrulaması"
+              label={t("sellerStorePage.companyVerification")}
             />
           </div>
         </div>
@@ -405,53 +429,57 @@ export default function SellerStorePage() {
         <article style={aboutCardStyle}>
           <div style={sectionHeaderStyle}>
             <div>
-              <div style={eyebrowStyle}>FİRMA PROFİLİ</div>
-              <h2 style={sectionTitleStyle}>Firma hakkında</h2>
+              <div style={eyebrowStyle}>{t("sellerStorePage.companyProfile")}</div>
+              <h2 style={sectionTitleStyle}>{t("sellerStorePage.aboutCompany")}</h2>
             </div>
           </div>
 
           <p style={descriptionStyle}>
             {company.description ||
-              "Firma açıklaması henüz eklenmedi. Satıcı, şirket faaliyetlerini ve ürün gruplarını yakında burada paylaşabilir."}
+              t("sellerStorePage.noCompanyDescription")}
           </p>
 
           <div style={detailGridStyle}>
             <Detail
-              label="Üyelik tarihi"
+              label={t("sellerStorePage.membershipDate")}
               value={
                 company.createdAt
-                  ? new Date(company.createdAt).toLocaleDateString("tr-TR")
+                  ? new Date(company.createdAt).toLocaleDateString(locale)
                   : "-"
               }
             />
             <Detail
-              label="Yanıt süresi"
+              label={t("sellerStorePage.responseTime")}
               value={
                 company.responseTime
-                  ? `${company.responseTime} saat`
-                  : "Henüz ölçülmedi"
+                  ? t("sellerStorePage.hours", { count: company.responseTime })
+                  : t("sellerStorePage.notMeasured")
               }
             />
             <Detail
-              label="Firma durumu"
-              value={company.verified ? "Doğrulandı" : "Doğrulama bekliyor"}
+              label={t("sellerStorePage.companyStatus")}
+              value={
+                company.verified
+                  ? t("sellerStorePage.verified")
+                  : t("sellerStorePage.verificationPending")
+              }
             />
           </div>
         </article>
 
         <aside style={trustCardStyle}>
           <div style={trustIconStyle}>🛡️</div>
-          <h2 style={trustTitleStyle}>Güvenli tedarik</h2>
+          <h2 style={trustTitleStyle}>{t("sellerStorePage.safeSourcing")}</h2>
 
           <div style={trustListStyle}>
-            <div>✓ Firma bilgileri yönetici kontrolünden geçer.</div>
-            <div>✓ Teklif ve sipariş işlemleri platform içinde kayıt altındadır.</div>
-            <div>✓ Ödemeler güvenli ödeme altyapısı üzerinden gerçekleştirilir.</div>
-            <div>✓ Alıcılar tamamlanan siparişlerden sonra değerlendirme yapabilir.</div>
+            <div>{t("sellerStorePage.trustItem1")}</div>
+            <div>{t("sellerStorePage.trustItem2")}</div>
+            <div>{t("sellerStorePage.trustItem3")}</div>
+            <div>{t("sellerStorePage.trustItem4")}</div>
           </div>
 
           <Link to="/yardim" style={secondaryLinkStyle}>
-            Güvenli ticaret hakkında bilgi al
+            {t("sellerStorePage.safeTradeInfo")}
           </Link>
         </aside>
       </section>
@@ -459,19 +487,21 @@ export default function SellerStorePage() {
       <section style={sectionStyle}>
         <div style={sectionHeaderStyle}>
           <div>
-            <div style={eyebrowStyle}>ÜRÜN KATALOĞU</div>
-            <h2 style={sectionTitleStyle}>Satıcının ürünleri</h2>
+            <div style={eyebrowStyle}>{t("sellerStorePage.productCatalog")}</div>
+            <h2 style={sectionTitleStyle}>{t("sellerStorePage.sellerProducts")}</h2>
           </div>
 
-          <span style={countBadgeStyle}>{products.length} aktif ürün</span>
+          <span style={countBadgeStyle}>
+            {t("sellerStorePage.activeProductCount", { count: products.length })}
+          </span>
         </div>
 
         {products.length === 0 ? (
           <div style={emptyStyle}>
             <div style={{ fontSize: 44 }}>📦</div>
-            <h3 style={{ marginBottom: 6 }}>Henüz yayınlanmış ürün yok</h3>
+            <h3 style={{ marginBottom: 6 }}>{t("sellerStorePage.noProducts")}</h3>
             <p style={{ margin: 0, color: "#64748b" }}>
-              Onaylanan ürünler bu bölümde görüntülenecek.
+              {t("sellerStorePage.noProductsText")}
             </p>
           </div>
         ) : (
@@ -489,7 +519,7 @@ export default function SellerStorePage() {
                     {imageUrl ? (
                       <img
                         src={imageUrl}
-                        alt={product.title || "Ürün"}
+                        alt={product.title || t("sellerStorePage.product")}
                         style={productImageStyle}
                       />
                     ) : (
@@ -498,25 +528,28 @@ export default function SellerStorePage() {
 
                     <div style={productBodyStyle}>
                       <div style={productMetaStyle}>
-                        {product.unitType || "Birim belirtilmedi"}
+                        {unitLabel(product.unitType, t)}
                       </div>
 
                       <h3 style={productTitleStyle}>
-                        {product.title || "Ürün"}
+                        {product.title || t("sellerStorePage.product")}
                       </h3>
 
                       <p style={productDescriptionStyle}>
                         {product.description ||
-                          "Ürün detaylarını görüntülemek için karta tıklayın."}
+                          t("sellerStorePage.productDetailsText")}
                       </p>
 
                       <div style={productFooterStyle}>
                         <strong style={priceStyle}>
-                          {formatPrice(product.basePrice)}
+                          {formatPrice(product.basePrice, locale)}
                         </strong>
 
                         <span style={moqStyle}>
-                          Min. {product.moq || 1} {product.unitType || "adet"}
+                          {t("sellerStorePage.minimum")} {product.moq || 1}{" "}
+                          {product.unitType
+                            ? unitLabel(product.unitType, t)
+                            : t("sellerStorePage.piece")}
                         </span>
                       </div>
                     </div>
@@ -531,21 +564,23 @@ export default function SellerStorePage() {
       <section style={sectionStyle}>
         <div style={sectionHeaderStyle}>
           <div>
-            <div style={eyebrowStyle}>MÜŞTERİ DENEYİMİ</div>
-            <h2 style={sectionTitleStyle}>Son değerlendirmeler</h2>
+            <div style={eyebrowStyle}>{t("sellerStorePage.customerExperience")}</div>
+            <h2 style={sectionTitleStyle}>{t("sellerStorePage.latestReviews")}</h2>
           </div>
 
           <span style={countBadgeStyle}>
-            {company.reviewCount || reviews.length} değerlendirme
+            {t("sellerStorePage.reviewCount", {
+              count: company.reviewCount || reviews.length,
+            })}
           </span>
         </div>
 
         {reviews.length === 0 ? (
           <div style={emptyStyle}>
             <div style={{ fontSize: 42 }}>⭐</div>
-            <h3 style={{ marginBottom: 6 }}>Henüz değerlendirme yok</h3>
+            <h3 style={{ marginBottom: 6 }}>{t("sellerStorePage.noReviews")}</h3>
             <p style={{ margin: 0, color: "#64748b" }}>
-              Tamamlanan ilk siparişten sonra alıcı yorumu burada görünecek.
+              {t("sellerStorePage.noReviewsText")}
             </p>
           </div>
         ) : (
@@ -557,13 +592,13 @@ export default function SellerStorePage() {
 
                   <span style={reviewDateStyle}>
                     {review.createdAt
-                      ? new Date(review.createdAt).toLocaleDateString("tr-TR")
+                      ? new Date(review.createdAt).toLocaleDateString(locale)
                       : ""}
                   </span>
                 </div>
 
                 <p style={reviewTextStyle}>
-                  {review.comment || "Alıcı yalnızca puan verdi."}
+                  {review.comment || t("sellerStorePage.ratingOnly")}
                 </p>
               </article>
             ))}

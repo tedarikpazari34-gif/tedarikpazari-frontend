@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import AdminSidebar from "../components/admin/AdminSidebar";
 
 const API = import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
@@ -14,11 +15,14 @@ type LedgerEntry = {
   toCompany?: { name?: string } | null;
 };
 
-function money(value: number | string) {
-  return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;
+function money(value: number | string, locale: string) {
+  return `${Number(value || 0).toLocaleString(locale)} ₺`;
 }
 
 export default function AdminFinancePage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +41,7 @@ export default function AdminFinancePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Ledger kayıtları alınamadı");
+        alert(data?.message || t("adminFinancePage.loadFailed"));
         setLedger([]);
         return;
       }
@@ -45,7 +49,7 @@ export default function AdminFinancePage() {
       setLedger(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      alert("Finans verileri yüklenirken hata oluştu");
+      alert(t("adminFinancePage.loadError"));
     } finally {
       setLoading(false);
     }
@@ -80,68 +84,98 @@ export default function AdminFinancePage() {
       <main style={{ flex: 1, minHeight: "100vh", padding: 40 }}>
         <div style={{ marginBottom: 28 }}>
           <h1 style={{ fontSize: 34, fontWeight: 900, margin: 0 }}>
-            Finans Yönetimi
+            {t("adminFinancePage.title")}
           </h1>
           <p style={{ color: "#64748b", marginTop: 8 }}>
-            Ledger kayıtları, komisyonlar, escrow hareketleri ve payout
-            işlemlerini buradan takip edin.
+            {t("adminFinancePage.description")}
           </p>
         </div>
 
         <section style={gridStyle}>
-          <MetricCard title="Toplam İşlem Hacmi" value={money(totals.totalVolume)} />
-          <MetricCard title="Toplam Komisyon" value={money(totals.commission)} />
-          <MetricCard title="Satıcıya Aktarılan" value={money(totals.sellerRelease)} />
-          <MetricCard title="İade Edilen" value={money(totals.refund)} />
-          <MetricCard title="Payout Talep" value={money(totals.payoutRequested)} />
-          <MetricCard title="Payout Onay" value={money(totals.payoutApproved)} />
-          <MetricCard title="Payout Red" value={money(totals.payoutRejected)} />
-          <MetricCard title="Admin Ayarlama" value={money(totals.adjustment)} />
+          <MetricCard
+            title={t("adminFinancePage.totalVolume")}
+            value={money(totals.totalVolume, locale)}
+          />
+          <MetricCard
+            title={t("adminFinancePage.totalCommission")}
+            value={money(totals.commission, locale)}
+          />
+          <MetricCard
+            title={t("adminFinancePage.sellerRelease")}
+            value={money(totals.sellerRelease, locale)}
+          />
+          <MetricCard
+            title={t("adminFinancePage.refunded")}
+            value={money(totals.refund, locale)}
+          />
+          <MetricCard
+            title={t("adminFinancePage.payoutRequested")}
+            value={money(totals.payoutRequested, locale)}
+          />
+          <MetricCard
+            title={t("adminFinancePage.payoutApproved")}
+            value={money(totals.payoutApproved, locale)}
+          />
+          <MetricCard
+            title={t("adminFinancePage.payoutRejected")}
+            value={money(totals.payoutRejected, locale)}
+          />
+          <MetricCard
+            title={t("adminFinancePage.adjustment")}
+            value={money(totals.adjustment, locale)}
+          />
         </section>
 
         <section style={panelStyle}>
           <div style={panelHeaderStyle}>
             <div>
-              <h2 style={{ margin: 0, fontSize: 24 }}>Ledger Hareketleri</h2>
+              <h2 style={{ margin: 0, fontSize: 24 }}>
+                {t("adminFinancePage.ledgerMovements")}
+              </h2>
               <p style={{ margin: "6px 0 0", color: "#64748b" }}>
-                Tüm finansal kayıtların işlem geçmişi.
+                {t("adminFinancePage.ledgerDescription")}
               </p>
             </div>
 
             <button onClick={loadLedger} style={refreshButtonStyle}>
-              Yenile
+              {t("adminFinancePage.refresh")}
             </button>
           </div>
 
           {loading ? (
-            <div style={emptyStyle}>Yükleniyor...</div>
+            <div style={emptyStyle}>{t("adminFinancePage.loading")}</div>
           ) : ledger.length === 0 ? (
-            <div style={emptyStyle}>Ledger kaydı yok</div>
+            <div style={emptyStyle}>{t("adminFinancePage.empty")}</div>
           ) : (
             <div style={{ display: "grid", gap: 14 }}>
               {ledger.map((item) => (
                 <article key={item.id} style={ledgerCardStyle}>
                   <div style={ledgerTopStyle}>
                     <strong>{item.type}</strong>
-                    <span style={amountStyle}>{money(item.amount)}</span>
+                    <span style={amountStyle}>{money(item.amount, locale)}</span>
                   </div>
 
                   <div style={metaStyle}>
-                    {item.note || "Açıklama bulunmuyor"}
+                    {item.note || t("adminFinancePage.noDescription")}
                   </div>
 
                   <div style={metaStyle}>
-                    Tarih: {new Date(item.createdAt).toLocaleString("tr-TR")}
+                    {t("adminFinancePage.date")}{" "}
+                    {new Date(item.createdAt).toLocaleString(locale)}
                   </div>
 
                   {(item.fromCompany?.name || item.toCompany?.name) && (
                     <div style={metaStyle}>
                       {item.fromCompany?.name && (
-                        <span>Çıkış: {item.fromCompany.name}</span>
+                        <span>
+                          {t("adminFinancePage.from")} {item.fromCompany.name}
+                        </span>
                       )}
                       {item.fromCompany?.name && item.toCompany?.name && " · "}
                       {item.toCompany?.name && (
-                        <span>Giriş: {item.toCompany.name}</span>
+                        <span>
+                          {t("adminFinancePage.to")} {item.toCompany.name}
+                        </span>
                       )}
                     </div>
                   )}

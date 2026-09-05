@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { TURKEY_CITIES } from "../constants/turkeyCities";
 
 const API = "https://tedarik-backend.onrender.com/api";
@@ -49,20 +50,20 @@ function isNewProduct(createdAt?: string) {
   return Date.now() - created <= sevenDays;
 }
 
-function getProductTitle(product: Product) {
-  return product.title || product.name || "Ürün";
+function getProductTitle(product: Product, fallback: string) {
+  return product.title || product.name || fallback;
 }
 
-function getCategory(product: Product) {
+function getCategory(product: Product, fallback: string) {
   if (product.categoryName) return product.categoryName;
 
   if (typeof product.category === "string") return product.category;
 
   if (product.category && typeof product.category === "object") {
-    return product.category.name || "Kategori";
+    return product.category.name || fallback;
   }
 
-  return "Kategori";
+  return fallback;
 }
 
 function getImage(product: Product) {
@@ -99,11 +100,15 @@ function getImage(product: Product) {
   return "";
 }
 
-function getPrice(product: Product) {
+function getPrice(
+  product: Product,
+  quoteLabel: string,
+  locale: string
+) {
   const value = product.price ?? product.basePrice;
 
   if (value === undefined || value === null || value === "") {
-    return "Teklif Al";
+    return quoteLabel;
   }
 
   const numeric = Number(value);
@@ -112,11 +117,12 @@ function getPrice(product: Product) {
     return String(value);
   }
 
-  return `${numeric.toLocaleString("tr-TR")} ₺`;
+  return `${numeric.toLocaleString(locale === "en" ? "en-US" : "tr-TR")} ₺`;
 }
 
 export default function ProductsPage() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [params] = useSearchParams();
   const q = params.get("q") || "";
 
@@ -276,7 +282,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
       const exists = current.includes(productId);
 
       if (!exists && current.length >= 4) {
-        alert("En fazla 4 ürün karşılaştırabilirsiniz.");
+        alert(t("productsPage.maxCompareAlert"));
         return current;
       }
 
@@ -307,7 +313,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     }
 
     if (role !== "BUYER") {
-      alert("Favoriler özelliğini yalnızca alıcı hesapları kullanabilir.");
+      alert(t("productsPage.buyerFavoritesOnly"));
       return;
     }
 
@@ -326,7 +332,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "Favori işlemi başarısız.");
+        alert(data?.message || t("productsPage.favoriteFailed"));
         return;
       }
 
@@ -343,7 +349,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
       });
     } catch (err) {
       console.error("FAVORITE TOGGLE ERROR:", err);
-      alert("Favori işlemi sırasında hata oluştu.");
+      alert(t("productsPage.favoriteError"));
     } finally {
       setFavoriteLoadingId("");
     }
@@ -365,10 +371,9 @@ const res = await fetch(`${API}/products?${query.toString()}`);
       <section style={hero}>
         <div>
           <div style={eyebrow}>TEDARİK PAZARI</div>
-          <h1 style={title}>Ürün keşfet</h1>
+          <h1 style={title}>{t("productsPage.discover")}</h1>
           <p style={desc}>
-            Tedarik ürünlerini inceleyin, fiyatları karşılaştırın ve tek tıkla
-            teklif talebi oluşturun.
+            {t("productsPage.description")}
           </p>
         </div>
 
@@ -379,12 +384,12 @@ const res = await fetch(`${API}/products?${query.toString()}`);
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSearch();
             }}
-            placeholder="Ürün ara... örn: koli, ampul, eldiven"
+            placeholder={t("productsPage.searchPlaceholder")}
             style={searchInput}
           />
 
           <button onClick={handleSearch} style={searchButton}>
-            Ara
+            {t("productsPage.search")}
           </button>
         </div>
       </section>
@@ -394,7 +399,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     min="0"
     value={minPrice}
     onChange={(e) => setMinPrice(e.target.value)}
-    placeholder="Min fiyat"
+    placeholder={t("productsPage.minPrice")}
     style={filterInput}
   />
 
@@ -403,7 +408,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     min="0"
     value={maxPrice}
     onChange={(e) => setMaxPrice(e.target.value)}
-    placeholder="Max fiyat"
+    placeholder={t("productsPage.maxPrice")}
     style={filterInput}
   />
 
@@ -412,7 +417,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     min="0"
     value={minMoq}
     onChange={(e) => setMinMoq(e.target.value)}
-    placeholder="Min MOQ"
+    placeholder={t("productsPage.minMoq")}
     style={filterInput}
   />
 
@@ -421,7 +426,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     min="0"
     value={maxMoq}
     onChange={(e) => setMaxMoq(e.target.value)}
-    placeholder="Max MOQ"
+    placeholder={t("productsPage.maxMoq")}
     style={filterInput}
   />
 
@@ -430,7 +435,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     onChange={(e) => setCity(e.target.value)}
     style={filterInput}
   >
-    <option value="">Tüm şehirler</option>
+    <option value="">{t("productsPage.allCities")}</option>
 
     {TURKEY_CITIES.map((cityName) => (
       <option key={cityName} value={cityName}>
@@ -444,9 +449,9 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     onChange={(e) => setSort(e.target.value)}
     style={filterInput}
   >
-    <option value="newest">En yeni</option>
-    <option value="price-asc">Fiyat: Artan</option>
-    <option value="price-desc">Fiyat: Azalan</option>
+    <option value="newest">{t("productsPage.newest")}</option>
+    <option value="price-asc">{t("productsPage.priceAsc")}</option>
+    <option value="price-desc">{t("productsPage.priceDesc")}</option>
   </select>
 
   <label style={checkLabel}>
@@ -455,7 +460,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
       checked={verifiedOnly}
       onChange={(e) => setVerifiedOnly(e.target.checked)}
     />
-    Onaylı tedarikçi
+    {t("productsPage.verifiedSupplier")}
   </label>
 
   <button
@@ -463,32 +468,39 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     onClick={clearFilters}
     style={clearButton}
   >
-    Filtreleri Temizle
+    {t("productsPage.clearFilters")}
   </button>
 </section>
       <section style={toolbar}>
         <div>
           <strong>
-            {q ? `"${q}" için sonuçlar` : "Tüm ürünler"}
+            {q
+              ? t("productsPage.resultsFor", { query: q })
+              : t("productsPage.allProducts")}
           </strong>
-          <span style={countText}> {filteredProducts.length} ürün</span>
+          <span style={countText}>
+            {" "}
+            {t("productsPage.productCount", {
+              count: filteredProducts.length,
+            })}
+          </span>
         </div>
 
         <Link to="/buyer/rfqs/new" style={rfqButton}>
-          Toplu Teklif Talebi Oluştur
+          {t("productsPage.createBulkRequest")}
         </Link>
       </section>
 
       {loading ? (
-        <div style={empty}>Ürünler yükleniyor...</div>
+        <div style={empty}>{t("productsPage.loading")}</div>
       ) : filteredProducts.length === 0 ? (
         <div style={emptyCard}>
-          <h2 style={{ marginTop: 0 }}>Ürün bulunamadı</h2>
+          <h2 style={{ marginTop: 0 }}>{t("productsPage.notFound")}</h2>
           <p style={{ color: "#64748b" }}>
-            Farklı bir kelime deneyin veya doğrudan teklif talebi oluşturun.
+            {t("productsPage.notFoundDescription")}
           </p>
           <Link to="/buyer/rfqs/new" style={quoteBtn}>
-            Teklif Talebi Oluştur
+            {t("productsPage.createRequest")}
           </Link>
         </div>
       ) : (
@@ -499,7 +511,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
             return (
               <div key={product.id} style={card}>
                 {isNewProduct(product.createdAt) && (
-                  <span style={newBadge}>Yeni</span>
+                  <span style={newBadge}>{t("productsPage.new")}</span>
                 )}
 
                 <button
@@ -508,8 +520,8 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                   disabled={favoriteLoadingId === product.id}
                   aria-label={
                     favoriteIds.has(product.id)
-                      ? "Favoriden çıkar"
-                      : "Favoriye ekle"
+                      ? t("productsPage.removeFavorite")
+                      : t("productsPage.addFavorite")
                   }
                   style={{
                     ...favoriteButton,
@@ -528,62 +540,80 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                     <img
                       src={image}
                       style={img}
-                      alt={getProductTitle(product)}
+                      alt={getProductTitle(
+                        product,
+                        t("productsPage.productFallback")
+                      )}
                       loading="lazy"
                     />
                   ) : (
                     <div style={placeholder}>
                       <span style={{ fontSize: 42 }}>📦</span>
-                      <span>Ürün görseli yok</span>
+                      <span>{t("productsPage.noImage")}</span>
                     </div>
                   )}
                 </Link>
 
                 <div style={{ padding: 18 }}>
-                  <div style={category}>{getCategory(product)}</div>
+                  <div style={category}>
+                    {getCategory(product, t("productsPage.categoryFallback"))}
+                  </div>
 
-                  <h3 style={productTitle}>{getProductTitle(product)}</h3>
+                  <h3 style={productTitle}>
+                    {getProductTitle(
+                      product,
+                      t("productsPage.productFallback")
+                    )}
+                  </h3>
 
                   <div style={sellerRow}>
                     <div style={{ minWidth: 0 }}>
                       <div style={sellerNameText}>
-                        Platform Onaylı Tedarikçi
+                        {t("productsPage.approvedSupplier")}
                       </div>
 
                       <div style={sellerMeta}>
-                        Tedarikçi bilgileri güvenli ticaret için gizlidir
+                        {t("productsPage.supplierHidden")}
                       </div>
                     </div>
 
-                    <span style={supplierBadge}>✓ Platform İçi</span>
+                    <span style={supplierBadge}>✓ {t("productsPage.platformOnly")}</span>
                   </div>
 
                   <div style={featureGrid}>
                     <div style={featureItem}>
                       <span>📦 MOQ</span>
                       <strong>
-                        {product.moq || 1} {product.unitType || "adet"}
+                        {product.moq || 1} {product.unitType || t("productsPage.piece")}
                       </strong>
                     </div>
 
                     <div style={featureItem}>
-                      <span>🚚 Teslim</span>
+                      <span>🚚 {t("productsPage.delivery")}</span>
                       <strong>
                         {product.leadTimeDays
-                          ? `${product.leadTimeDays} gün`
-                          : "Sorunuz"}
+                          ? t("productsPage.days", {
+                              count: product.leadTimeDays,
+                            })
+                          : t("productsPage.ask")}
                       </strong>
                     </div>
                   </div>
 
                   <div style={priceRow}>
                     <div>
-                      <span style={priceLabel}>Başlangıç fiyatı</span>
-                      <strong style={priceText}>{getPrice(product)}</strong>
+                      <span style={priceLabel}>{t("productsPage.startingPrice")}</span>
+                      <strong style={priceText}>
+                        {getPrice(
+                          product,
+                          t("productsPage.getQuote"),
+                          i18n.language
+                        )}
+                      </strong>
                     </div>
 
                     <span style={stockBadge}>
-                      {product.stockType || "Toptan satış"}
+                      {product.stockType || t("productsPage.wholesale")}
                     </span>
                   </div>
 
@@ -601,22 +631,25 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                     }}
                   >
                     {compareIds.includes(product.id)
-                      ? "✓ Karşılaştırmada"
-                      : "⚖️ Karşılaştır"}
+                      ? `✓ ${t("productsPage.inComparison")}`
+                      : `⚖️ ${t("productsPage.compare")}`}
                   </button>
 
                   <div style={actions}>
                     <Link to={`/product/${product.id}`} style={detailBtn}>
-                      İncele
+                      {t("productsPage.view")}
                     </Link>
 
                     <Link
                       to={`/buyer/rfqs/new?productId=${product.id}&product=${encodeURIComponent(
-                        getProductTitle(product)
+                        getProductTitle(
+                          product,
+                          t("productsPage.productFallback")
+                        )
                       )}`}
                       style={quoteBtn}
                     >
-                      Teklif Al
+                      {t("productsPage.getQuote")}
                     </Link>
                   </div>
                 </div>
@@ -629,9 +662,13 @@ const res = await fetch(`${API}/products?${query.toString()}`);
       {compareIds.length > 0 && (
         <div style={compareBarStyle}>
           <div>
-            <strong>{compareIds.length} ürün seçildi</strong>
+            <strong>
+              {t("productsPage.selectedProducts", {
+                count: compareIds.length,
+              })}
+            </strong>
             <div style={compareHintStyle}>
-              En fazla 4 ürünü yan yana karşılaştırabilirsiniz.
+              {t("productsPage.compareHint")}
             </div>
           </div>
 
@@ -641,11 +678,11 @@ const res = await fetch(`${API}/products?${query.toString()}`);
               onClick={clearCompare}
               style={compareClearButtonStyle}
             >
-              Temizle
+              {t("productsPage.clear")}
             </button>
 
             <Link to="/compare" style={compareGoButtonStyle}>
-              Karşılaştır →
+              {t("productsPage.compare")} →
             </Link>
           </div>
         </div>

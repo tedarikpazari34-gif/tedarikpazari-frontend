@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface RFQ {
   id: string;
@@ -29,18 +30,20 @@ export default function RFQList({
   openQuoteModal,
   panelCardStyle,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <>
       {role === "BUYER" && (
         <>
-          <h2>RFQ Listem ({rfqs.length})</h2>
+          <h2>{t("rfqList.myRfqs")} ({rfqs.length})</h2>
 
           {rfqs.map((r) => (
             <div key={r.id} style={panelCardStyle}>
-              <b>RFQ:</b> {r.id}
-              <div>Ürün: {r.product?.title || r.productId}</div>
-              <div>Miktar: {r.quantity}</div>
-              <div>Durum: {r.status}</div>
+              <b>{t("rfqList.rfq")}:</b> {r.id}
+              <div>{t("rfqList.product")}: {r.product?.title || r.productId}</div>
+              <div>{t("rfqList.quantity")}: {r.quantity}</div>
+              <div>{t("rfqList.status")}: {r.status}</div>
             </div>
           ))}
         </>
@@ -48,21 +51,21 @@ export default function RFQList({
 
       {role === "SELLER" && (
         <>
-          <h2>OPEN RFQ ({openRfqs.length})</h2>
+          <h2>{t("rfqList.openRfqs")} ({openRfqs.length})</h2>
 
           {openRfqs.map((r) => (
             <div key={r.id} style={panelCardStyle}>
-              <b>RFQ:</b> {r.id}
-              <div>Ürün: {r.product?.title || r.productId}</div>
-              <div>Buyer: {r.buyer?.name || "Onaylı Alıcı"}</div>
-              <div>Miktar: {r.quantity}</div>
-              <div>Durum: {r.status}</div>
+              <b>{t("rfqList.rfq")}:</b> {r.id}
+              <div>{t("rfqList.product")}: {r.product?.title || r.productId}</div>
+              <div>{t("rfqList.buyer")}: {r.buyer?.name || t("rfqList.verifiedBuyer")}</div>
+              <div>{t("rfqList.quantity")}: {r.quantity}</div>
+              <div>{t("rfqList.status")}: {r.status}</div>
 
               <button
                 style={{ marginTop: 8 }}
                 onClick={() => openQuoteModal(r)}
               >
-                Teklif Ver
+                {t("rfqList.makeOffer")}
               </button>
             </div>
           ))}

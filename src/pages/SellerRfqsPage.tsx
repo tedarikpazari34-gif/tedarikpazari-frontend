@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 
 type Quote = {
   id: string;
@@ -23,17 +24,19 @@ type RFQ = {
 
 const API = "https://tedarik-backend.onrender.com/api";
 
-function statusLabel(status: string) {
+function statusLabel(status: string, t: any) {
   const value = status?.toUpperCase();
 
-  if (value === "OPEN") return "Açık";
-  if (value === "PENDING") return "Beklemede";
-  if (value === "CLOSED") return "Kapandı";
+  if (value === "OPEN") return t("sellerRfqsPage.statusOpen");
+  if (value === "PENDING") return t("sellerRfqsPage.statusPending");
+  if (value === "CLOSED") return t("sellerRfqsPage.statusClosed");
 
   return status || "-";
 }
 
 export default function SellerRfqsPage() {
+  const { t } = useTranslation();
+
   const [rfqs, setRfqs] = useState<RFQ[]>([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState("");
@@ -47,7 +50,7 @@ export default function SellerRfqsPage() {
       const token = getToken();
 
       if (!token) {
-        setError("Oturum bulunamadı");
+        setError(t("sellerRfqsPage.sessionMissing"));
         setRfqs([]);
         return;
       }
@@ -61,7 +64,7 @@ export default function SellerRfqsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "RFQ listesi alınamadı");
+        setError(data?.message || t("sellerRfqsPage.loadFailed"));
         setRfqs([]);
         return;
       }
@@ -69,7 +72,7 @@ export default function SellerRfqsPage() {
       setRfqs(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("RFQ LOAD ERROR:", err);
-      setError("RFQ listesi alınamadı");
+      setError(t("sellerRfqsPage.loadFailed"));
       setRfqs([]);
     } finally {
       setPageLoading(false);
@@ -89,14 +92,14 @@ export default function SellerRfqsPage() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data?.message || "Chat başlatılamadı");
+      alert(data?.message || t("sellerRfqsPage.chatFailed"));
       return;
     }
 
     window.location.href = "/chat";
   } catch (err) {
     console.error("START CHAT ERROR:", err);
-    alert("Chat başlatılamadı");
+    alert(t("sellerRfqsPage.chatFailed"));
   }
 };
   useEffect(() => {
@@ -106,7 +109,7 @@ export default function SellerRfqsPage() {
   if (pageLoading) {
     return (
       <main style={pageStyle}>
-        <div style={emptyCardStyle}>RFQ talepleri yükleniyor...</div>
+        <div style={emptyCardStyle}>{t("sellerRfqsPage.loading")}</div>
       </main>
     );
   }
@@ -115,16 +118,15 @@ export default function SellerRfqsPage() {
     <main style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <div style={eyebrowStyle}>SATICI PANELİ</div>
-          <h1 style={titleStyle}>Açık RFQ Talepleri</h1>
+          <div style={eyebrowStyle}>{t("sellerRfqsPage.eyebrow")}</div>
+          <h1 style={titleStyle}>{t("sellerRfqsPage.title")}</h1>
           <p style={descStyle}>
-            Alıcıların gönderdiği talepleri inceleyin, uygun olanlara hızlıca
-            fiyat ve teslim süresi teklifi verin.
+            {t("sellerRfqsPage.description")}
           </p>
         </div>
 
         <div style={heroStatsStyle}>
-          <span>Toplam Talep</span>
+          <span>{t("sellerRfqsPage.totalRequests")}</span>
           <strong>{rfqs.length}</strong>
         </div>
       </section>
@@ -133,9 +135,9 @@ export default function SellerRfqsPage() {
 
       {!error && rfqs.length === 0 ? (
         <div style={emptyCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Açık RFQ bulunamadı</h2>
+          <h2 style={{ marginTop: 0 }}>{t("sellerRfqsPage.noOpenRfqs")}</h2>
           <p style={{ color: "#64748b", lineHeight: 1.7 }}>
-            Yeni alıcı talepleri geldiğinde burada listelenecek.
+            {t("sellerRfqsPage.noOpenRfqsText")}
           </p>
         </div>
       ) : (
@@ -144,25 +146,25 @@ export default function SellerRfqsPage() {
             <article key={rfq.id} style={cardStyle}>
               <div style={cardTopStyle}>
                 <div>
-                  <div style={smallLabelStyle}>Talep Edilen Ürün</div>
+                  <div style={smallLabelStyle}>{t("sellerRfqsPage.requestedProduct")}</div>
                   <h2 style={cardTitleStyle}>
-                    {rfq.product?.title || "Genel Talep"}
+                    {rfq.product?.title || t("sellerRfqsPage.generalRequest")}
                   </h2>
                 </div>
 
-                <span style={statusBadgeStyle}>{statusLabel(rfq.status)}</span>
+                <span style={statusBadgeStyle}>{statusLabel(rfq.status, t)}</span>
               </div>
 
               <div style={infoGridStyle}>
-                <Info label="Alıcı" value={rfq.buyer?.name || "-"} />
-                <Info label="Miktar" value={rfq.quantity || "-"} />
-                <Info label="Mevcut Teklif" value={rfq.quotes?.length || 0} />
-                <Info label="Durum" value={statusLabel(rfq.status)} />
+                <Info label={t("sellerRfqsPage.buyer")} value={rfq.buyer?.name || "-"} />
+                <Info label={t("sellerRfqsPage.quantity")} value={rfq.quantity || "-"} />
+                <Info label={t("sellerRfqsPage.existingQuotes")} value={rfq.quotes?.length || 0} />
+                <Info label={t("sellerRfqsPage.status")} value={statusLabel(rfq.status, t)} />
               </div>
 
               <div style={noteBoxStyle}>
-                <strong>Talep Notu</strong>
-                <p>{rfq.note || "Not eklenmemiş."}</p>
+                <strong>{t("sellerRfqsPage.requestNote")}</strong>
+                <p>{rfq.note || t("sellerRfqsPage.noNote")}</p>
               </div>
 
               <div style={buttonRowStyle}>
@@ -172,14 +174,14 @@ export default function SellerRfqsPage() {
     }}
     style={quoteButtonStyle}
   >
-    Teklif Ver
+    {t("sellerRfqsPage.submitQuote")}
   </button>
 
   <button
     onClick={() => startChat(rfq.id)}
     style={chatButtonStyle}
   >
-    Mesajlaş
+    {t("sellerRfqsPage.message")}
   </button>
 </div>
             </article>

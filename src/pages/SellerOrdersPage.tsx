@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 
 type Order = {
   id: string;
@@ -25,17 +26,18 @@ type Order = {
 
 const API = "https://tedarik-backend.onrender.com/api";
 
-function formatPrice(value?: number | string) {
+function formatPrice(value: number | string | undefined, locale: string) {
   const numeric = Number(value || 0);
-  return `${numeric.toLocaleString("tr-TR")} ₺`;
+  return `${numeric.toLocaleString(locale)} ₺`;
 }
 
-function statusLabel(status: string) {
-  if (status === "PENDING_PAYMENT") return "Ödeme Bekleniyor";
-  if (status === "PAID") return "Ödeme Alındı";
-  if (status === "PREPARING") return "Hazırlanıyor";
-  if (status === "SHIPPED") return "Kargoda";
-  if (status === "COMPLETED") return "Tamamlandı";
+function statusLabel(status: string, t: any) {
+  if (status === "PENDING_PAYMENT") return t("sellerOrdersPage.pendingPayment");
+  if (status === "PAID") return t("sellerOrdersPage.paid");
+  if (status === "PREPARING") return t("sellerOrdersPage.preparing");
+  if (status === "SHIPPED") return t("sellerOrdersPage.shipped");
+  if (status === "COMPLETED") return t("sellerOrdersPage.completed");
+  if (status === "CANCELLED") return t("sellerOrdersPage.cancelled");
   return status || "-";
 }
 
@@ -49,6 +51,9 @@ function statusStyle(status: string): CSSProperties {
 }
 
 export default function SellerOrdersPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
   );
@@ -74,7 +79,7 @@ export default function SellerOrdersPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Siparişlerinizi görmek için giriş yapmalısınız.");
+        setError(t("sellerOrdersPage.loginRequired"));
         setOrders([]);
         return;
       }
@@ -88,7 +93,7 @@ export default function SellerOrdersPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "Siparişler alınamadı");
+        setError(data?.message || t("sellerOrdersPage.loadFailed"));
         setOrders([]);
         return;
       }
@@ -102,7 +107,7 @@ export default function SellerOrdersPage() {
       setOrders(safeOrders);
     } catch (err) {
       console.error("ORDER LOAD ERROR:", err);
-      setError("Siparişler alınamadı");
+      setError(t("sellerOrdersPage.loadFailed"));
       setOrders([]);
     } finally {
       setLoading(false);
@@ -123,21 +128,21 @@ export default function SellerOrdersPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "Hazırlama işlemi başarısız");
+        alert(data?.message || t("sellerOrdersPage.prepareFailed"));
         return;
       }
 
-      alert("Sipariş hazırlanmaya alındı 🛠");
+      alert(t("sellerOrdersPage.prepareSuccess"));
       loadOrders();
     } catch (err) {
       console.error("PREPARE ERROR:", err);
-      alert("Hazırlama işlemi sırasında hata oluştu");
+      alert(t("sellerOrdersPage.prepareError"));
     }
   };
 
   const handleShip = async (orderId: string) => {
   const shippingCompany = window.prompt(
-    "Kargo firmasını yazın",
+    t("sellerOrdersPage.shippingCompanyPrompt"),
     "Yurtiçi Kargo"
   );
 
@@ -146,7 +151,7 @@ export default function SellerOrdersPage() {
   }
 
   const shippingTrackingNo = window.prompt(
-    "Kargo takip numarasını yazın"
+    t("sellerOrdersPage.trackingNoPrompt")
   );
 
   if (!shippingTrackingNo?.trim()) {
@@ -157,7 +162,7 @@ export default function SellerOrdersPage() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("Lütfen giriş yapın");
+      alert(t("sellerOrdersPage.loginShort"));
       return;
     }
 
@@ -176,19 +181,19 @@ export default function SellerOrdersPage() {
     const data = await res.json().catch(() => null);
 
     if (!res.ok) {
-      alert(data?.message || "Kargo işlemi başarısız");
+      alert(data?.message || t("sellerOrdersPage.shippingFailed"));
       return;
     }
 
-    alert("Sipariş kargoya verildi 🚚");
+    alert(t("sellerOrdersPage.shippingSuccess"));
     await loadOrders();
   } catch (err) {
     console.error("SHIP ERROR:", err);
-    alert("Kargo işlemi sırasında hata oluştu");
+    alert(t("sellerOrdersPage.shippingError"));
   }
 };
   const handleOpenDispute = async (orderId: string) => {
-    const reason = window.prompt("Uyuşmazlık sebebini yazın");
+    const reason = window.prompt(t("sellerOrdersPage.disputeReasonPrompt"));
 
     if (!reason?.trim()) return;
 
@@ -196,7 +201,7 @@ export default function SellerOrdersPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Lütfen giriş yapın");
+        alert(t("sellerOrdersPage.loginShort"));
         return;
       }
 
@@ -214,15 +219,15 @@ export default function SellerOrdersPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "Uyuşmazlık açılamadı");
+        alert(data?.message || t("sellerOrdersPage.disputeFailed"));
         return;
       }
 
-      alert("Uyuşmazlık başarıyla açıldı");
+      alert(t("sellerOrdersPage.disputeSuccess"));
       loadOrders();
     } catch (err) {
       console.error("DISPUTE ERROR:", err);
-      alert("Uyuşmazlık açılırken hata oluştu");
+      alert(t("sellerOrdersPage.disputeError"));
     }
   };
   useEffect(() => {
@@ -232,7 +237,7 @@ export default function SellerOrdersPage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <div style={emptyCardStyle}>Siparişler yükleniyor...</div>
+        <div style={emptyCardStyle}>{t("sellerOrdersPage.loading")}</div>
       </main>
     );
   }
@@ -248,10 +253,10 @@ export default function SellerOrdersPage() {
         }}
       >
         <div>
-          <div style={eyebrowStyle}>SATICI PANELİ</div>
-          <h1 style={titleStyle}>Satıcı Siparişleri</h1>
+          <div style={eyebrowStyle}>{t("sellerOrdersPage.eyebrow")}</div>
+          <h1 style={titleStyle}>{t("sellerOrdersPage.title")}</h1>
           <p style={descStyle}>
-            Ödemesi alınan siparişleri hazırlayın, kargoya verin ve satış sürecinizi tek panelden yönetin.
+            {t("sellerOrdersPage.description")}
           </p>
         </div>
 
@@ -264,24 +269,24 @@ export default function SellerOrdersPage() {
             marginTop: isMobile ? 16 : 0,
           }}
         >
-          <span>Toplam Sipariş</span>
+          <span>{t("sellerOrdersPage.totalOrders")}</span>
           <strong>{orders.length}</strong>
         </div>
       </section>
 
       <section style={statsStyle}>
-        <Stat label="Ödenen" value={orders.filter((o) => o.status === "PAID").length} />
-        <Stat label="Hazırlanan" value={orders.filter((o) => o.status === "PREPARING").length} />
-        <Stat label="Kargoda" value={orders.filter((o) => o.status === "SHIPPED").length} />
+        <Stat label={t("sellerOrdersPage.paidStat")} value={orders.filter((o) => o.status === "PAID").length} />
+        <Stat label={t("sellerOrdersPage.preparingStat")} value={orders.filter((o) => o.status === "PREPARING").length} />
+        <Stat label={t("sellerOrdersPage.shippedStat")} value={orders.filter((o) => o.status === "SHIPPED").length} />
       </section>
 
       {error ? (
         <div style={errorCardStyle}>{error}</div>
       ) : orders.length === 0 ? (
         <div style={emptyCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Sipariş bulunamadı</h2>
+          <h2 style={{ marginTop: 0 }}>{t("sellerOrdersPage.emptyTitle")}</h2>
           <p style={{ color: "#64748b", lineHeight: 1.7 }}>
-            Kabul edilen teklifler siparişe dönüştüğünde burada listelenecek.
+            {t("sellerOrdersPage.emptyText")}
           </p>
         </div>
       ) : (
@@ -290,44 +295,48 @@ export default function SellerOrdersPage() {
             <article key={o.id} style={cardStyle}>
               <div style={cardTopStyle}>
                 <div>
-                  <div style={smallLabelStyle}>Sipariş / Talep</div>
-                  <h2 style={cardTitleStyle}>{o.rfq?.product?.title || o.rfq?.title || "Alım Talebi"}</h2>
+                  <div style={smallLabelStyle}>{t("sellerOrdersPage.orderRequest")}</div>
+                  <h2 style={cardTitleStyle}>
+                    {o.rfq?.product?.title ||
+                      o.rfq?.title ||
+                      t("sellerOrdersPage.buyingRequest")}
+                  </h2>
                 </div>
 
                 <span style={{ ...badgeStyle, ...statusStyle(o.status) }}>
-                  {statusLabel(o.status)}
+                  {statusLabel(o.status, t)}
                 </span>
               </div>
 
               <div style={infoGridStyle}>
-                <Info label="Buyer" value={o.buyer?.name || o.buyer?.companyName || "-"} />
-                <Info label="Miktar" value={o.rfq?.quantity || "-"} />
-                <Info label="Birim Fiyat" value={formatPrice(o.quote?.unitPrice)} />
-                <Info label="Toplam" value={formatPrice(o.totalAmount)} />
+                <Info label={t("sellerOrdersPage.buyer")} value={o.buyer?.name || o.buyer?.companyName || "-"} />
+                <Info label={t("sellerOrdersPage.quantity")} value={o.rfq?.quantity || "-"} />
+                <Info label={t("sellerOrdersPage.unitPrice")} value={formatPrice(o.quote?.unitPrice, locale)} />
+                <Info label={t("sellerOrdersPage.total")} value={formatPrice(o.totalAmount, locale)} />
               </div>
 
               <div style={commissionBoxStyle}>
-                <span>Platform Komisyonu</span>
-                <strong>{formatPrice(o.commissionAmount)}</strong>
+                <span>{t("sellerOrdersPage.platformCommission")}</span>
+                <strong>{formatPrice(o.commissionAmount, locale)}</strong>
               </div>
 
               <div style={actionsStyle}>
                 {o.status === "PAID" && (
                   <button onClick={() => handlePrepare(o.id)} style={orangeButtonStyle}>
-                    🛠 Hazırlamaya Başla
+                    {t("sellerOrdersPage.startPreparing")}
                   </button>
                 )}
 
                 {o.status === "PREPARING" && (
                   <>
                     <button onClick={() => handleShip(o.id)} style={blueButtonStyle}>
-                      📦 Kargoya Ver
+                      {t("sellerOrdersPage.shipOrder")}
                     </button>
 
                     <button
                       onClick={async () => {
                         const ok = window.confirm(
-                          "Siparişi kendi teslimatına hazır olarak işaretlemek istiyor musunuz?"
+                          t("sellerOrdersPage.selfDeliveryConfirm")
                         );
 
                         if (!ok) return;
@@ -348,26 +357,28 @@ export default function SellerOrdersPage() {
                           const data = await res.json().catch(() => null);
 
                           if (!res.ok) {
-                            alert(data?.message || "İşlem başarısız");
+                            alert(data?.message || t("sellerOrdersPage.operationFailed"));
                             return;
                           }
 
-                          alert("Sipariş teslime hazır olarak işaretlendi 🤝");
+                          alert(t("sellerOrdersPage.selfDeliverySuccess"));
                           loadOrders();
                         } catch (err) {
                           console.error("SELF DELIVERY ERROR:", err);
-                          alert("İşlem sırasında hata oluştu");
+                          alert(t("sellerOrdersPage.operationError"));
                         }
                       }}
                       style={orangeButtonStyle}
                     >
-                      🤝 Teslime Hazır
+                      {t("sellerOrdersPage.readyForDelivery")}
                     </button>
                   </>
                 )}
 
                 {o.status !== "PAID" && o.status !== "PREPARING" && (
-                  <div style={passiveActionStyle}>İşlem beklenmiyor</div>
+                  <div style={passiveActionStyle}>
+                    {t("sellerOrdersPage.noActionRequired")}
+                  </div>
                 )}
 
                 {!o.status.includes("CANCELLED") && (
@@ -375,7 +386,7 @@ export default function SellerOrdersPage() {
                     onClick={() => handleOpenDispute(o.id)}
                     style={disputeButtonStyle}
                   >
-                    ⚠️ Uyuşmazlık Aç
+                    {t("sellerOrdersPage.openDispute")}
                   </button>
                 )}
               </div>

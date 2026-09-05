@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const API = "https://tedarik-backend.onrender.com/api";
 
@@ -15,6 +16,9 @@ type VerificationRequest = {
 };
 
 export default function CompanyVerificationPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [file, setFile] = useState<File | null>(null);
   const [documentType, setDocumentType] = useState("VERGI_LEVHASI");
   const [note, setNote] = useState("");
@@ -50,12 +54,12 @@ export default function CompanyVerificationPage() {
 
   const submitVerification = async () => {
     if (!file) {
-      setMessage("Lütfen bir belge seçin.");
+      setMessage(t("companyVerificationPage.selectDocument"));
       return;
     }
 
     if (!token) {
-      setMessage("Oturum bulunamadı.");
+      setMessage(t("companyVerificationPage.sessionMissing"));
       return;
     }
 
@@ -77,7 +81,7 @@ export default function CompanyVerificationPage() {
       const uploadData = await uploadRes.json();
 
       if (!uploadRes.ok) {
-        setMessage(uploadData?.message || "Belge yüklenemedi.");
+        setMessage(uploadData?.message || t("companyVerificationPage.uploadFailed"));
         return;
       }
 
@@ -99,55 +103,62 @@ export default function CompanyVerificationPage() {
       const createData = await createRes.json();
 
       if (!createRes.ok) {
-        setMessage(createData?.message || "Başvuru oluşturulamadı.");
+        setMessage(createData?.message || t("companyVerificationPage.applicationFailed"));
         return;
       }
 
-      setMessage("Doğrulama başvurunuz alındı.");
+      setMessage(t("companyVerificationPage.applicationReceived"));
       setFile(null);
       setNote("");
       await loadRequests();
     } catch (err) {
       console.error(err);
-      setMessage("İşlem sırasında hata oluştu.");
+      setMessage(t("companyVerificationPage.processError"));
     } finally {
       setLoading(false);
     }
   };
 
   const statusLabel = (status: string) => {
-    if (status === "APPROVED") return "Onaylandı";
-    if (status === "REJECTED") return "Reddedildi";
-    return "İncelemede";
+    if (status === "APPROVED") return t("companyVerificationPage.approved");
+    if (status === "REJECTED") return t("companyVerificationPage.rejected");
+    return t("companyVerificationPage.pending");
   };
 
   return (
     <main style={pageStyle}>
       <section style={cardStyle}>
-        <h1 style={titleStyle}>Firma Doğrulama</h1>
+        <h1 style={titleStyle}>{t("companyVerificationPage.title")}</h1>
 
         <p style={descStyle}>
-          Firmanızı doğrulatmak için vergi levhası, faaliyet belgesi veya
-          ticaret sicili belgesi yükleyebilirsiniz.
+          {t("companyVerificationPage.description")}
         </p>
 
         <div style={formGridStyle}>
           <label style={labelStyle}>
-            Belge Türü
+            {t("companyVerificationPage.documentType")}
             <select
               value={documentType}
               onChange={(e) => setDocumentType(e.target.value)}
               style={inputStyle}
             >
-              <option value="VERGI_LEVHASI">Vergi Levhası</option>
-              <option value="FAALIYET_BELGESI">Faaliyet Belgesi</option>
-              <option value="TICARET_SICIL">Ticaret Sicili Belgesi</option>
-              <option value="DIGER">Diğer</option>
+              <option value="VERGI_LEVHASI">
+                {t("companyVerificationPage.taxCertificate")}
+              </option>
+              <option value="FAALIYET_BELGESI">
+                {t("companyVerificationPage.activityCertificate")}
+              </option>
+              <option value="TICARET_SICIL">
+                {t("companyVerificationPage.tradeRegistry")}
+              </option>
+              <option value="DIGER">
+                {t("companyVerificationPage.other")}
+              </option>
             </select>
           </label>
 
           <label style={labelStyle}>
-            Belge
+            {t("companyVerificationPage.document")}
             <input
               type="file"
               accept=".pdf,.jpg,.jpeg,.png,.webp"
@@ -157,11 +168,11 @@ export default function CompanyVerificationPage() {
           </label>
 
           <label style={labelStyle}>
-            Not
+            {t("companyVerificationPage.note")}
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="İsterseniz kısa bir açıklama ekleyin"
+              placeholder={t("companyVerificationPage.notePlaceholder")}
               style={{ ...inputStyle, minHeight: 100 }}
             />
           </label>
@@ -172,17 +183,23 @@ export default function CompanyVerificationPage() {
           disabled={loading}
           style={buttonStyle}
         >
-          {loading ? "Gönderiliyor..." : "Doğrulama Başvurusu Gönder"}
+          {loading
+            ? t("companyVerificationPage.sending")
+            : t("companyVerificationPage.submit")}
         </button>
 
         {message && <div style={messageStyle}>{message}</div>}
       </section>
 
       <section style={cardStyle}>
-        <h2 style={subTitleStyle}>Başvurularım</h2>
+        <h2 style={subTitleStyle}>
+          {t("companyVerificationPage.myApplications")}
+        </h2>
 
         {requests.length === 0 ? (
-          <div style={emptyStyle}>Henüz doğrulama başvurunuz yok.</div>
+          <div style={emptyStyle}>
+            {t("companyVerificationPage.noApplications")}
+          </div>
         ) : (
           <div style={listStyle}>
             {requests.map((request) => (
@@ -190,10 +207,12 @@ export default function CompanyVerificationPage() {
                 <div>
                   <strong>{statusLabel(request.status)}</strong>
                   <div style={mutedStyle}>
-                    {request.fileName || request.documentType || "Belge"}
+                    {request.fileName ||
+                      request.documentType ||
+                      t("companyVerificationPage.documentFallback")}
                   </div>
                   <div style={mutedStyle}>
-                    {new Date(request.createdAt).toLocaleString("tr-TR")}
+                    {new Date(request.createdAt).toLocaleString(locale)}
                   </div>
                 </div>
 
@@ -203,7 +222,7 @@ export default function CompanyVerificationPage() {
                   rel="noreferrer"
                   style={linkStyle}
                 >
-                  Belgeyi Gör
+                  {t("companyVerificationPage.viewDocument")}
                 </a>
               </div>
             ))}

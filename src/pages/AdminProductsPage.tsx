@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import AdminSidebar from '../components/admin/AdminSidebar';
 
 const API = 'https://tedarik-backend.onrender.com/api';
 
 export default function AdminProductsPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [products, setProducts] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +50,7 @@ export default function AdminProductsPage() {
   }
 
   async function deactivateProduct(id: string) {
-    if (!window.confirm("Bu ürünü pasife almak istediğinize emin misiniz?")) {
+    if (!window.confirm(t("adminProductsPage.deactivateConfirm"))) {
       return;
     }
 
@@ -63,7 +67,7 @@ export default function AdminProductsPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "Ürün pasife alınamadı.");
+        alert(data?.message || t("adminProductsPage.deactivateFailed"));
         return;
       }
 
@@ -71,7 +75,7 @@ export default function AdminProductsPage() {
       loadReports();
     } catch (err) {
       console.error(err);
-      alert("Ürün pasife alınırken hata oluştu.");
+      alert(t("adminProductsPage.deactivateError"));
     } finally {
       setDeactivatingId('');
     }
@@ -120,12 +124,12 @@ export default function AdminProductsPage() {
             marginBottom: 30,
           }}
         >
-          Ürün Yönetimi
+          {t("adminProductsPage.title")}
         </h1>
 
         <section style={{ marginBottom: 40 }}>
           <h2 style={{ fontSize: 24, marginBottom: 18 }}>
-            Bildirilen Ürünler
+            {t("adminProductsPage.reportedProducts")}
           </h2>
 
           {reports.length === 0 ? (
@@ -137,7 +141,7 @@ export default function AdminProductsPage() {
                 color: '#64748b',
               }}
             >
-              Açık ürün bildirimi yok.
+              {t("adminProductsPage.noReports")}
             </div>
           ) : (
             <div style={{ display: 'grid', gap: 16 }}>
@@ -152,21 +156,24 @@ export default function AdminProductsPage() {
                   }}
                 >
                   <div style={{ fontWeight: 800, fontSize: 18 }}>
-                    {report.product?.title || 'Ürün'}
+                    {report.product?.title ||
+                      t("adminProductsPage.productFallback")}
                   </div>
 
                   <div style={{ marginTop: 10 }}>
-                    <strong>Bildirim nedeni:</strong> {report.reason}
+                    <strong>{t("adminProductsPage.reportReason")}</strong>{" "}
+                    {report.reason}
                   </div>
 
                   {report.note && (
                     <div style={{ marginTop: 8 }}>
-                      <strong>Açıklama:</strong> {report.note}
+                      <strong>{t("adminProductsPage.description")}</strong>{" "}
+                      {report.note}
                     </div>
                   )}
 
                   <div style={{ marginTop: 8, color: '#64748b' }}>
-                    {new Date(report.createdAt).toLocaleString('tr-TR')}
+                    {new Date(report.createdAt).toLocaleString(locale)}
                   </div>
 
                   {report.product?.isActive !== false ? (
@@ -185,8 +192,8 @@ export default function AdminProductsPage() {
                       }}
                     >
                       {deactivatingId === report.product?.id
-                        ? 'İşleniyor...'
-                        : 'Ürünü Pasife Al'}
+                        ? t("adminProductsPage.processing")
+                        : t("adminProductsPage.deactivateProduct")}
                     </button>
                   ) : (
                     <div
@@ -196,7 +203,7 @@ export default function AdminProductsPage() {
                         fontWeight: 700,
                       }}
                     >
-                      Ürün zaten pasif
+                      {t("adminProductsPage.alreadyInactive")}
                     </div>
                   )}
                 </div>
@@ -206,9 +213,9 @@ export default function AdminProductsPage() {
         </section>
 
         {loading ? (
-          <div>Yükleniyor...</div>
+          <div>{t("adminProductsPage.loading")}</div>
         ) : products.length === 0 ? (
-          <div>Ürün bulunamadı</div>
+          <div>{t("adminProductsPage.noProducts")}</div>
         ) : (
           <div
             style={{
@@ -231,12 +238,13 @@ export default function AdminProductsPage() {
 <p>{product.description}</p>
 
 <div style={{ marginTop: 10 }}>
-  <strong>Fiyat:</strong> {product.basePrice} ₺
+  <strong>{t("adminProductsPage.price")}</strong>{" "}
+  {Number(product.basePrice || 0).toLocaleString(locale)} ₺
 </div>
 
 <div style={{ marginTop: 10 }}>
-  <strong>Satıcı:</strong>{' '}
-  {product.seller?.name || '-'}
+  <strong>{t("adminProductsPage.seller")}</strong>{" "}
+  {product.seller?.name || "-"}
 </div>
 
                 <div style={{ display: 'flex', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
@@ -253,7 +261,7 @@ export default function AdminProductsPage() {
                         fontWeight: 600,
                       }}
                     >
-                      Ürünü Onayla
+                      {t("adminProductsPage.approveProduct")}
                     </button>
                   )}
 
@@ -272,11 +280,13 @@ export default function AdminProductsPage() {
                         opacity: deactivatingId === product.id ? 0.6 : 1,
                       }}
                     >
-                      {deactivatingId === product.id ? 'İşleniyor...' : 'Pasife Al'}
+                      {deactivatingId === product.id
+                        ? t("adminProductsPage.processing")
+                        : t("adminProductsPage.deactivate")}
                     </button>
                   ) : (
                     <span style={{ color: '#64748b', fontWeight: 700 }}>
-                      Pasif
+                      {t("adminProductsPage.inactive")}
                     </span>
                   )}
                 </div>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import AdminSidebar from "../components/admin/AdminSidebar";
 
 const API = import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
@@ -20,18 +21,21 @@ type PayoutRequest = {
 
 type StatusFilter = "ALL" | "PENDING" | "APPROVED" | "REJECTED";
 
-function formatMoney(value: string | number) {
-  return `${Number(value || 0).toLocaleString("tr-TR")} ₺`;
+function formatMoney(value: string | number, locale: string) {
+  return `${Number(value || 0).toLocaleString(locale)} ₺`;
 }
 
-function statusText(status: PayoutRequest["status"]) {
-  if (status === "PENDING") return "Bekliyor";
-  if (status === "APPROVED") return "Onaylandı";
-  if (status === "REJECTED") return "Reddedildi";
+function statusText(status: PayoutRequest["status"], t: any) {
+  if (status === "PENDING") return t("adminPayoutsPage.statusPending");
+  if (status === "APPROVED") return t("adminPayoutsPage.statusApproved");
+  if (status === "REJECTED") return t("adminPayoutsPage.statusRejected");
   return status;
 }
 
 export default function AdminPayoutsPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
@@ -56,7 +60,7 @@ export default function AdminPayoutsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Payout talepleri alınamadı");
+        alert(data?.message || t("adminPayoutsPage.loadFailed"));
         setPayouts([]);
         return;
       }
@@ -64,14 +68,14 @@ export default function AdminPayoutsPage() {
       setPayouts(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      alert("Payout talepleri yüklenirken hata oluştu");
+      alert(t("adminPayoutsPage.loadError"));
     } finally {
       setLoading(false);
     }
   }
 
   async function approve(id: string) {
-    if (!confirm("Bu para çekme talebini onaylamak istiyor musunuz?")) return;
+    if (!confirm(t("adminPayoutsPage.approveConfirm"))) return;
 
     try {
       const token = localStorage.getItem("token");
@@ -86,20 +90,23 @@ export default function AdminPayoutsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Onaylama başarısız");
+        alert(data?.message || t("adminPayoutsPage.approveFailed"));
         return;
       }
 
-      alert("Talep onaylandı ✅");
+      alert(t("adminPayoutsPage.approveSuccess"));
       await loadPayouts();
     } catch (err) {
       console.error(err);
-      alert("Onaylama sırasında hata oluştu");
+      alert(t("adminPayoutsPage.approveError"));
     }
   }
 
   async function reject(id: string) {
-    const note = prompt("Red sebebi yazın:", "Admin rejected payout");
+    const note = prompt(
+      t("adminPayoutsPage.rejectPrompt"),
+      t("adminPayoutsPage.rejectDefaultNote"),
+    );
 
     if (note === null) return;
 
@@ -118,15 +125,15 @@ export default function AdminPayoutsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Reddetme başarısız");
+        alert(data?.message || t("adminPayoutsPage.rejectFailed"));
         return;
       }
 
-      alert("Talep reddedildi");
+      alert(t("adminPayoutsPage.rejectSuccess"));
       await loadPayouts();
     } catch (err) {
       console.error(err);
-      alert("Reddetme sırasında hata oluştu");
+      alert(t("adminPayoutsPage.rejectError"));
     }
   }
 
@@ -140,11 +147,11 @@ export default function AdminPayoutsPage() {
 
       <main style={{ flex: 1, minHeight: "100vh", padding: 40 }}>
         <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 8 }}>
-          Para Çekme Talepleri
+          {t("adminPayoutsPage.title")}
         </h1>
 
         <p style={{ color: "#64748b", marginBottom: 24 }}>
-          Satıcıların IBAN para çekme taleplerini onaylayın veya reddedin.
+          {t("adminPayoutsPage.description")}
         </p>
 
         <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
@@ -163,16 +170,18 @@ export default function AdminPayoutsPage() {
                   cursor: "pointer",
                 }}
               >
-                {status === "ALL" ? "Tümü" : statusText(status)}
+                {status === "ALL"
+                  ? t("adminPayoutsPage.filterAll")
+                  : statusText(status, t)}
               </button>
             ),
           )}
         </div>
 
         {loading ? (
-          <div>Yükleniyor...</div>
+          <div>{t("adminPayoutsPage.loading")}</div>
         ) : filteredPayouts.length === 0 ? (
-          <div>Payout talebi yok</div>
+          <div>{t("adminPayoutsPage.empty")}</div>
         ) : (
           <div style={{ display: "grid", gap: 20 }}>
             {filteredPayouts.map((item) => (
@@ -200,28 +209,30 @@ export default function AdminPayoutsPage() {
                     </h2>
 
                     <div style={{ marginTop: 10 }}>
-                      <strong>Tutar:</strong> {formatMoney(item.amount)}
+                      <strong>{t("adminPayoutsPage.amount")}</strong>{" "}
+                      {formatMoney(item.amount, locale)}
                     </div>
 
                     <div style={{ marginTop: 10 }}>
-                      <strong>IBAN:</strong> {item.iban}
+                      <strong>{t("adminPayoutsPage.iban")}</strong> {item.iban}
                     </div>
 
                     <div style={{ marginTop: 10 }}>
-                      <strong>Oluşturma:</strong>{" "}
-                      {new Date(item.createdAt).toLocaleString("tr-TR")}
+                      <strong>{t("adminPayoutsPage.createdAt")}</strong>{" "}
+                      {new Date(item.createdAt).toLocaleString(locale)}
                     </div>
 
                     {item.processedAt && (
                       <div style={{ marginTop: 10 }}>
-                        <strong>İşlem:</strong>{" "}
-                        {new Date(item.processedAt).toLocaleString("tr-TR")}
+                        <strong>{t("adminPayoutsPage.processedAt")}</strong>{" "}
+                        {new Date(item.processedAt).toLocaleString(locale)}
                       </div>
                     )}
 
                     {item.adminNote && (
                       <div style={{ marginTop: 10, color: "#991b1b" }}>
-                        <strong>Admin Notu:</strong> {item.adminNote}
+                        <strong>{t("adminPayoutsPage.adminNote")}</strong>{" "}
+                        {item.adminNote}
                       </div>
                     )}
                   </div>
@@ -245,7 +256,7 @@ export default function AdminPayoutsPage() {
                             : "#92400e",
                     }}
                   >
-                    {statusText(item.status)}
+                    {statusText(item.status, t)}
                   </span>
                 </div>
 
@@ -263,7 +274,7 @@ export default function AdminPayoutsPage() {
                         fontWeight: 700,
                       }}
                     >
-                      Onayla
+                      {t("adminPayoutsPage.approve")}
                     </button>
 
                     <button
@@ -278,7 +289,7 @@ export default function AdminPayoutsPage() {
                         fontWeight: 700,
                       }}
                     >
-                      Reddet
+                      {t("adminPayoutsPage.reject")}
                     </button>
                   </div>
                 )}

@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 
 type FlaggedMessage = {
   id: string;
@@ -25,6 +26,9 @@ const API =
   "https://tedarik-backend.onrender.com/api";
 
 export default function AdminChatModerationPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [messages, setMessages] = useState<FlaggedMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -61,22 +65,22 @@ export default function AdminChatModerationPage() {
       <div style={headerStyle}>
         <div>
           <div style={eyebrowStyle}>
-            ADMIN MODERATION
+            {t("adminChatModerationPage.eyebrow")}
           </div>
 
           <h1 style={titleStyle}>
-            Şüpheli Chat Mesajları
+            {t("adminChatModerationPage.title")}
           </h1>
         </div>
       </div>
 
       {loading ? (
         <div style={emptyStyle}>
-          Yükleniyor...
+          {t("adminChatModerationPage.loading")}
         </div>
       ) : messages.length === 0 ? (
         <div style={emptyStyle}>
-          Şüpheli mesaj bulunamadı ✅
+          {t("adminChatModerationPage.empty")}
         </div>
       ) : (
         <section style={gridStyle}>
@@ -87,13 +91,13 @@ export default function AdminChatModerationPage() {
             >
               <div style={topStyle}>
                 <span style={dangerBadgeStyle}>
-                  FLAGGED
+                  {t("adminChatModerationPage.flagged")}
                 </span>
 
                 <span style={dateStyle}>
                   {new Date(
                     msg.createdAt
-                  ).toLocaleString("tr-TR")}
+                  ).toLocaleString(locale)}
                 </span>
               </div>
 
@@ -111,11 +115,11 @@ export default function AdminChatModerationPage() {
                 {msg.thread?.rfq?.product
                   ?.title ||
                   (msg.thread?.order?.id
-                    ? `Sipariş #${msg.thread.order.id.slice(
+                    ? `${t("adminChatModerationPage.order")} #${msg.thread.order.id.slice(
                         0,
                         8
                       )}`
-                    : "Chat")}
+                    : t("adminChatModerationPage.chat"))}
               </div>
 
               <div style={messageBoxStyle}>

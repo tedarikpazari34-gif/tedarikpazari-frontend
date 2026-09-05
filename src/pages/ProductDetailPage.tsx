@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
 
@@ -61,6 +62,39 @@ function getCategoryIcon(categoryName?: string) {
   return "📦";
 }
 
+function unitLabel(value: string | undefined, t: any) {
+  if (!value) return "";
+
+  const labels: Record<string, string> = {
+    "Adet": t("productDetailPage.piece"),
+    "Koli": t("productDetailPage.box"),
+    "Paket": t("productDetailPage.package"),
+    "Kilogram": t("productDetailPage.kilogram"),
+    "Kg": t("productDetailPage.kilogram"),
+    "Ton": t("productDetailPage.ton"),
+    "Litre": t("productDetailPage.litre"),
+    "Metre": t("productDetailPage.meter"),
+    "Palet": t("productDetailPage.pallet"),
+  };
+
+  return labels[value] || value;
+}
+
+function stockTypeLabel(value: string | null | undefined, t: any) {
+  if (!value) return "-";
+
+  const labels: Record<string, string> = {
+    "Stoktan": t("productDetailPage.inStock"),
+    "STOKTAN": t("productDetailPage.inStock"),
+    "Üretim": t("productDetailPage.production"),
+    "URETIM": t("productDetailPage.production"),
+    "Sipariş Üzerine": t("productDetailPage.madeToOrder"),
+    "SIPARIS_UZERINE": t("productDetailPage.madeToOrder"),
+  };
+
+  return labels[value] || value;
+}
+
 function resolveImageUrl(url?: string | null) {
   if (!url) return null;
   if (url.startsWith("http")) return url;
@@ -68,6 +102,9 @@ function resolveImageUrl(url?: string | null) {
 }
 
 export default function ProductDetailPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const params = useParams();
   const navigate = useNavigate();
 
@@ -226,7 +263,7 @@ export default function ProductDetailPage() {
     }
 
     if (role !== "BUYER") {
-      alert("Favoriler özelliğini yalnızca alıcı hesapları kullanabilir.");
+      alert(t("productDetailPage.favoriteBuyerOnly"));
       return;
     }
 
@@ -246,14 +283,14 @@ export default function ProductDetailPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "Favori işlemi başarısız.");
+        alert(data?.message || t("productDetailPage.favoriteFailed"));
         return;
       }
 
       setIsFavorite((current) => !current);
     } catch (error) {
       console.error("PRODUCT FAVORITE ERROR:", error);
-      alert("Favori işlemi sırasında hata oluştu.");
+      alert(t("productDetailPage.favoriteError"));
     } finally {
       setFavoriteLoading(false);
     }
@@ -271,7 +308,7 @@ export default function ProductDetailPage() {
         setIsCompared(false);
       } else {
         if (ids.length >= 4) {
-          alert("En fazla 4 ürün karşılaştırabilirsiniz.");
+          alert(t("productDetailPage.compareLimit"));
           return;
         }
 
@@ -291,7 +328,7 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <div style={loadingCardStyle}>Ürün yükleniyor...</div>
+        <div style={loadingCardStyle}>{t("productDetailPage.loading")}</div>
       </main>
     );
   }
@@ -300,10 +337,10 @@ export default function ProductDetailPage() {
     return (
       <main style={pageStyle}>
         <div style={loadingCardStyle}>
-          <h1 style={{ marginTop: 0 }}>Ürün bulunamadı</h1>
-          <p>Bu ürün yayında olmayabilir veya kaldırılmış olabilir.</p>
+          <h1 style={{ marginTop: 0 }}>{t("productDetailPage.notFound")}</h1>
+          <p>{t("productDetailPage.notFoundText")}</p>
           <Link to="/" style={secondaryButtonStyle}>
-            Ana sayfaya dön
+            {t("productDetailPage.backHome")}
           </Link>
         </div>
       </main>
@@ -321,7 +358,7 @@ export default function ProductDetailPage() {
           name="description"
           content={
             product.description ||
-            `${product.title} için fiyat, minimum sipariş miktarı ve tedarikçi bilgilerini inceleyin.`
+            t("productDetailPage.seoDescription", { title: product.title })
           }
         />
         <link
@@ -331,7 +368,7 @@ export default function ProductDetailPage() {
         <meta property="og:title" content={product.title} />
         <meta
           property="og:description"
-          content={product.description || "Tedarik Pazarı ürün detayı"}
+          content={product.description || t("productDetailPage.seoOgDescription")}
         />
       </Helmet>
 
@@ -349,7 +386,7 @@ export default function ProductDetailPage() {
             ) : (
               <div style={emptyImageStyle}>
                 <div style={emptyIconStyle}>{icon}</div>
-                <div style={emptyTextStyle}>Ürün görseli yok</div>
+                <div style={emptyTextStyle}>{t("productDetailPage.noImage")}</div>
               </div>
             )}
           </div>
@@ -399,11 +436,13 @@ export default function ProductDetailPage() {
 
         <div style={infoSectionStyle}>
           <div style={categoryStyle}>
-            {product.category?.name || "Kategori"}
+            {product.category?.name || t("productDetailPage.category")}
           </div>
 
           <div style={badgeRowStyle}>
-            {product.rfqEnabled && <span style={rfqBadgeStyle}>RFQ Uygun</span>}
+            {product.rfqEnabled && (
+              <span style={rfqBadgeStyle}>{t("productDetailPage.rfqAvailable")}</span>
+            )}
 
             <span
               style={{
@@ -412,105 +451,126 @@ export default function ProductDetailPage() {
                 color: product.isApproved ? "#166534" : "#92400e",
               }}
             >
-              {product.isApproved ? "Onaylı" : "Onay Bekliyor"}
+              {product.isApproved
+                ? t("productDetailPage.approved")
+                : t("productDetailPage.approvalPending")}
             </span>
           </div>
 
           <h1 style={titleStyle}>{product.title}</h1>
 
           <p style={descriptionStyle}>
-            {product.description || "Bu ürün için açıklama eklenmemiş."}
+            {product.description || t("productDetailPage.noDescription")}
           </p>
 
           <div style={priceBlockStyle}>
-            <div style={priceLabelStyle}>Başlangıç fiyatı</div>
+            <div style={priceLabelStyle}>{t("productDetailPage.startingPrice")}</div>
             <div style={priceStyle}>
-              {Number(product.basePrice || 0).toLocaleString("tr-TR")} ₺
+              {Number(product.basePrice || 0).toLocaleString(locale)} ₺
             </div>
-            <div style={unitStyle}>/ {product.unitType}</div>
+            <div style={unitStyle}>/ {unitLabel(product.unitType, t)}</div>
           </div>
           <div style={infoGridStyle}>
-            <InfoBox label="Birim" value={product.unitType} />
+            <InfoBox
+              label={t("productDetailPage.unit")}
+              value={unitLabel(product.unitType, t)}
+            />
             <InfoBox label="MOQ" value={product.moq} />
             <InfoBox
-              label="Teslim süresi"
-              value={product.leadTimeDays ? `${product.leadTimeDays} gün` : "-"}
+              label={t("productDetailPage.deliveryTime")}
+              value={
+                product.leadTimeDays
+                  ? t("productDetailPage.days", { count: product.leadTimeDays })
+                  : "-"
+              }
             />
-            <InfoBox label="Stok tipi" value={product.stockType || "-"} />
             <InfoBox
-              label="KDV"
+              label={t("productDetailPage.stockType")}
+              value={stockTypeLabel(product.stockType, t)}
+            />
+            <InfoBox
+              label={t("productDetailPage.vat")}
               value={
                 product.vatRate !== null && product.vatRate !== undefined
                   ? `%${product.vatRate}`
                   : "-"
               }
             />
-            <InfoBox label="Tedarikçi" value="Bilgisi Gizli" green />
+            <InfoBox
+              label={t("productDetailPage.supplier")}
+              value={t("productDetailPage.hiddenInfo")}
+              green
+            />
           </div>
 
           <div style={noticeStyle}>
-            <strong>Platform Güvenceli Tedarik</strong>
+            <strong>{t("productDetailPage.platformProtectedSupply")}</strong>
             <p style={{ marginBottom: 0 }}>
-              Tedarikçi bilgileri, güvenli ticaret akışını korumak amacıyla
-              teklif veya sipariş sürecine kadar gizlenir.
+              {t("productDetailPage.platformProtectedText")}
             </p>
           </div>
           <div style={supplierCardStyle}>
   <div>
-    <div style={supplierTitleStyle}>Tedarikçi Profili</div>
-    <div style={supplierNameStyle}>Tedarikçi Bilgisi Gizli</div>
+    <div style={supplierTitleStyle}>{t("productDetailPage.supplierProfile")}</div>
+    <div style={supplierNameStyle}>{t("productDetailPage.supplierHidden")}</div>
     <p style={supplierDescStyle}>
-      Tedarikçi kimliği, platform içi güvenli ticaret akışını korumak amacıyla gizli tutulur.
+      {t("productDetailPage.supplierHiddenText")}
     </p>
   </div>
 
   <div style={supplierStatsStyle}>
-    <span>✓ Platform içi teklif</span>
-    <span>✓ Güvenli ödeme akışı</span>
-    <span>✓ Kontrollü ticaret</span>
+    <span>{t("productDetailPage.inPlatformQuote")}</span>
+    <span>{t("productDetailPage.securePayment")}</span>
+    <span>{t("productDetailPage.controlledTrade")}</span>
   </div>
 </div>
           <div style={purchaseBoxStyle}>
             <div style={purchaseHeaderStyle}>
               <div>
-                <span style={purchaseLabelStyle}>Toptan satın alma</span>
+                <span style={purchaseLabelStyle}>{t("productDetailPage.wholesalePurchase")}</span>
                 <strong style={purchasePriceStyle}>
-                  {Number(product.basePrice || 0).toLocaleString("tr-TR")} ₺
+                  {Number(product.basePrice || 0).toLocaleString(locale)} ₺
                 </strong>
               </div>
 
-              <span style={purchaseUnitStyle}>/ {product.unitType}</span>
+              <span style={purchaseUnitStyle}>/ {unitLabel(product.unitType, t)}</span>
             </div>
 
             <div style={purchaseFeatureGridStyle}>
               <div style={purchaseFeatureStyle}>
-                <span>📦 Minimum sipariş</span>
+                <span>{t("productDetailPage.minimumOrder")}</span>
                 <strong>
-                  {product.moq} {product.unitType}
+                  {product.moq} {unitLabel(product.unitType, t)}
                 </strong>
               </div>
 
               <div style={purchaseFeatureStyle}>
-                <span>🚚 Tahmini teslim</span>
+                <span>{t("productDetailPage.estimatedDelivery")}</span>
                 <strong>
                   {product.leadTimeDays
-                    ? `${product.leadTimeDays} gün`
-                    : "Satıcıya sorun"}
+                    ? t("productDetailPage.days", {
+                        count: product.leadTimeDays,
+                      })
+                    : t("productDetailPage.askSeller")}
                 </strong>
               </div>
 
               <div style={purchaseFeatureStyle}>
-                <span>🏷️ Stok durumu</span>
-                <strong>{product.stockType || "Bilgi alın"}</strong>
+                <span>{t("productDetailPage.stockStatus")}</span>
+                <strong>
+                  {product.stockType
+                    ? stockTypeLabel(product.stockType, t)
+                    : t("productDetailPage.getInformation")}
+                </strong>
               </div>
 
               <div style={purchaseFeatureStyle}>
-                <span>🧾 KDV</span>
+                <span>{t("productDetailPage.vatLabel")}</span>
                 <strong>
                   {product.vatRate !== null &&
                   product.vatRate !== undefined
                     ? `%${product.vatRate}`
-                    : "Belirtilmedi"}
+                    : t("productDetailPage.unspecified")}
                 </strong>
               </div>
             </div>
@@ -527,10 +587,10 @@ export default function ProductDetailPage() {
                 }}
               >
                 {favoriteLoading
-                  ? "İşleniyor..."
+                  ? t("productDetailPage.processing")
                   : isFavorite
-                    ? "♥️ Favorilerde"
-                    : "♡ Favoriye Ekle"}
+                    ? t("productDetailPage.inFavorites")
+                    : t("productDetailPage.addFavorite")}
               </button>
 
               <button
@@ -543,8 +603,8 @@ export default function ProductDetailPage() {
                 }}
               >
                 {isCompared
-                  ? "✓ Karşılaştırmada"
-                  : "⚖️ Karşılaştır"}
+                  ? t("productDetailPage.inComparison")
+                  : t("productDetailPage.compare")}
               </button>
             </div>
           </div>
@@ -565,14 +625,16 @@ export default function ProductDetailPage() {
                 cursor: product.rfqEnabled ? "pointer" : "not-allowed",
               }}
             >
-              {product.rfqEnabled ? "Teklif İste (RFQ)" : "RFQ Kapalı"}
+              {product.rfqEnabled
+                ? t("productDetailPage.requestQuote")
+                : t("productDetailPage.rfqClosed")}
             </button>
 
             <Link
               to={product.category?.id ? `/category/${product.category.id}` : "/"}
               style={secondaryButtonStyle}
             >
-              Kategoriye Dön
+              {t("productDetailPage.backCategory")}
             </Link>
           </div>
         </div>
@@ -580,8 +642,11 @@ export default function ProductDetailPage() {
 
       {similarProducts.length > 0 && (
         <ProductCollection
-          title="Benzer ürünler"
-          description={`${product.category?.name || "Aynı kategorideki"} alternatif ürünler`}
+          title={t("productDetailPage.similarProducts")}
+          description={t("productDetailPage.sameCategoryAlternatives", {
+            category:
+              product.category?.name || t("productDetailPage.sameCategory"),
+          })}
           products={similarProducts}
         />
       )}
@@ -598,6 +663,9 @@ function ProductCollection({
   description: string;
   products: Product[];
 }) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   return (
     <section style={collectionStyle}>
       <div style={collectionHeaderStyle}>
@@ -635,18 +703,19 @@ function ProductCollection({
 
                 <div style={collectionBodyStyle}>
                   <span style={collectionCategoryStyle}>
-                    {item.category?.name || "Ürün"}
+                    {item.category?.name || t("productDetailPage.product")}
                   </span>
 
                   <h3 style={collectionProductTitleStyle}>{item.title}</h3>
 
                   <div style={collectionFooterStyle}>
                     <strong style={collectionPriceStyle}>
-                      {Number(item.basePrice || 0).toLocaleString("tr-TR")} ₺
+                      {Number(item.basePrice || 0).toLocaleString(locale)} ₺
                     </strong>
 
                     <span style={collectionMoqStyle}>
-                      Min. {item.moq || 1} {item.unitType || "adet"}
+                      {t("productDetailPage.minimumShort")} {item.moq || 1}{" "}
+                      {unitLabel(item.unitType || "Adet", t)}
                     </span>
                   </div>
                 </div>

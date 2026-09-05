@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import type { CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 
 type NavItem = {
   label: string;
@@ -7,19 +8,21 @@ type NavItem = {
   to: string;
 };
 
-const items: NavItem[] = [
-  { label: "Ana Sayfa", icon: "⌂", to: "/" },
-  { label: "Ürünler", icon: "⌕", to: "/products" },
-  { label: "Teklif Al", icon: "+", to: "/buyer/rfqs/new" },
-  { label: "Favoriler", icon: "♡", to: "/favorites" },
-  { label: "Hesabım", icon: "◉", to: "/panel" },
-];
+const buildItems = (t: any): NavItem[] => [
+  { label: t("common.home"), icon: "⌂", to: "/" },
+  { label: t("common.products"), icon: "⌕", to: "/products" },
+  { label: t("mobileBottomNav.getQuote"), icon: "+", to: "/buyer/rfqs/new" },
+  { label: t("common.favorites"), icon: "♡", to: "/favorites" },
+  { label: t("mobileBottomNav.account"), icon: "◉", to: "/panel" },
+]
 
 export default function MobileBottomNav() {
   const location = useLocation();
+  const { t } = useTranslation();
+  const items = buildItems(t);
 
   return (
-    <nav style={navStyle} aria-label="Mobil alt menü">
+    <nav style={navStyle} aria-label={t("mobileBottomNav.ariaLabel")}>
       {items.map((item) => {
         const active =
           item.to === "/"

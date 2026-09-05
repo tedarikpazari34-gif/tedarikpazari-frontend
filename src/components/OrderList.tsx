@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface OrderItem {
   id: string;
@@ -43,41 +44,43 @@ export default function OrderList({
   statusBadgeStyle,
   panelCardStyle,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <>
-      <h2>Orders</h2>
+      <h2>{t("orderList.title")}</h2>
 
       {orders.map((o) => (
         <div key={o.id} style={panelCardStyle}>
-          <div>Ürün: {o.rfq?.product?.title || "-"}</div>
-          <div>Miktar: {o.rfq?.quantity || "-"}</div>
-          <div>Quote ID: {o.quote?.id || o.quoteId || "-"}</div>
-          <div>Birim Fiyat: {o.quote?.unitPrice || "-"}</div>
-          <div>Teslim Süresi: {o.quote?.deliveryDays || "-"} gün</div>
-          <div>Toplam: {o.totalAmount}</div>
-          <div>Komisyon: {o.commissionAmount}</div>
-          <div>Escrow: {o.escrowAmount}</div>
+          <div>{t("orderList.product")}: {o.rfq?.product?.title || "-"}</div>
+          <div>{t("orderList.quantity")}: {o.rfq?.quantity || "-"}</div>
+          <div>{t("orderList.quoteId")}: {o.quote?.id || o.quoteId || "-"}</div>
+          <div>{t("orderList.unitPrice")}: {o.quote?.unitPrice || "-"}</div>
+          <div>{t("orderList.deliveryTime")}: {o.quote?.deliveryDays || "-"} {t("orderList.days")}</div>
+          <div>{t("orderList.total")}: {o.totalAmount}</div>
+          <div>{t("orderList.commission")}: {o.commissionAmount}</div>
+          <div>{t("orderList.escrow")}: {o.escrowAmount}</div>
 
           <div style={{ marginTop: 8 }}>
-            Durum:{" "}
+            {t("orderList.status")}:{" "}
             <span style={statusBadgeStyle(o.status)}>{o.status}</span>
           </div>
 
           {role === "BUYER" && o.status === "PENDING_PAYMENT" && (
             <button style={{ marginTop: 10 }} onClick={() => payOrder(o.id)}>
-              Ödeme Yap
+              {t("orderList.pay")}
             </button>
           )}
 
           {role === "SELLER" && o.status === "PAID" && (
             <button style={{ marginTop: 10 }} onClick={() => prepareOrder(o.id)}>
-              Hazırlığa Al
+              {t("orderList.prepare")}
             </button>
           )}
 
           {role === "SELLER" && o.status === "PREPARING" && (
             <button style={{ marginTop: 10 }} onClick={() => shipOrder(o.id)}>
-              Kargoya Ver
+              {t("orderList.ship")}
             </button>
           )}
 
@@ -87,9 +90,9 @@ export default function OrderList({
                 style={{ marginRight: 8 }}
                 onClick={() => completeOrder(o.id)}
               >
-                Teslim Aldım
+                {t("orderList.received")}
               </button>
-              <button onClick={() => openDispute(o.id)}>Dispute Aç</button>
+              <button onClick={() => openDispute(o.id)}>{t("orderList.openDispute")}</button>
             </div>
           )}
         </div>

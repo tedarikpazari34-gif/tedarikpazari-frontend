@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type ProductImage = {
   url?: string;
@@ -52,7 +53,29 @@ function getProductImage(item: FavoriteItem["product"]) {
   return resolveImageUrl(cover || first || item.imageUrl);
 }
 
+function unitLabel(value: string | undefined, t: any) {
+  if (!value) return "";
+
+  const labels: Record<string, string> = {
+    "Adet": t("favoritesPage.piece"),
+    "adet": t("favoritesPage.piece"),
+    "Koli": t("favoritesPage.box"),
+    "Paket": t("favoritesPage.package"),
+    "Kilogram": t("favoritesPage.kilogram"),
+    "Kg": t("favoritesPage.kilogram"),
+    "Ton": t("favoritesPage.ton"),
+    "Litre": t("favoritesPage.litre"),
+    "Metre": t("favoritesPage.meter"),
+    "Palet": t("favoritesPage.pallet"),
+  };
+
+  return labels[value] || value;
+}
+
 export default function FavoritesPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState("");
@@ -66,7 +89,7 @@ export default function FavoritesPage() {
       setError("");
 
       if (!token) {
-        setError("Favorilerinizi görmek için giriş yapmalısınız.");
+        setError(t("favoritesPage.loginRequired"));
         setFavorites([]);
         return;
       }
@@ -80,7 +103,7 @@ export default function FavoritesPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        setError(data?.message || "Favoriler alınamadı.");
+        setError(data?.message || t("favoritesPage.loadFailed"));
         setFavorites([]);
         return;
       }
@@ -88,7 +111,7 @@ export default function FavoritesPage() {
       setFavorites(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("FAVORITES LOAD ERROR:", err);
-      setError("Favoriler yüklenirken hata oluştu.");
+      setError(t("favoritesPage.loadError"));
       setFavorites([]);
     } finally {
       setLoading(false);
@@ -113,7 +136,7 @@ export default function FavoritesPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "Favoriden çıkarılamadı.");
+        alert(data?.message || t("favoritesPage.removeFailed"));
         return;
       }
 
@@ -122,7 +145,7 @@ export default function FavoritesPage() {
       );
     } catch (err) {
       console.error("FAVORITE REMOVE ERROR:", err);
-      alert("Favoriden çıkarılırken hata oluştu.");
+      alert(t("favoritesPage.removeError"));
     } finally {
       setRemovingId("");
     }
@@ -131,32 +154,32 @@ export default function FavoritesPage() {
   return (
     <main style={pageStyle}>
       <section style={heroStyle}>
-        <div style={eyebrowStyle}>ALICI PANELİ</div>
-        <h1 style={titleStyle}>Favorilerim</h1>
+        <div style={eyebrowStyle}>{t("favoritesPage.panel")}</div>
+        <h1 style={titleStyle}>{t("favoritesPage.title")}</h1>
         <p style={descriptionStyle}>
-          Daha sonra incelemek istediğiniz ürünleri burada saklayabilirsiniz.
+          {t("favoritesPage.description")}
         </p>
       </section>
 
       {loading ? (
-        <div style={stateCardStyle}>Favoriler yükleniyor...</div>
+        <div style={stateCardStyle}>{t("favoritesPage.loading")}</div>
       ) : error ? (
         <div style={stateCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Favoriler görüntülenemedi</h2>
+          <h2 style={{ marginTop: 0 }}>{t("favoritesPage.unavailable")}</h2>
           <p>{error}</p>
           <Link to="/login" style={primaryLinkStyle}>
-            Giriş Yap
+            {t("favoritesPage.login")}
           </Link>
         </div>
       ) : favorites.length === 0 ? (
         <div style={stateCardStyle}>
           <div style={{ fontSize: 48 }}>♡</div>
-          <h2>Henüz favori ürününüz yok</h2>
+          <h2>{t("favoritesPage.emptyTitle")}</h2>
           <p style={{ color: "#64748b" }}>
-            Ürün kartlarındaki kalp simgesine dokunarak ürünleri kaydedin.
+            {t("favoritesPage.emptyText")}
           </p>
           <Link to="/products" style={primaryLinkStyle}>
-            Ürünleri İncele
+            {t("favoritesPage.browseProducts")}
           </Link>
         </div>
       ) : (
@@ -171,7 +194,7 @@ export default function FavoritesPage() {
                   {image ? (
                     <img
                       src={image}
-                      alt={product.title || "Ürün"}
+                      alt={product.title || t("favoritesPage.product")}
                       style={imageStyle}
                     />
                   ) : (
@@ -181,21 +204,21 @@ export default function FavoritesPage() {
 
                 <div style={bodyStyle}>
                   <div style={categoryStyle}>
-                    {product.category?.name || "Ürün"}
+                    {product.category?.name || t("favoritesPage.product")}
                   </div>
 
                   <h2 style={productTitleStyle}>
-                    {product.title || "Ürün"}
+                    {product.title || t("favoritesPage.product")}
                   </h2>
 
                   <p style={productDescriptionStyle}>
                     {product.description ||
-                      "Ürün detaylarını görüntülemek için karta tıklayın."}
+                      t("favoritesPage.productDetailsText")}
                   </p>
 
                   <div style={sellerStyle}>
                     {product.seller?.verified ? "✓ " : ""}
-                    {product.seller?.name || "Tedarikçi"}
+                    {product.seller?.name || t("favoritesPage.supplier")}
                     {product.seller?.city
                       ? ` · ${product.seller.city}`
                       : ""}
@@ -203,11 +226,12 @@ export default function FavoritesPage() {
 
                   <div style={priceRowStyle}>
                     <strong style={priceStyle}>
-                      {Number(product.basePrice || 0).toLocaleString("tr-TR")} ₺
+                      {Number(product.basePrice || 0).toLocaleString(locale)} ₺
                     </strong>
 
                     <span style={moqStyle}>
-                      Min. {product.moq || 1} {product.unitType || "adet"}
+                      {t("favoritesPage.minimumShort")} {product.moq || 1}{" "}
+                      {unitLabel(product.unitType || "Adet", t)}
                     </span>
                   </div>
 
@@ -216,7 +240,7 @@ export default function FavoritesPage() {
                       to={`/product/${product.id}`}
                       style={detailButtonStyle}
                     >
-                      İncele
+                      {t("favoritesPage.view")}
                     </Link>
 
                     <button
@@ -229,8 +253,8 @@ export default function FavoritesPage() {
                       }}
                     >
                       {removingId === product.id
-                        ? "Çıkarılıyor..."
-                        : "♥️ Favoriden Çıkar"}
+                        ? t("favoritesPage.removing")
+                        : t("favoritesPage.removeFavorite")}
                     </button>
                   </div>
                 </div>

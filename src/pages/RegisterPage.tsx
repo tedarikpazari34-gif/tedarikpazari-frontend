@@ -4,6 +4,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useNavigate } from "react-router-dom";
 import { TURKEY_CITIES } from "../constants/turkeyCities";
 import { sectors } from "../data/sectors";
+import { useTranslation } from "react-i18next";
 
 const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
@@ -12,6 +13,7 @@ type MembershipType = "BUYER" | "SELLER" | "LOGISTICS";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [companyName, setCompanyName] = useState("");
   const [fullName, setFullName] = useState("");
@@ -42,7 +44,7 @@ export default function RegisterPage() {
       categories.length === 0
     ) {
       setError(
-        "Firma adı, yetkili kişi, telefon, email, şifre ve en az 1 kategori zorunludur"
+        t("registerPage.requiredFields")
       );
       return;
     }
@@ -50,12 +52,12 @@ export default function RegisterPage() {
     const normalizedPhone = phone.replace(/\D/g, "");
 
     if (!/^05\d{9}$/.test(normalizedPhone)) {
-      setError("Telefon numarası 05XXXXXXXXX formatında 11 haneli olmalıdır");
+      setError(t("registerPage.invalidPhone"));
       return;
     }
 
     if (!recaptchaToken) {
-      setError("Lütfen reCAPTCHA doğrulamasını tamamlayın");
+      setError(t("registerPage.recaptchaRequired"));
       return;
     }
 
@@ -87,7 +89,7 @@ export default function RegisterPage() {
         });
       }
 
-      alert("Kayıt başarılı. Şimdi giriş yapabilirsiniz.");
+      alert(t("registerPage.success"));
       navigate("/login");
     } catch (err: any) {
       console.error("REGISTER ERROR =>", err?.response || err);
@@ -95,7 +97,7 @@ export default function RegisterPage() {
       setError(
         err?.response?.data?.message ||
           err?.response?.data?.error ||
-          "Kayıt sırasında hata oluştu"
+          t("registerPage.registerError")
       );
     } finally {
       setLoading(false);
@@ -108,18 +110,17 @@ export default function RegisterPage() {
         <div style={cardStyle}>
           <div style={topRowStyle}>
             <Link to="/" style={backLinkStyle}>
-              ← Ana Sayfa
+              ← {t("registerPage.home")}
             </Link>
 
             <div style={badgeStyle}>B2B Marketplace</div>
           </div>
 
           <div style={{ marginBottom: 30 }}>
-            <h1 style={titleStyle}>Tedarik Pazarı'na Katılın</h1>
+            <h1 style={titleStyle}>{t("registerPage.title")}</h1>
 
             <p style={subtitleStyle}>
-              Toptancılar, satıcılar ve lojistik firmaları için modern B2B
-              platformu.
+              {t("registerPage.subtitle")}
             </p>
           </div>
 
@@ -127,20 +128,20 @@ export default function RegisterPage() {
 
           <div style={gridStyle}>
             <div>
-              <label style={labelStyle}>Firma Adı *</label>
+              <label style={labelStyle}>{t("registerPage.companyName")}</label>
               <input
                 style={inputStyle}
-                placeholder="Firma adını girin"
+                placeholder={t("registerPage.companyNamePlaceholder")}
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
               />
             </div>
 
             <div>
-              <label style={labelStyle}>Yetkili Ad Soyad *</label>
+              <label style={labelStyle}>{t("registerPage.fullName")}</label>
               <input
                 style={inputStyle}
-                placeholder="Ad Soyad"
+                placeholder={t("registerPage.fullNamePlaceholder")}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
@@ -148,7 +149,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Telefon *</label>
+              <label style={labelStyle}>{t("registerPage.phone")}</label>
               <input
                 style={inputStyle}
                 placeholder="05XXXXXXXXX"
@@ -164,7 +165,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Email *</label>
+              <label style={labelStyle}>{t("registerPage.email")}</label>
               <input
                 type="email"
                 style={inputStyle}
@@ -175,7 +176,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Üyelik Türü *</label>
+              <label style={labelStyle}>{t("registerPage.membershipType")}</label>
               <select
                 style={inputStyle}
                 value={membershipType}
@@ -183,27 +184,27 @@ export default function RegisterPage() {
                   setMembershipType(e.target.value as MembershipType)
                 }
               >
-                <option value="BUYER">Toptancı</option>
-                <option value="SELLER">Satıcı</option>
-                <option value="LOGISTICS">Nakliyeci</option>
+                <option value="BUYER">{t("registerPage.buyer")}</option>
+                <option value="SELLER">{t("registerPage.seller")}</option>
+                <option value="LOGISTICS">{t("registerPage.logistics")}</option>
               </select>
             </div>
 
             <div>
-              <label style={labelStyle}>Şirket Türü</label>
+              <label style={labelStyle}>{t("registerPage.companyType")}</label>
               <select
                 style={inputStyle}
                 value={companyType}
                 onChange={(e) => setCompanyType(e.target.value)}
               >
-                <option>Şahıs</option>
-                <option>Limited</option>
-                <option>Anonim</option>
+                <option value="Şahıs">{t("registerPage.soleProprietorship")}</option>
+                <option value="Limited">{t("registerPage.limited")}</option>
+                <option value="Anonim">{t("registerPage.jointStock")}</option>
               </select>
             </div>
 
             <div>
-              <label style={labelStyle}>Kategoriler</label>
+              <label style={labelStyle}>{t("registerPage.categories")}</label>
 
               <div
                 style={{
@@ -217,6 +218,7 @@ export default function RegisterPage() {
               >
                 {sectors.map((sector) => {
                   const checked = categories.includes(sector.name);
+                  const sectorKey = sector.id.replace(/-/g, "_");
 
                   return (
                     <label
@@ -239,7 +241,7 @@ export default function RegisterPage() {
                             }
 
                             if (prev.length >= 3) {
-                              alert("En fazla 3 kategori seçebilirsiniz.");
+                              alert(t("registerPage.maxCategories"));
                               return prev;
                             }
 
@@ -248,25 +250,28 @@ export default function RegisterPage() {
                         }}
                       />
 
-                      {sector.name}
+                      {t(
+                        `popularSectors.sectors.${sectorKey}.name`,
+                        sector.name
+                      )}
                     </label>
                   );
                 })}
               </div>
 
               <div style={{ marginTop: 6, fontSize: 12, color: "#6b7280" }}>
-                En fazla 3 kategori seçebilirsiniz.
+                {t("registerPage.maxCategories")}
               </div>
             </div>
 
             <div>
-              <label style={labelStyle}>İl</label>
+              <label style={labelStyle}>{t("registerPage.city")}</label>
               <select
                 style={inputStyle}
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
               >
-                <option value="">Şehir seçin</option>
+                <option value="">{t("registerPage.selectCity")}</option>
 
                 {TURKEY_CITIES.map((cityName) => (
                   <option key={cityName} value={cityName}>
@@ -277,17 +282,17 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>İlçe</label>
+              <label style={labelStyle}>{t("registerPage.district")}</label>
               <input
                 style={inputStyle}
-                placeholder="Kadıköy"
+                placeholder={t("registerPage.districtPlaceholder")}
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
               />
             </div>
 
             <div>
-              <label style={labelStyle}>Vergi No</label>
+              <label style={labelStyle}>{t("registerPage.taxNumber")}</label>
               <input
                 style={inputStyle}
                 placeholder="1234567890"
@@ -297,17 +302,17 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Vergi Dairesi</label>
+              <label style={labelStyle}>{t("registerPage.taxOffice")}</label>
               <input
                 style={inputStyle}
-                placeholder="Kadıköy VD"
+                placeholder={t("registerPage.taxOfficePlaceholder")}
                 value={taxOffice}
                 onChange={(e) => setTaxOffice(e.target.value)}
               />
             </div>
 
             <div>
-              <label style={labelStyle}>Şifre *</label>
+              <label style={labelStyle}>{t("registerPage.password")}</label>
               <input
                 type="password"
                 style={inputStyle}
@@ -319,10 +324,10 @@ export default function RegisterPage() {
           </div>
 
           <div style={{ marginTop: 18 }}>
-            <label style={labelStyle}>Adres</label>
+            <label style={labelStyle}>{t("registerPage.address")}</label>
             <textarea
               style={textareaStyle}
-              placeholder="Firma adresinizi girin"
+              placeholder={t("registerPage.addressPlaceholder")}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
@@ -345,13 +350,13 @@ export default function RegisterPage() {
               opacity: loading ? 0.7 : 1,
             }}
           >
-            {loading ? "Kaydediliyor..." : "Başvuruyu Gönder"}
+            {loading ? t("registerPage.saving") : t("registerPage.submit")}
           </button>
 
           <p style={loginTextStyle}>
-            Zaten hesabınız var mı?{" "}
+            {t("registerPage.alreadyAccount")}{" "}
             <Link to="/login" style={loginLinkStyle}>
-              Giriş Yap
+              {t("registerPage.login")}
             </Link>
           </p>
         </div>

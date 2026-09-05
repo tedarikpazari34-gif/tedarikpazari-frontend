@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface Category {
   id: string;
@@ -20,9 +21,11 @@ export default function CategorySidebar({
   loadProducts,
   sidebarStyle,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div style={sidebarStyle}>
-      <h3 style={{ marginTop: 0 }}>Kategoriler</h3>
+      <h3 style={{ marginTop: 0 }}>{t("categorySidebar.title")}</h3>
 
       {categories.map((parent) => (
         <div key={parent.id} style={{ marginBottom: 16 }}>
@@ -82,7 +85,7 @@ export default function CategorySidebar({
                 width: "100%",
               }}
             >
-              Ürünleri göster
+              {t("categorySidebar.showProducts")}
             </button>
           )}
         </div>

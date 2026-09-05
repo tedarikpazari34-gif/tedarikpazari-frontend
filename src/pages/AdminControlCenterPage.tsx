@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import AdminSidebar from "../components/admin/AdminSidebar";
 
@@ -60,24 +61,25 @@ function isHealthy(status: SystemStatus) {
   return status === "UP" || status === "CONFIGURED";
 }
 
-function getStatusText(status: SystemStatus) {
+function getStatusText(status: SystemStatus, t: any) {
   switch (status) {
     case "UP":
-      return "Çalışıyor";
+      return t("adminControlCenterPage.statusUp");
     case "CONFIGURED":
-      return "Yapılandırıldı";
+      return t("adminControlCenterPage.statusConfigured");
     case "STARTING":
-      return "Başlatılıyor";
+      return t("adminControlCenterPage.statusStarting");
     case "NOT_CONFIGURED":
-      return "Eksik ayar";
+      return t("adminControlCenterPage.statusNotConfigured");
     case "DOWN":
-      return "Çalışmıyor";
+      return t("adminControlCenterPage.statusDown");
     default:
       return status;
   }
 }
 
 function SystemCard({ title, status, message, detail }: SystemCardProps) {
+  const { t } = useTranslation();
   const healthy = isHealthy(status);
   const warning = status === "STARTING" || status === "NOT_CONFIGURED";
 
@@ -98,7 +100,7 @@ function SystemCard({ title, status, message, detail }: SystemCardProps) {
             color: healthy ? "#166534" : warning ? "#92400e" : "#b91c1c",
           }}
         >
-          {healthy ? "●" : warning ? "▲" : "●"} {getStatusText(status)}
+          {healthy ? "●" : warning ? "▲" : "●"} {getStatusText(status, t)}
         </span>
       </div>
 
@@ -139,6 +141,9 @@ function ActionCard({ title, value, description, to }: ActionCardProps) {
 }
 
 export default function AdminControlCenterPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [data, setData] = useState<ControlCenterData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -162,7 +167,7 @@ export default function AdminControlCenterPage() {
 
       if (!response.ok) {
         throw new Error(
-          result?.message || "Kontrol Merkezi verileri alınamadı.",
+          result?.message || t("adminControlCenterPage.dataLoadFailed"),
         );
       }
 
@@ -171,13 +176,15 @@ export default function AdminControlCenterPage() {
       console.error(err);
 
       setError(
-        err instanceof Error ? err.message : "Beklenmeyen bir hata oluştu.",
+        err instanceof Error
+          ? err.message
+          : t("adminControlCenterPage.unexpectedError"),
       );
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadControlCenter();
@@ -196,25 +203,23 @@ export default function AdminControlCenterPage() {
 
   const overallStatus = systemCritical
     ? {
-        title: "Kritik Sistem Sorunu",
-        description: "Sistemin temel servislerinden biri çalışmıyor.",
+        title: t("adminControlCenterPage.criticalTitle"),
+        description: t("adminControlCenterPage.criticalDescription"),
         background: "#fef2f2",
         border: "#fecaca",
         color: "#b91c1c",
       }
     : systemWarning
       ? {
-          title: "Dikkat Gerekiyor",
-          description:
-            "Bekleyen yönetim işlemleri veya eksik sistem ayarları bulunuyor.",
+          title: t("adminControlCenterPage.warningTitle"),
+          description: t("adminControlCenterPage.warningDescription"),
           background: "#fffbeb",
           border: "#fde68a",
           color: "#92400e",
         }
       : {
-          title: "Sistem Sağlıklı",
-          description:
-            "Temel servisler çalışıyor ve bekleyen kritik işlem bulunmuyor.",
+          title: t("adminControlCenterPage.healthyTitle"),
+          description: t("adminControlCenterPage.healthyDescription"),
           background: "#f0fdf4",
           border: "#bbf7d0",
           color: "#166534",
@@ -227,13 +232,12 @@ export default function AdminControlCenterPage() {
       <main style={pageStyle}>
         <header style={headerStyle}>
           <div>
-            <div style={eyebrowStyle}>TEDARİK PAZARI · SUPER ADMIN</div>
+            <div style={eyebrowStyle}>{t("adminControlCenterPage.eyebrow")}</div>
 
-            <h1 style={titleStyle}>Kontrol Merkezi</h1>
+            <h1 style={titleStyle}>{t("adminControlCenterPage.title")}</h1>
 
             <p style={subtitleStyle}>
-              Sistem sağlığını ve müdahale bekleyen işlemleri tek ekrandan takip
-              edin.
+              {t("adminControlCenterPage.subtitle")}
             </p>
           </div>
 
@@ -247,15 +251,17 @@ export default function AdminControlCenterPage() {
               cursor: loading || refreshing ? "not-allowed" : "pointer",
             }}
           >
-            {refreshing ? "Yenileniyor..." : "Verileri Yenile"}
+            {refreshing
+              ? t("adminControlCenterPage.refreshing")
+              : t("adminControlCenterPage.refresh")}
           </button>
         </header>
 
         {loading ? (
-          <div style={stateBoxStyle}>Kontrol ediliyor...</div>
+          <div style={stateBoxStyle}>{t("adminControlCenterPage.checking")}</div>
         ) : error ? (
           <div style={errorBoxStyle}>
-            <strong>Veriler alınamadı</strong>
+            <strong>{t("adminControlCenterPage.couldNotLoad")}</strong>
             <span>{error}</span>
 
             <button
@@ -263,7 +269,7 @@ export default function AdminControlCenterPage() {
               onClick={() => loadControlCenter()}
               style={retryButtonStyle}
             >
-              Tekrar Dene
+              {t("adminControlCenterPage.retry")}
             </button>
           </div>
         ) : data ? (
@@ -277,7 +283,9 @@ export default function AdminControlCenterPage() {
               }}
             >
               <div>
-                <div style={overallLabelStyle}>GENEL DURUM</div>
+                <div style={overallLabelStyle}>
+                  {t("adminControlCenterPage.overallStatus")}
+                </div>
 
                 <h2 style={overallTitleStyle}>{overallStatus.title}</h2>
 
@@ -288,55 +296,66 @@ export default function AdminControlCenterPage() {
 
               <div style={totalActionStyle}>
                 <strong>{data.actions.total}</strong>
-                <span>bekleyen işlem</span>
+                <span>
+                  {t("adminControlCenterPage.pendingActions", {
+                    count: data.actions.total,
+                  })}
+                </span>
               </div>
             </section>
 
             <section style={sectionStyle}>
               <div style={sectionHeaderStyle}>
                 <div>
-                  <div style={sectionEyebrowStyle}>ALTYAPI</div>
-                  <h2 style={sectionTitleStyle}>Sistem Durumu</h2>
+                  <div style={sectionEyebrowStyle}>
+                    {t("adminControlCenterPage.infrastructure")}
+                  </div>
+                  <h2 style={sectionTitleStyle}>
+                    {t("adminControlCenterPage.systemStatus")}
+                  </h2>
                 </div>
 
                 <span style={checkTimeStyle}>
-                  Son kontrol:{" "}
-                  {new Date(data.checkedAt).toLocaleString("tr-TR")}
+                  {t("adminControlCenterPage.lastCheck", {
+                    date: new Date(data.checkedAt).toLocaleString(locale),
+                  })}
                 </span>
               </div>
 
               <div style={systemGridStyle}>
                 <SystemCard
-                  title="Backend"
+                  title={t("adminControlCenterPage.backend")}
                   status={data.systems.backend.status}
                   message={data.systems.backend.message}
                 />
 
                 <SystemCard
-                  title="Veritabanı"
+                  title={t("adminControlCenterPage.database")}
                   status={data.systems.database.status}
                   message={data.systems.database.message}
                   detail={data.systems.database.error || undefined}
                 />
 
                 <SystemCard
-                  title="E-posta / SMTP"
+                  title={t("adminControlCenterPage.mail")}
                   status={data.systems.mail.status}
                   message={data.systems.mail.message}
                   detail={
                     data.systems.mail.missingVariables?.length
-                      ? `Eksik değişkenler: ${data.systems.mail.missingVariables.join(
-                          ", ",
-                        )}`
+                      ? t("adminControlCenterPage.missingVariables", {
+                          variables: data.systems.mail.missingVariables.join(", "),
+                        })
                       : undefined
                   }
                 />
 
                 <SystemCard
-                  title="WebSocket"
+                  title={t("adminControlCenterPage.websocket")}
                   status={data.systems.websocket.status}
                   message={data.systems.websocket.message}
-                  detail={`${data.systems.websocket.onlineUsers} çevrim içi kullanıcı`}
+                  detail={t("adminControlCenterPage.onlineUsers", {
+                    count: data.systems.websocket.onlineUsers,
+                  })}
                 />
               </div>
             </section>
@@ -344,44 +363,48 @@ export default function AdminControlCenterPage() {
             <section style={sectionStyle}>
               <div style={sectionHeaderStyle}>
                 <div>
-                  <div style={sectionEyebrowStyle}>OPERASYON</div>
-                  <h2 style={sectionTitleStyle}>Müdahale Bekleyen İşler</h2>
+                  <div style={sectionEyebrowStyle}>
+                    {t("adminControlCenterPage.operation")}
+                  </div>
+                  <h2 style={sectionTitleStyle}>
+                    {t("adminControlCenterPage.pendingWork")}
+                  </h2>
                 </div>
               </div>
 
               <div style={actionGridStyle}>
                 <ActionCard
-                  title="Onay Bekleyen Firmalar"
+                  title={t("adminControlCenterPage.pendingCompanies")}
                   value={data.actions.pendingCompanies}
-                  description="Yeni şirket kayıtlarını inceleyin."
+                  description={t("adminControlCenterPage.pendingCompaniesText")}
                   to="/admin/companies"
                 />
 
                 <ActionCard
-                  title="Onay Bekleyen Ürünler"
+                  title={t("adminControlCenterPage.pendingProducts")}
                   value={data.actions.pendingProducts}
-                  description="Satıcı ürünlerini kontrol edin."
+                  description={t("adminControlCenterPage.pendingProductsText")}
                   to="/admin/products"
                 />
 
                 <ActionCard
-                  title="Açık Anlaşmazlıklar"
+                  title={t("adminControlCenterPage.openDisputes")}
                   value={data.actions.openDisputes}
-                  description="Alıcı ve satıcı uyuşmazlıklarını yönetin."
+                  description={t("adminControlCenterPage.openDisputesText")}
                   to="/admin/disputes"
                 />
 
                 <ActionCard
-                  title="Bekleyen Satıcı Ödemeleri"
+                  title={t("adminControlCenterPage.pendingPayouts")}
                   value={data.actions.pendingPayouts}
-                  description="Para çekme taleplerini değerlendirin."
+                  description={t("adminControlCenterPage.pendingPayoutsText")}
                   to="/admin/payouts"
                 />
 
                 <ActionCard
-                  title="Şüpheli Chat Mesajları"
+                  title={t("adminControlCenterPage.flaggedMessages")}
                   value={data.actions.flaggedMessages}
-                  description="İşaretlenen yazışmaları inceleyin."
+                  description={t("adminControlCenterPage.flaggedMessagesText")}
                   to="/admin/chat-moderation"
                 />
               </div>

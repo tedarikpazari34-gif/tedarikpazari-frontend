@@ -1,16 +1,10 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const API =
   import.meta.env.VITE_API_URL ||
   "https://tedarik-backend.onrender.com/api";
-
-const statusText: Record<string, string> = {
-  PENDING_PICKUP: "Yük Alınacak",
-  PICKED_UP: "Yük Alındı",
-  IN_TRANSIT: "Yolda",
-  DELIVERED: "Teslim Edildi",
-};
 
 const statusIndex: Record<string, number> = {
   PENDING_PICKUP: 1,
@@ -19,18 +13,10 @@ const statusIndex: Record<string, number> = {
   DELIVERED: 4,
 };
 
-const timelineSteps = [
-  { key: "CREATED", label: "Taşıma siparişi oluşturuldu" },
-  { key: "PENDING_PICKUP", label: "Nakliyeci seçildi" },
-  { key: "PICKED_UP", label: "Yük teslim alındı" },
-  { key: "IN_TRANSIT", label: "Araç yola çıktı" },
-  { key: "DELIVERED", label: "Teslim edildi" },
-];
-
-function formatDate(value?: string | null) {
+function formatDate(value: string | null | undefined, locale: string) {
   if (!value) return "";
 
-  return new Date(value).toLocaleString("tr-TR", {
+  return new Date(value).toLocaleString(locale, {
     dateStyle: "short",
     timeStyle: "short",
   });
@@ -52,8 +38,39 @@ function statusBadgeStyle(status: string): CSSProperties {
   return { background: "#fef3c7", color: "#92400e" };
 }
 
-function ShippingTimeline({ order }: { order: any }) {
+function ShippingTimeline({
+  order,
+  t,
+  locale,
+}: {
+  order: any;
+  t: any;
+  locale: string;
+}) {
   const currentIndex = statusIndex[order.status] ?? 0;
+
+  const timelineSteps = [
+    {
+      key: "CREATED",
+      label: t("logisticsOrdersPage.timelineCreated"),
+    },
+    {
+      key: "PENDING_PICKUP",
+      label: t("logisticsOrdersPage.timelineCarrierSelected"),
+    },
+    {
+      key: "PICKED_UP",
+      label: t("logisticsOrdersPage.timelinePickedUp"),
+    },
+    {
+      key: "IN_TRANSIT",
+      label: t("logisticsOrdersPage.timelineInTransit"),
+    },
+    {
+      key: "DELIVERED",
+      label: t("logisticsOrdersPage.timelineDelivered"),
+    },
+  ];
 
   const stepDate = (key: string) => {
     if (key === "CREATED") return order.createdAt;
@@ -113,7 +130,7 @@ function ShippingTimeline({ order }: { order: any }) {
 
               {completed && stepDate(step.key) && (
                 <span style={timelineDateStyle}>
-                  {formatDate(stepDate(step.key))}
+                  {formatDate(stepDate(step.key), locale)}
                 </span>
               )}
             </div>
@@ -125,6 +142,16 @@ function ShippingTimeline({ order }: { order: any }) {
 }
 
 export default function LogisticsOrdersPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
+  const statusText: Record<string, string> = {
+    PENDING_PICKUP: t("logisticsOrdersPage.statusPendingPickup"),
+    PICKED_UP: t("logisticsOrdersPage.statusPickedUp"),
+    IN_TRANSIT: t("logisticsOrdersPage.statusInTransit"),
+    DELIVERED: t("logisticsOrdersPage.statusDelivered"),
+  };
+
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState("");
@@ -144,7 +171,7 @@ export default function LogisticsOrdersPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Nakliye siparişleri alınamadı");
+        alert(data?.message || t("logisticsOrdersPage.loadFailed"));
         setOrders([]);
         return;
       }
@@ -184,14 +211,14 @@ export default function LogisticsOrdersPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "İşlem yapılamadı");
+        alert(data?.message || t("logisticsOrdersPage.actionFailed"));
         return;
       }
 
       await load();
     } catch (err) {
       console.error("SHIPPING ACTION ERROR:", err);
-      alert("İşlem sırasında hata oluştu");
+      alert(t("logisticsOrdersPage.actionError"));
     } finally {
       setBusyId("");
     }
@@ -200,7 +227,7 @@ export default function LogisticsOrdersPage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <div style={emptyStyle}>Nakliye siparişleri yükleniyor...</div>
+        <div style={emptyStyle}>{t("logisticsOrdersPage.loading")}</div>
       </main>
     );
   }
@@ -209,16 +236,15 @@ export default function LogisticsOrdersPage() {
     <main style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <div style={eyebrowStyle}>LOJİSTİK PANELİ</div>
-          <h1 style={heroTitleStyle}>Nakliye Siparişlerim</h1>
+          <div style={eyebrowStyle}>{t("logisticsOrdersPage.eyebrow")}</div>
+          <h1 style={heroTitleStyle}>{t("logisticsOrdersPage.title")}</h1>
           <p style={heroTextStyle}>
-            Atanan taşımaları, rotaları ve teslimat durumlarını
-            tek ekrandan yönetin.
+            {t("logisticsOrdersPage.description")}
           </p>
         </div>
 
         <div style={heroStatStyle}>
-          <span>Aktif Taşıma</span>
+          <span>{t("logisticsOrdersPage.activeTransport")}</span>
           <strong>
             {
               orders.filter(
@@ -231,9 +257,11 @@ export default function LogisticsOrdersPage() {
 
       {orders.length === 0 ? (
         <div style={emptyStyle}>
-          <h2 style={{ marginTop: 0 }}>Aktif nakliye siparişi yok</h2>
+          <h2 style={{ marginTop: 0 }}>
+            {t("logisticsOrdersPage.noActiveOrders")}
+          </h2>
           <p style={{ color: "#64748b" }}>
-            Kabul edilen taşıma teklifleri burada görünecek.
+            {t("logisticsOrdersPage.noActiveOrdersText")}
           </p>
         </div>
       ) : (
@@ -242,9 +270,12 @@ export default function LogisticsOrdersPage() {
             <article key={order.id} style={cardStyle}>
               <div style={cardHeaderStyle}>
                 <div>
-                  <div style={smallLabelStyle}>TAŞINACAK ÜRÜN</div>
+                  <div style={smallLabelStyle}>
+                    {t("logisticsOrdersPage.productToTransport")}
+                  </div>
                   <h2 style={productTitleStyle}>
-                    {order.order?.rfq?.product?.title || "Ürün"}
+                    {order.order?.rfq?.product?.title ||
+                      t("logisticsOrdersPage.product")}
                   </h2>
                 </div>
 
@@ -260,7 +291,9 @@ export default function LogisticsOrdersPage() {
 
               <div style={routeStyle}>
                 <div>
-                  <span style={routeLabelStyle}>Çıkış</span>
+                  <span style={routeLabelStyle}>
+                    {t("logisticsOrdersPage.origin")}
+                  </span>
                   <strong>
                     {order.shippingRfq?.fromAddress || "-"}
                   </strong>
@@ -269,7 +302,9 @@ export default function LogisticsOrdersPage() {
                 <span style={routeArrowStyle}>→</span>
 
                 <div>
-                  <span style={routeLabelStyle}>Varış</span>
+                  <span style={routeLabelStyle}>
+                    {t("logisticsOrdersPage.destination")}
+                  </span>
                   <strong>
                     {order.shippingRfq?.toAddress || "-"}
                   </strong>
@@ -278,40 +313,40 @@ export default function LogisticsOrdersPage() {
 
               <div style={infoGridStyle}>
                 <Info
-                  label="Alıcı"
+                  label={t("logisticsOrdersPage.buyer")}
                   value={order.buyer?.name || "-"}
                 />
                 <Info
-                  label="Satıcı"
+                  label={t("logisticsOrdersPage.seller")}
                   value={order.seller?.name || "-"}
                 />
                 <Info
-                  label="Nakliye Bedeli"
+                  label={t("logisticsOrdersPage.shippingPrice")}
                   value={`${Number(
                     order.shippingQuote?.price || 0
-                  ).toLocaleString("tr-TR")} ₺`}
+                  ).toLocaleString(locale)} ₺`}
                 />
                 <Info
-                  label="Tahmini Teslim"
-                  value={`${
-                    order.shippingQuote?.deliveryDays || "-"
-                  } gün`}
+                  label={t("logisticsOrdersPage.estimatedDelivery")}
+                  value={t("logisticsOrdersPage.deliveryDays", {
+                    days: order.shippingQuote?.deliveryDays || "-",
+                  })}
                 />
                 <Info
-                  label="Takip Numarası"
+                  label={t("logisticsOrdersPage.trackingNumber")}
                   value={order.trackingNo || "-"}
                 />
                 <Info
-                  label="Nakliye Firması"
+                  label={t("logisticsOrdersPage.shippingCompany")}
                   value={order.shippingCompany || "-"}
                 />
               </div>
 
-              <ShippingTimeline order={order} />
+              <ShippingTimeline order={order} t={t} locale={locale} />
 
               <div style={actionsStyle}>
                 <Link to="/chat" style={chatButtonStyle}>
-                  💬 Nakliye Sohbetine Git
+                  {t("logisticsOrdersPage.shippingChat")}
                 </Link>
 
                 {order.status === "PENDING_PICKUP" && (
@@ -321,8 +356,8 @@ export default function LogisticsOrdersPage() {
                     style={primaryActionStyle}
                   >
                     {busyId === order.id
-                      ? "İşleniyor..."
-                      : "📦 Yükü Teslim Aldım"}
+                      ? t("logisticsOrdersPage.processing")
+                      : t("logisticsOrdersPage.confirmPickup")}
                   </button>
                 )}
 
@@ -333,8 +368,8 @@ export default function LogisticsOrdersPage() {
                     style={warningActionStyle}
                   >
                     {busyId === order.id
-                      ? "İşleniyor..."
-                      : "🚛 Araç Yola Çıktı"}
+                      ? t("logisticsOrdersPage.processing")
+                      : t("logisticsOrdersPage.confirmTransit")}
                   </button>
                 )}
 
@@ -345,14 +380,14 @@ export default function LogisticsOrdersPage() {
                     style={successActionStyle}
                   >
                     {busyId === order.id
-                      ? "İşleniyor..."
-                      : "✅ Teslim Edildi"}
+                      ? t("logisticsOrdersPage.processing")
+                      : t("logisticsOrdersPage.confirmDelivered")}
                   </button>
                 )}
 
                 {order.status === "DELIVERED" && (
                   <div style={deliveredStyle}>
-                    ✅ Taşıma başarıyla tamamlandı
+                    {t("logisticsOrdersPage.completed")}
                   </div>
                 )}
               </div>

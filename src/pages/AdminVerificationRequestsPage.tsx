@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const API =
   import.meta.env.VITE_API_URL ||
@@ -25,6 +26,9 @@ type VerificationRequest = {
 };
 
 export default function AdminVerificationRequestsPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [requests, setRequests] = useState<VerificationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState("");
@@ -46,14 +50,14 @@ export default function AdminVerificationRequestsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "Başvurular alınamadı");
+        setError(data?.message || t("adminVerificationRequestsPage.loadFailed"));
         return;
       }
 
       setRequests(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      setError("Başvurular alınamadı");
+      setError(t("adminVerificationRequestsPage.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -64,7 +68,8 @@ export default function AdminVerificationRequestsPage() {
   }, []);
 
   const approve = async (id: string) => {
-    const note = window.prompt("Admin notu (isteğe bağlı):") || "";
+    const note =
+      window.prompt(t("adminVerificationRequestsPage.adminNotePrompt")) || "";
 
     try {
       setActionId(id);
@@ -86,21 +91,24 @@ export default function AdminVerificationRequestsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Başvuru onaylanamadı");
+        alert(
+          data?.message || t("adminVerificationRequestsPage.approveFailed"),
+        );
         return;
       }
 
       await loadRequests();
     } catch (err) {
       console.error(err);
-      alert("İşlem başarısız");
+      alert(t("adminVerificationRequestsPage.actionFailed"));
     } finally {
       setActionId("");
     }
   };
 
   const reject = async (id: string) => {
-    const note = window.prompt("Red sebebi:") || "";
+    const note =
+      window.prompt(t("adminVerificationRequestsPage.rejectReasonPrompt")) || "";
 
     try {
       setActionId(id);
@@ -122,31 +130,41 @@ export default function AdminVerificationRequestsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "Başvuru reddedilemedi");
+        alert(
+          data?.message || t("adminVerificationRequestsPage.rejectFailed"),
+        );
         return;
       }
 
       await loadRequests();
     } catch (err) {
       console.error(err);
-      alert("İşlem başarısız");
+      alert(t("adminVerificationRequestsPage.actionFailed"));
     } finally {
       setActionId("");
     }
   };
 
   if (loading) {
-    return <main style={pageStyle}>Başvurular yükleniyor...</main>;
+    return (
+      <main style={pageStyle}>
+        {t("adminVerificationRequestsPage.loading")}
+      </main>
+    );
   }
 
   return (
     <main style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <div style={eyebrowStyle}>ADMIN PANELİ</div>
-          <h1 style={titleStyle}>Firma Doğrulama Başvuruları</h1>
+          <div style={eyebrowStyle}>
+            {t("adminVerificationRequestsPage.eyebrow")}
+          </div>
+          <h1 style={titleStyle}>
+            {t("adminVerificationRequestsPage.title")}
+          </h1>
           <p style={descStyle}>
-            Firmaların yüklediği belgeleri inceleyip onaylayın veya reddedin.
+            {t("adminVerificationRequestsPage.description")}
           </p>
         </div>
       </section>
@@ -155,14 +173,17 @@ export default function AdminVerificationRequestsPage() {
 
       <section style={listStyle}>
         {requests.length === 0 ? (
-          <div style={emptyStyle}>Henüz doğrulama başvurusu yok.</div>
+          <div style={emptyStyle}>
+            {t("adminVerificationRequestsPage.empty")}
+          </div>
         ) : (
           requests.map((request) => (
             <div key={request.id} style={cardStyle}>
               <div style={topStyle}>
                 <div>
                   <h2 style={companyStyle}>
-                    {request.company?.name || "İsimsiz firma"}
+                    {request.company?.name ||
+                      t("adminVerificationRequestsPage.unnamedCompany")}
                   </h2>
                   <div style={mutedStyle}>
                     {request.company?.email || "-"}
@@ -174,32 +195,32 @@ export default function AdminVerificationRequestsPage() {
 
                 <span style={statusStyle(request.status)}>
                   {request.status === "PENDING"
-                    ? "İncelemede"
+                    ? t("adminVerificationRequestsPage.statusPending")
                     : request.status === "APPROVED"
-                      ? "Onaylandı"
-                      : "Reddedildi"}
+                      ? t("adminVerificationRequestsPage.statusApproved")
+                      : t("adminVerificationRequestsPage.statusRejected")}
                 </span>
               </div>
 
               <div style={infoGridStyle}>
                 <Info
-                  label="Belge Türü"
+                  label={t("adminVerificationRequestsPage.documentType")}
                   value={request.documentType || "-"}
                 />
                 <Info
-                  label="Dosya"
+                  label={t("adminVerificationRequestsPage.file")}
                   value={request.fileName || "-"}
                 />
                 <Info
-                  label="Başvuru Tarihi"
-                  value={new Date(request.createdAt).toLocaleString("tr-TR")}
+                  label={t("adminVerificationRequestsPage.applicationDate")}
+                  value={new Date(request.createdAt).toLocaleString(locale)}
                 />
                 <Info
-                  label="Not"
+                  label={t("adminVerificationRequestsPage.note")}
                   value={request.note || "-"}
                 />
                 <Info
-                  label="Admin Notu"
+                  label={t("adminVerificationRequestsPage.adminNote")}
                   value={request.adminNote || "-"}
                 />
               </div>
@@ -211,7 +232,7 @@ export default function AdminVerificationRequestsPage() {
                   rel="noreferrer"
                   style={documentButtonStyle}
                 >
-                  Belgeyi Gör
+                  {t("adminVerificationRequestsPage.viewDocument")}
                 </a>
 
                 {request.status === "PENDING" && (
@@ -221,7 +242,7 @@ export default function AdminVerificationRequestsPage() {
                       disabled={actionId === request.id}
                       style={approveButtonStyle}
                     >
-                      ✓ Doğrula
+                      {t("adminVerificationRequestsPage.verify")}
                     </button>
 
                     <button
@@ -229,7 +250,7 @@ export default function AdminVerificationRequestsPage() {
                       disabled={actionId === request.id}
                       style={rejectButtonStyle}
                     >
-                      Reddet
+                      {t("adminVerificationRequestsPage.reject")}
                     </button>
                   </>
                 )}

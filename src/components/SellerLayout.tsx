@@ -1,12 +1,14 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function SellerLayout({
   children,
-  title = "Satıcı Paneli",
+  title,
 }: {
   children: React.ReactNode;
   title?: string;
 }) {
+  const { t } = useTranslation();
   const path = window.location.pathname;
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
@@ -22,17 +24,47 @@ export default function SellerLayout({
   }, []);
 
   const logout = () => {
+    const language = localStorage.getItem("language");
     localStorage.clear();
+
+    if (language) {
+      localStorage.setItem("language", language);
+    }
+
     window.location.href = "/login";
   };
 
   const menu = [
-    { label: "Dashboard", href: "/seller/dashboard", icon: "📊" },
-    { label: "Ürünlerim", href: "/seller/products", icon: "📦" },
-    { label: "Yeni Ürün", href: "/seller/products/new", icon: "➕" },
-    { label: "Gelen Talepler", href: "/seller/rfqs", icon: "📩" },
-    { label: "Tekliflerim", href: "/seller/quotes", icon: "💬" },
-    { label: "Siparişler", href: "/seller/orders", icon: "🧾" },
+    {
+      label: t("sellerLayout.dashboard"),
+      href: "/seller/dashboard",
+      icon: "📊",
+    },
+    {
+      label: t("sellerLayout.myProducts"),
+      href: "/seller/products",
+      icon: "📦",
+    },
+    {
+      label: t("sellerLayout.newProduct"),
+      href: "/seller/products/new",
+      icon: "➕",
+    },
+    {
+      label: t("sellerLayout.incomingRequests"),
+      href: "/seller/rfqs",
+      icon: "📩",
+    },
+    {
+      label: t("sellerLayout.myQuotes"),
+      href: "/seller/quotes",
+      icon: "💬",
+    },
+    {
+      label: t("sellerLayout.orders"),
+      href: "/seller/orders",
+      icon: "🧾",
+    },
   ];
 
   return (
@@ -49,8 +81,8 @@ export default function SellerLayout({
         <div style={brand}>
           <div style={brandIcon}>T</div>
           <div>
-            <div style={brandText}>TEDARİKÇİ</div>
-            <div style={brandSub}>Satıcı Paneli</div>
+            <div style={brandText}>{t("sellerLayout.brand")}</div>
+            <div style={brandSub}>{t("sellerLayout.panelTitle")}</div>
           </div>
         </div>
 
@@ -75,7 +107,7 @@ export default function SellerLayout({
         </nav>
 
         <button onClick={logout} style={logoutButton}>
-          Çıkış Yap
+          {t("sellerLayout.logout")}
         </button>
       </aside>}
 
@@ -104,9 +136,9 @@ export default function SellerLayout({
                 fontSize: isMobile ? 24 : 32,
               }}
             >
-              {title}
+              {title || t("sellerLayout.panelTitle")}
             </h1>
-            <p style={pageSub}>Ürünlerinizi, taleplerinizi ve siparişlerinizi yönetin.</p>
+            <p style={pageSub}>{t("sellerLayout.subtitle")}</p>
           </div>
 
           <div
@@ -117,8 +149,8 @@ export default function SellerLayout({
           >
             <div style={avatar}>S</div>
             <div>
-              <div style={profileName}>Satıcı Hesabı</div>
-              <div style={profileRole}>SELLER</div>
+              <div style={profileName}>{t("sellerLayout.sellerAccount")}</div>
+              <div style={profileRole}>{t("sellerLayout.sellerRole")}</div>
             </div>
           </div>
         </header>

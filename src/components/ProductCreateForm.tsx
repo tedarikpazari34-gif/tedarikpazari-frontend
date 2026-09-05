@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Category {
   id: string;
@@ -15,6 +16,8 @@ export default function ProductCreateForm({
   categories,
   onCreated,
 }: Props) {
+  const { t } = useTranslation();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -53,7 +56,11 @@ export default function ProductCreateForm({
         const uploadData = await uploadRes.json();
 
         if (!uploadRes.ok) {
-          alert("Görsel yükleme hatası: " + JSON.stringify(uploadData));
+          alert(
+            t("productCreateForm.imageUploadError") +
+              ": " +
+              JSON.stringify(uploadData)
+          );
           return;
         }
 
@@ -115,13 +122,15 @@ export default function ProductCreateForm({
 
         if (!imageRes.ok) {
           alert(
-            "Ürün oluştu ama görsel eklenemedi: " + JSON.stringify(imageData)
+            t("productCreateForm.imageAttachError") +
+              ": " +
+              JSON.stringify(imageData)
           );
           return;
         }
       }
 
-      alert("Ürün oluşturuldu");
+      alert(t("productCreateForm.createSuccess"));
 
       setTitle("");
       setDescription("");
@@ -137,7 +146,7 @@ export default function ProductCreateForm({
       onCreated?.();
     } catch (error) {
       console.error(error);
-      alert("Ürün oluşturma hatası");
+      alert(t("productCreateForm.createError"));
     } finally {
       setLoading(false);
     }
@@ -153,21 +162,21 @@ export default function ProductCreateForm({
         marginBottom: 24,
       }}
     >
-      <h2 style={{ marginTop: 0 }}>Yeni Ürün Ekle</h2>
+      <h2 style={{ marginTop: 0 }}>{t("productCreateForm.title")}</h2>
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: "grid", gap: 12 }}>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Ürün adı"
+            placeholder={t("productCreateForm.productName")}
             style={inputStyle}
           />
 
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Açıklama"
+            placeholder={t("productCreateForm.description")}
             style={{ ...inputStyle, minHeight: 100, resize: "vertical" }}
           />
 
@@ -176,7 +185,7 @@ export default function ProductCreateForm({
             onChange={(e) => setCategoryId(e.target.value)}
             style={inputStyle}
           >
-            <option value="">Kategori seç</option>
+            <option value="">{t("productCreateForm.selectCategory")}</option>
             {flatCategories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -188,7 +197,7 @@ export default function ProductCreateForm({
             type="number"
             value={basePrice}
             onChange={(e) => setBasePrice(Number(e.target.value))}
-            placeholder="Fiyat"
+            placeholder={t("productCreateForm.price")}
             style={inputStyle}
           />
 
@@ -203,7 +212,7 @@ export default function ProductCreateForm({
           <input
             value={unitType}
             onChange={(e) => setUnitType(e.target.value)}
-            placeholder="Birim tipi"
+            placeholder={t("productCreateForm.unitType")}
             style={inputStyle}
           />
 
@@ -212,15 +221,17 @@ export default function ProductCreateForm({
             onChange={(e) => setStockType(e.target.value)}
             style={inputStyle}
           >
-            <option value="STOCK">STOCK</option>
-            <option value="MAKE_TO_ORDER">MAKE_TO_ORDER</option>
+            <option value="STOCK">{t("productCreateForm.stock")}</option>
+            <option value="MAKE_TO_ORDER">
+              {t("productCreateForm.makeToOrder")}
+            </option>
           </select>
 
           <input
             type="number"
             value={vatRate}
             onChange={(e) => setVatRate(Number(e.target.value))}
-            placeholder="KDV oranı"
+            placeholder={t("productCreateForm.vatRate")}
             style={inputStyle}
           />
 
@@ -234,7 +245,7 @@ export default function ProductCreateForm({
             type="number"
             value={leadTimeDays}
             onChange={(e) => setLeadTimeDays(Number(e.target.value))}
-            placeholder="Teslim süresi"
+            placeholder={t("productCreateForm.leadTime")}
             style={inputStyle}
           />
 
@@ -251,7 +262,9 @@ export default function ProductCreateForm({
               fontWeight: 700,
             }}
           >
-            {loading ? "Kaydediliyor..." : "Ürün Oluştur"}
+            {loading
+              ? t("productCreateForm.saving")
+              : t("productCreateForm.create")}
           </button>
         </div>
       </form>

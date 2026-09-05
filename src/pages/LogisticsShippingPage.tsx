@@ -1,26 +1,30 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 
 const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
-function formatDate(value?: string | null) {
+function formatDate(value: string | null | undefined, locale: string) {
   if (!value) return "-";
 
-  return new Date(value).toLocaleDateString("tr-TR");
+  return new Date(value).toLocaleDateString(locale);
 }
 
-function deliveryText(value?: string | null) {
+function deliveryText(value: string | null | undefined, t: any) {
   const labels: Record<string, string> = {
-    ACIL: "Acil",
-    "1_3_GUN": "1–3 gün",
-    "1_HAFTA": "1 hafta",
-    ESNEK: "Esnek",
+    ACIL: t("logisticsShippingPage.deliveryUrgent"),
+    "1_3_GUN": t("logisticsShippingPage.deliveryOneThreeDays"),
+    "1_HAFTA": t("logisticsShippingPage.deliveryOneWeek"),
+    ESNEK: t("logisticsShippingPage.deliveryFlexible"),
   };
 
   return value ? labels[value] || value : "-";
 }
 
 export default function ShippingPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [rfqs, setRfqs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState("");
@@ -45,7 +49,7 @@ export default function ShippingPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data?.message || "Nakliye talepleri alınamadı");
+        alert(data?.message || t("logisticsShippingPage.loadFailed"));
         setRfqs([]);
         return;
       }
@@ -88,12 +92,12 @@ export default function ShippingPage() {
     const numericDeliveryDays = Number(deliveryDays);
 
     if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
-      setFormError("Geçerli bir teklif fiyatı girin.");
+      setFormError(t("logisticsShippingPage.invalidPrice"));
       return;
     }
 
     if (!Number.isInteger(numericDeliveryDays) || numericDeliveryDays <= 0) {
-      setFormError("Teslim süresini gün olarak girin.");
+      setFormError(t("logisticsShippingPage.invalidDeliveryDays"));
       return;
     }
 
@@ -123,17 +127,17 @@ export default function ShippingPage() {
         setFormError(
           Array.isArray(data?.message)
             ? data.message.join(", ")
-            : data?.message || "Teklif gönderilemedi",
+            : data?.message || t("logisticsShippingPage.quoteFailed"),
         );
         return;
       }
 
       closeQuoteModal();
       await load();
-      alert("Nakliye teklifi gönderildi ✅");
+      alert(t("logisticsShippingPage.quoteSuccess"));
     } catch (error) {
       console.error("SEND QUOTE ERROR:", error);
-      setFormError("İşlem sırasında bağlantı hatası oluştu.");
+      setFormError(t("logisticsShippingPage.connectionError"));
     } finally {
       setBusyId("");
     }
@@ -142,7 +146,7 @@ export default function ShippingPage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <div style={emptyStyle}>Nakliye talepleri yükleniyor...</div>
+        <div style={emptyStyle}>{t("logisticsShippingPage.loading")}</div>
       </main>
     );
   }
@@ -151,25 +155,26 @@ export default function ShippingPage() {
     <main style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <div style={eyebrowStyle}>LOJİSTİK PAZARI</div>
-          <h1 style={titleStyle}>Açık Nakliye Talepleri</h1>
+          <div style={eyebrowStyle}>{t("logisticsShippingPage.eyebrow")}</div>
+          <h1 style={titleStyle}>{t("logisticsShippingPage.title")}</h1>
           <p style={heroTextStyle}>
-            Rota, yük özellikleri ve teslimat beklentilerini inceleyerek uygun
-            taşımalara teklif verin.
+            {t("logisticsShippingPage.description")}
           </p>
         </div>
 
         <div style={countStyle}>
-          <span>Açık Talep</span>
+          <span>{t("logisticsShippingPage.openRequest")}</span>
           <strong>{rfqs.length}</strong>
         </div>
       </section>
 
       {rfqs.length === 0 ? (
         <div style={emptyStyle}>
-          <h2 style={{ marginTop: 0 }}>Açık nakliye talebi yok</h2>
+          <h2 style={{ marginTop: 0 }}>
+            {t("logisticsShippingPage.noOpenRequest")}
+          </h2>
           <p style={{ color: "#64748b" }}>
-            Yeni talepler yayınlandığında burada görünecek.
+            {t("logisticsShippingPage.noOpenRequestText")}
           </p>
         </div>
       ) : (
@@ -178,20 +183,27 @@ export default function ShippingPage() {
             <article key={rfq.id} style={cardStyle}>
               <div style={cardHeaderStyle}>
                 <div>
-                  <div style={smallLabelStyle}>TAŞINACAK ÜRÜN</div>
+                  <div style={smallLabelStyle}>
+                    {t("logisticsShippingPage.productToTransport")}
+                  </div>
                   <h2 style={productTitleStyle}>
-                    {rfq.order?.rfq?.product?.title || "Ürün"}
+                    {rfq.order?.rfq?.product?.title ||
+                      t("logisticsShippingPage.product")}
                   </h2>
                 </div>
 
                 <span style={statusStyle}>
-                  {rfq.status === "OPEN" ? "Teklife Açık" : rfq.status}
+                  {rfq.status === "OPEN"
+                    ? t("logisticsShippingPage.openForQuote")
+                    : rfq.status}
                 </span>
               </div>
 
               <div style={routeStyle}>
                 <div>
-                  <span style={routeLabelStyle}>Yükleme</span>
+                  <span style={routeLabelStyle}>
+                    {t("logisticsShippingPage.pickup")}
+                  </span>
                   <strong>
                     {rfq.fromCity || "-"}
                     {rfq.fromDistrict ? ` / ${rfq.fromDistrict}` : ""}
@@ -202,7 +214,9 @@ export default function ShippingPage() {
                 <span style={arrowStyle}>→</span>
 
                 <div>
-                  <span style={routeLabelStyle}>Teslimat</span>
+                  <span style={routeLabelStyle}>
+                    {t("logisticsShippingPage.delivery")}
+                  </span>
                   <strong>
                     {rfq.toCity || "-"}
                     {rfq.toDistrict ? ` / ${rfq.toDistrict}` : ""}
@@ -212,48 +226,72 @@ export default function ShippingPage() {
               </div>
 
               <div style={infoGridStyle}>
-                <Info label="Araç Tipi" value={rfq.vehicleType || "-"} />
                 <Info
-                  label="Ağırlık"
+                  label={t("logisticsShippingPage.vehicleType")}
+                  value={rfq.vehicleType || "-"}
+                />
+                <Info
+                  label={t("logisticsShippingPage.weight")}
                   value={
                     rfq.weight
-                      ? `${Number(rfq.weight).toLocaleString("tr-TR")} kg`
+                      ? `${Number(rfq.weight).toLocaleString(locale)} kg`
                       : "-"
                   }
                 />
                 <Info
-                  label="Hacim"
+                  label={t("logisticsShippingPage.volume")}
                   value={rfq.volume ? `${rfq.volume} m³` : "-"}
                 />
-                <Info label="Palet" value={rfq.palletCount ?? "-"} />
-                <Info label="Koli" value={rfq.packageCount ?? "-"} />
                 <Info
-                  label="Yükleme Tarihi"
-                  value={formatDate(rfq.loadingDate)}
+                  label={t("logisticsShippingPage.pallet")}
+                  value={rfq.palletCount ?? "-"}
                 />
                 <Info
-                  label="Teslim İsteği"
+                  label={t("logisticsShippingPage.package")}
+                  value={rfq.packageCount ?? "-"}
+                />
+                <Info
+                  label={t("logisticsShippingPage.loadingDate")}
+                  value={formatDate(rfq.loadingDate, locale)}
+                />
+                <Info
+                  label={t("logisticsShippingPage.deliveryRequest")}
                   value={
                     rfq.requestedDeliveryDate
-                      ? formatDate(rfq.requestedDeliveryDate)
-                      : deliveryText(rfq.deliveryExpectation)
+                      ? formatDate(rfq.requestedDeliveryDate, locale)
+                      : deliveryText(rfq.deliveryExpectation, t)
                   }
                 />
-                <Info label="Teklif Sayısı" value={rfq.quotes?.length || 0} />
+                <Info
+                  label={t("logisticsShippingPage.quoteCount")}
+                  value={rfq.quotes?.length || 0}
+                />
               </div>
 
               <div style={featureGridStyle}>
-                {rfq.isFragile && <Feature>📦 Kırılabilir</Feature>}
-                {rfq.isDangerous && <Feature>⚠️ Tehlikeli Madde</Feature>}
-                {rfq.coldChain && <Feature>❄️ Soğuk Zincir</Feature>}
-                {!rfq.stackable && <Feature>⬆️ Üst Üste Konulamaz</Feature>}
-                {rfq.needForklift && <Feature>🏗️ Forklift Gerekli</Feature>}
-                {rfq.needCrane && <Feature>🏗️ Vinç Gerekli</Feature>}
+                {rfq.isFragile && (
+                  <Feature>{t("logisticsShippingPage.fragile")}</Feature>
+                )}
+                {rfq.isDangerous && (
+                  <Feature>{t("logisticsShippingPage.dangerous")}</Feature>
+                )}
+                {rfq.coldChain && (
+                  <Feature>{t("logisticsShippingPage.coldChain")}</Feature>
+                )}
+                {!rfq.stackable && (
+                  <Feature>{t("logisticsShippingPage.notStackable")}</Feature>
+                )}
+                {rfq.needForklift && (
+                  <Feature>{t("logisticsShippingPage.forkliftRequired")}</Feature>
+                )}
+                {rfq.needCrane && (
+                  <Feature>{t("logisticsShippingPage.craneRequired")}</Feature>
+                )}
               </div>
 
               {rfq.note && (
                 <div style={noteStyle}>
-                  <strong>Yükleme Notu</strong>
+                  <strong>{t("logisticsShippingPage.loadingNote")}</strong>
                   <p>{rfq.note}</p>
                 </div>
               )}
@@ -266,7 +304,7 @@ export default function ShippingPage() {
                   opacity: busyId ? 0.65 : 1,
                 }}
               >
-                💰 Nakliye Teklifi Ver
+                {t("logisticsShippingPage.submitShippingQuote")}
               </button>
             </article>
           ))}
@@ -288,10 +326,12 @@ export default function ShippingPage() {
           >
             <div style={modalHeaderStyle}>
               <div>
-                <div style={modalEyebrowStyle}>NAKLİYE TEKLİFİ</div>
+                <div style={modalEyebrowStyle}>
+                  {t("logisticsShippingPage.modalEyebrow")}
+                </div>
 
                 <h2 id="shipping-quote-title" style={modalTitleStyle}>
-                  Teklifinizi Oluşturun
+                  {t("logisticsShippingPage.modalTitle")}
                 </h2>
               </div>
 
@@ -300,7 +340,7 @@ export default function ShippingPage() {
                 onClick={closeQuoteModal}
                 disabled={Boolean(busyId)}
                 style={closeButtonStyle}
-                aria-label="Teklif formunu kapat"
+                aria-label={t("logisticsShippingPage.closeForm")}
               >
                 ×
               </button>
@@ -308,7 +348,9 @@ export default function ShippingPage() {
 
             <div style={modalRouteStyle}>
               <div>
-                <span style={modalRouteLabelStyle}>Yükleme</span>
+                <span style={modalRouteLabelStyle}>
+                  {t("logisticsShippingPage.pickup")}
+                </span>
                 <strong>
                   {selectedRfq.fromCity || "-"}
                   {selectedRfq.fromDistrict
@@ -320,7 +362,9 @@ export default function ShippingPage() {
               <span style={modalArrowStyle}>→</span>
 
               <div>
-                <span style={modalRouteLabelStyle}>Teslimat</span>
+                <span style={modalRouteLabelStyle}>
+                  {t("logisticsShippingPage.delivery")}
+                </span>
                 <strong>
                   {selectedRfq.toCity || "-"}
                   {selectedRfq.toDistrict ? ` / ${selectedRfq.toDistrict}` : ""}
@@ -329,7 +373,9 @@ export default function ShippingPage() {
             </div>
 
             <label style={fieldStyle}>
-              <span style={fieldLabelStyle}>Teklif fiyatı</span>
+              <span style={fieldLabelStyle}>
+                {t("logisticsShippingPage.quotePrice")}
+              </span>
 
               <div style={moneyInputWrapStyle}>
                 <input
@@ -339,7 +385,7 @@ export default function ShippingPage() {
                   inputMode="decimal"
                   value={quotePrice}
                   onChange={(event) => setQuotePrice(event.target.value)}
-                  placeholder="Örnek: 12500"
+                  placeholder={t("logisticsShippingPage.pricePlaceholder")}
                   style={moneyInputStyle}
                   autoFocus
                 />
@@ -349,7 +395,9 @@ export default function ShippingPage() {
             </label>
 
             <label style={fieldStyle}>
-              <span style={fieldLabelStyle}>Tahmini teslim süresi</span>
+              <span style={fieldLabelStyle}>
+                {t("logisticsShippingPage.estimatedDelivery")}
+              </span>
 
               <div style={moneyInputWrapStyle}>
                 <input
@@ -359,21 +407,25 @@ export default function ShippingPage() {
                   inputMode="numeric"
                   value={deliveryDays}
                   onChange={(event) => setDeliveryDays(event.target.value)}
-                  placeholder="Örnek: 2"
+                  placeholder={t("logisticsShippingPage.daysPlaceholder")}
                   style={moneyInputStyle}
                 />
 
-                <span style={currencyStyle}>Gün</span>
+                <span style={currencyStyle}>
+                  {t("logisticsShippingPage.day")}
+                </span>
               </div>
             </label>
 
             <label style={fieldStyle}>
-              <span style={fieldLabelStyle}>Teklif notu</span>
+              <span style={fieldLabelStyle}>
+                {t("logisticsShippingPage.quoteNote")}
+              </span>
 
               <textarea
                 value={quoteNote}
                 onChange={(event) => setQuoteNote(event.target.value)}
-                placeholder="Araç, yükleme saati veya taşıma koşullarıyla ilgili not ekleyin."
+                placeholder={t("logisticsShippingPage.notePlaceholder")}
                 maxLength={500}
                 style={textareaStyle}
               />
@@ -390,7 +442,7 @@ export default function ShippingPage() {
                 disabled={Boolean(busyId)}
                 style={cancelButtonStyle}
               >
-                Vazgeç
+                {t("logisticsShippingPage.cancel")}
               </button>
 
               <button
@@ -402,7 +454,9 @@ export default function ShippingPage() {
                   opacity: busyId ? 0.65 : 1,
                 }}
               >
-                {busyId ? "Gönderiliyor..." : "Teklifi Gönder"}
+                {busyId
+                  ? t("logisticsShippingPage.sending")
+                  : t("logisticsShippingPage.submitQuote")}
               </button>
             </div>
           </section>

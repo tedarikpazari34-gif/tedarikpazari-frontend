@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
 
@@ -45,26 +46,26 @@ function decodeCategory(value: string) {
   }
 }
 
-function getTitle(product: Product) {
-  return product.title || product.name || "Ürün";
+function getTitle(product: Product, t: any) {
+  return product.title || product.name || t("categoryPage.product");
 }
 
-function getCategory(product: Product) {
-  return product.category?.name || product.categoryName || "Kategori";
+function getCategory(product: Product, t: any) {
+  return product.category?.name || product.categoryName || t("categoryPage.category");
 }
 
-function getPrice(product: Product) {
+function getPrice(product: Product, t: any, locale: string) {
   const value = product.price ?? product.basePrice;
 
   if (value === undefined || value === null || value === "") {
-    return "Teklif Al";
+    return t("categoryPage.getQuote");
   }
 
   const numeric = Number(value);
 
   if (Number.isNaN(numeric)) return String(value);
 
-  return `${numeric.toLocaleString("tr-TR")} ₺`;
+  return `${numeric.toLocaleString(locale)} ₺`;
 }
 
 function resolveImage(product: Product) {
@@ -101,7 +102,29 @@ function resolveImage(product: Product) {
   return "";
 }
 
+function unitLabel(value: string | undefined, t: any) {
+  if (!value) return "";
+
+  const labels: Record<string, string> = {
+    "Adet": t("categoryPage.piece"),
+    "adet": t("categoryPage.piece"),
+    "Koli": t("categoryPage.box"),
+    "Paket": t("categoryPage.package"),
+    "Kilogram": t("categoryPage.kilogram"),
+    "Kg": t("categoryPage.kilogram"),
+    "Ton": t("categoryPage.ton"),
+    "Litre": t("categoryPage.litre"),
+    "Metre": t("categoryPage.meter"),
+    "Palet": t("categoryPage.pallet"),
+  };
+
+  return labels[value] || value;
+}
+
 export default function CategoryPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const navigate = useNavigate();
   const params = useParams();
   const rawCategoryId = params.id || "";
@@ -158,7 +181,7 @@ export default function CategoryPage() {
           setProducts(safeProducts);
         } else {
           const filteredByName = safeProducts.filter((product: Product) => {
-            const text = `${getTitle(product)} ${getCategory(product)}`.toLowerCase();
+            const text = `${getTitle(product, t)} ${getCategory(product, t)}`.toLowerCase();
             return text.includes(categoryKey.toLowerCase());
           });
 
@@ -184,33 +207,35 @@ export default function CategoryPage() {
     if (!keyword) return products;
 
     return products.filter((product) => {
-      const text = `${getTitle(product)} ${getCategory(product)} ${
+      const text = `${getTitle(product, t)} ${getCategory(product, t)} ${
         product.description || ""
       }`.toLowerCase();
 
       return text.includes(keyword);
     });
-  }, [products, search]);
+  }, [products, search, t]);
 
-  const categoryTitle = currentCategory?.name || categoryKey || "Kategori";
+  const categoryTitle =
+    currentCategory?.name || categoryKey || t("categoryPage.category");
 
   return (
     <main style={pageStyle}>
       <section style={heroStyle}>
-        <div style={eyebrowStyle}>KATEGORİ</div>
+        <div style={eyebrowStyle}>{t("categoryPage.eyebrow")}</div>
 
         <h1 style={titleStyle}>{categoryTitle}</h1>
 
         <p style={descStyle}>
-          Bu kategorideki tedarik ürünlerini inceleyin, ürün detaylarına bakın ve
-          hızlıca teklif talebi oluşturun.
+          {t("categoryPage.description")}
         </p>
 
         <div style={searchBoxStyle}>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={`${categoryTitle} içinde ara...`}
+            placeholder={t("categoryPage.searchPlaceholder", {
+              category: categoryTitle,
+            })}
             style={searchInputStyle}
           />
 
@@ -223,7 +248,7 @@ export default function CategoryPage() {
             }}
             style={searchButtonStyle}
           >
-            Genel Ara
+            {t("categoryPage.globalSearch")}
           </button>
         </div>
       </section>
@@ -231,7 +256,7 @@ export default function CategoryPage() {
       {childCategories.length > 0 && (
         <section style={sectionStyle}>
           <div style={sectionHeaderStyle}>
-            <h2 style={sectionTitleStyle}>Alt Kategoriler</h2>
+            <h2 style={sectionTitleStyle}>{t("categoryPage.subcategories")}</h2>
           </div>
 
           <div style={categoryGridStyle}>
@@ -239,7 +264,7 @@ export default function CategoryPage() {
               <Link key={child.id} to={`/category/${child.id}`} style={categoryCardStyle}>
                 <div style={categoryIconStyle}>{child.name.charAt(0)}</div>
                 <strong>{child.name}</strong>
-                <span style={mutedTextStyle}>Ürünleri görüntüle</span>
+                <span style={mutedTextStyle}>{t("categoryPage.viewProducts")}</span>
               </Link>
             ))}
           </div>
@@ -248,33 +273,35 @@ export default function CategoryPage() {
 
       <section style={toolbarStyle}>
         <div>
-          <strong>Ürünler</strong>
-          <span style={countTextStyle}> {shownProducts.length} ürün</span>
+          <strong>{t("categoryPage.products")}</strong>
+          <span style={countTextStyle}>
+            {" "}
+            {t("categoryPage.productCount", { count: shownProducts.length })}
+          </span>
         </div>
 
         <Link
           to={`/buyer/rfqs/new?category=${encodeURIComponent(categoryTitle)}`}
           style={rfqButtonStyle}
         >
-          Bu kategori için teklif iste
+          {t("categoryPage.requestCategoryQuote")}
         </Link>
       </section>
 
       {loading ? (
-        <div style={emptyStyle}>Yükleniyor...</div>
+        <div style={emptyStyle}>{t("categoryPage.loading")}</div>
       ) : shownProducts.length === 0 ? (
         <div style={emptyCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Bu kategoride ürün bulunamadı</h2>
+          <h2 style={{ marginTop: 0 }}>{t("categoryPage.emptyTitle")}</h2>
           <p style={{ color: "#64748b", lineHeight: 1.7 }}>
-            Bu kategoride henüz onaylı ürün bulunmuyor. İsterseniz doğrudan
-            teklif talebi oluşturarak tedarikçilerden fiyat alabilirsiniz.
+            {t("categoryPage.emptyText")}
           </p>
 
           <Link
             to={`/buyer/rfqs/new?category=${encodeURIComponent(categoryTitle)}`}
             style={quoteButtonStyle}
           >
-            Teklif Talebi Oluştur
+            {t("categoryPage.createQuoteRequest")}
           </Link>
         </div>
       ) : (
@@ -286,45 +313,58 @@ export default function CategoryPage() {
               <article key={product.id} style={cardStyle}>
                 <Link to={`/product/${product.id}`} style={imageBoxStyle}>
                   {image ? (
-                    <img src={image} alt={getTitle(product)} style={imageStyle} />
+                    <img
+                      src={image}
+                      alt={getTitle(product, t)}
+                      style={imageStyle}
+                    />
                   ) : (
                     <div style={placeholderStyle}>
                       <span style={{ fontSize: 42 }}>📦</span>
-                      <span>Ürün görseli yok</span>
+                      <span>{t("categoryPage.noImage")}</span>
                     </div>
                   )}
                 </Link>
 
                 <div style={cardBodyStyle}>
-                  <div style={categoryLabelStyle}>{getCategory(product)}</div>
+                  <div style={categoryLabelStyle}>
+                    {getCategory(product, t)}
+                  </div>
 
-                  <h3 style={productTitleStyle}>{getTitle(product)}</h3>
+                  <h3 style={productTitleStyle}>
+                    {getTitle(product, t)}
+                  </h3>
 
                   <p style={productDescStyle}>
-                    {product.description || "Toptan alım için uygun ürün."}
+                    {product.description || t("categoryPage.wholesaleSuitable")}
                   </p>
 
                   <div style={priceRowStyle}>
-                    <strong style={priceStyle}>{getPrice(product)}</strong>
+                    <strong style={priceStyle}>
+                      {getPrice(product, t, locale)}
+                    </strong>
                     <span style={moqStyle}>
-                      MOQ: {product.moq || "-"} {product.unitType || ""}
+                      {t("categoryPage.minimumShort")}: {product.moq || "-"}{" "}
+                      {unitLabel(product.unitType, t)}
                     </span>
                   </div>
 
-                  <div style={supplierBadgeStyle}>✔ Doğrulanmış Firma</div>
+                  <div style={supplierBadgeStyle}>
+                    {t("categoryPage.verifiedCompany")}
+                  </div>
 
                   <div style={actionsStyle}>
                     <Link to={`/product/${product.id}`} style={detailButtonStyle}>
-                      İncele
+                      {t("categoryPage.view")}
                     </Link>
 
                     <Link
                       to={`/buyer/rfqs/new?productId=${product.id}&product=${encodeURIComponent(
-                        getTitle(product)
+                        getTitle(product, t)
                       )}`}
                       style={quoteButtonStyle}
                     >
-                      Teklif Al
+                      {t("categoryPage.getQuote")}
                     </Link>
                   </div>
                 </div>

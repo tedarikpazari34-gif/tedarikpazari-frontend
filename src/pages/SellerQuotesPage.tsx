@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type Quote = {
   id: string;
@@ -24,22 +25,48 @@ type Quote = {
 
 const API = "https://tedarik-backend.onrender.com/api";
 
-function formatPrice(value: string | number) {
+function formatPrice(value: string | number, locale: string) {
   const numeric = Number(value);
 
   if (Number.isNaN(numeric)) {
     return String(value);
   }
 
-  return `${numeric.toLocaleString("tr-TR")} ₺`;
+  return `${numeric.toLocaleString(locale)} ₺`;
 }
 
-function statusLabel(status: string) {
-  if (status === "SENT") return "Bekliyor";
-  if (status === "ACCEPTED") return "Kabul edildi";
-  if (status === "REJECTED") return "Reddedildi";
+function statusLabel(status: string, t: any) {
+  if (status === "SENT") return t("sellerQuotesPage.pending");
+  if (status === "ACCEPTED") return t("sellerQuotesPage.accepted");
+  if (status === "REJECTED") return t("sellerQuotesPage.rejected");
 
   return status || "-";
+}
+
+function unitLabel(value: string | undefined, t: any) {
+  if (!value) return "";
+
+  const labels: Record<string, string> = {
+    "Adet": t("sellerQuotesPage.piece"),
+    "adet": t("sellerQuotesPage.piece"),
+    "Koli": t("sellerQuotesPage.box"),
+    "koli": t("sellerQuotesPage.box"),
+    "Paket": t("sellerQuotesPage.package"),
+    "paket": t("sellerQuotesPage.package"),
+    "Kilogram": t("sellerQuotesPage.kilogram"),
+    "kg": t("sellerQuotesPage.kilogramShort"),
+    "Kg": t("sellerQuotesPage.kilogramShort"),
+    "Litre": t("sellerQuotesPage.litre"),
+    "litre": t("sellerQuotesPage.litre"),
+    "Metre": t("sellerQuotesPage.meter"),
+    "metre": t("sellerQuotesPage.meter"),
+    "Ton": t("sellerQuotesPage.ton"),
+    "ton": t("sellerQuotesPage.ton"),
+    "Palet": t("sellerQuotesPage.pallet"),
+    "palet": t("sellerQuotesPage.pallet"),
+  };
+
+  return labels[value] || value;
 }
 
 function statusStyle(status: string): CSSProperties {
@@ -64,6 +91,9 @@ function statusStyle(status: string): CSSProperties {
 }
 
 export default function SellerQuotesPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
   );
@@ -86,7 +116,7 @@ export default function SellerQuotesPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Tekliflerinizi görmek için giriş yapın.");
+        setError(t("sellerQuotesPage.loginRequired"));
         return;
       }
 
@@ -99,14 +129,14 @@ export default function SellerQuotesPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "Teklifler alınamadı");
+        setError(data?.message || t("sellerQuotesPage.loadFailed"));
         return;
       }
 
       setQuotes(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      setError("Teklifler alınamadı");
+      setError(t("sellerQuotesPage.loadFailed"));
       setQuotes([]);
     } finally {
       setLoading(false);
@@ -121,7 +151,7 @@ export default function SellerQuotesPage() {
     return (
       <main style={pageStyle}>
         <div style={emptyCardStyle}>
-          Teklifler yükleniyor...
+          {t("sellerQuotesPage.loading")}
         </div>
       </main>
     );
@@ -138,13 +168,12 @@ export default function SellerQuotesPage() {
         }}
       >
         <div>
-          <div style={eyebrowStyle}>SATICI PANELİ</div>
+          <div style={eyebrowStyle}>{t("sellerQuotesPage.eyebrow")}</div>
 
-          <h1 style={titleStyle}>Tekliflerim</h1>
+          <h1 style={titleStyle}>{t("sellerQuotesPage.title")}</h1>
 
           <p style={descStyle}>
-            Gönderdiğiniz teklifleri, durumlarını ve satışa dönüşen
-            fırsatları tek ekrandan takip edin.
+            {t("sellerQuotesPage.description")}
           </p>
         </div>
 
@@ -158,25 +187,25 @@ export default function SellerQuotesPage() {
             marginTop: isMobile ? 16 : 0,
           }}
         >
-          Yeni RFQ Bul
+          {t("sellerQuotesPage.findRfq")}
         </Link>
       </section>
 
       <section style={statsStyle}>
         <Stat
-          label="Toplam Teklif"
+          label={t("sellerQuotesPage.totalQuotes")}
           value={quotes.length}
         />
 
         <Stat
-          label="Bekleyen"
+          label={t("sellerQuotesPage.pendingQuotes")}
           value={
             quotes.filter((q) => q.status === "SENT").length
           }
         />
 
         <Stat
-          label="Kabul Edilen"
+          label={t("sellerQuotesPage.acceptedQuotes")}
           value={
             quotes.filter((q) => q.status === "ACCEPTED").length
           }
@@ -190,19 +219,18 @@ export default function SellerQuotesPage() {
       ) : quotes.length === 0 ? (
         <div style={emptyCardStyle}>
           <h2 style={{ marginTop: 0 }}>
-            Henüz teklif yok
+            {t("sellerQuotesPage.emptyTitle")}
           </h2>
 
           <p style={{ color: "#64748b", lineHeight: 1.7 }}>
-            Açık RFQ taleplerine teklif vererek satış
-            fırsatlarını değerlendirebilirsiniz.
+            {t("sellerQuotesPage.emptyText")}
           </p>
 
           <Link
             to="/seller/rfqs"
             style={primaryButtonStyle}
           >
-            RFQ Taleplerini Gör
+            {t("sellerQuotesPage.viewRfqs")}
           </Link>
         </div>
       ) : (
@@ -212,11 +240,13 @@ export default function SellerQuotesPage() {
               <div style={cardTopStyle}>
                 <div>
                   <div style={smallLabelStyle}>
-                    Teklif Verilen Talep
+                    {t("sellerQuotesPage.requestLabel")}
                   </div>
 
                   <h2 style={cardTitleStyle}>
-                    {q.rfq?.product?.title || q.rfq?.title || "Alım Talebi"}
+                    {q.rfq?.product?.title ||
+                      q.rfq?.title ||
+                      t("sellerQuotesPage.buyingRequest")}
                   </h2>
                 </div>
 
@@ -226,61 +256,63 @@ export default function SellerQuotesPage() {
                     ...statusStyle(q.status),
                   }}
                 >
-                  {statusLabel(q.status)}
+                  {statusLabel(q.status, t)}
                 </span>
               </div>
 
               <div style={infoGridStyle}>
                 <Info
-                  label="Buyer"
+                  label={t("sellerQuotesPage.buyer")}
                   value={q.rfq?.buyer?.name || "-"}
                 />
 
                 <Info
-                  label="Miktar"
+                  label={t("sellerQuotesPage.quantity")}
                   value={`${q.rfq?.quantity || "-"} ${
-                    q.rfq?.product?.unitType || ""
+                    unitLabel(q.rfq?.product?.unitType, t)
                   }`}
                 />
 
                 <Info
-                  label="Fiyat"
-                  value={formatPrice(q.unitPrice)}
+                  label={t("sellerQuotesPage.price")}
+                  value={formatPrice(q.unitPrice, locale)}
                 />
 
                 <Info
-                  label="Teslim"
+                  label={t("sellerQuotesPage.delivery")}
                   value={
                     q.deliveryDays
-                      ? `${q.deliveryDays} gün`
+                      ? t("sellerQuotesPage.dayCount", {
+                          count: q.deliveryDays,
+                        })
                       : "-"
                   }
                 />
               </div>
 
               <div style={noteBoxStyle}>
-                <strong>Teklif Notu</strong>
+                <strong>{t("sellerQuotesPage.quoteNote")}</strong>
 
                 <p>
-                  {q.sellerNote || "Not eklenmemiş."}
+                  {q.sellerNote || t("sellerQuotesPage.noNote")}
                 </p>
               </div>
 
               {q.status === "ACCEPTED" && (
                 <div style={acceptedBoxStyle}>
-                  ✅ Satışa dönüştü
+                  {t("sellerQuotesPage.convertedToSale")}
                 </div>
               )}
 
               {q.status === "REJECTED" && (
                 <div style={rejectedBoxStyle}>
-                  ❌ Teklif reddedildi
+                  {t("sellerQuotesPage.quoteRejected")}
                 </div>
               )}
 
               {q.status === "SENT" && (
                 <div style={pendingBoxStyle}>
-                  ⏳ Buyer yanıtı bekleniyor
+                  {t("sellerQuotesPage.waitingBuyer")}
                 </div>
               )}
             </article>

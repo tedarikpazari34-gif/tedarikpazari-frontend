@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type ProductImage = {
   id?: string;
@@ -72,7 +73,43 @@ function readIds() {
   }
 }
 
+function unitLabel(value: string | undefined, t: any) {
+  if (!value) return "";
+
+  const labels: Record<string, string> = {
+    "Adet": t("compareProductsPage.piece"),
+    "Koli": t("compareProductsPage.box"),
+    "Paket": t("compareProductsPage.package"),
+    "Kilogram": t("compareProductsPage.kilogram"),
+    "Kg": t("compareProductsPage.kilogram"),
+    "Ton": t("compareProductsPage.ton"),
+    "Litre": t("compareProductsPage.litre"),
+    "Metre": t("compareProductsPage.meter"),
+    "Palet": t("compareProductsPage.pallet"),
+  };
+
+  return labels[value] || value;
+}
+
+function stockTypeLabel(value: string | null | undefined, t: any) {
+  if (!value) return t("compareProductsPage.notSpecified");
+
+  const labels: Record<string, string> = {
+    "Stoktan": t("compareProductsPage.inStock"),
+    "STOKTAN": t("compareProductsPage.inStock"),
+    "Üretim": t("compareProductsPage.production"),
+    "URETIM": t("compareProductsPage.production"),
+    "Sipariş Üzerine": t("compareProductsPage.madeToOrder"),
+    "SIPARIS_UZERINE": t("compareProductsPage.madeToOrder"),
+  };
+
+  return labels[value] || value;
+}
+
 export default function CompareProductsPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -105,7 +142,7 @@ export default function CompareProductsPage() {
       );
     } catch (err) {
       console.error("COMPARE LOAD ERROR:", err);
-      setError("Karşılaştırılacak ürünler yüklenemedi.");
+      setError(t("compareProductsPage.loadError"));
     } finally {
       setLoading(false);
     }
@@ -135,7 +172,7 @@ export default function CompareProductsPage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <div style={stateCardStyle}>Ürünler karşılaştırma için yükleniyor...</div>
+        <div style={stateCardStyle}>{t("compareProductsPage.loading")}</div>
       </main>
     );
   }
@@ -144,17 +181,16 @@ export default function CompareProductsPage() {
     <main style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <div style={eyebrowStyle}>ÜRÜN KARŞILAŞTIRMA</div>
-          <h1 style={titleStyle}>Ürünleri yan yana karşılaştırın</h1>
+          <div style={eyebrowStyle}>{t("compareProductsPage.eyebrow")}</div>
+          <h1 style={titleStyle}>{t("compareProductsPage.title")}</h1>
           <p style={descriptionStyle}>
-            Fiyat, minimum sipariş, teslim süresi ve tedarikçi bilgilerini
-            aynı ekranda değerlendirin.
+            {t("compareProductsPage.description")}
           </p>
         </div>
 
         {products.length > 0 && (
           <button type="button" onClick={clearAll} style={clearButtonStyle}>
-            Tümünü Temizle
+            {t("compareProductsPage.clearAll")}
           </button>
         )}
       </section>
@@ -164,12 +200,12 @@ export default function CompareProductsPage() {
       ) : products.length === 0 ? (
         <div style={stateCardStyle}>
           <div style={{ fontSize: 48 }}>⚖️</div>
-          <h2>Karşılaştırma listeniz boş</h2>
+          <h2>{t("compareProductsPage.emptyTitle")}</h2>
           <p style={{ color: "#64748b" }}>
-            Ürünler sayfasından en fazla dört ürünü karşılaştırmaya ekleyin.
+            {t("compareProductsPage.emptyText")}
           </p>
           <Link to="/products" style={primaryLinkStyle}>
-            Ürünleri İncele
+            {t("compareProductsPage.browseProducts")}
           </Link>
         </div>
       ) : (
@@ -180,7 +216,7 @@ export default function CompareProductsPage() {
               gridTemplateColumns: `190px repeat(${products.length}, minmax(230px, 1fr))`,
             }}
           >
-            <div style={labelHeaderStyle}>Ürün</div>
+            <div style={labelHeaderStyle}>{t("compareProductsPage.product")}</div>
 
             {products.map((product) => {
               const image = getImage(product);
@@ -191,7 +227,7 @@ export default function CompareProductsPage() {
                     type="button"
                     onClick={() => removeProduct(product.id)}
                     style={removeButtonStyle}
-                    aria-label="Karşılaştırmadan çıkar"
+                    aria-label={t("compareProductsPage.remove")}
                   >
                     ✕
                   </button>
@@ -214,86 +250,93 @@ export default function CompareProductsPage() {
             })}
 
             <CompareRow
-              label="Fiyat"
+              label={t("compareProductsPage.price")}
               values={products.map(
                 (product) =>
-                  `${Number(product.basePrice || 0).toLocaleString("tr-TR")} ₺`
+                  `${Number(product.basePrice || 0).toLocaleString(locale)} ₺`
               )}
             />
 
             <CompareRow
-              label="Birim"
-              values={products.map((product) => product.unitType || "-")}
-            />
-
-            <CompareRow
-              label="Minimum sipariş"
-              values={products.map(
-                (product) =>
-                  `${product.moq || 1} ${product.unitType || "adet"}`
+              label={t("compareProductsPage.unit")}
+              values={products.map((product) =>
+                product.unitType ? unitLabel(product.unitType, t) : "-"
               )}
             />
 
             <CompareRow
-              label="Teslim süresi"
+              label={t("compareProductsPage.minimumOrder")}
+              values={products.map(
+                (product) =>
+                  `${product.moq || 1} ${unitLabel(product.unitType || "Adet", t)}`
+              )}
+            />
+
+            <CompareRow
+              label={t("compareProductsPage.deliveryTime")}
               values={products.map((product) =>
                 product.leadTimeDays
-                  ? `${product.leadTimeDays} gün`
-                  : "Belirtilmedi"
+                  ? t("compareProductsPage.days", {
+                      count: product.leadTimeDays,
+                    })
+                  : t("compareProductsPage.notSpecified")
               )}
             />
 
             <CompareRow
-              label="Stok tipi"
-              values={products.map(
-                (product) => product.stockType || "Belirtilmedi"
+              label={t("compareProductsPage.stockType")}
+              values={products.map((product) =>
+                stockTypeLabel(product.stockType, t)
               )}
             />
 
             <CompareRow
-              label="KDV"
+              label={t("compareProductsPage.vat")}
               values={products.map((product) =>
                 product.vatRate !== null &&
                 product.vatRate !== undefined
                   ? `%${product.vatRate}`
-                  : "Belirtilmedi"
+                  : t("compareProductsPage.notSpecified")
               )}
             />
 
             <CompareRow
               label="RFQ"
               values={products.map((product) =>
-                product.rfqEnabled ? "✓ Teklif alınabilir" : "Kapalı"
+                product.rfqEnabled
+                  ? t("compareProductsPage.quoteAvailable")
+                  : t("compareProductsPage.closed")
               )}
             />
 
             <CompareRow
-              label="Tedarikçi"
+              label={t("compareProductsPage.supplier")}
               values={products.map(
-                (product) => product.seller?.name || "Tedarikçi"
+                (product) =>
+                  product.seller?.name || t("compareProductsPage.supplier")
               )}
             />
 
             <CompareRow
-              label="Firma doğrulaması"
+              label={t("compareProductsPage.companyVerification")}
               values={products.map((product) =>
                 product.seller?.verified
-                  ? "✓ Onaylı tedarikçi"
-                  : "Standart tedarikçi"
+                  ? t("compareProductsPage.verifiedSupplier")
+                  : t("compareProductsPage.standardSupplier")
               )}
             />
 
             <CompareRow
-              label="Satıcı puanı"
+              label={t("compareProductsPage.sellerRating")}
               values={products.map((product) =>
                 Number(product.seller?.rating || 0) > 0
                   ? `⭐ ${Number(product.seller?.rating).toFixed(1)}`
-                  : "Yeni"
+                  : t("compareProductsPage.newSeller")
               )}
             />
 
             <CompareRow
-              label="Konum"
+              label={t("compareProductsPage.location")}
               values={products.map((product) =>
                 [
                   product.seller?.city,
@@ -304,7 +347,7 @@ export default function CompareProductsPage() {
               )}
             />
 
-            <div style={rowLabelStyle}>İşlem</div>
+            <div style={rowLabelStyle}>{t("compareProductsPage.action")}</div>
 
             {products.map((product) => (
               <div key={`action-${product.id}`} style={cellStyle}>
@@ -314,7 +357,7 @@ export default function CompareProductsPage() {
                   )}`}
                   style={quoteButtonStyle}
                 >
-                  Teklif İste
+                  {t("compareProductsPage.requestQuote")}
                 </Link>
               </div>
             ))}
