@@ -11,6 +11,40 @@ const API =
 
 type MembershipType = "BUYER" | "SELLER" | "LOGISTICS";
 
+const COUNTRIES = [
+  "Türkiye",
+  "United States",
+  "United Kingdom",
+  "Germany",
+  "France",
+  "Italy",
+  "Spain",
+  "Netherlands",
+  "Belgium",
+  "Switzerland",
+  "Austria",
+  "Poland",
+  "Romania",
+  "Bulgaria",
+  "Greece",
+  "Georgia",
+  "Azerbaijan",
+  "United Arab Emirates",
+  "Saudi Arabia",
+  "Qatar",
+  "Kuwait",
+  "Iraq",
+  "Egypt",
+  "Morocco",
+  "China",
+  "India",
+  "Pakistan",
+  "South Korea",
+  "Japan",
+  "Canada",
+  "Australia",
+];
+
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -23,6 +57,7 @@ export default function RegisterPage() {
     useState<MembershipType>("BUYER");
   const [companyType, setCompanyType] = useState("Şahıs");
   const [categories, setCategories] = useState<string[]>([]);
+  const [country, setCountry] = useState("Türkiye");
   const [city, setCity] = useState("");
   const [district, setDistrict] = useState("");
   const [taxNumber, setTaxNumber] = useState("");
@@ -41,6 +76,7 @@ export default function RegisterPage() {
       !phone.trim() ||
       !email.trim() ||
       !password.trim() ||
+      !country.trim() ||
       categories.length === 0
     ) {
       setError(
@@ -49,11 +85,26 @@ export default function RegisterPage() {
       return;
     }
 
-    const normalizedPhone = phone.replace(/\D/g, "");
+    const rawPhone = phone.trim();
+    const phoneDigits = rawPhone.replace(/\D/g, "");
+    let normalizedPhone = rawPhone;
 
-    if (!/^05\d{9}$/.test(normalizedPhone)) {
-      setError(t("registerPage.invalidPhone"));
-      return;
+    if (country === "Türkiye") {
+      if (!/^05\d{9}$/.test(phoneDigits) && !/^905\d{9}$/.test(phoneDigits)) {
+        setError(t("registerPage.invalidPhoneTurkey"));
+        return;
+      }
+
+      normalizedPhone = phoneDigits.startsWith("90")
+        ? `+${phoneDigits}`
+        : `+90${phoneDigits.slice(1)}`;
+    } else {
+      if (!rawPhone.startsWith("+") || !/^\d{7,15}$/.test(phoneDigits)) {
+        setError(t("registerPage.invalidPhoneInternational"));
+        return;
+      }
+
+      normalizedPhone = `+${phoneDigits}`;
     }
 
     if (!recaptchaToken) {
@@ -75,6 +126,7 @@ export default function RegisterPage() {
         phone: normalizedPhone,
         companyType,
         categories,
+        country,
         city,
         district,
         taxNumber,
@@ -152,12 +204,20 @@ export default function RegisterPage() {
               <label style={labelStyle}>{t("registerPage.phone")}</label>
               <input
                 style={inputStyle}
-                placeholder="05XXXXXXXXX"
+                placeholder={
+                  country === "Türkiye"
+                    ? t("registerPage.phonePlaceholderTurkey")
+                    : t("registerPage.phonePlaceholderInternational")
+                }
                 value={phone}
-                inputMode="numeric"
-                maxLength={11}
+                inputMode="tel"
+                maxLength={20}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "").slice(0, 11);
+                  const value =
+                    country === "Türkiye"
+                      ? e.target.value.replace(/[^+0-9]/g, "").slice(0, 13)
+                      : e.target.value.replace(/[^+0-9()\s-]/g, "").slice(0, 20);
+
                   setPhone(value);
                 }}
                 required
@@ -265,20 +325,49 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>{t("registerPage.city")}</label>
+              <label style={labelStyle}>{t("registerPage.country")}</label>
               <select
                 style={inputStyle}
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
+                value={country}
+                onChange={(e) => {
+                  setCountry(e.target.value);
+                  setCity("");
+                }}
               >
-                <option value="">{t("registerPage.selectCity")}</option>
-
-                {TURKEY_CITIES.map((cityName) => (
-                  <option key={cityName} value={cityName}>
-                    {cityName}
+                <option value="">{t("registerPage.selectCountry")}</option>
+                {COUNTRIES.map((countryName) => (
+                  <option key={countryName} value={countryName}>
+                    {countryName}
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label style={labelStyle}>{t("registerPage.city")}</label>
+
+              {country === "Türkiye" ? (
+                <select
+                  style={inputStyle}
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                >
+                  <option value="">{t("registerPage.selectCity")}</option>
+
+                  {TURKEY_CITIES.map((cityName) => (
+                    <option key={cityName} value={cityName}>
+                      {cityName}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  style={inputStyle}
+                  placeholder={t("registerPage.cityPlaceholder")}
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+              )}
             </div>
 
             <div>
