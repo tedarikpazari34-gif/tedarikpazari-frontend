@@ -257,9 +257,37 @@ export default function RegisterPage() {
                 value={companyType}
                 onChange={(e) => setCompanyType(e.target.value)}
               >
-                <option value="Şahıs">{t("registerPage.soleProprietorship")}</option>
-                <option value="Limited">{t("registerPage.limited")}</option>
-                <option value="Anonim">{t("registerPage.jointStock")}</option>
+                {country === "Türkiye" ? (
+                  <>
+                    <option value="Şahıs">
+                      {t("registerPage.soleProprietorship")}
+                    </option>
+                    <option value="Limited">
+                      {t("registerPage.limited")}
+                    </option>
+                    <option value="Anonim">
+                      {t("registerPage.jointStock")}
+                    </option>
+                  </>
+                ) : (
+                  <>
+                    <option value="Sole Proprietorship">
+                      {t("registerPage.soleProprietorship")}
+                    </option>
+                    <option value="Limited Liability Company">
+                      {t("registerPage.limitedLiabilityCompany")}
+                    </option>
+                    <option value="Corporation">
+                      {t("registerPage.corporation")}
+                    </option>
+                    <option value="Partnership">
+                      {t("registerPage.partnership")}
+                    </option>
+                    <option value="Other">
+                      {t("registerPage.otherCompanyType")}
+                    </option>
+                  </>
+                )}
               </select>
             </div>
 
@@ -381,17 +409,29 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>{t("registerPage.taxNumber")}</label>
+              <label style={labelStyle}>
+                {country === "Türkiye"
+                  ? t("registerPage.taxNumber")
+                  : t("registerPage.internationalTaxNumber")}
+              </label>
               <input
                 style={inputStyle}
-                placeholder="1234567890"
+                placeholder={
+                  country === "Türkiye"
+                    ? "1234567890"
+                    : t("registerPage.internationalTaxNumberPlaceholder")
+                }
                 value={taxNumber}
                 onChange={(e) => setTaxNumber(e.target.value)}
               />
             </div>
 
             <div>
-              <label style={labelStyle}>{t("registerPage.taxOffice")}</label>
+              <label style={labelStyle}>
+                {country === "Türkiye"
+                  ? t("registerPage.taxOffice")
+                  : t("registerPage.internationalTaxOffice")}
+              </label>
               <input
                 style={inputStyle}
                 placeholder={t("registerPage.taxOfficePlaceholder")}
