@@ -210,6 +210,16 @@ export default function CreateQuotePage() {
         {error && <div style={errorStyle}>{error}</div>}
         {success && <div style={successStyle}>{success}</div>}
 
+        {rfqData && (
+          <div style={summaryBoxStyle}>
+            <strong>{t("sellerQuoteCreatePage.requestSummary")}</strong>
+            <span>
+              {t("sellerQuoteCreatePage.deliveryLocation")}: {rfqData.deliveryCountry || "-"}
+              {rfqData.deliveryCity ? ` / ${rfqData.deliveryCity}` : ""}
+            </span>
+          </div>
+        )}
+
         <label style={fieldStyle}>
           <span style={labelStyle}>{t("sellerQuoteCreatePage.rfqId")}</span>
           <input
