@@ -11,6 +11,9 @@ type Quote = {
 type RFQ = {
   id: string;
   quantity: number;
+  unitType?: string | null;
+  deliveryCountry?: string | null;
+  deliveryCity?: string | null;
   note?: string | null;
   status: string;
   product?: {
@@ -157,7 +160,18 @@ export default function SellerRfqsPage() {
 
               <div style={infoGridStyle}>
                 <Info label={t("sellerRfqsPage.buyer")} value={rfq.buyer?.name || "-"} />
-                <Info label={t("sellerRfqsPage.quantity")} value={rfq.quantity || "-"} />
+                <Info
+                  label={t("sellerRfqsPage.quantity")}
+                  value={rfq.quantity ? `${rfq.quantity} ${rfq.unitType || ""}`.trim() : "-"}
+                />
+                <Info
+                  label={t("sellerRfqsPage.delivery")}
+                  value={
+                    rfq.deliveryCountry || rfq.deliveryCity
+                      ? [rfq.deliveryCountry, rfq.deliveryCity].filter(Boolean).join(" / ")
+                      : "-"
+                  }
+                />
                 <Info label={t("sellerRfqsPage.existingQuotes")} value={rfq.quotes?.length || 0} />
                 <Info label={t("sellerRfqsPage.status")} value={statusLabel(rfq.status, t)} />
               </div>
