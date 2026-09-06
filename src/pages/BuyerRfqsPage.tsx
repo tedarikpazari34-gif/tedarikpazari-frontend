@@ -7,6 +7,8 @@ type RFQ = {
   quantity: number;
   title?: string | null;
   unitType?: string | null;
+  deliveryCountry?: string | null;
+  deliveryCity?: string | null;
   note?: string | null;
   status: string;
   createdAt?: string;
@@ -203,6 +205,14 @@ export default function BuyerRfqsPage() {
 
               <div style={infoGrid}>
                 <Info label={t("buyerRfqsPage.quantity")} value={rfq.quantity ? `${rfq.quantity} ${rfq.unitType || ""}`.trim() : "-"} />
+                <Info
+                  label={t("buyerRfqsPage.delivery")}
+                  value={
+                    rfq.deliveryCountry || rfq.deliveryCity
+                      ? [rfq.deliveryCountry, rfq.deliveryCity].filter(Boolean).join(" / ")
+                      : "-"
+                  }
+                />
                 <Info
                   label={t("buyerRfqsPage.date")}
                   value={

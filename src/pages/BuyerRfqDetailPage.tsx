@@ -7,6 +7,8 @@ type RFQ = {
   title?: string | null;
   quantity: number;
   unitType?: string | null;
+  deliveryCountry?: string | null;
+  deliveryCity?: string | null;
   note?: string | null;
   status: string;
   createdAt?: string;
@@ -366,6 +368,14 @@ setRfq(found || null);
 
       <section style={summaryGridStyle}>
         <InfoCard label={t("buyerRfqDetailPage.quantity")} value={rfq.quantity || "-"} />
+        <InfoCard
+          label={t("buyerRfqDetailPage.delivery")}
+          value={
+            rfq.deliveryCountry || rfq.deliveryCity
+              ? [rfq.deliveryCountry, rfq.deliveryCity].filter(Boolean).join(" / ")
+              : "-"
+          }
+        />
         <InfoCard label={t("buyerRfqDetailPage.rfqStatus")} value={statusLabel(rfq.status, t)} />
         <InfoCard label={t("buyerRfqDetailPage.incomingQuotes")} value={quotes.length} />
         <InfoCard
