@@ -54,6 +54,22 @@ type ProductCard = {
   leadTimeDays?: number | null;
 };
 
+type PublicRfq = {
+  id: string;
+  title?: string | null;
+  quantity?: number | null;
+  unitType?: string | null;
+  deliveryCountry?: string | null;
+  deliveryCity?: string | null;
+  createdAt?: string;
+  category?: {
+    name?: string | null;
+  } | null;
+  product?: {
+    title?: string | null;
+  } | null;
+};
+
 const sectors: Sector[] = [
   { title: "Ambalaj ve Paketleme", image: "/images/category-ambalaj-ai.png" },
   { title: "Temizlik ve Hijyen", image: "/images/category-temizlik-ai.png" },
@@ -177,6 +193,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] =
   useState<ProductCard[]>([]);
+  const [recentRfqs, setRecentRfqs] = useState<PublicRfq[]>([]);
   const [search, setSearch] = useState("");
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 700 : false
@@ -189,6 +206,21 @@ export default function HomePage() {
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api"}/rfqs/public/recent`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`RFQ talepleri alınamadı: ${res.status}`);
+        return res.json();
+      })
+      .then((data: unknown) => {
+        setRecentRfqs(Array.isArray(data) ? (data as PublicRfq[]) : []);
+      })
+      .catch((err) => {
+        console.error("public rfqs error:", err);
+        setRecentRfqs([]);
+      });
+  }, []);
+
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api"}/products`)
       .then((res) => {
@@ -915,6 +947,221 @@ export default function HomePage() {
                 );
               })}
             </div>
+          </section>
+
+          <section
+            style={{
+              background: "linear-gradient(135deg, #ffffff, #f8fafc)",
+              color: "#0f172a",
+              borderRadius: 24,
+              padding: isMobile ? 18 : 28,
+              marginBottom: 28,
+              border: "1px solid #e2e8f0",
+              boxShadow: "0 18px 40px rgba(15, 23, 42, 0.08)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "end",
+                gap: 16,
+                flexWrap: "wrap",
+                marginBottom: 20,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    color: "#16a34a",
+                    fontWeight: 900,
+                    fontSize: 13,
+                    marginBottom: 8,
+                  }}
+                >
+                  {t("homePage.liveMarket.eyebrow")}
+                </div>
+
+                <h2
+                  style={{
+                    margin: "0 0 8px",
+                    fontSize: isMobile ? 24 : 32,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {t("homePage.liveMarket.title")}
+                </h2>
+
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#64748b",
+                    lineHeight: 1.6,
+                    maxWidth: 720,
+                  }}
+                >
+                  {t("homePage.liveMarket.description")}
+                </p>
+              </div>
+
+              <Link
+                to="/register"
+                style={{
+                  textDecoration: "none",
+                  color: "#166534",
+                  fontWeight: 800,
+                }}
+              >
+                {t("homePage.liveMarket.sellerCta")}
+              </Link>
+            </div>
+
+            {recentRfqs.length > 0 ? (
+              <div
+                style={{
+                  display: isMobile ? "flex" : "grid",
+                  gridTemplateColumns: isMobile
+                    ? undefined
+                    : "repeat(auto-fit, minmax(240px, 1fr))",
+                  gap: 14,
+                  overflowX: isMobile ? "auto" : "visible",
+                  paddingBottom: isMobile ? 8 : 0,
+                  scrollSnapType: isMobile ? "x mandatory" : undefined,
+                  WebkitOverflowScrolling: "touch",
+                }}
+              >
+                {recentRfqs.map((rfq) => {
+                  const title =
+                    rfq.title ||
+                    rfq.product?.title ||
+                    t("homePage.productFallback");
+
+                  const delivery =
+                    [rfq.deliveryCountry, rfq.deliveryCity]
+                      .filter(Boolean)
+                      .join(" / ") || "-";
+
+                  return (
+                    <div
+                      key={rfq.id}
+                      style={{
+                        minWidth: isMobile ? 250 : undefined,
+                        flex: isMobile ? "0 0 250px" : undefined,
+                        scrollSnapAlign: isMobile ? "start" : undefined,
+                        border: "1px solid #e2e8f0",
+                        borderRadius: 18,
+                        padding: 18,
+                        background: "#ffffff",
+                        boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: 10,
+                          alignItems: "center",
+                          marginBottom: 12,
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 800,
+                            color: "#166534",
+                            background: "#dcfce7",
+                            borderRadius: 999,
+                            padding: "5px 9px",
+                          }}
+                        >
+                          {t("homePage.liveMarket.newRequest")}
+                        </span>
+
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: "#64748b",
+                            textAlign: "right",
+                          }}
+                        >
+                          {rfq.category?.name || t("homePage.liveMarket.category")}
+                        </span>
+                      </div>
+
+                      <h3
+                        style={{
+                          margin: "0 0 14px",
+                          fontSize: 18,
+                          lineHeight: 1.35,
+                        }}
+                      >
+                        {title}
+                      </h3>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gap: 8,
+                          color: "#475569",
+                          fontSize: 14,
+                        }}
+                      >
+                        <div>
+                          <strong>{t("homePage.liveMarket.quantity")}:</strong>{" "}
+                          {rfq.quantity
+                            ? `${rfq.quantity} ${rfq.unitType || ""}`.trim()
+                            : "-"}
+                        </div>
+
+                        <div>
+                          <strong>{t("homePage.liveMarket.delivery")}:</strong>{" "}
+                          {delivery}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div
+                style={{
+                  border: "1px dashed #cbd5e1",
+                  borderRadius: 18,
+                  padding: isMobile ? 20 : 28,
+                  textAlign: "center",
+                  background: "#f8fafc",
+                }}
+              >
+                <h3 style={{ margin: "0 0 8px" }}>
+                  {t("homePage.liveMarket.emptyTitle")}
+                </h3>
+
+                <p
+                  style={{
+                    margin: "0 0 16px",
+                    color: "#64748b",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {t("homePage.liveMarket.emptyDescription")}
+                </p>
+
+                <Link
+                  to="/buyer/rfqs/new"
+                  style={{
+                    display: "inline-block",
+                    textDecoration: "none",
+                    background: "#2563eb",
+                    color: "#ffffff",
+                    padding: "11px 16px",
+                    borderRadius: 12,
+                    fontWeight: 800,
+                  }}
+                >
+                  {t("homePage.liveMarket.buyerCta")}
+                </Link>
+              </div>
+            )}
           </section>
 
           {/* Gerçek ürünler yayına alındığında ürün vitrini yeniden açılacak. */}

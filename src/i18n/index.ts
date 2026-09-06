@@ -1766,6 +1766,20 @@ const resources = {
         sectorsTitle: "Sektörlere Göre Keşfedin",
         allCategories: "Tüm kategorileri incele",
 
+        liveMarket: {
+          eyebrow: "CANLI PAZAR",
+          title: "Şu anda aranan ürünler",
+          description: "Tedarik Pazarı'nda yayınlanan gerçek ve açık alım taleplerini keşfedin.",
+          quantity: "Miktar",
+          delivery: "Teslimat",
+          category: "Kategori",
+          newRequest: "Yeni Talep",
+          sellerCta: "Satıcı olarak talepleri gör",
+          buyerCta: "Alım talebi oluştur",
+          emptyTitle: "Henüz açık alım talebi yok",
+          emptyDescription: "İlk talebi siz oluşturabilir veya yeni talepler için tekrar kontrol edebilirsiniz."
+        },
+
         sectors: {
           packaging: "Ambalaj ve Paketleme",
           cleaning: "Temizlik ve Hijyen",
@@ -4182,6 +4196,20 @@ const resources = {
         popularEyebrow: "POPULAR SOURCING CATEGORIES",
         sectorsTitle: "Explore by Industry",
         allCategories: "View all categories",
+
+        liveMarket: {
+          eyebrow: "LIVE MARKET",
+          title: "Products buyers are looking for now",
+          description: "Explore real and currently open buying requests posted on Tedarik Pazarı.",
+          quantity: "Quantity",
+          delivery: "Delivery",
+          category: "Category",
+          newRequest: "New Request",
+          sellerCta: "View requests as a seller",
+          buyerCta: "Post a buying request",
+          emptyTitle: "No open buying requests yet",
+          emptyDescription: "You can post the first request or check back for new opportunities."
+        },
 
         sectors: {
           packaging: "Packaging",
