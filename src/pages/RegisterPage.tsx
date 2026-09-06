@@ -3,6 +3,7 @@ import axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useNavigate } from "react-router-dom";
 import { TURKEY_CITIES } from "../constants/turkeyCities";
+import { COUNTRIES } from "../constants/countries";
 import { sectors } from "../data/sectors";
 import { useTranslation } from "react-i18next";
 
@@ -11,39 +12,6 @@ const API =
 
 type MembershipType = "BUYER" | "SELLER" | "LOGISTICS";
 
-const COUNTRIES = [
-  "Türkiye",
-  "United States",
-  "United Kingdom",
-  "Germany",
-  "France",
-  "Italy",
-  "Spain",
-  "Netherlands",
-  "Belgium",
-  "Switzerland",
-  "Austria",
-  "Poland",
-  "Romania",
-  "Bulgaria",
-  "Greece",
-  "Georgia",
-  "Azerbaijan",
-  "United Arab Emirates",
-  "Saudi Arabia",
-  "Qatar",
-  "Kuwait",
-  "Iraq",
-  "Egypt",
-  "Morocco",
-  "China",
-  "India",
-  "Pakistan",
-  "South Korea",
-  "Japan",
-  "Canada",
-  "Australia",
-];
 
 export default function RegisterPage() {
   const navigate = useNavigate();

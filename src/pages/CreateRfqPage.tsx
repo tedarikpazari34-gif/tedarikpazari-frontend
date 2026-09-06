@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { TURKEY_CITIES } from "../constants/turkeyCities";
+import { COUNTRIES } from "../constants/countries";
 import { useTranslation } from "react-i18next";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
@@ -41,6 +42,7 @@ export default function CreateRfqPage() {
 
   const [quantity, setQuantity] = useState(copiedQuantity || "100");
   const [unitType, setUnitType] = useState("Adet");
+  const [deliveryCountry, setDeliveryCountry] = useState("Türkiye");
   const [deliveryCity, setDeliveryCity] = useState("");
   const [targetPrice, setTargetPrice] = useState("");
   const [note, setNote] = useState(copiedNote || "");
@@ -65,6 +67,10 @@ export default function CreateRfqPage() {
 
       if (draft.unitType !== undefined) {
         setUnitType(String(draft.unitType));
+      }
+
+      if (draft.deliveryCountry !== undefined) {
+        setDeliveryCountry(String(draft.deliveryCountry));
       }
 
       if (draft.deliveryCity !== undefined) {
@@ -102,6 +108,7 @@ export default function CreateRfqPage() {
         JSON.stringify({
           quantity,
           unitType,
+          deliveryCountry,
           deliveryCity,
           targetPrice,
           note,
@@ -118,6 +125,7 @@ export default function CreateRfqPage() {
     draftKey,
     quantity,
     unitType,
+    deliveryCountry,
     deliveryCity,
     targetPrice,
     note,
@@ -310,7 +318,7 @@ export default function CreateRfqPage() {
         return;
       }
 
-      if (!deliveryCity.trim()) {
+      if (!deliveryCountry.trim() || !deliveryCity.trim()) {
         setError(t("createRfqPage.deliveryRequired"));
         return;
       }
@@ -330,7 +338,7 @@ export default function CreateRfqPage() {
           ? `Talep: ${product?.title || productName || requestTitle}`
           : "",
         `Miktar Birimi: ${unitType}`,
-        `Teslimat Şehri: ${deliveryCity.trim()}`,
+        `Teslimat: ${deliveryCountry.trim()} / ${deliveryCity.trim()}`,
         targetPrice
           ? `Hedef Fiyat: ${Number(targetPrice).toLocaleString("tr-TR")} ₺`
           : "",
@@ -351,6 +359,8 @@ export default function CreateRfqPage() {
           title: productId ? undefined : requestTitle.trim(),
           quantity: Number(quantity),
           unitType,
+          deliveryCountry: deliveryCountry.trim(),
+          deliveryCity: deliveryCity.trim(),
           note: finalNote,
         }),
       });
@@ -421,7 +431,7 @@ export default function CreateRfqPage() {
 
             <div>
               <span style={successSummaryLabelStyle}>{t("createRfqPage.delivery")}</span>
-              <strong>{deliveryCity}</strong>
+              <strong>{deliveryCountry} / {deliveryCity}</strong>
             </div>
           </div>
 
@@ -440,6 +450,7 @@ export default function CreateRfqPage() {
                 setCreatedRfqId("");
                 setQuantity("100");
                 setUnitType("Adet");
+                setDeliveryCountry("Türkiye");
                 setDeliveryCity("");
                 setTargetPrice("");
                 setNote("");
@@ -653,20 +664,49 @@ export default function CreateRfqPage() {
         </div>
 
         <label style={fieldStyle}>
-          <span style={labelStyle}>{t("createRfqPage.deliveryCity")}</span>
+          <span style={labelStyle}>{t("createRfqPage.deliveryCountry")}</span>
           <select
-            value={deliveryCity}
-            onChange={(e) => setDeliveryCity(e.target.value)}
+            value={deliveryCountry}
+            onChange={(e) => {
+              setDeliveryCountry(e.target.value);
+              setDeliveryCity("");
+            }}
             style={inputStyle}
           >
-            <option value="">{t("createRfqPage.selectCity")}</option>
-
-            {TURKEY_CITIES.map((city) => (
-              <option key={city} value={city}>
-                {city}
+            <option value="">{t("createRfqPage.selectCountry")}</option>
+            {COUNTRIES.map((country) => (
+              <option key={country} value={country}>
+                {country}
               </option>
             ))}
           </select>
+        </label>
+
+        <label style={fieldStyle}>
+          <span style={labelStyle}>{t("createRfqPage.deliveryCity")}</span>
+
+          {deliveryCountry === "Türkiye" ? (
+            <select
+              value={deliveryCity}
+              onChange={(e) => setDeliveryCity(e.target.value)}
+              style={inputStyle}
+            >
+              <option value="">{t("createRfqPage.selectCity")}</option>
+
+              {TURKEY_CITIES.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              value={deliveryCity}
+              onChange={(e) => setDeliveryCity(e.target.value)}
+              style={inputStyle}
+              placeholder={t("createRfqPage.selectCity")}
+            />
+          )}
         </label>
 
         <label style={fieldStyle}>
