@@ -1055,7 +1055,7 @@ export default function HomePage() {
                           return;
                         }
 
-                        navigate("/register");
+                        navigate("/login");
                       }}
                       style={{
                         minWidth: isMobile ? 250 : undefined,
