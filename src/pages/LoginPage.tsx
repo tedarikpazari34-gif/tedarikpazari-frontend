@@ -7,6 +7,8 @@ const API_URL =
 
 export default function LoginPage() {
   const { t } = useTranslation();
+  const returnUrl =
+    new URLSearchParams(window.location.search).get("returnUrl") || "";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("123456");
   const [loading, setLoading] = useState(false);
@@ -73,7 +75,9 @@ export default function LoginPage() {
 
       window.dispatchEvent(new Event("storage"));
 
-      if (role === "LOGISTICS") {
+      if (returnUrl && role === "SELLER" && returnUrl.startsWith("/seller/")) {
+        window.location.href = returnUrl;
+      } else if (role === "LOGISTICS") {
         window.location.href = "/logistics/dashboard";
       } else if (role === "SELLER") {
         window.location.href = "/seller/dashboard";

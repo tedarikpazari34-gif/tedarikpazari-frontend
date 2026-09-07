@@ -1055,7 +1055,8 @@ export default function HomePage() {
                           return;
                         }
 
-                        navigate("/login");
+                        const returnUrl = `/seller/quotes/create?rfqId=${rfq.id}`;
+                        navigate(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
                       }}
                       style={{
                         minWidth: isMobile ? 250 : undefined,
