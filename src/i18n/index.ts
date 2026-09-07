@@ -56,7 +56,7 @@ const resources = {
           "Tedarik Pazarı ile yeni alıcılara ulaşın ve satış fırsatlarınızı artırın.",
       },
       loginPage: {
-        subtitle: "Türkiye B2B tedarik ve toptan satın alma platformu",
+        subtitle: "İşletmeleri alıcılar, tedarikçiler ve lojistik firmalarıyla buluşturan B2B platformu",
         emailPlaceholder: "Email adresiniz",
         passwordPlaceholder: "Şifreniz",
         login: "Giriş Yap",
@@ -2487,7 +2487,7 @@ const resources = {
           "Connect with new buyers and grow your sales opportunities with Tedarik Pazarı.",
       },
       loginPage: {
-        subtitle: "Türkiye B2B sourcing and wholesale purchasing platform",
+        subtitle: "A B2B marketplace connecting buyers, suppliers and logistics companies worldwide",
         emailPlaceholder: "Email address",
         passwordPlaceholder: "Password",
         login: "Login",
