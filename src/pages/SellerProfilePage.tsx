@@ -6,6 +6,7 @@ import {
 } from "react";
 
 import { TURKEY_CITIES } from "../constants/turkeyCities";
+import { COUNTRIES } from "../constants/countries";
 import { useTranslation } from "react-i18next";
 
 type CompanyProfile = {
@@ -316,30 +317,49 @@ export default function SellerProfilePage() {
 
           <div style={twoColumnStyle}>
             <label style={fieldStyle}>
-              <span style={labelStyle}>{t("sellerProfilePage.city")}</span>
+              <span style={labelStyle}>{t("sellerProfilePage.country")}</span>
               <select
-                value={city}
-                onChange={(event) => setCity(event.target.value)}
+                value={country}
+                onChange={(event) => {
+                  setCountry(event.target.value);
+                  setCity("");
+                }}
                 style={inputStyle}
               >
-                <option value="">{t("sellerProfilePage.selectCity")}</option>
-
-                {TURKEY_CITIES.map((cityName) => (
-                  <option key={cityName} value={cityName}>
-                    {cityName}
+                {COUNTRIES.map((countryName) => (
+                  <option key={countryName} value={countryName}>
+                    {countryName}
                   </option>
                 ))}
               </select>
             </label>
 
             <label style={fieldStyle}>
-              <span style={labelStyle}>{t("sellerProfilePage.country")}</span>
-              <input
-                value={country}
-                onChange={(event) => setCountry(event.target.value)}
-                style={inputStyle}
-                maxLength={100}
-              />
+              <span style={labelStyle}>{t("sellerProfilePage.city")}</span>
+
+              {country === "Türkiye" ? (
+                <select
+                  value={city}
+                  onChange={(event) => setCity(event.target.value)}
+                  style={inputStyle}
+                >
+                  <option value="">{t("sellerProfilePage.selectCity")}</option>
+
+                  {TURKEY_CITIES.map((cityName) => (
+                    <option key={cityName} value={cityName}>
+                      {cityName}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  value={city}
+                  onChange={(event) => setCity(event.target.value)}
+                  style={inputStyle}
+                  maxLength={120}
+                  placeholder={t("sellerProfilePage.cityPlaceholder")}
+                />
+              )}
             </label>
           </div>
 
@@ -358,7 +378,7 @@ export default function SellerProfilePage() {
                   onChange={(event) => setPhone(event.target.value)}
                   style={inputStyle}
                   maxLength={30}
-                  placeholder="05xx xxx xx xx"
+                  placeholder={t("sellerProfilePage.phonePlaceholder")}
                 />
               </label>
 
