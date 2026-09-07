@@ -1044,6 +1044,19 @@ export default function HomePage() {
                   return (
                     <div
                       key={rfq.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => {
+                        const token = localStorage.getItem("token");
+                        const role = localStorage.getItem("role");
+
+                        if (token && role === "SELLER") {
+                          navigate(`/seller/quotes/create?rfqId=${rfq.id}`);
+                          return;
+                        }
+
+                        navigate("/register");
+                      }}
                       style={{
                         minWidth: isMobile ? 250 : undefined,
                         flex: isMobile ? "0 0 250px" : undefined,
@@ -1053,6 +1066,7 @@ export default function HomePage() {
                         padding: 18,
                         background: "#ffffff",
                         boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
+                        cursor: "pointer",
                       }}
                     >
                       <div
