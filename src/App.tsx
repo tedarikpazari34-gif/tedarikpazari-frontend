@@ -12,6 +12,7 @@ import LoginPage from "./pages/LoginPage";
 import CategoryPage from "./pages/CategoryPage";
 import AllCategoriesPage from "./pages/AllCategoriesPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import CartPage from "./pages/CartPage";
 
 import BuyerOrdersPage from "./pages/BuyerOrdersPage";
 import BuyerRfqDetailPage from "./pages/BuyerRfqDetailPage";
@@ -112,6 +113,7 @@ export default function App() {
 
         {/* PRODUCT */}
         <Route path="/product/:id" element={<ProductDetailPage />} />
+        <Route path="/cart" element={<CartPage />} />
 
         {/* BUYER */}
         <Route

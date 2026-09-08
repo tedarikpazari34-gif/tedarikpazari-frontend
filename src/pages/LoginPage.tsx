@@ -75,7 +75,13 @@ export default function LoginPage() {
 
       window.dispatchEvent(new Event("storage"));
 
-      if (returnUrl && role === "SELLER" && returnUrl.startsWith("/seller/")) {
+      if (
+        returnUrl &&
+        (
+          (role === "SELLER" && returnUrl.startsWith("/seller/")) ||
+          (role === "BUYER" && returnUrl.startsWith("/"))
+        )
+      ) {
         window.location.href = returnUrl;
       } else if (role === "LOGISTICS") {
         window.location.href = "/logistics/dashboard";

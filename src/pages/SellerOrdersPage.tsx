@@ -6,6 +6,13 @@ type Order = {
   status: string;
   totalAmount?: number | string;
   commissionAmount?: number | string;
+  quantity?: number | null;
+  product?: {
+    id?: string;
+    title?: string;
+    unitType?: string | null;
+    basePrice?: number | string;
+  } | null;
   rfq?: {
     quantity?: number;
     title?: string | null;
@@ -297,7 +304,8 @@ export default function SellerOrdersPage() {
                 <div>
                   <div style={smallLabelStyle}>{t("sellerOrdersPage.orderRequest")}</div>
                   <h2 style={cardTitleStyle}>
-                    {o.rfq?.product?.title ||
+                    {o.product?.title ||
+                      o.rfq?.product?.title ||
                       o.rfq?.title ||
                       t("sellerOrdersPage.buyingRequest")}
                   </h2>
@@ -310,8 +318,25 @@ export default function SellerOrdersPage() {
 
               <div style={infoGridStyle}>
                 <Info label={t("sellerOrdersPage.buyer")} value={o.buyer?.name || o.buyer?.companyName || "-"} />
-                <Info label={t("sellerOrdersPage.quantity")} value={o.rfq?.quantity || "-"} />
-                <Info label={t("sellerOrdersPage.unitPrice")} value={formatPrice(o.quote?.unitPrice, locale)} />
+                <Info
+                  label={t("sellerOrdersPage.quantity")}
+                  value={
+                    o.quantity
+                      ? `${o.quantity} ${o.product?.unitType || ""}`.trim()
+                      : o.rfq?.quantity || "-"
+                  }
+                />
+                <Info
+                  label={t("sellerOrdersPage.unitPrice")}
+                  value={formatPrice(
+                    o.product?.basePrice ||
+                      o.quote?.unitPrice ||
+                      (o.quantity
+                        ? Number(o.totalAmount || 0) / Number(o.quantity)
+                        : 0),
+                    locale
+                  )}
+                />
                 <Info label={t("sellerOrdersPage.total")} value={formatPrice(o.totalAmount, locale)} />
               </div>
 

@@ -9,6 +9,14 @@ type Order = {
   status: string;
   totalAmount?: number | string;
   commissionAmount?: number | string;
+  quantity?: number | null;
+
+  product?: {
+    id?: string;
+    title?: string;
+    unitType?: string | null;
+    basePrice?: number | string;
+  } | null;
 
   shippingTrackingNo?: string | null;
   shippingCompany?: string | null;
@@ -465,7 +473,8 @@ export default function BuyerOrdersPage() {
                   </div>
 
                   <h2 style={cardTitleStyle}>
-                    {o.rfq?.product?.title ||
+                    {o.product?.title ||
+                      o.rfq?.product?.title ||
                       o.rfq?.title ||
                       t("buyerOrdersPage.buyingRequest")}
                   </h2>
@@ -485,16 +494,22 @@ export default function BuyerOrdersPage() {
                 <Info
                   label={t("buyerOrdersPage.quantity")}
                   value={
-                    o.rfq?.quantity
-                      ? `${o.rfq.quantity} ${unitLabel(o.rfq.unitType, t)}`
-                      : "-"
+                    o.quantity
+                      ? `${o.quantity} ${unitLabel(o.product?.unitType, t)}`
+                      : o.rfq?.quantity
+                        ? `${o.rfq.quantity} ${unitLabel(o.rfq.unitType, t)}`
+                        : "-"
                   }
                 />
 
                 <Info
                   label={t("buyerOrdersPage.unitPrice")}
                   value={`${Number(
-                    o.quote?.unitPrice || 0
+                    o.product?.basePrice ||
+                      o.quote?.unitPrice ||
+                      (o.quantity
+                        ? Number(o.totalAmount || 0) / Number(o.quantity)
+                        : 0)
                   ).toLocaleString(locale)} ₺`}
                 />
 

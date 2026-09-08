@@ -119,6 +119,8 @@ export default function ProductDetailPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [isCompared, setIsCompared] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [addedToCart, setAddedToCart] = useState(false);
 
   useEffect(() => {
     const loadSavedActions = async () => {
@@ -177,6 +179,7 @@ export default function ProductDetailPage() {
         }
 
         setProduct(data);
+        setQuantity(Math.max(Number(data.moq || 1), 1));
       } catch (error) {
         console.error("PRODUCT DETAIL ERROR:", error);
         setProduct(null);
@@ -293,6 +296,64 @@ export default function ProductDetailPage() {
       alert(t("productDetailPage.favoriteError"));
     } finally {
       setFavoriteLoading(false);
+    }
+  };
+
+  const addToCart = () => {
+    if (!product) return;
+
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token) {
+      localStorage.setItem(
+        "returnUrl",
+        `/product/${product.id}`
+      );
+      navigate("/login");
+      return;
+    }
+
+    if (role !== "BUYER") {
+      alert(t("productDetailPage.cartBuyerOnly"));
+      return;
+    }
+
+    if (quantity < product.moq) {
+      alert(t("productDetailPage.cartInvalidQuantity"));
+      return;
+    }
+
+    try {
+      const raw = localStorage.getItem("tedarikCart");
+      const current = raw ? JSON.parse(raw) : [];
+      const cart = Array.isArray(current) ? current : [];
+
+      const existingIndex = cart.findIndex(
+        (item: any) => item.productId === product.id
+      );
+
+      const item = {
+        productId: product.id,
+        title: product.title,
+        quantity,
+        unitType: product.unitType,
+        unitPrice: Number(product.basePrice || 0),
+        sellerId: product.seller?.id || null,
+        imageUrl: product.imageUrl || product.images?.[0]?.url || null,
+      };
+
+      if (existingIndex >= 0) {
+        cart[existingIndex] = item;
+      } else {
+        cart.push(item);
+      }
+
+      localStorage.setItem("tedarikCart", JSON.stringify(cart));
+      window.dispatchEvent(new Event("tedarik-cart-changed"));
+      setAddedToCart(true);
+    } catch (error) {
+      console.error("ADD TO CART ERROR:", error);
     }
   };
 
@@ -609,26 +670,72 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
+          <div style={{ marginTop: 18 }}>
+            <label
+              style={{
+                display: "block",
+                fontWeight: 700,
+                marginBottom: 8,
+                color: "#0f172a",
+              }}
+            >
+              {t("productDetailPage.quantity")}
+            </label>
+
+            <input
+              type="number"
+              min={product.moq}
+              value={quantity}
+              onChange={(e) =>
+                setQuantity(
+                  Math.max(product.moq, Number(e.target.value || product.moq))
+                )
+              }
+              style={{
+                width: 140,
+                padding: "12px 14px",
+                border: "1px solid #cbd5e1",
+                borderRadius: 10,
+                fontSize: 16,
+                marginBottom: 14,
+              }}
+            />
+          </div>
+
           <div style={actionsStyle}>
             <button
               type="button"
-              onClick={() => {
-                if (!product.rfqEnabled) return;
-                navigate(
-                `/buyer/rfqs/new?productId=${product.id}&product=${encodeURIComponent(product.title)}`
-                );
-              }}
-              disabled={!product.rfqEnabled}
-              style={{
-                ...primaryButtonStyle,
-                opacity: product.rfqEnabled ? 1 : 0.55,
-                cursor: product.rfqEnabled ? "pointer" : "not-allowed",
-              }}
+              onClick={addToCart}
+              style={primaryButtonStyle}
             >
-              {product.rfqEnabled
-                ? t("productDetailPage.requestQuote")
-                : t("productDetailPage.rfqClosed")}
+              {addedToCart
+                ? t("productDetailPage.addedToCart")
+                : t("productDetailPage.addToCart")}
             </button>
+
+            {addedToCart && (
+              <button
+                type="button"
+                onClick={() => navigate("/cart")}
+                style={secondaryButtonStyle}
+              >
+                {t("productDetailPage.viewCart")}
+              </button>
+            )}
+
+            {product.rfqEnabled && (
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/buyer/rfqs/new?productId=${product.id}&product=${encodeURIComponent(product.title)}`
+                  )
+                }
+                style={secondaryButtonStyle}
+              >
+                {t("productDetailPage.requestQuote")}
+              </button>
+            )}
 
             <Link
               to={product.category?.id ? `/category/${product.category.id}` : "/"}

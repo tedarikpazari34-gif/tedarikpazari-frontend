@@ -27,6 +27,7 @@ export default function SellerProductCreatePage() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [mainCategoryId, setMainCategoryId] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [basePrice, setBasePrice] = useState("");
   const [unitType, setUnitType] = useState("adet");
@@ -42,15 +43,6 @@ export default function SellerProductCreatePage() {
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const flattenCategories = (items: Category[], level = 0): Category[] => {
-  return items.flatMap((item) => [
-    {
-      ...item,
-      name: `${"— ".repeat(level)}${item.name}`,
-    },
-    ...(item.children ? flattenCategories(item.children, level + 1) : []),
-  ]);
-};
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -67,7 +59,7 @@ export default function SellerProductCreatePage() {
         const data = await res.json();
 
         if (Array.isArray(data)) {
-          setCategories(flattenCategories(data));
+          setCategories(data);
         }
       } catch (err) {
         console.error(t("sellerProductCreatePage.categoryLoadError"), err);
@@ -195,6 +187,7 @@ export default function SellerProductCreatePage() {
 
       setTitle("");
       setDescription("");
+      setMainCategoryId("");
       setCategoryId("");
       setBasePrice("");
       setUnitType("adet");
@@ -271,13 +264,31 @@ export default function SellerProductCreatePage() {
               />
 
               <select
+                value={mainCategoryId}
+                onChange={(e) => {
+                  setMainCategoryId(e.target.value);
+                  setCategoryId("");
+                }}
+                style={inputStyle}
+                required
+              >
+                <option value="">{t("sellerProductCreatePage.selectMainCategory")}</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 style={inputStyle}
                 required
+                disabled={!mainCategoryId}
               >
-                <option value="">{t("sellerProductCreatePage.selectCategory")}</option>
-                {categories.map((c) => (
+                <option value="">{t("sellerProductCreatePage.selectSubCategory")}</option>
+                {(categories.find((c) => c.id === mainCategoryId)?.children || []).map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
