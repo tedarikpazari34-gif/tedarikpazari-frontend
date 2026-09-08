@@ -16,6 +16,7 @@ export const COUNTRIES = [
   "Greece",
   "Georgia",
   "Azerbaijan",
+  "Uzbekistan",
   "United Arab Emirates",
   "Saudi Arabia",
   "Qatar",

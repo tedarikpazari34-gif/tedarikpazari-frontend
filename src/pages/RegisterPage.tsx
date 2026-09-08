@@ -15,7 +15,7 @@ type MembershipType = "BUYER" | "SELLER" | "LOGISTICS";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [companyName, setCompanyName] = useState("");
   const [fullName, setFullName] = useState("");
@@ -132,6 +132,38 @@ export default function RegisterPage() {
             <Link to="/" style={backLinkStyle}>
               ← {t("registerPage.home")}
             </Link>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => i18n.changeLanguage("tr")}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: i18n.language?.startsWith("tr") ? "#ffffff" : "#94a3b8",
+                  fontWeight: 800,
+                  cursor: "pointer",
+                }}
+              >
+                TR
+              </button>
+
+              <span style={{ color: "#64748b" }}>|</span>
+
+              <button
+                type="button"
+                onClick={() => i18n.changeLanguage("en")}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: i18n.language?.startsWith("en") ? "#ffffff" : "#94a3b8",
+                  fontWeight: 800,
+                  cursor: "pointer",
+                }}
+              >
+                EN
+              </button>
+            </div>
 
             <div style={badgeStyle}>B2B Marketplace</div>
           </div>
@@ -285,6 +317,7 @@ export default function RegisterPage() {
                         gap: 8,
                         padding: "6px 0",
                         cursor: "pointer",
+                        color: "#0f172a",
                       }}
                     >
                       <input
@@ -386,11 +419,19 @@ export default function RegisterPage() {
                 style={inputStyle}
                 placeholder={
                   country === "Türkiye"
-                    ? "1234567890"
+                    ? "10 haneli vergi numarası"
                     : t("registerPage.internationalTaxNumberPlaceholder")
                 }
                 value={taxNumber}
-                onChange={(e) => setTaxNumber(e.target.value)}
+                inputMode={country === "Türkiye" ? "numeric" : "text"}
+                maxLength={country === "Türkiye" ? 10 : 50}
+                onChange={(e) =>
+                  setTaxNumber(
+                    country === "Türkiye"
+                      ? e.target.value.replace(/\D/g, "").slice(0, 10)
+                      : e.target.value
+                  )
+                }
               />
             </div>
 
@@ -402,7 +443,11 @@ export default function RegisterPage() {
               </label>
               <input
                 style={inputStyle}
-                placeholder={t("registerPage.taxOfficePlaceholder")}
+                placeholder={
+                  country === "Türkiye"
+                    ? t("registerPage.taxOfficePlaceholder")
+                    : t("registerPage.internationalTaxOfficePlaceholder")
+                }
                 value={taxOffice}
                 onChange={(e) => setTaxOffice(e.target.value)}
               />
