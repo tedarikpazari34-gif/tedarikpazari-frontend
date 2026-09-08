@@ -241,7 +241,12 @@ export default function Navbar() {
           <span style={brandIconStyle}>TP</span>
 
           <span>
-            TEDARİK PAZARI
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.2, display: "block" }}>
+              NEX
+            </span>
+            <span style={{ display: "block" }}>
+              TEDARİK PAZARI
+            </span>
             <small style={brandSubStyle}>{t("common.marketplace")}</small>
           </span>
         </Link>

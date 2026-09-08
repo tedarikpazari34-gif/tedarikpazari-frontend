@@ -54,7 +54,12 @@ export default function VerifyEmailPage() {
           textAlign: "center",
         }}
       >
-        <h1 style={{ marginTop: 0 }}>Tedarik Pazarı</h1>
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2 }}>
+            Nex
+          </div>
+          <h1 style={{ marginTop: 2 }}>Tedarik Pazarı</h1>
+        </div>
 
         <p
           style={{

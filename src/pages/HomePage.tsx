@@ -214,7 +214,7 @@ export default function HomePage() {
               product,
               t("homePage.categoryFallback"),
               t("homePage.productFallback"),
-              t("homePage.getQuote")
+              t("homePage.priceInfo")
             ));
 
           setFeaturedProducts(mapped);
@@ -425,14 +425,14 @@ export default function HomePage() {
                 >
                   {t("homePage.productNotFound")}{" "}
                   <Link
-                    to="/buyer/rfqs/new"
+                    to="/products"
                     style={{
                       color: "#ffffff",
                       fontWeight: 900,
                       textDecoration: "underline",
                     }}
                   >
-                    {t("homePage.directRfq")}
+                    {t("homePage.browseProducts")}
                   </Link>
                 </div>
 
@@ -446,7 +446,7 @@ export default function HomePage() {
                   }}
                 >
                   <Link
-                    to="/buyer/rfqs/new"
+                    to="/products"
                     style={{
                       ...primaryButtonStyle,
                       width: isMobile ? "100%" : "auto",
@@ -454,7 +454,7 @@ export default function HomePage() {
                       boxSizing: "border-box",
                     }}
                   >
-                    {t("homePage.freeQuote")}
+                    {t("homePage.browseProducts")}
                   </Link>
 
                   <Link
@@ -705,7 +705,7 @@ export default function HomePage() {
               </p>
 
               <Link
-                to="/buyer/rfqs/new"
+                to="/products"
                 style={{
                   display: "inline-block",
                   textDecoration: "none",
@@ -716,7 +716,7 @@ export default function HomePage() {
                   fontWeight: 900,
                 }}
               >
-                {t("homePage.createRfq")}
+                {t("homePage.browseProducts")}
               </Link>
             </div>
 
@@ -1191,7 +1191,7 @@ export default function HomePage() {
                 {t("homePage.startFree")}
               </Link>
               <Link
-                to="/buyer/rfqs/new"
+                to="/products"
                 style={{
                   ...secondaryButtonStyle,
                   width: isMobile ? "100%" : "auto",
@@ -1202,7 +1202,7 @@ export default function HomePage() {
                   fontSize: isMobile ? 13 : 16,
                 }}
               >
-                {t("homePage.createRfq")}
+                {t("homePage.browseProducts")}
               </Link>
               {!isMobile && (
                 <Link

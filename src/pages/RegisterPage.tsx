@@ -169,6 +169,9 @@ export default function RegisterPage() {
           </div>
 
           <div style={{ marginBottom: 30 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, marginBottom: 4 }}>
+              Nex
+            </div>
             <h1 style={titleStyle}>{t("registerPage.title")}</h1>
 
             <p style={subtitleStyle}>

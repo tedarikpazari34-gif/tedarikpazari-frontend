@@ -41,7 +41,12 @@ export default function Footer() {
           <div style={logoStyle}>TP</div>
 
           <div>
-            <strong style={brandStyle}>Tedarik Pazarı</strong>
+            <div style={{ lineHeight: 1.05 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.1, display: "block" }}>
+                Nex
+              </span>
+              <strong style={brandStyle}>Tedarik Pazarı</strong>
+            </div>
             <p style={textStyle}>
               {t("footer.description")}
             </p>

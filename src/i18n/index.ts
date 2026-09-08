@@ -1738,14 +1738,14 @@ const resources = {
       },
       homePage: {
         seoTitle: "Tedarik Pazarı | İşletmeler için B2B Toptan Tedarik Platformu",
-        seoDescription: "Tedarik Pazarı ile işletmeniz için toptan ürünleri keşfedin, tedarikçilerden teklif alın ve B2B satın alma sürecinizi tek platformdan yönetin.",
+        seoDescription: "Tedarik Pazarı ile işletmeniz için toptan ürünleri keşfedin, fiyatları karşılaştırın ve B2B satın alma sürecinizi tek platformdan yönetin.",
         ogDescription: "İşletmeler için güvenli ve hızlı B2B tedarik platformu.",
 
         heroBadge: "TÜRKİYE B2B MARKETPLACE",
-        heroTitle: "Tedarik Aramayı Bırakın. Teklifler Size Gelsin",
-        heroDescription: "İhtiyacınızı yayınlayın, uygun firmalardan gelen teklifleri tek ekranda karşılaştırın. Satıcıysanız yeni satın alma taleplerine ulaşın ve işletmeniz için yeni iş fırsatları oluşturun.",
+        heroTitle: "Türkiye’nin B2B Tedarik Pazarı",
+        heroDescription: "Ürünleri keşfedin, fiyatları karşılaştırın ve güvenle satın alın. Satıcıysanız ürünlerinizi yayınlayın ve yeni kurumsal müşterilere ulaşın.",
         heroQuestion: "İşletmeniz için neye ihtiyacınız var?",
-        heroSearchDescription: "Ürün, kategori veya tedarikçi arayın; dilerseniz ihtiyacınızı yayınlayıp teklif toplayın.",
+        heroSearchDescription: "Ürün, kategori veya tedarikçi arayın ve işletmeniz için uygun seçenekleri keşfedin.",
         searchPlaceholder: "Ürün, kategori veya marka ara...",
         searchButton: "Ürün Ara",
         productNotFound: "Aradığınız ürünü bulamadınız mı?",
@@ -1755,14 +1755,14 @@ const resources = {
 
         badges: {
           verified: "Belgeyle Doğrulanabilen Firmalar",
-          rfq: "RFQ ile Teklif Toplama",
+          rfq: "Görünür Fiyatlar",
           payment: "Güvenli Ödeme",
           nationwide: "Türkiye Geneli"
         },
 
         stats: {
           safeTrade: "Güvenli B2B Ticaret",
-          rfq: "RFQ ile Teklif Toplama",
+          rfq: "Doğrudan Sipariş",
           payment: "Güvenli Ödeme Sistemi",
           delivery: "Sipariş ve Teslimat Takibi"
         },
@@ -1773,22 +1773,22 @@ const resources = {
         highlights: {
           verificationTitle: "Belgeyle firma doğrulama",
           verificationDescription: "Doğrulama başvurusu yapan firmalar belgelerini iletebilir ve kontrol sonrasında doğrulanmış firma rozeti alabilir.",
-          quotesTitle: "Teklif toplama altyapısı",
-          quotesDescription: "Tek bir talep üzerinden birden fazla satıcıdan fiyat ve termin alın.",
+          quotesTitle: "Doğrudan satın alma",
+          quotesDescription: "Ürünleri görünür fiyatlarıyla inceleyin, sepete ekleyin ve siparişinizi doğrudan oluşturun.",
           discoveryTitle: "Kategori bazlı keşif",
           discoveryDescription: "Temizlikten ambalaja, gıdadan sanayiye kadar geniş tedarik ağına ulaşın.",
           purchasingTitle: "Kurumsal satın alma deneyimi",
-          purchasingDescription: "Ürün, teklif ve tedarik sürecinizi tek panelden daha verimli yönetin."
+          purchasingDescription: "Ürün, sipariş, ödeme ve tedarik sürecinizi tek panelden daha verimli yönetin."
         },
 
         buyerEyebrow: "ALICILAR İÇİN",
-        buyerTitle: "İhtiyacınızı yayınlayın, teklifler size gelsin",
-        buyerDescription: "Tek tek tedarikçi aramak yerine talebinizi oluşturun, gelen teklifleri fiyat ve teslim süresine göre karşılaştırın.",
+        buyerTitle: "Ürünleri keşfedin, fiyatları karşılaştırın",
+        buyerDescription: "Farklı tedarikçilerin ürünlerini, fiyatlarını ve teslimat bilgilerini inceleyerek işletmeniz için doğru seçimi yapın.",
         createRfq: "Teklif Talebi Oluştur",
 
         sellerEyebrow: "SATICILAR İÇİN",
-        sellerTitle: "Yeni taleplere ulaşın, satış fırsatlarınızı büyütün",
-        sellerDescription: "Ürünlerinizi yayınlayın, size uygun satın alma taleplerini görün ve teklif vererek yeni müşterilere ulaşın.",
+        sellerTitle: "Ürünlerinizi yayınlayın, satış fırsatlarınızı büyütün",
+        sellerDescription: "Ürünlerinizi fiyatlarıyla birlikte yayınlayın, yeni kurumsal müşterilere ulaşın ve doğrudan sipariş alın.",
         sellerJoin: "Satıcı Olarak Üye Ol",
 
         popularEyebrow: "POPÜLER TEDARİK ALANLARI",
@@ -1825,29 +1825,30 @@ const resources = {
           oneDescription: "Ürün veya kategori bazında ihtiyacına uygun tedarik seçeneklerini hızlıca bul.",
           twoTitle: "Tedarikçileri karşılaştır",
           twoDescription: "Fiyat, minimum sipariş, teslim süresi ve güven durumuna göre en doğru seçimi yap.",
-          threeTitle: "Teklif al ve yönet",
-          threeDescription: "RFQ ile teklif topla, süreci takip et ve kurumsal satın almanı tek yerden yönet."
+          threeTitle: "Sepete ekle ve güvenle öde",
+          threeDescription: "Seçtiğin ürünleri sepete ekle, siparişini oluştur ve ödeme sürecini güvenle tamamla."
         },
 
         trustEyebrow: "GÜVENLİ B2B TİCARET",
         trustTitle: "Firma bilgileri paylaşılmadan güvenli ticaret altyapısı",
-        trustDescription: "Tedarik Pazarı, alıcı ve satıcıların teklif ve sipariş sürecini platform içinde yönetebilmesi için tasarlanmıştır.",
+        trustDescription: "Tedarik Pazarı, alıcı ve satıcıların sipariş ve ödeme sürecini platform içinde yönetebilmesi için tasarlanmıştır.",
 
         trustCards: {
           verificationTitle: "Belgeyle Doğrulama",
           verificationText: "Firmalar doğrulama belgelerini iletebilir. Kontrol edilen firmalar doğrulanmış firma rozeti kazanır.",
           communicationTitle: "Platform İçi İletişim",
-          communicationText: "Teklif ve satın alma süreci boyunca ticari iletişim platform içinde tutulur.",
+          communicationText: "Satın alma ve sipariş süreci boyunca ticari iletişim platform içinde tutulur.",
           flowTitle: "Kontrollü İşlem Akışı",
-          flowText: "Teklif, sipariş, ödeme ve teslimat adımları tek sistem üzerinden takip edilir."
+          flowText: "Sipariş, ödeme ve teslimat adımları tek sistem üzerinden takip edilir."
         },
 
         createFreeCompany: "Ücretsiz Firma Hesabı Oluştur",
 
         ctaTitle: "Alıcı veya satıcı olarak ticaret ağınızı büyütün",
-        ctaDescription: "Alıcı olarak ihtiyaçlarınıza teklif alın; satıcı olarak yeni taleplere ulaşın. Tedarik sürecinizi tek platformdan yönetin.",
+        ctaDescription: "Alıcı olarak ürünleri keşfedin ve doğrudan satın alın; satıcı olarak ürünlerinizi yayınlayıp yeni müşterilere ulaşın.",
         startFree: "Ücretsiz Başla",
         browseProducts: "Ürünleri İncele",
+        priceInfo: "Fiyat Bilgisi",
 
         offerFallback: "Teklif Al",
         categoryFallback: "Kategori",
@@ -4180,14 +4181,14 @@ const resources = {
       },
       homePage: {
         seoTitle: "Tedarik Pazarı | B2B Wholesale Sourcing Platform for Businesses",
-        seoDescription: "Discover wholesale products, receive supplier quotes and manage your B2B purchasing process from one platform with Tedarik Pazarı.",
+        seoDescription: "Discover wholesale products, compare prices and manage your B2B purchasing process from one platform with Tedarik Pazarı.",
         ogDescription: "A secure and efficient B2B sourcing platform for businesses.",
 
         heroBadge: "B2B SOURCING MARKETPLACE",
-        heroTitle: "Stop Searching for Suppliers. Let the Quotes Come to You",
-        heroDescription: "Post what you need and compare quotes from suitable companies in one place. If you are a seller, discover new buying requests and create new business opportunities.",
+        heroTitle: "Türkiye’s B2B Supply Marketplace",
+        heroDescription: "Discover products, compare prices and buy securely. If you are a seller, list your products and reach new business customers.",
         heroQuestion: "What does your business need?",
-        heroSearchDescription: "Search for a product, category or supplier, or post your requirement and collect quotes.",
+        heroSearchDescription: "Search for products, categories or suppliers and discover the right options for your business.",
         searchPlaceholder: "Search products, categories or brands...",
         searchButton: "Search Products",
         productNotFound: "Can't find the product you need?",
@@ -4197,14 +4198,14 @@ const resources = {
 
         badges: {
           verified: "Document-Verified Companies",
-          rfq: "Collect Quotes with RFQ",
+          rfq: "Visible Prices",
           payment: "Secure Payment",
           nationwide: "Türkiye-Wide Network"
         },
 
         stats: {
           safeTrade: "Secure B2B Trade",
-          rfq: "RFQ Quote Collection",
+          rfq: "Direct Orders",
           payment: "Secure Payment System",
           delivery: "Order & Delivery Tracking"
         },
@@ -4215,22 +4216,22 @@ const resources = {
         highlights: {
           verificationTitle: "Company verification with documents",
           verificationDescription: "Companies can submit verification documents and receive a verified company badge after review.",
-          quotesTitle: "Multi-supplier quotation",
-          quotesDescription: "Receive pricing and lead times from multiple sellers through a single request.",
+          quotesTitle: "Direct purchasing",
+          quotesDescription: "Browse products with visible prices, add them to your cart and place orders directly.",
           discoveryTitle: "Category-based discovery",
           discoveryDescription: "Access a broad supplier network across cleaning, packaging, food, industry and more.",
           purchasingTitle: "Professional purchasing experience",
-          purchasingDescription: "Manage products, quotations and sourcing processes more efficiently from one dashboard."
+          purchasingDescription: "Manage products, orders, payments and sourcing processes more efficiently from one dashboard."
         },
 
         buyerEyebrow: "FOR BUYERS",
-        buyerTitle: "Post your requirement and let suppliers come to you",
-        buyerDescription: "Instead of searching suppliers one by one, create a buying request and compare incoming quotes by price and delivery time.",
+        buyerTitle: "Discover products and compare prices",
+        buyerDescription: "Compare products, prices and delivery information from different suppliers and choose the right option for your business.",
         createRfq: "Post a Buying Request",
 
         sellerEyebrow: "FOR SELLERS",
-        sellerTitle: "Reach new buyers and grow your sales opportunities",
-        sellerDescription: "List your products, discover relevant buying requests and reach new customers by submitting quotes.",
+        sellerTitle: "List your products and grow your sales opportunities",
+        sellerDescription: "List your products with prices, reach new business customers and receive direct orders.",
         sellerJoin: "Join as a Seller",
 
         popularEyebrow: "POPULAR SOURCING CATEGORIES",
@@ -4267,29 +4268,30 @@ const resources = {
           oneDescription: "Quickly find sourcing options that match your needs by product or category.",
           twoTitle: "Compare suppliers",
           twoDescription: "Compare price, minimum order quantity, lead time and trust indicators to choose the right supplier.",
-          threeTitle: "Collect and manage quotes",
-          threeDescription: "Collect quotes through RFQs, track the process and manage business purchasing from one place."
+          threeTitle: "Add to cart and pay securely",
+          threeDescription: "Add selected products to your cart, place your order and complete payment securely."
         },
 
         trustEyebrow: "SECURE B2B TRADE",
         trustTitle: "A secure trading infrastructure without exposing company details",
-        trustDescription: "Tedarik Pazarı is designed so buyers and sellers can manage quotation and order processes within the platform.",
+        trustDescription: "Tedarik Pazarı is designed so buyers and sellers can manage order and payment processes within the platform.",
 
         trustCards: {
           verificationTitle: "Document Verification",
           verificationText: "Companies can submit verification documents. Approved companies receive a verified company badge.",
           communicationTitle: "In-Platform Communication",
-          communicationText: "Commercial communication is kept within the platform throughout the quotation and purchasing process.",
+          communicationText: "Commercial communication is kept within the platform throughout the purchasing and order process.",
           flowTitle: "Controlled Transaction Flow",
-          flowText: "Quotation, order, payment and delivery steps are tracked through one system."
+          flowText: "Order, payment and delivery steps are tracked through one system."
         },
 
         createFreeCompany: "Create a Free Company Account",
 
         ctaTitle: "Grow your business network as a buyer or seller",
-        ctaDescription: "Receive quotes for your purchasing needs or reach new buyers as a seller. Manage your sourcing process from one platform.",
+        ctaDescription: "Discover and buy products directly as a buyer, or list your products and reach new customers as a seller.",
         startFree: "Start Free",
         browseProducts: "Browse Products",
+        priceInfo: "Price Information",
 
         offerFallback: "Get Quote",
         categoryFallback: "Category",

@@ -110,7 +110,12 @@ export default function LoginPage() {
       <div style={cardStyle}>
         <div style={logoStyle}>TP</div>
 
-        <h1 style={titleStyle}>Tedarik Pazarı</h1>
+        <div style={{ marginBottom: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2 }}>
+            Nex
+          </div>
+          <h1 style={titleStyle}>Tedarik Pazarı</h1>
+        </div>
 
         <p style={subtitleStyle}>
           {t("loginPage.subtitle")}
