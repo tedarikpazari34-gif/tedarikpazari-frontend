@@ -21,7 +21,6 @@ const buyerLinks: NavItem[] = [
   { labelKey: "common.dashboard", to: "/buyer/dashboard" },
   { labelKey: "common.home", to: "/" },
   { labelKey: "common.products", to: "/products" },
-  { labelKey: "common.myQuotes", to: "/tekliflerim" },
   { labelKey: "common.myOrders", to: "/buyer/orders" },
   { labelKey: "common.shippingQuotes", to: "/buyer/shipping-quotes" },
   { labelKey: "common.favorites", to: "/favorites" },
@@ -32,8 +31,6 @@ const buyerLinks: NavItem[] = [
 
 const sellerLinks: NavItem[] = [
   { labelKey: "common.dashboard", to: "/seller/dashboard" },
-  { labelKey: "common.incomingRequests", to: "/seller/rfqs" },
-  { labelKey: "common.myQuotes", to: "/seller/quotes" },
   { labelKey: "common.myOrders", to: "/seller/orders" },
   { labelKey: "common.myProducts", to: "/seller/products" },
   { labelKey: "common.companyProfile", to: "/seller/profile" },
@@ -65,6 +62,7 @@ export default function Navbar() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [cartCount, setCartCount] = useState(0);
   const [pushEnabled, setPushEnabled] = useState(
     typeof window !== "undefined" &&
       "Notification" in window &&
@@ -96,6 +94,37 @@ export default function Navbar() {
           : role === "ADMIN"
             ? t("common.adminPanel")
             : t("common.menu");
+
+  useEffect(() => {
+    const loadCartCount = () => {
+      try {
+        const cart = JSON.parse(localStorage.getItem("tedarikCart") || "[]");
+        setCartCount(
+          Array.isArray(cart)
+            ? cart.reduce((total, item) => total + Number(item?.quantity || 0), 0)
+            : 0,
+        );
+      } catch {
+        setCartCount(0);
+      }
+    };
+
+    loadCartCount();
+
+    window.addEventListener("storage", loadCartCount);
+    window.addEventListener(
+      "tedarik-cart-changed",
+      loadCartCount as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener("storage", loadCartCount);
+      window.removeEventListener(
+        "tedarik-cart-changed",
+        loadCartCount as EventListener,
+      );
+    };
+  }, []);
 
   useEffect(() => {
     const loadUnreadCount = async () => {
@@ -222,6 +251,17 @@ export default function Navbar() {
 
           <LanguageSwitcher />
 
+          {role === "BUYER" && (
+            <Link to="/cart" style={bellStyle} title={t("common.cart")}>
+              🛒
+              {cartCount > 0 && (
+                <span style={badgeStyle}>
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </Link>
+          )}
+
           <Link to="/notifications" style={bellStyle}>
             🔔
             {unreadCount > 0 && (
@@ -277,6 +317,21 @@ export default function Navbar() {
           />
 
           <LanguageSwitcher mobile />
+
+          {role === "BUYER" && (
+            <Link
+              to="/cart"
+              onClick={() => setOpen(false)}
+              style={mobileNotificationStyle}
+            >
+              <span>🛒 {t("common.cart")}</span>
+              {cartCount > 0 && (
+                <span style={mobileBadgeStyle}>
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </Link>
+          )}
 
           <Link
             to="/notifications"

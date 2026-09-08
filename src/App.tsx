@@ -15,17 +15,11 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
 
 import BuyerOrdersPage from "./pages/BuyerOrdersPage";
-import BuyerRfqDetailPage from "./pages/BuyerRfqDetailPage";
-import BuyerRfqsPage from "./pages/BuyerRfqsPage";
 import BuyerQuotesPage from "./pages/BuyerQuotesPage";
-import CreateRfqPage from "./pages/CreateRfqPage";
 
 import SellerOrdersPage from "./pages/SellerOrdersPage";
-import SellerRfqsPage from "./pages/SellerRfqsPage";
 import SellerProductsPage from "./pages/SellerProductsPage";
 import SellerProductCreatePage from "./pages/SellerProductCreatePage";
-import SellerQuotesPage from "./pages/SellerQuotesPage";
-import SellerQuoteCreatePage from "./pages/SellerQuoteCreatePage";
 import SellerProfilePage from "./pages/SellerProfilePage";
 
 import AdminDashboardPage from "./pages/AdminDashboardPage";
@@ -125,42 +119,6 @@ export default function App() {
           }
         />
 
-        <Route
-          path="/buyer/rfqs"
-          element={
-            <PrivateRoute role="BUYER">
-              <BuyerRfqsPage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/buyer/rfqs/new"
-          element={
-            <PrivateRoute role="BUYER">
-              <CreateRfqPage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/buyer/rfqs/:id"
-          element={
-            <PrivateRoute role="BUYER">
-              <BuyerRfqDetailPage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/tekliflerim"
-          element={
-            <PrivateRoute role="BUYER">
-              <BuyerRfqsPage />
-            </PrivateRoute>
-          }
-        />
-
         {/* COMPANY VERIFICATION */}
         <Route
           path="/company/verification"
@@ -191,15 +149,6 @@ export default function App() {
         />
 
         <Route
-          path="/seller/rfqs"
-          element={
-            <PrivateRoute role="SELLER">
-              <SellerRfqsPage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
           path="/seller/products"
           element={
             <PrivateRoute role="SELLER">
@@ -213,24 +162,6 @@ export default function App() {
           element={
             <PrivateRoute role="SELLER">
               <SellerProductCreatePage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/seller/quotes"
-          element={
-            <PrivateRoute role="SELLER">
-              <SellerQuotesPage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/seller/quotes/create"
-          element={
-            <PrivateRoute role="SELLER">
-              <SellerQuoteCreatePage />
             </PrivateRoute>
           }
         />

@@ -5,6 +5,7 @@ const resources = {
   tr: {
     translation: {
       common: {
+        cart: "Sepet",
         home: "Ana Sayfa",
         about: "Hakkımızda",
         services: "Hizmetler",
