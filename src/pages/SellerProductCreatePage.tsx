@@ -41,6 +41,8 @@ export default function SellerProductCreatePage() {
 
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -69,6 +71,122 @@ export default function SellerProductCreatePage() {
 
     loadCategories();
   }, []);
+
+  const generateAiDraft = async () => {
+    setError("");
+    setMessage("");
+
+    if (!aiPrompt.trim()) {
+      setError(t("sellerProductCreatePage.aiPromptRequired"));
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setError(t("sellerProductCreatePage.loginRequired"));
+      return;
+    }
+
+    try {
+      setAiLoading(true);
+
+      const res = await fetch(`${BASE_URL}/api/ai/product-draft`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ prompt: aiPrompt.trim() }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data?.message || t("sellerProductCreatePage.aiFailed"));
+        return;
+      }
+
+      if (data.title) setTitle(String(data.title));
+      if (data.description) setDescription(String(data.description));
+      if (data.moq) setMoq(String(data.moq));
+      if (data.leadTimeDays) setLeadTimeDays(String(data.leadTimeDays));
+
+      if (data.unitType) {
+        const unit = String(data.unitType).toLocaleLowerCase("tr-TR");
+        const unitMap: Record<string, string> = {
+          adet: "adet",
+          koli: "koli",
+          kutu: "koli",
+          kg: "kg",
+          kilogram: "kg",
+          litre: "litre",
+          liter: "litre",
+          metre: "metre",
+          meter: "metre",
+          paket: "paket",
+        };
+
+        if (unitMap[unit]) {
+          setUnitType(unitMap[unit]);
+        }
+      }
+
+      if (data.categoryName && categories.length > 0) {
+        const suggested = String(data.categoryName)
+          .trim()
+          .toLocaleLowerCase("tr-TR");
+
+        let matchedMain: Category | undefined;
+        let matchedChild: Category | undefined;
+
+        for (const main of categories) {
+          const mainName = main.name.trim().toLocaleLowerCase("tr-TR");
+
+          if (
+            mainName === suggested ||
+            mainName.includes(suggested) ||
+            suggested.includes(mainName)
+          ) {
+            matchedMain = main;
+            break;
+          }
+
+          const child = (main.children || []).find((item) => {
+            const childName = item.name.trim().toLocaleLowerCase("tr-TR");
+            return (
+              childName === suggested ||
+              childName.includes(suggested) ||
+              suggested.includes(childName)
+            );
+          });
+
+          if (child) {
+            matchedMain = main;
+            matchedChild = child;
+            break;
+          }
+        }
+
+        if (matchedMain) {
+          setMainCategoryId(matchedMain.id);
+
+          if (matchedChild) {
+            setCategoryId(matchedChild.id);
+          } else if ((matchedMain.children || []).length === 1) {
+            setCategoryId(matchedMain.children![0].id);
+          } else {
+            setCategoryId("");
+          }
+        }
+      }
+    } catch (err) {
+      console.error("AI PRODUCT ERROR:", err);
+      setError(t("sellerProductCreatePage.aiError"));
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -198,6 +316,7 @@ export default function SellerProductCreatePage() {
       setVatRate("20");
       setUploadedImages([]);
       setSelectedFileNames([]);
+      setAiPrompt("");
     } catch (err) {
       console.error("CREATE ERROR:", err);
       setError(t("sellerProductCreatePage.createError"));
@@ -243,6 +362,42 @@ export default function SellerProductCreatePage() {
               padding: isMobile ? 16 : 24,
             }}
           >
+            <section style={aiBoxStyle}>
+              <div style={aiBadgeStyle}>
+                {t("sellerProductCreatePage.aiBadge")}
+              </div>
+
+              <h3 style={aiTitleStyle}>
+                {t("sellerProductCreatePage.aiTitle")}
+              </h3>
+
+              <p style={aiTextStyle}>
+                {t("sellerProductCreatePage.aiText")}
+              </p>
+
+              <textarea
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder={t("sellerProductCreatePage.aiPlaceholder")}
+                style={aiPromptStyle}
+              />
+
+              <button
+                type="button"
+                onClick={generateAiDraft}
+                disabled={aiLoading}
+                style={{
+                  ...aiButtonStyle,
+                  opacity: aiLoading ? 0.65 : 1,
+                  cursor: aiLoading ? "not-allowed" : "pointer",
+                }}
+              >
+                {aiLoading
+                  ? t("sellerProductCreatePage.aiLoading")
+                  : t("sellerProductCreatePage.aiButton")}
+              </button>
+            </section>
+
             <div
               style={{
                 ...gridStyle,
@@ -533,4 +688,55 @@ const fileBoxStyle: CSSProperties = {
   padding: 16,
   borderRadius: 12,
   marginBottom: 20,
+};
+
+const aiBoxStyle: CSSProperties = {
+  background: "#eef6ff",
+  border: "1px solid #bfdbfe",
+  borderRadius: 16,
+  padding: 20,
+  marginBottom: 22,
+};
+
+const aiBadgeStyle: CSSProperties = {
+  display: "inline-block",
+  fontSize: 12,
+  fontWeight: 800,
+  color: "#1d4ed8",
+  marginBottom: 8,
+};
+
+const aiTitleStyle: CSSProperties = {
+  margin: "0 0 8px",
+  fontSize: 20,
+  color: "#0f172a",
+};
+
+const aiTextStyle: CSSProperties = {
+  margin: "0 0 14px",
+  color: "#475569",
+  lineHeight: 1.6,
+};
+
+const aiPromptStyle: CSSProperties = {
+  width: "100%",
+  minHeight: 90,
+  border: "1px solid #93c5fd",
+  borderRadius: 12,
+  padding: 14,
+  fontSize: 15,
+  boxSizing: "border-box",
+  resize: "vertical",
+  background: "#fff",
+  marginBottom: 12,
+};
+
+const aiButtonStyle: CSSProperties = {
+  border: "none",
+  borderRadius: 12,
+  background: "#1d4ed8",
+  color: "#fff",
+  padding: "13px 18px",
+  fontSize: 15,
+  fontWeight: 700,
 };
