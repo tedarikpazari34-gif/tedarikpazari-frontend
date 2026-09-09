@@ -11,7 +11,7 @@ type NavItem = {
 const buildItems = (t: any): NavItem[] => [
   { label: t("common.home"), icon: "⌂", to: "/" },
   { label: t("common.products"), icon: "⌕", to: "/products" },
-  { label: t("mobileBottomNav.getQuote"), icon: "+", to: "/buyer/rfqs/new" },
+  { label: t("mobileBottomNav.cart"), icon: "🛒", to: "/cart" },
   { label: t("common.favorites"), icon: "♡", to: "/favorites" },
   { label: t("mobileBottomNav.account"), icon: "◉", to: "/panel" },
 ]

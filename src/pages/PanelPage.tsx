@@ -15,14 +15,11 @@ import {
 import { Line } from "react-chartjs-2";
 
 import OrderList from "../components/OrderList";
-import QuoteList from "../components/QuoteList";
 import DisputeList from "../components/DisputeList";
-import RFQList from "../components/RFQList";
 import CategorySidebar from "../components/CategorySidebar";
 import DashboardStats from "../components/DashboardStats";
 import ProductCreateForm from "../components/ProductCreateForm";
 import ProductGrid from "../components/ProductGrid";
-import RFQMarketplace from "../components/RFQMarketplace";
 import { authFetch } from "../api";
 
 ChartJS.register(
@@ -158,22 +155,12 @@ export default function PanelPage() {
 
   const [token, setToken] = useState<string>(getStoredToken());
   const [role, setRole] = useState<string>(getStoredRole());
-
-  const [rfqs, setRfqs] = useState<RFQ[]>([]);
-  const [openRfqs, setOpenRfqs] = useState<RFQ[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [disputes, setDisputes] = useState<DisputeItem[]>([]);
 
   const [searchText, setSearchText] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedQuoteRfq, setSelectedQuoteRfq] = useState<RFQ | null>(null);
-  const [quotePrice, setQuotePrice] = useState("");
-  const [quoteDays, setQuoteDays] = useState("");
-  const [quoteNote, setQuoteNote] = useState("");
-  const [rfqProduct, setRfqProduct] = useState<Product | null>(null);
-  const [rfqQuantity, setRfqQuantity] = useState(100);
-  const [rfqNote, setRfqNote] = useState("");
 
   const [adminCompanies, setAdminCompanies] = useState<any[]>([]);
   const [adminMetrics, setAdminMetrics] = useState<any>(null);
@@ -285,8 +272,6 @@ export default function PanelPage() {
 
     setToken("");
     setRole("");
-    setRfqs([]);
-    setOpenRfqs([]);
     setQuotes([]);
     setOrders([]);
     setDisputes([]);
@@ -301,113 +286,13 @@ export default function PanelPage() {
     loadProducts(selectedCategory || undefined, searchText.trim() || undefined);
   };
 
-  const submitRFQ = async () => {
-    if (!rfqProduct) return;
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/rfqs`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({
-          productId: rfqProduct.id,
-          quantity: rfqQuantity,
-          note: rfqNote,
-        }),
-      });
 
-      const data = await res.json();
 
-      if (!res.ok) {
-        alert(JSON.stringify(data));
-        return;
-      }
 
-      alert(t("panelPage.errors.rfqSent"));
 
-      setRfqProduct(null);
-      setRfqQuantity(100);
-      setRfqNote("");
 
-      loadMyRFQs();
-    } catch (err) {
-      console.error(err);
-      alert(t("panelPage.errors.rfqError"));
-    }
-  };
 
-  const loadMyRFQs = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/rfqs/mine`, {
-        headers: authHeaders(),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(JSON.stringify(data));
-        return;
-      }
-
-      setRfqs(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error(err);
-      alert(t("panelPage.errors.rfqLoadError"));
-    }
-  };
-
-  const loadOpenRFQs = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/rfqs/open`, {
-        headers: authHeaders(),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(JSON.stringify(data));
-        return;
-      }
-
-      setOpenRfqs(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error(err);
-      alert(t("panelPage.errors.openRfqLoadError"));
-    }
-  };
-
-  const sendQuote = async (
-    rfqId: string,
-    unitPrice: number,
-    deliveryDays: number,
-    sellerNote: string
-  ) => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/quotes`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({
-          rfqId,
-          unitPrice,
-          deliveryDays,
-          sellerNote,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(JSON.stringify(data));
-        return;
-      }
-
-      alert(t("panelPage.errors.quoteSent"));
-      loadQuotes();
-      loadOpenRFQs();
-    } catch (err) {
-      console.error(err);
-      alert(t("panelPage.errors.quoteSendError"));
-    }
-  };
 
   const loadQuotes = async () => {
     try {
@@ -453,7 +338,6 @@ export default function PanelPage() {
       alert(t("panelPage.errors.orderCreated"));
       loadQuotes();
       loadOrders();
-      loadMyRFQs();
     } catch (err) {
       console.error(err);
       alert(t("panelPage.errors.quoteAcceptError"));
@@ -779,11 +663,9 @@ export default function PanelPage() {
 
     loadOrders();
     loadQuotes();
-    loadMyRFQs();
     loadDisputes();
 
     if (role === "SELLER") {
-      loadOpenRFQs();
     }
 
     if (role === "ADMIN") {
@@ -817,18 +699,6 @@ export default function PanelPage() {
       ["PAID", "PREPARING", "SHIPPED", "COMPLETED"].includes(order.status)
     ).length;
   }, [orders]);
-
-  const buyerOpenRfqs = useMemo(() => {
-    return rfqs.filter((rfq) => rfq.status === "OPEN").length;
-  }, [rfqs]);
-
-  const buyerClosedRfqs = useMemo(() => {
-    return rfqs.filter((rfq) => rfq.status === "CLOSED").length;
-  }, [rfqs]);
-
-  const buyerQuoteCount = useMemo(() => {
-    return quotes.length;
-  }, [quotes]);
 
   const buyerOpenDisputes = useMemo(() => {
     return disputes.filter((d) => d.status !== "RESOLVED").length;
@@ -1576,11 +1446,7 @@ export default function PanelPage() {
         activeOrders={activeOrders}
         completedOrders={completedOrders}
         paidOrders={paidOrders}
-        openRfqsCount={openRfqs.length}
         totalOrders={orders.length}
-        buyerOpenRfqs={buyerOpenRfqs}
-        buyerClosedRfqs={buyerClosedRfqs}
-        buyerQuoteCount={buyerQuoteCount}
         buyerOpenDisputes={buyerOpenDisputes}
         buyerCompletedOrders={
           orders.filter((o) => o.status === "COMPLETED").length
@@ -1630,44 +1496,10 @@ export default function PanelPage() {
           <ProductGrid
             products={products}
             onSelectProduct={(product) => setSelectedProduct(product)}
-            onOpenRfq={(product) => setRfqProduct(product)}
-          />
-
-          <RFQList
-            role={role}
-            rfqs={rfqs}
-            openRfqs={openRfqs}
-            openQuoteModal={(rfq) => setSelectedQuoteRfq(rfq)}
-            panelCardStyle={panelCardStyle}
-          />
-
-          <QuoteList
-            quotes={quotes}
-            role={role}
-            acceptQuote={acceptQuote}
-            panelCardStyle={panelCardStyle}
-          />
-
-          <OrderList
-            orders={orders}
-            role={role}
-            payOrder={payOrder}
-            prepareOrder={prepareOrder}
-            shipOrder={shipOrder}
-            completeOrder={completeOrder}
-            openDispute={openDispute}
-            panelCardStyle={panelCardStyle}
-            statusBadgeStyle={statusBadgeStyle}
           />
 
           <DisputeList disputes={disputes} panelCardStyle={panelCardStyle} />
 
-          {role === "SELLER" && (
-            <RFQMarketplace
-              rfqs={openRfqs}
-              openQuoteModal={(rfq) => setSelectedQuoteRfq(rfq)}
-            />
-          )}
         </div>
       </div>
 
@@ -1687,15 +1519,6 @@ export default function PanelPage() {
           {t("panelPage.marketplace.bulkText")}
         </p>
 
-        <button
-          style={{
-            marginTop: 16,
-            ...primaryButtonStyle,
-          }}
-          onClick={() => window.scrollTo({ top: 1200, behavior: "smooth" })}
-        >
-          {t("panelPage.marketplace.createRfq")}
-        </button>
       </div>
 
       {selectedProduct && (
@@ -1779,16 +1602,6 @@ export default function PanelPage() {
 
               <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
                 <button
-                  onClick={() => {
-                    setSelectedProduct(null);
-                    setRfqProduct(selectedProduct);
-                  }}
-                  style={primaryButtonStyle}
-                >
-                  {t("panelPage.productModal.sendRfq")}
-                </button>
-
-                <button
                   onClick={() => setSelectedProduct(null)}
                   style={secondaryButtonStyle}
                 >
@@ -1800,136 +1613,7 @@ export default function PanelPage() {
         </div>
       )}
 
-      {selectedQuoteRfq && (
-        <div
-          style={modalOverlayStyle}
-          onClick={() => setSelectedQuoteRfq(null)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{ ...modalContentStyle, width: 400 }}
-          >
-            <h2>{t("panelPage.quoteModal.title")}</h2>
 
-            <p>
-              <b>{selectedQuoteRfq.product?.title || "RFQ"}</b>
-            </p>
-
-            <input
-              placeholder={t("panelPage.quoteModal.unitPrice")}
-              value={quotePrice}
-              onChange={(e) => setQuotePrice(e.target.value)}
-              style={{ ...inputStyle, width: "100%", marginTop: 8 }}
-            />
-
-            <input
-              placeholder={t("panelPage.quoteModal.deliveryDays")}
-              value={quoteDays}
-              onChange={(e) => setQuoteDays(e.target.value)}
-              style={{ ...inputStyle, width: "100%", marginTop: 8 }}
-            />
-
-            <textarea
-              placeholder={t("panelPage.quoteModal.sellerNote")}
-              value={quoteNote}
-              onChange={(e) => setQuoteNote(e.target.value)}
-              style={{
-                ...inputStyle,
-                width: "100%",
-                marginTop: 8,
-                minHeight: 100,
-              }}
-            />
-
-            <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-              <button
-                onClick={() => {
-                  setSelectedQuoteRfq(null);
-                  setQuotePrice("");
-                  setQuoteDays("");
-                  setQuoteNote("");
-                }}
-                style={secondaryButtonStyle}
-              >
-                {t("panelPage.quoteModal.cancel")}
-              </button>
-
-              <button
-                onClick={async () => {
-                  if (!selectedQuoteRfq) return;
-
-                  await sendQuote(
-                    selectedQuoteRfq.id,
-                    Number(quotePrice),
-                    Number(quoteDays),
-                    quoteNote
-                  );
-
-                  setSelectedQuoteRfq(null);
-                  setQuotePrice("");
-                  setQuoteDays("");
-                  setQuoteNote("");
-                }}
-                style={primaryButtonStyle}
-              >
-                {t("panelPage.quoteModal.send")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {rfqProduct && (
-        <div style={modalOverlayStyle} onClick={() => setRfqProduct(null)}>
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{ ...modalContentStyle, width: 400 }}
-          >
-            <h2>{t("panelPage.rfqModal.title")}</h2>
-
-            <p>
-              <b>{rfqProduct.title}</b>
-            </p>
-
-            <div style={{ marginTop: 12 }}>
-              {t("panelPage.rfqModal.quantity")}
-              <input
-                type="number"
-                value={rfqQuantity}
-                onChange={(e) => setRfqQuantity(Number(e.target.value))}
-                style={{ ...inputStyle, width: "100%", marginTop: 4 }}
-              />
-            </div>
-
-            <div style={{ marginTop: 12 }}>
-              {t("panelPage.rfqModal.note")}
-              <textarea
-                value={rfqNote}
-                onChange={(e) => setRfqNote(e.target.value)}
-                style={{
-                  ...inputStyle,
-                  width: "100%",
-                  marginTop: 4,
-                  minHeight: 100,
-                  resize: "vertical",
-                }}
-              />
-            </div>
-
-            <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
-              <button
-                onClick={() => setRfqProduct(null)}
-                style={secondaryButtonStyle}
-              >
-                {t("panelPage.quoteModal.cancel")}
-              </button>
-              <button onClick={submitRFQ} style={primaryButtonStyle}>
-                {t("panelPage.quoteModal.send")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

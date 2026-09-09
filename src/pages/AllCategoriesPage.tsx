@@ -118,8 +118,8 @@ export default function AllCategoriesPage() {
           </p>
         </div>
 
-        <Link to="/buyer/rfqs/new" style={ctaButtonStyle}>
-          {t("allCategoriesPage.createRequest")}
+        <Link to="/products" style={ctaButtonStyle}>
+          {t("allCategoriesPage.browseProducts")}
         </Link>
       </section>
     </main>

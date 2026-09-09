@@ -58,7 +58,7 @@ function getPrice(product: Product, t: any, locale: string) {
   const value = product.price ?? product.basePrice;
 
   if (value === undefined || value === null || value === "") {
-    return t("categoryPage.getQuote");
+    return t("categoryPage.priceInfo");
   }
 
   const numeric = Number(value);
@@ -280,12 +280,6 @@ export default function CategoryPage() {
           </span>
         </div>
 
-        <Link
-          to={`/buyer/rfqs/new?category=${encodeURIComponent(categoryTitle)}`}
-          style={rfqButtonStyle}
-        >
-          {t("categoryPage.requestCategoryQuote")}
-        </Link>
       </section>
 
       {loading ? (
@@ -297,12 +291,6 @@ export default function CategoryPage() {
             {t("categoryPage.emptyText")}
           </p>
 
-          <Link
-            to={`/buyer/rfqs/new?category=${encodeURIComponent(categoryTitle)}`}
-            style={quoteButtonStyle}
-          >
-            {t("categoryPage.createQuoteRequest")}
-          </Link>
         </div>
       ) : (
         <section style={gridStyle}>
@@ -358,14 +346,6 @@ export default function CategoryPage() {
                       {t("categoryPage.view")}
                     </Link>
 
-                    <Link
-                      to={`/buyer/rfqs/new?productId=${product.id}&product=${encodeURIComponent(
-                        getTitle(product, t)
-                      )}`}
-                      style={quoteButtonStyle}
-                    >
-                      {t("categoryPage.getQuote")}
-                    </Link>
                   </div>
                 </div>
               </article>
@@ -500,14 +480,6 @@ const countTextStyle: CSSProperties = {
   fontWeight: 600,
 };
 
-const rfqButtonStyle: CSSProperties = {
-  textDecoration: "none",
-  background: "#16a34a",
-  color: "white",
-  padding: "11px 16px",
-  borderRadius: 12,
-  fontWeight: 900,
-};
 
 const gridStyle: CSSProperties = {
   maxWidth: 1180,
@@ -618,16 +590,6 @@ const detailButtonStyle: CSSProperties = {
   fontWeight: 900,
 };
 
-const quoteButtonStyle: CSSProperties = {
-  flex: 1,
-  textAlign: "center",
-  textDecoration: "none",
-  background: "#2563eb",
-  color: "white",
-  padding: "10px 14px",
-  borderRadius: 10,
-  fontWeight: 900,
-};
 
 const mutedTextStyle: CSSProperties = {
   color: "#64748b",

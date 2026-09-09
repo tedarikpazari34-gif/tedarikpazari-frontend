@@ -7,12 +7,8 @@ interface Props {
   activeOrders: number;
   completedOrders: number;
   paidOrders: number;
-  openRfqsCount: number;
   totalOrders: number;
 
-  buyerOpenRfqs: number;
-  buyerClosedRfqs: number;
-  buyerQuoteCount: number;
   buyerOpenDisputes: number;
   buyerCompletedOrders: number;
   buyerPendingPayments: number;
@@ -24,11 +20,7 @@ export default function DashboardStats({
   activeOrders,
   completedOrders,
   paidOrders,
-  openRfqsCount,
   totalOrders,
-  buyerOpenRfqs,
-  buyerClosedRfqs,
-  buyerQuoteCount,
   buyerOpenDisputes,
   buyerCompletedOrders,
   buyerPendingPayments,
@@ -48,21 +40,6 @@ export default function DashboardStats({
               marginBottom: 24,
             }}
           >
-            <div style={darkCardStyle}>
-              <div style={labelStyle}>{t("dashboardStats.openRfq")}</div>
-              <div style={valueStyle}>{buyerOpenRfqs}</div>
-            </div>
-
-            <div style={darkCardStyle}>
-              <div style={labelStyle}>{t("dashboardStats.closedRfq")}</div>
-              <div style={valueStyle}>{buyerClosedRfqs}</div>
-            </div>
-
-            <div style={darkCardStyle}>
-              <div style={labelStyle}>{t("dashboardStats.receivedQuotes")}</div>
-              <div style={valueStyle}>{buyerQuoteCount}</div>
-            </div>
-
             <div style={darkCardStyle}>
               <div style={labelStyle}>{t("dashboardStats.orderCount")}</div>
               <div style={valueStyle}>{totalOrders}</div>
@@ -118,11 +95,6 @@ export default function DashboardStats({
             </div>
 
             <div style={darkCardStyle}>
-              <div style={labelStyle}>{t("dashboardStats.openRfq")}</div>
-              <div style={valueStyle}>{openRfqsCount}</div>
-            </div>
-
-            <div style={darkCardStyle}>
               <div style={labelStyle}>{t("dashboardStats.totalOrders")}</div>
               <div style={valueStyle}>{totalOrders}</div>
             </div>
@@ -146,10 +118,6 @@ export default function DashboardStats({
               <div style={lightValueStyle}>{paidOrders}</div>
             </div>
 
-            <div style={lightCardStyle}>
-              <div style={lightLabelStyle}>{t("dashboardStats.pendingRfqRequests")}</div>
-              <div style={lightValueStyle}>{openRfqsCount}</div>
-            </div>
           </div>
         </>
       )}

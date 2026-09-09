@@ -138,8 +138,6 @@ export default function BuyerDashboardPage() {
       {error && <div style={errorStyle}>{error}</div>}
 
       <div style={statGridStyle}>
-        <StatCard title={t("buyerDashboard.openRfqs")} value={data.openRfqs} icon="📋" />
-        <StatCard title={t("buyerDashboard.receivedQuotes")} value={data.receivedQuotes} icon="💬" />
         <StatCard
           title={t("buyerDashboard.pendingPayment")}
           value={data.pendingPaymentOrders}

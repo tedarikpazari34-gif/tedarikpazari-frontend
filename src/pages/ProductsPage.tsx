@@ -102,13 +102,13 @@ function getImage(product: Product) {
 
 function getPrice(
   product: Product,
-  quoteLabel: string,
+  priceFallback: string,
   locale: string
 ) {
   const value = product.price ?? product.basePrice;
 
   if (value === undefined || value === null || value === "") {
-    return quoteLabel;
+    return priceFallback;
   }
 
   const numeric = Number(value);
@@ -486,9 +486,6 @@ const res = await fetch(`${API}/products?${query.toString()}`);
           </span>
         </div>
 
-        <Link to="/buyer/rfqs/new" style={rfqButton}>
-          {t("productsPage.createBulkRequest")}
-        </Link>
       </section>
 
       {loading ? (
@@ -499,9 +496,6 @@ const res = await fetch(`${API}/products?${query.toString()}`);
           <p style={{ color: "#64748b" }}>
             {t("productsPage.notFoundDescription")}
           </p>
-          <Link to="/buyer/rfqs/new" style={quoteBtn}>
-            {t("productsPage.createRequest")}
-          </Link>
         </div>
       ) : (
         <div style={grid}>
@@ -606,7 +600,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                       <strong style={priceText}>
                         {getPrice(
                           product,
-                          t("productsPage.getQuote"),
+                          t("productsPage.priceInfo"),
                           i18n.language
                         )}
                       </strong>
@@ -638,18 +632,6 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                   <div style={actions}>
                     <Link to={`/product/${product.id}`} style={detailBtn}>
                       {t("productsPage.view")}
-                    </Link>
-
-                    <Link
-                      to={`/buyer/rfqs/new?productId=${product.id}&product=${encodeURIComponent(
-                        getProductTitle(
-                          product,
-                          t("productsPage.productFallback")
-                        )
-                      )}`}
-                      style={quoteBtn}
-                    >
-                      {t("productsPage.getQuote")}
                     </Link>
                   </div>
                 </div>
@@ -865,25 +847,7 @@ const detailBtn: CSSProperties = {
   fontWeight: 900,
 };
 
-const quoteBtn: CSSProperties = {
-  flex: 1,
-  textAlign: "center",
-  textDecoration: "none",
-  background: "#2563eb",
-  color: "white",
-  padding: "10px 14px",
-  borderRadius: 10,
-  fontWeight: 900,
-};
 
-const rfqButton: CSSProperties = {
-  textDecoration: "none",
-  background: "#16a34a",
-  color: "white",
-  padding: "11px 16px",
-  borderRadius: 12,
-  fontWeight: 900,
-};
 
 const empty: CSSProperties = {
   maxWidth: 1180,

@@ -20,7 +20,6 @@ type Product = {
   leadTimeDays?: number | null;
   stockType?: string | null;
   vatRate?: number | null;
-  rfqEnabled?: boolean;
   images?: ProductImage[];
   category?: {
     id?: string;
@@ -300,14 +299,6 @@ export default function CompareProductsPage() {
               )}
             />
 
-            <CompareRow
-              label="RFQ"
-              values={products.map((product) =>
-                product.rfqEnabled
-                  ? t("compareProductsPage.quoteAvailable")
-                  : t("compareProductsPage.closed")
-              )}
-            />
 
             <CompareRow
               label={t("compareProductsPage.supplier")}
@@ -349,18 +340,6 @@ export default function CompareProductsPage() {
 
             <div style={rowLabelStyle}>{t("compareProductsPage.action")}</div>
 
-            {products.map((product) => (
-              <div key={`action-${product.id}`} style={cellStyle}>
-                <Link
-                  to={`/buyer/rfqs/new?productId=${product.id}&product=${encodeURIComponent(
-                    product.title
-                  )}`}
-                  style={quoteButtonStyle}
-                >
-                  {t("compareProductsPage.requestQuote")}
-                </Link>
-              </div>
-            ))}
           </div>
         </section>
       )}
@@ -533,16 +512,6 @@ const cellStyle: CSSProperties = {
   lineHeight: 1.5,
 };
 
-const quoteButtonStyle: CSSProperties = {
-  width: "100%",
-  padding: "11px 12px",
-  borderRadius: 11,
-  color: "#ffffff",
-  background: "#2563eb",
-  textAlign: "center",
-  textDecoration: "none",
-  fontWeight: 900,
-};
 
 const stateCardStyle: CSSProperties = {
   maxWidth: 760,

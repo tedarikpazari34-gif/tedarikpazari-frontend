@@ -14,13 +14,11 @@ interface Product {
 interface Props {
   products: Product[];
   onSelectProduct?: (product: Product) => void;
-  onOpenRfq?: (product: Product) => void;
 }
 
 export default function ProductGrid({
   products,
   onSelectProduct,
-  onOpenRfq,
 }: Props) {
   const { t } = useTranslation();
 
@@ -96,13 +94,6 @@ export default function ProductGrid({
                 >
                   {t("productGrid.detail")}
                 </button>
-
-                <button
-                  onClick={() => onOpenRfq?.(p)}
-                  style={primaryButton}
-                >
-                  {t("productGrid.sendRfq")}
-                </button>
               </div>
             </div>
           </div>
@@ -112,16 +103,6 @@ export default function ProductGrid({
   );
 }
 
-const primaryButton: React.CSSProperties = {
-  flex: 1,
-  background: "#111827",
-  color: "#fff",
-  border: "none",
-  borderRadius: 8,
-  padding: "10px 12px",
-  cursor: "pointer",
-  fontWeight: 700,
-};
 
 const secondaryButton: React.CSSProperties = {
   flex: 1,

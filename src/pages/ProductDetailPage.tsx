@@ -23,7 +23,6 @@ type Product = {
   leadTimeDays?: number | null;
   stockType?: string | null;
   vatRate?: number | null;
-  rfqEnabled: boolean;
   isActive: boolean;
   isApproved: boolean;
   createdAt: string;
@@ -501,10 +500,6 @@ export default function ProductDetailPage() {
           </div>
 
           <div style={badgeRowStyle}>
-            {product.rfqEnabled && (
-              <span style={rfqBadgeStyle}>{t("productDetailPage.rfqAvailable")}</span>
-            )}
-
             <span
               style={{
                 ...approvalBadgeStyle,
@@ -720,20 +715,6 @@ export default function ProductDetailPage() {
                 style={secondaryButtonStyle}
               >
                 {t("productDetailPage.viewCart")}
-              </button>
-            )}
-
-            {product.rfqEnabled && (
-              <button
-                type="button"
-                onClick={() =>
-                  navigate(
-                    `/buyer/rfqs/new?productId=${product.id}&product=${encodeURIComponent(product.title)}`
-                  )
-                }
-                style={secondaryButtonStyle}
-              >
-                {t("productDetailPage.requestQuote")}
               </button>
             )}
 
@@ -989,14 +970,6 @@ const verifiedBadgeStyle: CSSProperties = {
   fontWeight: 900,
 };
 
-const rfqBadgeStyle: CSSProperties = {
-  background: "#dbeafe",
-  color: "#1d4ed8",
-  padding: "7px 11px",
-  borderRadius: 999,
-  fontSize: 12,
-  fontWeight: 900,
-};
 
 const approvalBadgeStyle: CSSProperties = {
   padding: "7px 11px",

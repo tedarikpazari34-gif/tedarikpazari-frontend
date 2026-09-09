@@ -51,16 +51,6 @@ export default function SellerLayout({
       icon: "➕",
     },
     {
-      label: t("sellerLayout.incomingRequests"),
-      href: "/seller/rfqs",
-      icon: "📩",
-    },
-    {
-      label: t("sellerLayout.myQuotes"),
-      href: "/seller/quotes",
-      icon: "💬",
-    },
-    {
       label: t("sellerLayout.orders"),
       href: "/seller/orders",
       icon: "🧾",

@@ -513,7 +513,7 @@ export default function HomePage() {
                 >
                   {[
                     { value: "🛡️", label: t("homePage.stats.safeTrade") },
-                    { value: "📄", label: t("homePage.stats.rfq") },
+                    { value: "🛒", label: t("homePage.stats.rfq") },
                     { value: "💳", label: t("homePage.stats.payment") },
                     { value: "🚚", label: t("homePage.stats.delivery") },
                   ].map((item) => (
@@ -1204,23 +1204,6 @@ export default function HomePage() {
               >
                 {t("homePage.browseProducts")}
               </Link>
-              {!isMobile && (
-                <Link
-                  to={`/products?q=${encodeURIComponent(search.trim())}`}
-                  style={{
-                    textDecoration: "none",
-                    background: "#ffffff",
-                    color: "#0f172a",
-                    padding: "13px 20px",
-                    borderRadius: 12,
-                    fontWeight: 700,
-                    boxSizing: "border-box",
-                    textAlign: "center",
-                  }}
-                >
-                  {t("homePage.browseProducts")}
-                </Link>
-              )}
             </div>
           </section>
         </div>
