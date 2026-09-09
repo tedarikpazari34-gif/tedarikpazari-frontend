@@ -310,25 +310,33 @@ export default function SellerProductCreatePage() {
                 <option value="paket">{t("sellerProductCreatePage.package")}</option>
               </select>
 
-              <input
-                type="number"
-                min="1"
-                placeholder={t("sellerProductCreatePage.moq")}
-                value={moq}
-                onChange={(e) => setMoq(e.target.value)}
-                style={inputStyle}
-                required
-              />
+              <div>
+                <label style={fieldLabelStyle}>
+                  {t("sellerProductCreatePage.moq")}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={moq}
+                  onChange={(e) => setMoq(e.target.value)}
+                  style={inputStyle}
+                  required
+                />
+              </div>
 
-              <input
-                type="number"
-                min="1"
-                placeholder={t("sellerProductCreatePage.leadTime")}
-                value={leadTimeDays}
-                onChange={(e) => setLeadTimeDays(e.target.value)}
-                style={inputStyle}
-                required
-              />
+              <div>
+                <label style={fieldLabelStyle}>
+                  {t("sellerProductCreatePage.leadTime")}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={leadTimeDays}
+                  onChange={(e) => setLeadTimeDays(e.target.value)}
+                  style={inputStyle}
+                  required
+                />
+              </div>
 
               <select
                 value={stockType}
@@ -445,6 +453,14 @@ const gridStyle: CSSProperties = {
   gridTemplateColumns: "1fr 1fr",
   gap: 16,
   marginBottom: 20,
+};
+
+const fieldLabelStyle: CSSProperties = {
+  display: "block",
+  marginBottom: 6,
+  fontSize: 13,
+  fontWeight: 600,
+  color: "#475569",
 };
 
 const inputStyle: CSSProperties = {
