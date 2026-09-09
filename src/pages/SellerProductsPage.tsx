@@ -206,18 +206,6 @@ export default function SellerProductsPage() {
                     <span
                       style={{
                         ...smallBadgeStyle,
-                        background: product.rfqEnabled ? "#dbeafe" : "#e5e7eb",
-                        color: product.rfqEnabled ? "#1d4ed8" : "#374151",
-                      }}
-                    >
-                      {product.rfqEnabled
-                        ? t("sellerProductsPage.rfqOpen")
-                        : t("sellerProductsPage.rfqClosed")}
-                    </span>
-
-                    <span
-                      style={{
-                        ...smallBadgeStyle,
                         background: product.isActive ? "#dcfce7" : "#fee2e2",
                         color: product.isActive ? "#166534" : "#991b1b",
                       }}

@@ -720,11 +720,6 @@ export default function PanelPage() {
         title: t("panelPage.admin.totalProducts"),
         value: adminMetrics?.marketplace?.productsTotal ?? 0,
       },
-      { title: t("panelPage.admin.totalRfqs"), value: adminMetrics?.marketplace?.rfqsTotal ?? 0 },
-      {
-        title: t("panelPage.admin.totalQuotes"),
-        value: adminMetrics?.marketplace?.quotesTotal ?? 0,
-      },
       { title: t("panelPage.admin.totalOrders"), value: adminMetrics?.orders?.total ?? 0 },
       {
         title: t("panelPage.admin.completedOrders"),

@@ -330,10 +330,6 @@ export default function AdminDashboardPage() {
         </section>
 
         <section style={statsStyle}>
-          <Stat label={t("adminDashboardPage.totalRfqs")} value={metrics?.totalRfqs ?? rfqs.length} />
-
-          <Stat label={t("adminDashboardPage.activeRfqs")} value={activeRfqs} />
-
           <Stat label={t("adminDashboardPage.totalOrders")} value={totalOrders} />
 
           <Stat label={t("adminDashboardPage.paidOrders")} value={paidOrders} />
