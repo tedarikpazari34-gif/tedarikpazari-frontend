@@ -13,8 +13,6 @@ type RecentOrder = {
 type SellerDashboard = {
   activeProducts: number;
   totalProducts: number;
-  openRfqs: number;
-  sentQuotes: number;
   activeOrders: number;
   completedOrders: number;
   totalOrders: number;
@@ -28,8 +26,6 @@ type SellerDashboard = {
 const emptyDashboard: SellerDashboard = {
   activeProducts: 0,
   totalProducts: 0,
-  openRfqs: 0,
-  sentQuotes: 0,
   activeOrders: 0,
   completedOrders: 0,
   totalOrders: 0,
@@ -135,16 +131,6 @@ export default function SellerDashboardPage() {
           icon="🏷️"
         />
         <StatCard
-          title={t("sellerDashboardPage.openRfqs")}
-          value={data.openRfqs}
-          icon="📋"
-        />
-        <StatCard
-          title={t("sellerDashboardPage.sentQuotes")}
-          value={data.sentQuotes}
-          icon="💬"
-        />
-        <StatCard
           title={t("sellerDashboardPage.activeOrders")}
           value={data.activeOrders}
           icon="📦"
@@ -177,14 +163,6 @@ export default function SellerDashboardPage() {
           <strong>{t("sellerDashboardPage.myProducts")}</strong>
           <small style={quickTextStyle}>
             {t("sellerDashboardPage.manageProducts")}
-          </small>
-        </Link>
-
-        <Link to="/seller/quotes" style={quickCardStyle}>
-          <span style={quickIconStyle}>📝</span>
-          <strong>{t("sellerDashboardPage.myQuotes")}</strong>
-          <small style={quickTextStyle}>
-            {t("sellerDashboardPage.trackQuotes")}
           </small>
         </Link>
 
