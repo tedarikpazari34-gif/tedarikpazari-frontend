@@ -174,6 +174,8 @@ export default function AdminCompaniesPage() {
   };
 
   const blockCompany = async (id: string) => {
+    if (!window.confirm(t("adminCompaniesPage.suspendConfirm"))) return;
+
     try {
       setActionId(id);
 
@@ -500,7 +502,9 @@ export default function AdminCompaniesPage() {
                         miniApproveButtonStyle
                       }
                     >
-                      {t("adminCompaniesPage.approve")}
+                      {company.status === "BLOCKED"
+                        ? t("adminCompaniesPage.reactivate")
+                        : t("adminCompaniesPage.approve")}
                     </button>
                   )}
                 </span>
@@ -814,7 +818,9 @@ export default function AdminCompaniesPage() {
                     disabled={actionId === selectedCompany.id}
                     style={approveButtonStyle}
                   >
-                    {t("adminCompaniesPage.approve")}
+                    {selectedCompany.status === "BLOCKED"
+                      ? t("adminCompaniesPage.reactivate")
+                      : t("adminCompaniesPage.approve")}
                   </button>
                 )}
 
@@ -886,7 +892,7 @@ function CompanyCard({
 
       <div style={infoGridStyle}>
         <Info
-          label="Email"
+          label={t("adminCompaniesPage.email")}
           value={
             company.email ||
             company.users?.[0]?.email ||
@@ -895,7 +901,7 @@ function CompanyCard({
         />
 
         <Info
-          label="Rol"
+          label={t("adminCompaniesPage.role")}
           value={getRoleLabel(role, t)}
         />
       </div>

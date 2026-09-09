@@ -136,7 +136,7 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
             marginBottom: 6,
           }}
         >
-          <strong>MOQ:</strong> {product.moq} {product.unitType}
+          <strong>{t("productCard.moq")}</strong> {product.moq} {product.unitType}
         </div>
 
         <div

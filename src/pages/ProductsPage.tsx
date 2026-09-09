@@ -370,7 +370,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     <main style={page}>
       <section style={hero}>
         <div>
-          <div style={eyebrow}>TEDARİK PAZARI</div>
+          <div style={eyebrow}>{t("common.brandName")}</div>
           <h1 style={title}>{t("productsPage.discover")}</h1>
           <p style={desc}>
             {t("productsPage.description")}
@@ -576,7 +576,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
 
                   <div style={featureGrid}>
                     <div style={featureItem}>
-                      <span>📦 MOQ</span>
+                      <span>📦 {t("productCard.moq").replace(":", "")}</span>
                       <strong>
                         {product.moq || 1} {product.unitType || t("productsPage.piece")}
                       </strong>

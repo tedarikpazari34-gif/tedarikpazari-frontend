@@ -165,7 +165,7 @@ export default function RegisterPage() {
               </button>
             </div>
 
-            <div style={badgeStyle}>B2B Marketplace</div>
+            <div style={badgeStyle}>{t("common.marketplace")}</div>
           </div>
 
           <div style={{ marginBottom: 30 }}>

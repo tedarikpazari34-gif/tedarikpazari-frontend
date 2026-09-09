@@ -144,7 +144,7 @@ const buildPages = (t: (key: string) => string): Record<string, PageContent> => 
 
         <h2>{t("corporatePage.contact.legalTitle")}</h2>
         <div style={{ margin: "20px 0 28px", padding: 22, borderRadius: 16, background: "#f8fafc", border: "1px solid #e2e8f0" }}>
-          <p><strong>{t("corporatePage.contact.businessBrand")}</strong> Tedarik Pazarı</p>
+          <p><strong>{t("corporatePage.contact.businessBrand")}</strong> {t("common.brandName")}</p>
           <p><strong>{t("corporatePage.contact.email")}:</strong> tedarikpazari34@gmail.com</p>
         </div>
 
