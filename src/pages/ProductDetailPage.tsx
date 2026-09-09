@@ -87,10 +87,12 @@ function stockTypeLabel(value: string | null | undefined, t: any) {
   const labels: Record<string, string> = {
     "Stoktan": t("productDetailPage.inStock"),
     "STOKTAN": t("productDetailPage.inStock"),
+    "STOCK": t("productDetailPage.inStock"),
     "Üretim": t("productDetailPage.production"),
     "URETIM": t("productDetailPage.production"),
     "Sipariş Üzerine": t("productDetailPage.madeToOrder"),
     "SIPARIS_UZERINE": t("productDetailPage.madeToOrder"),
+    "ON_DEMAND": t("productDetailPage.madeToOrder"),
   };
 
   return labels[value] || value;
