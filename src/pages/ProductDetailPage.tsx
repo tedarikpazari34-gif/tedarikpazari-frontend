@@ -305,23 +305,6 @@ export default function ProductDetailPage() {
   const addToCart = () => {
     if (!product) return;
 
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
-
-    if (!token) {
-      localStorage.setItem(
-        "returnUrl",
-        `/product/${product.id}`
-      );
-      navigate("/login");
-      return;
-    }
-
-    if (role !== "BUYER") {
-      alert(t("productDetailPage.cartBuyerOnly"));
-      return;
-    }
-
     if (quantity < product.moq) {
       alert(t("productDetailPage.cartInvalidQuantity"));
       return;
