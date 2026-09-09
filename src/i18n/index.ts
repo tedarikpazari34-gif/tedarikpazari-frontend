@@ -2478,6 +2478,7 @@ const resources = {
   en: {
     translation: {
       common: {
+        cart: "Cart",
         home: "Home",
         about: "About Us",
         services: "Services",
