@@ -33,6 +33,7 @@ export default function SellerProductCreatePage() {
   const [unitType, setUnitType] = useState("adet");
   const [moq, setMoq] = useState("1");
   const [leadTimeDays, setLeadTimeDays] = useState("3");
+  const [stockType, setStockType] = useState("STOCK");
   const [vatRate, setVatRate] = useState("20");
 
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
@@ -156,7 +157,7 @@ export default function SellerProductCreatePage() {
           moq: Number(moq),
           basePrice: Number(basePrice),
           leadTimeDays: Number(leadTimeDays),
-          stockType: "STOCK",
+          stockType,
           vatRate: Number(vatRate),
           rfqEnabled: true,
           imageUrl: coverImage,
@@ -193,6 +194,7 @@ export default function SellerProductCreatePage() {
       setUnitType("adet");
       setMoq("1");
       setLeadTimeDays("3");
+      setStockType("STOCK");
       setVatRate("20");
       setUploadedImages([]);
       setSelectedFileNames([]);
@@ -327,6 +329,15 @@ export default function SellerProductCreatePage() {
                 style={inputStyle}
                 required
               />
+
+              <select
+                value={stockType}
+                onChange={(e) => setStockType(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="STOCK">{t("sellerProductCreatePage.stockInStock")}</option>
+                <option value="ON_DEMAND">{t("sellerProductCreatePage.stockOnDemand")}</option>
+              </select>
 
               <select
                 value={vatRate}
