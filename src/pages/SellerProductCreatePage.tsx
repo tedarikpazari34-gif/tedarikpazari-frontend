@@ -1,6 +1,8 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import SellerLayout from "../components/SellerLayout";
 import { useTranslation } from "react-i18next";
+import { COUNTRIES } from "../constants/countries";
+import { TURKEY_CITIES } from "../constants/turkeyCities";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
 
@@ -30,6 +32,8 @@ export default function SellerProductCreatePage() {
   const [mainCategoryId, setMainCategoryId] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [basePrice, setBasePrice] = useState("");
+  const [country, setCountry] = useState("Türkiye");
+  const [city, setCity] = useState("");
   const [unitType, setUnitType] = useState("adet");
   const [moq, setMoq] = useState("1");
   const [leadTimeDays, setLeadTimeDays] = useState("3");
@@ -271,6 +275,8 @@ export default function SellerProductCreatePage() {
           title,
           description,
           categoryId,
+          country,
+          city,
           unitType,
           moq: Number(moq),
           basePrice: Number(basePrice),
@@ -309,6 +315,8 @@ export default function SellerProductCreatePage() {
       setMainCategoryId("");
       setCategoryId("");
       setBasePrice("");
+      setCountry("Türkiye");
+      setCity("");
       setUnitType("adet");
       setMoq("1");
       setLeadTimeDays("3");
@@ -451,6 +459,47 @@ export default function SellerProductCreatePage() {
                   </option>
                 ))}
               </select>
+
+              <select
+                value={country}
+                onChange={(e) => {
+                  setCountry(e.target.value);
+                  setCity("");
+                }}
+                style={inputStyle}
+                required
+              >
+                <option value="">{t("sellerProductCreatePage.selectCountry")}</option>
+                {COUNTRIES.map((countryName) => (
+                  <option key={countryName} value={countryName}>
+                    {countryName}
+                  </option>
+                ))}
+              </select>
+
+              {country === "Türkiye" ? (
+                <select
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  style={inputStyle}
+                  required
+                >
+                  <option value="">{t("sellerProductCreatePage.selectCity")}</option>
+                  {TURKEY_CITIES.map((cityName) => (
+                    <option key={cityName} value={cityName}>
+                      {cityName}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder={t("sellerProductCreatePage.city")}
+                  style={inputStyle}
+                  required
+                />
+              )}
 
               <select
                 value={unitType}
