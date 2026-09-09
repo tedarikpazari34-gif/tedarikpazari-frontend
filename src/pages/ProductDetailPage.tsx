@@ -17,6 +17,8 @@ type Product = {
   title: string;
   imageUrl?: string | null;
   description?: string | null;
+  country?: string | null;
+  city?: string | null;
   unitType: string;
   moq: number;
   basePrice: string;
@@ -551,6 +553,14 @@ export default function ProductDetailPage() {
                   ? `%${product.vatRate}`
                   : "-"
               }
+            />
+            <InfoBox
+              label={t("productDetailPage.country")}
+              value={product.country || product.seller?.country || "-"}
+            />
+            <InfoBox
+              label={t("productDetailPage.city")}
+              value={product.city || product.seller?.city || "-"}
             />
             <InfoBox
               label={t("productDetailPage.supplier")}
