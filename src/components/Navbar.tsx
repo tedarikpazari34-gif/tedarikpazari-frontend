@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { disconnectSocket, getSocket } from "../lib/socket";
 import { enablePushNotifications } from "../pushNotifications";
+import { SUPPORTED_LANGUAGES, type SupportedLanguageCode } from "../constants/languages";
 
 type NavItem = {
   labelKey: string;
@@ -384,39 +385,34 @@ function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
   const { i18n } = useTranslation();
   const currentLanguage = i18n.resolvedLanguage || i18n.language || "tr";
 
-  const changeLanguage = (language: "tr" | "en") => {
+  const visibleLanguages = SUPPORTED_LANGUAGES.filter(
+    (language) => ["tr", "en", "ka"].includes(language.code)
+  );
+
+  const changeLanguage = (language: SupportedLanguageCode) => {
     i18n.changeLanguage(language);
   };
 
   return (
     <div style={mobile ? mobileLanguageStyle : languageStyle}>
-      <button
-        type="button"
-        onClick={() => changeLanguage("tr")}
-        style={{
-          ...languageButtonStyle,
-          ...(currentLanguage.startsWith("tr")
-            ? activeLanguageButtonStyle
-            : {}),
-        }}
-      >
-        TR
-      </button>
-
-      <span style={languageDividerStyle}>|</span>
-
-      <button
-        type="button"
-        onClick={() => changeLanguage("en")}
-        style={{
-          ...languageButtonStyle,
-          ...(currentLanguage.startsWith("en")
-            ? activeLanguageButtonStyle
-            : {}),
-        }}
-      >
-        EN
-      </button>
+      {visibleLanguages.map((language, index) => (
+        <span key={language.code}>
+          {index > 0 && <span style={languageDividerStyle}>|</span>}
+          <button
+            type="button"
+            onClick={() => changeLanguage(language.code)}
+            title={language.name}
+            style={{
+              ...languageButtonStyle,
+              ...(currentLanguage.startsWith(language.code)
+                ? activeLanguageButtonStyle
+                : {}),
+            }}
+          >
+            {language.label}
+          </button>
+        </span>
+      ))}
     </div>
   );
 }
