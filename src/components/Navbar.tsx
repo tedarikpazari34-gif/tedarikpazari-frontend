@@ -386,7 +386,7 @@ function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
   const currentLanguage = i18n.resolvedLanguage || i18n.language || "tr";
 
   const visibleLanguages = SUPPORTED_LANGUAGES.filter(
-    (language) => ["tr", "en", "ka"].includes(language.code)
+    (language) => ["tr", "en", "ka", "ru"].includes(language.code)
   );
 
   const changeLanguage = (language: SupportedLanguageCode) => {
