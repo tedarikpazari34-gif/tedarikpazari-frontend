@@ -2,10 +2,12 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import ka from "./locales/ka";
 import ru from "./locales/ru";
+import de from "./locales/de";
 
 const resources = {
   ka: { translation: ka },
   ru: { translation: ru },
+  de: { translation: de },
   tr: {
     translation: {
       common: {
