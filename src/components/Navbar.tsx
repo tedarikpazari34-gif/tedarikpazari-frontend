@@ -395,24 +395,24 @@ function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
 
   return (
     <div style={mobile ? mobileLanguageStyle : languageStyle}>
-      {visibleLanguages.map((language, index) => (
-        <span key={language.code}>
-          {index > 0 && <span style={languageDividerStyle}>|</span>}
-          <button
-            type="button"
-            onClick={() => changeLanguage(language.code)}
-            title={language.name}
-            style={{
-              ...languageButtonStyle,
-              ...(currentLanguage.startsWith(language.code)
-                ? activeLanguageButtonStyle
-                : {}),
-            }}
-          >
-            {language.label}
-          </button>
-        </span>
-      ))}
+      <span style={languageGlobeStyle} aria-hidden="true">🌐</span>
+
+      <select
+        value={visibleLanguages.find((language) =>
+          currentLanguage.startsWith(language.code)
+        )?.code || "tr"}
+        onChange={(event) =>
+          changeLanguage(event.target.value as SupportedLanguageCode)
+        }
+        aria-label="Dil seçimi"
+        style={languageSelectStyle}
+      >
+        {visibleLanguages.map((language) => (
+          <option key={language.code} value={language.code}>
+            {language.label} — {language.name}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -535,7 +535,7 @@ const linkStyle: React.CSSProperties = {
 const languageStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: 5,
+  gap: 6,
   padding: "6px 8px",
   borderRadius: 10,
   border: "1px solid rgba(255,255,255,0.14)",
@@ -545,26 +545,24 @@ const languageStyle: React.CSSProperties = {
 const mobileLanguageStyle: React.CSSProperties = {
   ...languageStyle,
   justifyContent: "center",
+  width: "100%",
   padding: 10,
 };
 
-const languageButtonStyle: React.CSSProperties = {
+const languageGlobeStyle: React.CSSProperties = {
+  fontSize: 16,
+  lineHeight: 1,
+};
+
+const languageSelectStyle: React.CSSProperties = {
   border: "none",
+  outline: "none",
   background: "transparent",
-  color: "#94a3b8",
+  color: "#e2e8f0",
   cursor: "pointer",
   fontSize: 12,
-  fontWeight: 900,
-  padding: "3px 4px",
-};
-
-const activeLanguageButtonStyle: React.CSSProperties = {
-  color: "#38bdf8",
-};
-
-const languageDividerStyle: React.CSSProperties = {
-  color: "#64748b",
-  fontSize: 12,
+  fontWeight: 800,
+  maxWidth: 150,
 };
 
 const bellStyle: React.CSSProperties = {
