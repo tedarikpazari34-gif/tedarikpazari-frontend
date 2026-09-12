@@ -3,11 +3,13 @@ import { initReactI18next } from "react-i18next";
 import ka from "./locales/ka";
 import ru from "./locales/ru";
 import de from "./locales/de";
+import ar from "./locales/ar";
 
 const resources = {
   ka: { translation: ka },
   ru: { translation: ru },
   de: { translation: de },
+  ar: { translation: ar },
   tr: {
     translation: {
       common: {
@@ -4967,6 +4969,11 @@ i18n.use(initReactI18next).init({
 i18n.on("languageChanged", (lng) => {
   localStorage.setItem("language", lng);
   document.documentElement.lang = lng;
+  document.documentElement.dir = lng.startsWith("ar") ? "rtl" : "ltr";
 });
+
+const currentLanguage = i18n.language || "tr";
+document.documentElement.lang = currentLanguage;
+document.documentElement.dir = currentLanguage.startsWith("ar") ? "rtl" : "ltr";
 
 export default i18n;
