@@ -4,12 +4,14 @@ import ka from "./locales/ka";
 import ru from "./locales/ru";
 import de from "./locales/de";
 import ar from "./locales/ar";
+import uz from "./locales/uz";
 
 const resources = {
   ka: { translation: ka },
   ru: { translation: ru },
   de: { translation: de },
   ar: { translation: ar },
+  uz: { translation: uz },
   tr: {
     translation: {
       common: {
