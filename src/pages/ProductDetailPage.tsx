@@ -1316,7 +1316,7 @@ const collectionPriceStyle: CSSProperties = {
 const collectionMoqStyle: CSSProperties = {
   color: "#64748b",
   fontSize: 11,
-  textAlign: "right",
+  textAlign: "end",
 };
 
 const purchaseBoxStyle: CSSProperties = {

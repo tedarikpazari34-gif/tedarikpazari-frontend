@@ -460,7 +460,7 @@ export default function ChatPage() {
                     style={{
                       color: "#64748b",
                       fontSize: 13,
-                      paddingLeft: 8,
+                      paddingInlineStart: 8,
                       fontStyle: "italic",
                     }}
                   >
@@ -602,7 +602,7 @@ const threadButtonStyle: CSSProperties = {
   borderRadius: 18,
   padding: 14,
   marginBottom: 10,
-  textAlign: "left",
+  textAlign: "start",
   cursor: "pointer",
   display: "grid",
   gap: 7,

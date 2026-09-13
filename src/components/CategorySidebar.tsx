@@ -49,7 +49,7 @@ export default function CategorySidebar({
                     key={child.id}
                     onClick={() => loadProducts(child.id)}
                     style={{
-                      textAlign: "left",
+                      textAlign: "start",
                       border: isSelected
                         ? "1px solid #1d4ed8"
                         : "1px solid #d1d5db",
@@ -70,7 +70,7 @@ export default function CategorySidebar({
             <button
               onClick={() => loadProducts(parent.id)}
               style={{
-                textAlign: "left",
+                textAlign: "start",
                 border:
                   selectedCategory === parent.id
                     ? "1px solid #1d4ed8"

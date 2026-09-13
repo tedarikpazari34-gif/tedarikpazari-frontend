@@ -384,7 +384,7 @@ const priceStyle: CSSProperties = {
 const moqStyle: CSSProperties = {
   color: "#64748b",
   fontSize: 12,
-  textAlign: "right",
+  textAlign: "end",
 };
 
 const actionsStyle: CSSProperties = {

@@ -9,6 +9,7 @@ export default {
     "register": "Registrieren",
     "logout": "Abmelden",
     "language": "Sprache",
+    "languageSelection": "Sprachauswahl",
     "products": "Produkte",
     "dashboard": "Dashboard",
     "myOrders": "Meine Bestellungen",
@@ -97,6 +98,7 @@ export default {
     "cityPlaceholder": "Stadtname eingeben",
     "district": "Bezirk",
     "taxNumber": "Steuernummer",
+    "taxNumberPlaceholder": "10-stellige Steuernummer",
     "taxOffice": "Finanzamt",
     "internationalTaxNumber": "Steuernummer / VAT / Firmenregisternummer",
     "internationalTaxOffice": "Steuerbehörde (optional)",
@@ -1862,7 +1864,7 @@ export default {
       "paymentTitle": "Wie funktioniert die Bezahlung?",
       "paymentText": "Sie bestellen die im Warenkorb befindlichen Artikel, die Zahlung erfolgt über den sicheren Zahlungsbildschirm auf der Plattform.",
       "payoutTitle": "Wie erstelle ich eine Auszahlungsanforderung?",
-      "payoutText": "Der Verkäufer kann auf der Seite 'Cüzdanım' eine Auszahlungsanforderung erstellen, um den verfügbaren Guthabenbetrag aus abgeschlossenen Bestellungen auf ein IBAN‑Konto zu überweisen.",
+      "payoutText": "Der Verkäufer kann auf der Seite 'Meine Brieftasche' eine Auszahlungsanforderung erstellen, um den verfügbaren Guthabenbetrag aus abgeschlossenen Bestellungen auf ein IBAN‑Konto zu überweisen.",
       "disputeTitle": "Was tun im Streitfall?",
       "disputeText": "Sie können für die betreffende Bestellung einen Streitfall eröffnen und Ihre Erläuterung an die Plattform‑Administration senden."
     }

@@ -382,7 +382,7 @@ export default function Navbar() {
 }
 
 function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLanguage = i18n.resolvedLanguage || i18n.language || "tr";
 
   const visibleLanguages = SUPPORTED_LANGUAGES.filter(
@@ -404,7 +404,7 @@ function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
         onChange={(event) =>
           changeLanguage(event.target.value as SupportedLanguageCode)
         }
-        aria-label="Dil seçimi"
+        aria-label={t("common.languageSelection")}
         style={languageSelectStyle}
       >
         {visibleLanguages.map((language) => (

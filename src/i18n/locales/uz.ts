@@ -9,6 +9,7 @@ export default {
     "register": "Ro'yxatdan o'tish",
     "logout": "Chiqish",
     "language": "Til",
+    "languageSelection": "Tilni tanlash",
     "products": "Mahsulotlar",
     "dashboard": "Boshqaruv paneli",
     "myOrders": "Buyurtmalarim",
@@ -97,6 +98,7 @@ export default {
     "cityPlaceholder": "Shahar nomini kiriting",
     "district": "Tuman",
     "taxNumber": "Soliq raqami",
+    "taxNumberPlaceholder": "10 xonali soliq raqami",
     "taxOffice": "Soliq idorasi",
     "internationalTaxNumber": "Soliq raqami / VAT / tijorat ro'yxat raqami",
     "internationalTaxOffice": "Soliq organi (ixtiyoriy)",
@@ -1862,7 +1864,7 @@ export default {
       "paymentTitle": "To'lov qanday amalga oshiriladi?",
       "paymentText": "Siz savatdagi narsalarni buyurtma qilasiz va to'lov platformadagi xavfsiz to'lov oynasi orqali amalga oshiriladi.",
       "payoutTitle": "Qanday qilib yechib olish so‘rovi yuboraman?",
-      "payoutText": "'Cüzdanım' sahifasida sotuvchi yakunlangan buyurtmalardan hosil bo'lgan mavjud balansni IBAN hisobiga o‘tkazish uchun yechib olish so‘rovini yaratishi mumkin.",
+      "payoutText": "'Hamyonim' sahifasida sotuvchi yakunlangan buyurtmalardan hosil bo'lgan mavjud balansni IBAN hisobiga o‘tkazish uchun yechib olish so‘rovini yaratishi mumkin.",
       "disputeTitle": "Nizo yuzaga kelsa nima qilishim kerak?",
       "disputeText": "Siz tegishli buyurtma bo'yicha nizo ochishingiz va o'zingizning izohingizni platforma boshqaruviga yuborishingiz mumkin."
     }

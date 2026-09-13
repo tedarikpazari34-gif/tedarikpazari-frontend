@@ -331,7 +331,7 @@ export default function CartPage() {
                 borderRadius: 16,
                 padding: 20,
                 border: "1px solid #e2e8f0",
-                textAlign: "right",
+                textAlign: "end",
               }}
             >
               <strong style={{ fontSize: 22 }}>

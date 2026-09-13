@@ -87,7 +87,7 @@ export default function OrderList({
           {role === "BUYER" && o.status === "SHIPPED" && (
             <div style={{ marginTop: 10 }}>
               <button
-                style={{ marginRight: 8 }}
+                style={{ marginInlineEnd: 8 }}
                 onClick={() => completeOrder(o.id)}
               >
                 {t("orderList.received")}

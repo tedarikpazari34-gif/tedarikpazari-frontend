@@ -422,7 +422,7 @@ export default function RegisterPage() {
                 style={inputStyle}
                 placeholder={
                   country === "Türkiye"
-                    ? "10 haneli vergi numarası"
+                    ? t("registerPage.taxNumberPlaceholder")
                     : t("registerPage.internationalTaxNumberPlaceholder")
                 }
                 value={taxNumber}

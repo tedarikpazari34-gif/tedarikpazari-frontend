@@ -9,6 +9,7 @@ export default {
     "register": "تسجيل",
     "logout": "تسجيل الخروج",
     "language": "اللغة",
+    "languageSelection": "اختيار اللغة",
     "products": "المنتجات",
     "dashboard": "لوحة التحكم",
     "myOrders": "طلباتي",
@@ -97,6 +98,7 @@ export default {
     "cityPlaceholder": "أدخل اسم المدينة",
     "district": "الحي",
     "taxNumber": "رقم الضريبة",
+    "taxNumberPlaceholder": "رقم ضريبي مكوّن من 10 أرقام",
     "taxOffice": "مكتب الضرائب",
     "internationalTaxNumber": "رقم الضريبة / VAT / رقم السجل التجاري",
     "internationalTaxOffice": "الجهة الضريبية (اختياري)",
@@ -1862,7 +1864,7 @@ export default {
       "paymentTitle": "كيف تتم عملية الدفع؟",
       "paymentText": "تقوم بطلب العناصر الموجودة في السلة، وتتم عملية الدفع عبر شاشة دفع آمنة على المنصة.",
       "payoutTitle": "كيف أقدّم طلب سحب؟",
-      "payoutText": "يمكن للبائع إنشاء طلب سحب على صفحة 'Cüzdanım' لتحويل الرصيد المتاح من الطلبات المكتملة إلى حساب IBAN.",
+      "payoutText": "يمكن للبائع إنشاء طلب سحب على صفحة 'محفظتي' لتحويل الرصيد المتاح من الطلبات المكتملة إلى حساب IBAN.",
       "disputeTitle": "ماذا أفعل في حال وجود نزاع؟",
       "disputeText": "يمكنكم فتح نزاع للطلب المعني وإرسال توضيحكم إلى إدارة المنصة."
     }

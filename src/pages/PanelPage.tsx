@@ -977,7 +977,7 @@ export default function PanelPage() {
                   }}
                 >
                   <thead>
-                    <tr style={{ background: "#f3f4f6", textAlign: "left" }}>
+                    <tr style={{ background: "#f3f4f6", textAlign: "start" }}>
                       <th style={tableHeadStyle}>{t("panelPage.admin.name")}</th>
                       <th style={tableHeadStyle}>{t("panelPage.admin.email")}</th>
                       <th style={tableHeadStyle}>{t("panelPage.admin.role")}</th>
@@ -1055,7 +1055,7 @@ export default function PanelPage() {
                   }}
                 >
                   <thead>
-                    <tr style={{ background: "#f3f4f6", textAlign: "left" }}>
+                    <tr style={{ background: "#f3f4f6", textAlign: "start" }}>
                       <th style={tableHeadStyle}>{t("panelPage.admin.type")}</th>
                       <th style={tableHeadStyle}>{t("panelPage.admin.orderId")}</th>
                       <th style={tableHeadStyle}>{t("panelPage.admin.amount")}</th>
@@ -1470,7 +1470,7 @@ export default function PanelPage() {
                 }
               }}
               placeholder={t("panelPage.marketplace.searchPlaceholder")}
-              style={{ ...inputStyle, marginRight: 8 }}
+              style={{ ...inputStyle, marginInlineEnd: 8 }}
             />
             <button onClick={searchProducts} style={primaryButtonStyle}>
               {t("panelPage.marketplace.search")}
