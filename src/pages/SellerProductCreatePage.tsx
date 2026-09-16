@@ -274,7 +274,6 @@ export default function SellerProductCreatePage() {
         body: JSON.stringify({
           title,
           description,
-          sourceLanguage: i18n.language,
           categoryId,
           country,
           city,
