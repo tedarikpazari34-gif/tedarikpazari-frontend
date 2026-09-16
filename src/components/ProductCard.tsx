@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 type Product = {
   id: string;
@@ -136,7 +137,7 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
             marginBottom: 6,
           }}
         >
-          <strong>{t("productCard.moq")}</strong> {product.moq} {product.unitType}
+          <strong>{t("productCard.moq")}</strong> {product.moq} {unitLabel(product.unitType, t)}
         </div>
 
         <div
@@ -146,7 +147,7 @@ export default function ProductCard({ product, onRFQ, onDetail }: Props) {
             marginBottom: 6,
           }}
         >
-          <strong>{t("productCard.unit")}:</strong> {product.unitType}
+          <strong>{t("productCard.unit")}:</strong> {unitLabel(product.unitType, t)}
         </div>
 
         <div

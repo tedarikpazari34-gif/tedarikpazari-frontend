@@ -10,6 +10,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 
+import { unitLabel } from "../lib/unitLabel";
 import { TURKEY_CITIES } from "../constants/turkeyCities";
 import { useTranslation } from "react-i18next";
 
@@ -44,23 +45,6 @@ function vehicleLabel(value: string, t: any) {
     "Açık Kasa": t("buyerShippingRequestPage.openBody"),
     "Kapalı Kasa": t("buyerShippingRequestPage.closedBody"),
     "Diğer": t("buyerShippingRequestPage.other"),
-  };
-
-  return labels[value] || value;
-}
-
-function unitLabel(value: string | undefined, t: any) {
-  if (!value) return "";
-
-  const labels: Record<string, string> = {
-    "Adet": t("buyerShippingRequestPage.piece"),
-    "Koli": t("buyerShippingRequestPage.box"),
-    "Paket": t("buyerShippingRequestPage.package"),
-    "Kilogram": t("buyerShippingRequestPage.kilogram"),
-    "Ton": t("buyerShippingRequestPage.ton"),
-    "Litre": t("buyerShippingRequestPage.litre"),
-    "Metre": t("buyerShippingRequestPage.meter"),
-    "Palet": t("buyerShippingRequestPage.pallet"),
   };
 
   return labels[value] || value;

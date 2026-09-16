@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import SellerLayout from "../components/SellerLayout";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
 
@@ -25,24 +26,7 @@ type Product = {
   };
 };
 
-function unitLabel(value: string | undefined, t: any) {
-  if (!value) return "";
 
-  const labels: Record<string, string> = {
-    "Adet": t("sellerProductsPage.piece"),
-    "adet": t("sellerProductsPage.piece"),
-    "Koli": t("sellerProductsPage.box"),
-    "Paket": t("sellerProductsPage.package"),
-    "Kilogram": t("sellerProductsPage.kilogram"),
-    "Kg": t("sellerProductsPage.kilogram"),
-    "Ton": t("sellerProductsPage.ton"),
-    "Litre": t("sellerProductsPage.litre"),
-    "Metre": t("sellerProductsPage.meter"),
-    "Palet": t("sellerProductsPage.pallet"),
-  };
-
-  return labels[value] || value;
-}
 
 export default function SellerProductsPage() {
   const { t, i18n } = useTranslation();

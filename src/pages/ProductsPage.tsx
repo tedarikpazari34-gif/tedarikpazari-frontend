@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { unitLabel } from "../lib/unitLabel";
 import { useTranslation } from "react-i18next";
 import { TURKEY_CITIES } from "../constants/turkeyCities";
 
@@ -218,6 +219,7 @@ if (minMoq) query.set("minMoq", minMoq);
 if (maxMoq) query.set("maxMoq", maxMoq);
 if (city) query.set("city", city);
 if (verifiedOnly) query.set("verified", "true");
+query.set("lang", i18n.language);
 
 const res = await fetch(`${API}/products?${query.toString()}`);
         const data = await res.json();
@@ -232,7 +234,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     }
 
     loadProducts();
-  }, [q, minPrice, maxPrice, minMoq, maxMoq, city, verifiedOnly]);
+  }, [q, minPrice, maxPrice, minMoq, maxMoq, city, verifiedOnly, i18n.language]);
 
   const filteredProducts = useMemo(() => {
     const result = [...products];
@@ -578,7 +580,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                     <div style={featureItem}>
                       <span>📦 {t("productCard.moq").replace(":", "")}</span>
                       <strong>
-                        {product.moq || 1} {product.unitType || t("productsPage.piece")}
+                        {product.moq || 1} {product.unitType ? unitLabel(product.unitType, t) : t("productsPage.piece")}
                       </strong>
                     </div>
 

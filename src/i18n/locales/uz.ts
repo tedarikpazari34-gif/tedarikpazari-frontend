@@ -41,6 +41,16 @@ export default {
     "marketplace": "B2B bozori",
     "brandName": "Nex Tedarik Pazarı"
   },
+  "units": {
+    "piece": "Dona",
+    "box": "Karton",
+    "package": "Qadoq",
+    "kilogram": "Kilogramm",
+    "ton": "Tonna",
+    "litre": "Litr",
+    "meter": "Metr",
+    "pallet": "Palet"
+  },
   "buyer": {
     "title": "Ishonchli Turkiyalik yetkazib beruvchilarni toping",
     "subtitle": "Turkiya va boshqa bozorlardagi ta'minotchilarning mahsulotlarini shaffof narxlarda ko'rib chiqing va to'g'ridan-to'g'ri xarid qiling.",

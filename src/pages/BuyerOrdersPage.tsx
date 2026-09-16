@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 type Order = {
   id: string;
@@ -70,25 +71,6 @@ function statusLabel(
   }
 }
 
-function unitLabel(
-  unit: string | null | undefined,
-  t: (key: string) => string
-) {
-  const map: Record<string, string> = {
-    Adet: "piece",
-    Koli: "box",
-    Paket: "package",
-    Kilogram: "kilogram",
-    Ton: "ton",
-    Litre: "litre",
-    Metre: "meter",
-    Palet: "pallet",
-  };
-
-  return unit && map[unit]
-    ? t(`buyerOrdersPage.${map[unit]}`)
-    : unit || t("buyerOrdersPage.piece");
-}
 function statusStyle(status: string): CSSProperties {
   switch (status) {
     case "PENDING_PAYMENT":

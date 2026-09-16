@@ -56,6 +56,16 @@ const resources = {
         marketplace: "B2B Pazaryeri",
         brandName: "Nex Tedarik Pazarı",
       },
+      units: {
+        piece: "Adet",
+        box: "Koli",
+        package: "Paket",
+        kilogram: "Kilogram",
+        ton: "Ton",
+        litre: "Litre",
+        meter: "Metre",
+        pallet: "Palet",
+      },
       buyer: {
         title: "Türkiye'den Güvenilir Tedarikçiler Bulun",
         subtitle:
@@ -2530,6 +2540,16 @@ const resources = {
         menu: "Menu",
         marketplace: "B2B Marketplace",
         brandName: "Nex Tedarik Pazarı",
+      },
+      units: {
+        piece: "Piece",
+        box: "Carton",
+        package: "Package",
+        kilogram: "Kilogram",
+        ton: "Ton",
+        litre: "Litre",
+        meter: "Meter",
+        pallet: "Pallet",
       },
       buyer: {
         title: "Source Products from Trusted Turkish Suppliers",

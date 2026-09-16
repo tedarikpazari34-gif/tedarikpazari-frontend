@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 type ProductImage = {
   id?: string;
@@ -70,24 +71,6 @@ function readIds() {
   } catch {
     return [];
   }
-}
-
-function unitLabel(value: string | undefined, t: any) {
-  if (!value) return "";
-
-  const labels: Record<string, string> = {
-    "Adet": t("compareProductsPage.piece"),
-    "Koli": t("compareProductsPage.box"),
-    "Paket": t("compareProductsPage.package"),
-    "Kilogram": t("compareProductsPage.kilogram"),
-    "Kg": t("compareProductsPage.kilogram"),
-    "Ton": t("compareProductsPage.ton"),
-    "Litre": t("compareProductsPage.litre"),
-    "Metre": t("compareProductsPage.meter"),
-    "Palet": t("compareProductsPage.pallet"),
-  };
-
-  return labels[value] || value;
 }
 
 function stockTypeLabel(value: string | null | undefined, t: any) {
@@ -267,7 +250,7 @@ export default function CompareProductsPage() {
               label={t("compareProductsPage.minimumOrder")}
               values={products.map(
                 (product) =>
-                  `${product.moq || 1} ${unitLabel(product.unitType || "Adet", t)}`
+                  `${product.moq || 1} ${unitLabel(product.unitType || "adet", t)}`
               )}
             />
 

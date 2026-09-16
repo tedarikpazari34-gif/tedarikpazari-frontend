@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 interface Product {
   id: string;
@@ -80,7 +81,7 @@ export default function ProductGrid({
               </div>
 
               <div style={{ fontSize: 14, color: "#6b7280" }}>
-                MOQ: {p.moq} {p.unitType}
+                MOQ: {p.moq} {unitLabel(p.unitType, t)}
               </div>
 
               <div style={{ fontWeight: 700, fontSize: 18 }}>

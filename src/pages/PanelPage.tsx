@@ -21,6 +21,7 @@ import DashboardStats from "../components/DashboardStats";
 import ProductCreateForm from "../components/ProductCreateForm";
 import ProductGrid from "../components/ProductGrid";
 import { authFetch } from "../api";
+import { unitLabel } from "../lib/unitLabel";
 
 ChartJS.register(
   CategoryScale,
@@ -935,7 +936,7 @@ export default function PanelPage() {
                             <strong>{t("panelPage.admin.moq")}</strong> {product.moq}
                           </div>
                           <div>
-                            <strong>{t("panelPage.admin.unit")}</strong> {product.unitType}
+                            <strong>{t("panelPage.admin.unit")}</strong> {unitLabel(product.unitType, t)}
                           </div>
                         </div>
 
@@ -1565,7 +1566,7 @@ export default function PanelPage() {
 
                 <div>
                   <strong>{t("panelPage.admin.moq")}</strong> {selectedProduct.moq}{" "}
-                  {selectedProduct.unitType}
+                  {unitLabel(selectedProduct.unitType, t)}
                 </div>
 
                 <div>

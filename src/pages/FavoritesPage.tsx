@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 type ProductImage = {
   url?: string;
@@ -51,25 +52,6 @@ function getProductImage(item: FavoriteItem["product"]) {
   const first = item.images?.[0]?.url;
 
   return resolveImageUrl(cover || first || item.imageUrl);
-}
-
-function unitLabel(value: string | undefined, t: any) {
-  if (!value) return "";
-
-  const labels: Record<string, string> = {
-    "Adet": t("favoritesPage.piece"),
-    "adet": t("favoritesPage.piece"),
-    "Koli": t("favoritesPage.box"),
-    "Paket": t("favoritesPage.package"),
-    "Kilogram": t("favoritesPage.kilogram"),
-    "Kg": t("favoritesPage.kilogram"),
-    "Ton": t("favoritesPage.ton"),
-    "Litre": t("favoritesPage.litre"),
-    "Metre": t("favoritesPage.meter"),
-    "Palet": t("favoritesPage.pallet"),
-  };
-
-  return labels[value] || value;
 }
 
 export default function FavoritesPage() {
@@ -231,7 +213,7 @@ export default function FavoritesPage() {
 
                     <span style={moqStyle}>
                       {t("favoritesPage.minimumShort")} {product.moq || 1}{" "}
-                      {unitLabel(product.unitType || "Adet", t)}
+                      {unitLabel(product.unitType || "adet", t)}
                     </span>
                   </div>
 

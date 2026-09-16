@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
 
@@ -61,24 +62,6 @@ function getCategoryIcon(categoryName?: string) {
   if (name.includes("vida") || name.includes("alet") || name.includes("hırdavat")) return "🔩";
 
   return "📦";
-}
-
-function unitLabel(value: string | undefined, t: any) {
-  if (!value) return "";
-
-  const labels: Record<string, string> = {
-    "Adet": t("productDetailPage.piece"),
-    "Koli": t("productDetailPage.box"),
-    "Paket": t("productDetailPage.package"),
-    "Kilogram": t("productDetailPage.kilogram"),
-    "Kg": t("productDetailPage.kilogram"),
-    "Ton": t("productDetailPage.ton"),
-    "Litre": t("productDetailPage.litre"),
-    "Metre": t("productDetailPage.meter"),
-    "Palet": t("productDetailPage.pallet"),
-  };
-
-  return labels[value] || value;
 }
 
 function stockTypeLabel(value: string | null | undefined, t: any) {
@@ -173,7 +156,7 @@ export default function ProductDetailPage() {
       try {
         setLoading(true);
 
-        const res = await fetch(`${BASE_URL}/api/products/${productId}`);
+        const res = await fetch(`${BASE_URL}/api/products/${productId}?lang=${encodeURIComponent(i18n.language)}`);
         const data = await res.json();
 
         if (!res.ok) {
@@ -192,7 +175,7 @@ export default function ProductDetailPage() {
     }
 
     loadProduct();
-  }, [productId]);
+  }, [productId, i18n.language]);
 
   const galleryImages = useMemo(() => {
     if (!product) return [];
@@ -235,7 +218,7 @@ export default function ProductDetailPage() {
           const similarRes = await fetch(
             `${BASE_URL}/api/products?categoryId=${encodeURIComponent(
               product.category.id
-            )}`
+            )}&lang=${encodeURIComponent(i18n.language)}`
           );
 
           const similarData = await similarRes.json().catch(() => []);
@@ -257,7 +240,7 @@ export default function ProductDetailPage() {
     }
 
     loadRelatedProducts();
-  }, [product]);
+  }, [product, i18n.language]);
 
   const toggleFavorite = async () => {
     const token = localStorage.getItem("token");
@@ -798,7 +781,7 @@ function ProductCollection({
 
                     <span style={collectionMoqStyle}>
                       {t("productDetailPage.minimumShort")} {item.moq || 1}{" "}
-                      {unitLabel(item.unitType || "Adet", t)}
+                      {unitLabel(item.unitType || "adet", t)}
                     </span>
                   </div>
                 </div>

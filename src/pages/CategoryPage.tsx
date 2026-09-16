@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
 
@@ -102,25 +103,6 @@ function resolveImage(product: Product) {
   return "";
 }
 
-function unitLabel(value: string | undefined, t: any) {
-  if (!value) return "";
-
-  const labels: Record<string, string> = {
-    "Adet": t("categoryPage.piece"),
-    "adet": t("categoryPage.piece"),
-    "Koli": t("categoryPage.box"),
-    "Paket": t("categoryPage.package"),
-    "Kilogram": t("categoryPage.kilogram"),
-    "Kg": t("categoryPage.kilogram"),
-    "Ton": t("categoryPage.ton"),
-    "Litre": t("categoryPage.litre"),
-    "Metre": t("categoryPage.meter"),
-    "Palet": t("categoryPage.pallet"),
-  };
-
-  return labels[value] || value;
-}
-
 export default function CategoryPage() {
   const { t, i18n } = useTranslation();
   const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
@@ -149,9 +131,9 @@ export default function CategoryPage() {
 
         const [productsRes, categoriesRes] = await Promise.all([
           isProbablyId
-            ? fetch(`${BASE_URL}/api/products/category/${categoryKey}`)
-            : fetch(`${BASE_URL}/api/products`),
-          fetch(`${BASE_URL}/api/categories`),
+            ? fetch(`${BASE_URL}/api/products/category/${categoryKey}?lang=${encodeURIComponent(i18n.language)}`)
+            : fetch(`${BASE_URL}/api/products?lang=${encodeURIComponent(i18n.language)}`),
+          fetch(`${BASE_URL}/api/categories?lang=${encodeURIComponent(i18n.language)}`),
         ]);
 
         const productsData = await productsRes.json();
@@ -199,7 +181,7 @@ export default function CategoryPage() {
     }
 
     load();
-  }, [categoryKey, isProbablyId]);
+  }, [categoryKey, isProbablyId, i18n.language, t]);
 
   const shownProducts = useMemo(() => {
     const keyword = search.trim().toLowerCase();

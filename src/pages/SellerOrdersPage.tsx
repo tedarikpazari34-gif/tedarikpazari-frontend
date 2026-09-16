@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 type Order = {
   id: string;
@@ -322,7 +323,7 @@ export default function SellerOrdersPage() {
                   label={t("sellerOrdersPage.quantity")}
                   value={
                     o.quantity
-                      ? `${o.quantity} ${o.product?.unitType || ""}`.trim()
+                      ? `${o.quantity} ${o.product?.unitType ? unitLabel(o.product.unitType, t) : ""}`.trim()
                       : o.rfq?.quantity || "-"
                   }
                 />

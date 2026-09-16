@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 type Quote = {
   id: string;
@@ -41,32 +42,6 @@ function statusLabel(status: string, t: any) {
   if (status === "REJECTED") return t("sellerQuotesPage.rejected");
 
   return status || "-";
-}
-
-function unitLabel(value: string | undefined, t: any) {
-  if (!value) return "";
-
-  const labels: Record<string, string> = {
-    "Adet": t("sellerQuotesPage.piece"),
-    "adet": t("sellerQuotesPage.piece"),
-    "Koli": t("sellerQuotesPage.box"),
-    "koli": t("sellerQuotesPage.box"),
-    "Paket": t("sellerQuotesPage.package"),
-    "paket": t("sellerQuotesPage.package"),
-    "Kilogram": t("sellerQuotesPage.kilogram"),
-    "kg": t("sellerQuotesPage.kilogramShort"),
-    "Kg": t("sellerQuotesPage.kilogramShort"),
-    "Litre": t("sellerQuotesPage.litre"),
-    "litre": t("sellerQuotesPage.litre"),
-    "Metre": t("sellerQuotesPage.meter"),
-    "metre": t("sellerQuotesPage.meter"),
-    "Ton": t("sellerQuotesPage.ton"),
-    "ton": t("sellerQuotesPage.ton"),
-    "Palet": t("sellerQuotesPage.pallet"),
-    "palet": t("sellerQuotesPage.pallet"),
-  };
-
-  return labels[value] || value;
 }
 
 function statusStyle(status: string): CSSProperties {

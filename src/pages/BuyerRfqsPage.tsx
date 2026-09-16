@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 type RFQ = {
   id: string;
@@ -204,7 +205,7 @@ export default function BuyerRfqsPage() {
               </div>
 
               <div style={infoGrid}>
-                <Info label={t("buyerRfqsPage.quantity")} value={rfq.quantity ? `${rfq.quantity} ${rfq.unitType || ""}`.trim() : "-"} />
+                <Info label={t("buyerRfqsPage.quantity")} value={rfq.quantity ? `${rfq.quantity} ${rfq.unitType ? unitLabel(rfq.unitType, t) : ""}`.trim() : "-"} />
                 <Info
                   label={t("buyerRfqsPage.delivery")}
                   value={

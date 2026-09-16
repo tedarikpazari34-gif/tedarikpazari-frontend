@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 type ProductImage = {
   id?: string;
@@ -133,24 +134,6 @@ function getSellerBadges(company: Company, productCount: number, t: any) {
 function formatPrice(value: number | string | undefined, locale: string) {
   return `${Number(value || 0).toLocaleString(locale)} ₺`;
 }
-
-function unitLabel(value: string | undefined, t: any) {
-  if (!value) return t("sellerStorePage.unitNotSpecified");
-
-  const normalized = value.toLocaleLowerCase("tr-TR");
-
-  if (normalized === "adet") return t("sellerStorePage.unitPiece");
-  if (normalized === "koli") return t("sellerStorePage.unitBox");
-  if (normalized === "kg" || normalized === "kilogram") return t("sellerStorePage.unitKg");
-  if (normalized === "ton") return t("sellerStorePage.unitTon");
-  if (normalized === "metre" || normalized === "meter") return t("sellerStorePage.unitMeter");
-  if (normalized === "litre" || normalized === "liter") return t("sellerStorePage.unitLiter");
-  if (normalized === "palet") return t("sellerStorePage.unitPallet");
-  if (normalized === "paket") return t("sellerStorePage.unitPackage");
-
-  return value;
-}
-
 
 export default function SellerStorePage() {
   const { id } = useParams();

@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 type Quote = {
   id: string;
@@ -162,7 +163,7 @@ export default function SellerRfqsPage() {
                 <Info label={t("sellerRfqsPage.buyer")} value={rfq.buyer?.name || "-"} />
                 <Info
                   label={t("sellerRfqsPage.quantity")}
-                  value={rfq.quantity ? `${rfq.quantity} ${rfq.unitType || ""}`.trim() : "-"}
+                  value={rfq.quantity ? `${rfq.quantity} ${rfq.unitType ? unitLabel(rfq.unitType, t) : ""}`.trim() : "-"}
                 />
                 <Info
                   label={t("sellerRfqsPage.delivery")}

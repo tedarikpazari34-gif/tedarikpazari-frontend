@@ -20,7 +20,7 @@ type UploadedImage = {
 };
 
 export default function SellerProductCreatePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
@@ -62,7 +62,7 @@ export default function SellerProductCreatePage() {
   useEffect(() => {
     async function loadCategories() {
       try {
-        const res = await fetch(`${BASE_URL}/api/categories/tree`);
+        const res = await fetch(`${BASE_URL}/api/categories/tree?lang=${encodeURIComponent(i18n.language)}`);
         const data = await res.json();
 
         if (Array.isArray(data)) {
@@ -74,7 +74,7 @@ export default function SellerProductCreatePage() {
     }
 
     loadCategories();
-  }, []);
+  }, [i18n.language, t]);
 
   const generateAiDraft = async () => {
     setError("");
@@ -101,7 +101,7 @@ export default function SellerProductCreatePage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ prompt: aiPrompt.trim() }),
+        body: JSON.stringify({ prompt: aiPrompt.trim(), language: i18n.language }),
       });
 
       const data = await res.json();
@@ -274,6 +274,7 @@ export default function SellerProductCreatePage() {
         body: JSON.stringify({
           title,
           description,
+          sourceLanguage: i18n.language,
           categoryId,
           country,
           city,

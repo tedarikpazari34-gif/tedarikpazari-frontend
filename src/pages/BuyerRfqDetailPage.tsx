@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { unitLabel } from "../lib/unitLabel";
 
 type RFQ = {
   id: string;
@@ -59,22 +60,6 @@ function statusLabel(status: string | undefined, t: (key: string) => string) {
   return status || "-";
 }
 
-function unitLabel(unit: string | null | undefined, t: (key: string) => string) {
-  const map: Record<string, string> = {
-    Adet: "piece",
-    Koli: "box",
-    Paket: "package",
-    Kilogram: "kilogram",
-    Ton: "ton",
-    Litre: "litre",
-    Metre: "meter",
-    Palet: "pallet",
-  };
-
-  return unit && map[unit]
-    ? t(`buyerRfqDetailPage.${map[unit]}`)
-    : unit || t("buyerRfqDetailPage.piece");
-}
 function statusStyle(status?: string): CSSProperties {
   const value = status?.toUpperCase();
 
@@ -593,7 +578,7 @@ setRfq(found || null);
               </div>
 
               <div style={calculationStyle}>
-                {rfq.quantity} {rfq.unitType || "Adet"} × {formatPrice(quote.unitPrice, locale)}
+                {rfq.quantity} {rfq.unitType ? unitLabel(rfq.unitType, t) : t("units.piece")} × {formatPrice(quote.unitPrice, locale)}
                 <strong>{formatPrice(totalAmount, locale)}</strong>
               </div>
 

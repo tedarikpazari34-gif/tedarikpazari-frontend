@@ -16,7 +16,7 @@ export default function ProductCreateForm({
   categories,
   onCreated,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -76,6 +76,7 @@ export default function ProductCreateForm({
         body: JSON.stringify({
           title,
           description,
+          sourceLanguage: i18n.language,
           categoryId,
           imageUrl: uploadedImageUrl || null,
           basePrice: Number(basePrice),

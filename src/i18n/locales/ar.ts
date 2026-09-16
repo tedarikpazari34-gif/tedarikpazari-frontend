@@ -41,6 +41,16 @@ export default {
     "marketplace": "سوق B2B",
     "brandName": "Nex Tedarik Pazarı"
   },
+  "units": {
+    "piece": "قطعة",
+    "box": "كرتون",
+    "package": "عبوة",
+    "kilogram": "كيلوغرام",
+    "ton": "طن",
+    "litre": "لتر",
+    "meter": "متر",
+    "pallet": "منصة نقالة"
+  },
   "buyer": {
     "title": "اعثر على موردين أتراك موثوقين",
     "subtitle": "تصفح منتجات الموردين في تركيا وأسواق أخرى بأسعار شفافة واشتِر مباشرة.",

@@ -1,11 +1,39 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { TURKEY_CITIES } from "../constants/turkeyCities";
+import { unitLabel } from "../lib/unitLabel";
 import { COUNTRIES } from "../constants/countries";
 import { useTranslation } from "react-i18next";
 
 const BASE_URL = "https://tedarik-backend.onrender.com";
 
+
+function normalizeUnitType(value: unknown): string {
+  const normalized = String(value || "").trim().toLocaleLowerCase("tr-TR");
+
+  const aliases: Record<string, string> = {
+    adet: "adet",
+    piece: "adet",
+    unit: "adet",
+    koli: "koli",
+    kutu: "koli",
+    box: "koli",
+    carton: "koli",
+    paket: "paket",
+    package: "paket",
+    kg: "kg",
+    kilogram: "kg",
+    ton: "ton",
+    litre: "litre",
+    liter: "litre",
+    metre: "metre",
+    meter: "metre",
+    palet: "palet",
+    pallet: "palet",
+  };
+
+  return aliases[normalized] || normalized;
+}
 
 type Product = {
   id: string;
@@ -41,7 +69,7 @@ export default function CreateRfqPage() {
   const [requestTitle, setRequestTitle] = useState(productName || "");
 
   const [quantity, setQuantity] = useState(copiedQuantity || "100");
-  const [unitType, setUnitType] = useState("Adet");
+  const [unitType, setUnitType] = useState("adet");
   const [deliveryCountry, setDeliveryCountry] = useState("Türkiye");
   const [deliveryCity, setDeliveryCity] = useState("");
   const [targetPrice, setTargetPrice] = useState("");
@@ -66,7 +94,7 @@ export default function CreateRfqPage() {
       }
 
       if (draft.unitType !== undefined) {
-        setUnitType(String(draft.unitType));
+        setUnitType(normalizeUnitType(draft.unitType));
       }
 
       if (draft.deliveryCountry !== undefined) {
@@ -137,7 +165,7 @@ export default function CreateRfqPage() {
   useEffect(() => {
     async function loadCategories() {
       try {
-        const res = await fetch(`${BASE_URL}/api/categories`);
+        const res = await fetch(`${BASE_URL}/api/categories?lang=${encodeURIComponent(i18n.language)}`);
         const data = await res.json();
 
         if (!res.ok || !Array.isArray(data)) return;
@@ -168,14 +196,14 @@ export default function CreateRfqPage() {
     }
 
     loadCategories();
-  }, [initialCategory]);
+  }, [initialCategory, i18n.language]);
 
   useEffect(() => {
     async function loadProduct() {
       if (!productId) return;
 
       try {
-        const res = await fetch(`${BASE_URL}/api/products/${productId}`);
+        const res = await fetch(`${BASE_URL}/api/products/${productId}?lang=${encodeURIComponent(i18n.language)}`);
         const data = await res.json();
 
         if (res.ok) {
@@ -187,7 +215,7 @@ export default function CreateRfqPage() {
     }
 
     loadProduct();
-  }, [productId]);
+  }, [productId, i18n.language]);
 
   const generateAiDraft = async () => {
     try {
@@ -230,20 +258,20 @@ export default function CreateRfqPage() {
       const promptLower = aiPrompt.toLocaleLowerCase("tr-TR");
 
       const detectedUnit =
-        promptLower.includes("koli") ? "Koli" :
-        promptLower.includes("paket") ? "Paket" :
-        promptLower.includes("kilogram") || promptLower.includes(" kg") ? "Kilogram" :
-        promptLower.includes("ton") ? "Ton" :
-        promptLower.includes("litre") ? "Litre" :
-        promptLower.includes("metre") ? "Metre" :
-        promptLower.includes("palet") ? "Palet" :
-        promptLower.includes("adet") ? "Adet" :
+        promptLower.includes("koli") ? "koli" :
+        promptLower.includes("paket") ? "paket" :
+        promptLower.includes("kilogram") || promptLower.includes(" kg") ? "kg" :
+        promptLower.includes("ton") ? "ton" :
+        promptLower.includes("litre") ? "litre" :
+        promptLower.includes("metre") ? "metre" :
+        promptLower.includes("palet") ? "palet" :
+        promptLower.includes("adet") ? "adet" :
         "";
 
       if (detectedUnit) {
         setUnitType(detectedUnit);
       } else if (data.unitType) {
-        setUnitType(String(data.unitType));
+        setUnitType(normalizeUnitType(data.unitType));
       }
 
       if (data.deliveryCity) setDeliveryCity(String(data.deliveryCity));
@@ -425,7 +453,7 @@ export default function CreateRfqPage() {
             <div>
               <span style={successSummaryLabelStyle}>{t("createRfqPage.quantity")}</span>
               <strong>
-                {quantity} {unitType}
+                {quantity} {unitLabel(unitType, t)}
               </strong>
             </div>
 
@@ -449,7 +477,7 @@ export default function CreateRfqPage() {
               onClick={() => {
                 setCreatedRfqId("");
                 setQuantity("100");
-                setUnitType("Adet");
+                setUnitType("adet");
                 setDeliveryCountry("Türkiye");
                 setDeliveryCity("");
                 setTargetPrice("");
@@ -638,14 +666,14 @@ export default function CreateRfqPage() {
               onChange={(e) => setUnitType(e.target.value)}
               style={inputStyle}
             >
-              <option value="Adet">{t("createRfqPage.piece")}</option>
-              <option value="Koli">{t("createRfqPage.box")}</option>
-              <option value="Paket">{t("createRfqPage.package")}</option>
-              <option value="Kilogram">{t("createRfqPage.kilogram")}</option>
-              <option value="Ton">{t("createRfqPage.ton")}</option>
-              <option value="Litre">{t("createRfqPage.litre")}</option>
-              <option value="Metre">{t("createRfqPage.meter")}</option>
-              <option value="Palet">{t("createRfqPage.pallet")}</option>
+              <option value="adet">{t("createRfqPage.piece")}</option>
+              <option value="koli">{t("createRfqPage.box")}</option>
+              <option value="paket">{t("createRfqPage.package")}</option>
+              <option value="kg">{t("createRfqPage.kilogram")}</option>
+              <option value="ton">{t("createRfqPage.ton")}</option>
+              <option value="litre">{t("createRfqPage.litre")}</option>
+              <option value="metre">{t("createRfqPage.meter")}</option>
+              <option value="palet">{t("createRfqPage.pallet")}</option>
             </select>
           </label>
 
