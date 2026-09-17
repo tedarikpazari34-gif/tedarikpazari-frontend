@@ -772,7 +772,8 @@ const grid: CSSProperties = {
   maxWidth: 1180,
   margin: "0 auto",
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 340px))",
+  justifyContent: "start",
   gap: 20,
 };
 
