@@ -154,7 +154,9 @@ export default function BuyerOrdersPage() {
         ? data.data
         : [];
 
-      setOrders(safeOrders);
+      setOrders(
+        safeOrders.filter((order: Order) => order.status !== "CANCELLED")
+      );
     } catch (err) {
       console.error(err);
       setError(t("buyerOrdersPage.loadFailed"));
@@ -620,6 +622,22 @@ export default function BuyerOrdersPage() {
                   </button>
                 )}
 
+                {o.status === "PENDING_PAYMENT" && (
+                  <button
+                    style={cancelButtonStyle}
+                    onClick={() => {
+                      const confirmed = window.confirm(
+                        "Bu ödeme bekleyen siparişi iptal etmek istediğinize emin misiniz?"
+                      );
+                      if (confirmed) {
+                        handleAction(o.id, "cancel");
+                      }
+                    }}
+                  >
+                    Siparişi İptal Et
+                  </button>
+                )}
+
                 {o.status === "SHIPPED" && (
                   <button
                     style={greenButtonStyle}
@@ -787,6 +805,16 @@ const blueButtonStyle: CSSProperties = {
   border: "none",
   background: "#2563eb",
   color: "white",
+  padding: "12px 16px",
+  borderRadius: 12,
+  cursor: "pointer",
+  fontWeight: 900,
+};
+
+const cancelButtonStyle: CSSProperties = {
+  border: "1px solid #dc2626",
+  background: "white",
+  color: "#dc2626",
   padding: "12px 16px",
   borderRadius: 12,
   cursor: "pointer",
