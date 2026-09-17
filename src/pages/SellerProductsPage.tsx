@@ -77,6 +77,50 @@ export default function SellerProductsPage() {
     loadProducts();
   }, []);
 
+  const toggleProductActive = async (product: Product) => {
+    const nextActive = !product.isActive;
+
+    const confirmed = window.confirm(
+      nextActive
+        ? `"${product.title}" ürününü yeniden yayına almak istiyor musunuz?`
+        : `"${product.title}" ürününü yayından kaldırmak istiyor musunuz?`
+    );
+
+    if (!confirmed) return;
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setError(t("sellerProductsPage.loginAgain"));
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BASE_URL}/api/products/${product.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          isActive: nextActive,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data?.message || "Ürün durumu değiştirilemedi.");
+        return;
+      }
+
+      await loadProducts();
+    } catch (err) {
+      console.error("PRODUCT ACTIVE STATUS ERROR:", err);
+      setError("Ürün durumu değiştirilirken bir hata oluştu.");
+    }
+  };
+
   return (
     <SellerLayout title={t("sellerProductsPage.title")}>
       <main style={pageStyle}>
@@ -175,10 +219,8 @@ export default function SellerProductsPage() {
                       value={product.moq}
                     />
                     <Info
-                      label={t("sellerProductsPage.leadTime")}
-                      value={t("sellerProductsPage.dayCount", {
-                        count: product.leadTimeDays,
-                      })}
+                      label="Kargoya hazırlama"
+                      value={`${product.leadTimeDays} iş günü`}
                     />
                     <Info
                       label={t("sellerProductsPage.vat")}
@@ -201,9 +243,35 @@ export default function SellerProductsPage() {
                   </div>
 
                   <div style={actionsStyle}>
-                    <a href={`/product/${product.id}`} style={viewButtonStyle}>
-                      {t("sellerProductsPage.viewProduct")}
-                    </a>
+                    <div style={primaryActionsStyle}>
+                      <a
+                        href={`/seller/products/${product.id}/edit`}
+                        style={editButtonStyle}
+                      >
+                        Ürünü Düzenle
+                      </a>
+
+                      <a
+                        href={`/product/${product.id}`}
+                        style={viewButtonStyle}
+                      >
+                        {t("sellerProductsPage.viewProduct")}
+                      </a>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => toggleProductActive(product)}
+                      style={
+                        product.isActive
+                          ? deactivateButtonStyle
+                          : activateButtonStyle
+                      }
+                    >
+                      {product.isActive
+                        ? "Yayından Kaldır"
+                        : "Yeniden Yayınla"}
+                    </button>
                   </div>
                 </div>
               </article>
@@ -284,7 +352,8 @@ const imageWrapStyle: CSSProperties = {
 const imageStyle: CSSProperties = {
   width: "100%",
   height: "100%",
-  objectFit: "cover",
+  objectFit: "contain",
+  background: "#ffffff",
 };
 
 const imagePlaceholderStyle: CSSProperties = {
@@ -389,19 +458,59 @@ const smallBadgeStyle: CSSProperties = {
 const actionsStyle: CSSProperties = {
   marginTop: 18,
   display: "flex",
-  justifyContent: "space-between",
+  flexDirection: "column",
+  gap: 10,
+};
+
+const primaryActionsStyle: CSSProperties = {
+  display: "flex",
+  gap: 10,
+};
+
+const editButtonStyle: CSSProperties = {
+  flex: 1,
+  textAlign: "center",
+  background: "#2563eb",
+  color: "white",
+  textDecoration: "none",
+  padding: "12px 10px",
+  borderRadius: 12,
+  fontWeight: 800,
+  fontSize: 13,
 };
 
 const viewButtonStyle: CSSProperties = {
-  display: "inline-block",
-  width: "100%",
+  flex: 1,
   textAlign: "center",
   background: "#0f172a",
   color: "white",
   textDecoration: "none",
-  padding: "12px 14px",
+  padding: "12px 10px",
   borderRadius: 12,
   fontWeight: 800,
+  fontSize: 13,
+};
+
+const deactivateButtonStyle: CSSProperties = {
+  width: "100%",
+  border: "1px solid #fecaca",
+  background: "#fff7f7",
+  color: "#b91c1c",
+  padding: "11px 14px",
+  borderRadius: 12,
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
+const activateButtonStyle: CSSProperties = {
+  width: "100%",
+  border: "1px solid #bbf7d0",
+  background: "#f0fdf4",
+  color: "#166534",
+  padding: "11px 14px",
+  borderRadius: 12,
+  fontWeight: 800,
+  cursor: "pointer",
 };
 
 const infoBoxStyle: CSSProperties = {

@@ -88,7 +88,7 @@ export default {
     "phone": "Telefon *",
     "email": "Elektron pochta *",
     "membershipType": "A'zolik turi *",
-    "buyer": "Topdan xaridor",
+    "buyer": "Xaridor",
     "seller": "Sotuvchi",
     "logistics": "Logistika kompaniyasi",
     "companyType": "Kompaniya turi",

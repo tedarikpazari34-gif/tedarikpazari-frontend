@@ -88,7 +88,7 @@ export default {
     "phone": "Telefon *",
     "email": "E-Mail *",
     "membershipType": "Art der Mitgliedschaft *",
-    "buyer": "Großkunde",
+    "buyer": "Käufer",
     "seller": "Verkäufer",
     "logistics": "Logistikunternehmen",
     "companyType": "Unternehmensform",

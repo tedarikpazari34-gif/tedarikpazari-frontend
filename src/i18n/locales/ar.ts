@@ -88,7 +88,7 @@ export default {
     "phone": "الهاتف *",
     "email": "البريد الإلكتروني *",
     "membershipType": "نوع العضوية *",
-    "buyer": "مشتري بالجملة",
+    "buyer": "مشتري",
     "seller": "بائع",
     "logistics": "شركة لوجستية",
     "companyType": "نوع الشركة",

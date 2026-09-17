@@ -88,7 +88,7 @@ export default {
     "phone": "Телефон *",
     "email": "Эл. почта *",
     "membershipType": "Тип членства *",
-    "buyer": "Оптовый покупатель",
+    "buyer": "Покупатель",
     "seller": "Продавец",
     "logistics": "Логистическая компания",
     "companyType": "Тип компании",

@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import SellerLayout from "../components/SellerLayout";
 import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
 import { COUNTRIES } from "../constants/countries";
 import { TURKEY_CITIES } from "../constants/turkeyCities";
 
@@ -21,6 +22,8 @@ type UploadedImage = {
 
 export default function SellerProductCreatePage() {
   const { t, i18n } = useTranslation();
+  const { id: editProductId } = useParams();
+  const isEditMode = Boolean(editProductId);
 
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
@@ -75,6 +78,90 @@ export default function SellerProductCreatePage() {
 
     loadCategories();
   }, [i18n.language, t]);
+
+  useEffect(() => {
+    if (!isEditMode || !editProductId || categories.length === 0) return;
+
+    async function loadProductForEdit() {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError(t("sellerProductCreatePage.loginRequired"));
+        return;
+      }
+
+      try {
+        const res = await fetch(`${BASE_URL}/api/products/mine`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data?.message || "Ürün bilgileri yüklenemedi.");
+          return;
+        }
+
+        const product = Array.isArray(data)
+          ? data.find((item: any) => item.id === editProductId)
+          : null;
+
+        if (!product) {
+          setError("Düzenlenecek ürün bulunamadı.");
+          return;
+        }
+
+        setTitle(product.title || "");
+        setDescription(product.description || "");
+        setCategoryId(product.categoryId || "");
+        setBasePrice(String(product.basePrice ?? ""));
+        setCountry(product.country || "Türkiye");
+        setCity(product.city || "");
+        setUnitType(product.unitType || "adet");
+        setMoq(String(product.moq ?? 1));
+        setLeadTimeDays(String(product.leadTimeDays ?? 3));
+        setStockType(product.stockType || "STOCK");
+        setVatRate(String(product.vatRate ?? 20));
+
+        const parent = categories.find((main) =>
+          main.children?.some((child) => child.id === product.categoryId)
+        );
+
+        if (parent) {
+          setMainCategoryId(parent.id);
+        } else if (categories.some((main) => main.id === product.categoryId)) {
+          setMainCategoryId(product.categoryId);
+        }
+
+        const existingImages = Array.isArray(product.images)
+          ? product.images.map((image: any, index: number) => ({
+              url: image.url,
+              sortOrder: image.sortOrder ?? index,
+              isCover: image.isCover ?? index === 0,
+            }))
+          : [];
+
+        if (existingImages.length > 0) {
+          setUploadedImages(existingImages);
+        } else if (product.imageUrl) {
+          setUploadedImages([
+            {
+              url: product.imageUrl,
+              sortOrder: 0,
+              isCover: true,
+            },
+          ]);
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Ürün bilgileri yüklenirken bir hata oluştu.");
+      }
+    }
+
+    loadProductForEdit();
+  }, [isEditMode, editProductId, categories, t]);
 
   const generateAiDraft = async () => {
     setError("");
@@ -265,38 +352,48 @@ export default function SellerProductCreatePage() {
       const coverImage =
         uploadedImages.find((img) => img.isCover)?.url || uploadedImages[0]?.url;
 
-      const createRes = await fetch(`${BASE_URL}/api/products`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title,
-          description,
-          categoryId,
-          country,
-          city,
-          unitType,
-          moq: Number(moq),
-          basePrice: Number(basePrice),
-          leadTimeDays: Number(leadTimeDays),
-          stockType,
-          vatRate: Number(vatRate),
-          rfqEnabled: true,
-          imageUrl: coverImage,
-        }),
-      });
+      const productRes = await fetch(
+        isEditMode && editProductId
+          ? `${BASE_URL}/api/products/${editProductId}`
+          : `${BASE_URL}/api/products`,
+        {
+          method: isEditMode ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title,
+            description,
+            categoryId,
+            country,
+            city,
+            unitType,
+            moq: Number(moq),
+            basePrice: Number(basePrice),
+            leadTimeDays: Number(leadTimeDays),
+            stockType,
+            vatRate: Number(vatRate),
+            rfqEnabled: true,
+            imageUrl: coverImage,
+          }),
+        }
+      );
 
-      const createdProduct = await createRes.json();
+      const savedProduct = await productRes.json();
 
-      if (!createRes.ok) {
-        setError(createdProduct?.message || t("sellerProductCreatePage.createFailed"));
+      if (!productRes.ok) {
+        setError(
+          savedProduct?.message ||
+            (isEditMode
+              ? "Ürün güncellenemedi."
+              : t("sellerProductCreatePage.createFailed"))
+        );
         return;
       }
 
-      if (uploadedImages.length > 0) {
-        await fetch(`${BASE_URL}/api/products/${createdProduct.id}/images`, {
+      if (!isEditMode && uploadedImages.length > 0) {
+        await fetch(`${BASE_URL}/api/products/${savedProduct.id}/images`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -308,23 +405,29 @@ export default function SellerProductCreatePage() {
         });
       }
 
-      setMessage(t("sellerProductCreatePage.createSuccess"));
+      setMessage(
+        isEditMode
+          ? "Ürün başarıyla güncellendi."
+          : t("sellerProductCreatePage.createSuccess")
+      );
 
-      setTitle("");
-      setDescription("");
-      setMainCategoryId("");
-      setCategoryId("");
-      setBasePrice("");
-      setCountry("Türkiye");
-      setCity("");
-      setUnitType("adet");
-      setMoq("1");
-      setLeadTimeDays("3");
-      setStockType("STOCK");
-      setVatRate("20");
-      setUploadedImages([]);
-      setSelectedFileNames([]);
-      setAiPrompt("");
+      if (!isEditMode) {
+        setTitle("");
+        setDescription("");
+        setMainCategoryId("");
+        setCategoryId("");
+        setBasePrice("");
+        setCountry("Türkiye");
+        setCity("");
+        setUnitType("adet");
+        setMoq("1");
+        setLeadTimeDays("3");
+        setStockType("STOCK");
+        setVatRate("20");
+        setUploadedImages([]);
+        setSelectedFileNames([]);
+        setAiPrompt("");
+      }
     } catch (err) {
       console.error("CREATE ERROR:", err);
       setError(t("sellerProductCreatePage.createError"));
@@ -334,7 +437,9 @@ export default function SellerProductCreatePage() {
   };
 
   return (
-    <SellerLayout title={t("sellerProductCreatePage.title")}>
+    <SellerLayout
+      title={isEditMode ? "Ürünü Düzenle" : t("sellerProductCreatePage.title")}
+    >
       <main
         style={{
           ...pageStyle,
@@ -610,6 +715,8 @@ export default function SellerProductCreatePage() {
                 ? t("sellerProductCreatePage.uploading")
                 : saving
                 ? t("sellerProductCreatePage.saving")
+                : isEditMode
+                ? "Değişiklikleri Kaydet"
                 : t("sellerProductCreatePage.save")}
             </button>
           </form>

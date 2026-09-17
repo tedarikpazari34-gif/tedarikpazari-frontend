@@ -357,6 +357,40 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     }
   };
 
+  const addToCart = (product: Product) => {
+    try {
+      const quantity = Math.max(Number(product.moq || 1), 1);
+      const raw = localStorage.getItem("tedarikCart");
+      const current = raw ? JSON.parse(raw) : [];
+      const cart = Array.isArray(current) ? current : [];
+
+      const existingIndex = cart.findIndex(
+        (item: any) => item.productId === product.id
+      );
+
+      const item = {
+        productId: product.id,
+        title: getProductTitle(product, t("productsPage.productFallback")),
+        quantity,
+        unitType: product.unitType,
+        unitPrice: Number(product.basePrice ?? product.price ?? 0),
+        sellerId: product.seller?.id || null,
+        imageUrl: getImage(product) || null,
+      };
+
+      if (existingIndex >= 0) {
+        cart[existingIndex] = item;
+      } else {
+        cart.push(item);
+      }
+
+      localStorage.setItem("tedarikCart", JSON.stringify(cart));
+      window.dispatchEvent(new Event("tedarik-cart-changed"));
+    } catch (err) {
+      console.error("ADD TO CART ERROR:", err);
+    }
+  };
+
   const handleSearch = () => {
     const keyword = search.trim();
 
@@ -562,79 +596,60 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                     )}
                   </h3>
 
-                  <div style={sellerRow}>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={sellerNameText}>
-                        {t("productsPage.approvedSupplier")}
-                      </div>
-
-                      <div style={sellerMeta}>
-                        {t("productsPage.supplierHidden")}
-                      </div>
-                    </div>
-
-                    <span style={supplierBadge}>✓ {t("productsPage.platformOnly")}</span>
+                  <div style={professionalSupplier}>
+                    <span style={verifiedDot}>✓</span>
+                    <span>{t("productsPage.verifiedSupplier")}</span>
                   </div>
 
-                  <div style={featureGrid}>
-                    <div style={featureItem}>
-                      <span>📦 {t("productCard.moq").replace(":", "")}</span>
-                      <strong>
-                        {product.moq || 1} {product.unitType ? unitLabel(product.unitType, t) : t("productsPage.piece")}
-                      </strong>
-                    </div>
-
-                    <div style={featureItem}>
-                      <span>🚚 {t("productsPage.delivery")}</span>
-                      <strong>
-                        {product.leadTimeDays
-                          ? t("productsPage.days", {
-                              count: product.leadTimeDays,
-                            })
-                          : t("productsPage.ask")}
-                      </strong>
-                    </div>
-                  </div>
-
-                  <div style={priceRow}>
-                    <div>
-                      <span style={priceLabel}>{t("productsPage.startingPrice")}</span>
-                      <strong style={priceText}>
+                  <div style={professionalPriceBlock}>
+                    <div style={professionalPriceLine}>
+                      <strong style={professionalPriceText}>
                         {getPrice(
                           product,
                           t("productsPage.priceInfo"),
                           i18n.language
                         )}
                       </strong>
+                      <span style={professionalUnit}>
+                        / {product.unitType ? unitLabel(product.unitType, t) : t("productsPage.piece")}
+                      </span>
                     </div>
-
-                    <span style={stockBadge}>
-                      {product.stockType || t("productsPage.wholesale")}
-                    </span>
+                    <span style={vatIncludedText}>KDV dahil</span>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => toggleCompare(product.id)}
-                    style={{
-                      ...compareCardButton,
-                      background: compareIds.includes(product.id)
-                        ? "#dbeafe"
-                        : "#f8fafc",
-                      color: compareIds.includes(product.id)
-                        ? "#1d4ed8"
-                        : "#475569",
-                    }}
-                  >
-                    {compareIds.includes(product.id)
-                      ? `✓ ${t("productsPage.inComparison")}`
-                      : `⚖️ ${t("productsPage.compare")}`}
-                  </button>
+                  <div style={professionalDetails}>
+                    <div style={professionalDetailRow}>
+                      <span>Minimum sipariş</span>
+                      <strong>
+                        {product.moq || 1} {product.unitType ? unitLabel(product.unitType, t) : t("productsPage.piece")}
+                      </strong>
+                    </div>
+
+                    <div style={professionalDetailRow}>
+                      <span>Stok durumu</span>
+                      <strong>
+                        {product.stockType === "STOCK"
+                          ? "Stoktan"
+                          : product.stockType || t("productsPage.wholesale")}
+                      </strong>
+                    </div>
+
+                    <div style={professionalShipping}>
+                      🚚 {product.leadTimeDays
+                        ? `En geç ${product.leadTimeDays} iş günü içinde kargoya verilir`
+                        : "Kargoya hazırlama süresi için bilgi alın"}
+                    </div>
+                  </div>
+
 
                   <div style={actions}>
-                    <Link to={`/product/${product.id}`} style={detailBtn}>
-                      {t("productsPage.view")}
-                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => addToCart(product)}
+                      style={addToCartButton}
+                    >
+                      Sepete Ekle
+                    </button>
                   </div>
                 </div>
               </div>
@@ -779,7 +794,7 @@ const imageLink: CSSProperties = {
 const img: CSSProperties = {
   width: "100%",
   height: "100%",
-  objectFit: "cover",
+  objectFit: "contain",
 };
 
 const placeholder: CSSProperties = {
@@ -1078,4 +1093,100 @@ const stockBadge: CSSProperties = {
   whiteSpace: "nowrap",
   fontSize: 11,
   fontWeight: 800,
+};
+
+const professionalSupplier: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 6,
+  marginBottom: 14,
+  color: "#475569",
+  fontSize: 12,
+  fontWeight: 700,
+};
+
+const verifiedDot: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: 18,
+  height: 18,
+  borderRadius: "50%",
+  background: "#ecfdf5",
+  color: "#059669",
+  fontSize: 11,
+  fontWeight: 900,
+};
+
+const professionalPriceBlock: CSSProperties = {
+  paddingBottom: 14,
+  marginBottom: 14,
+  borderBottom: "1px solid #eef2f7",
+};
+
+const professionalPriceLine: CSSProperties = {
+  display: "flex",
+  alignItems: "baseline",
+  gap: 5,
+};
+
+const professionalPriceText: CSSProperties = {
+  color: "#111827",
+  fontSize: 25,
+  lineHeight: 1.15,
+  fontWeight: 800,
+  letterSpacing: "-0.4px",
+};
+
+const professionalUnit: CSSProperties = {
+  color: "#64748b",
+  fontSize: 13,
+  fontWeight: 600,
+};
+
+const vatIncludedText: CSSProperties = {
+  display: "block",
+  marginTop: 4,
+  color: "#64748b",
+  fontSize: 11,
+  fontWeight: 600,
+};
+
+const professionalDetails: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 8,
+};
+
+const professionalDetailRow: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
+  color: "#64748b",
+  fontSize: 12,
+};
+
+const professionalShipping: CSSProperties = {
+  marginTop: 3,
+  padding: "9px 10px",
+  borderRadius: 9,
+  background: "#f8fafc",
+  color: "#475569",
+  fontSize: 12,
+  fontWeight: 650,
+  lineHeight: 1.4,
+};
+
+const addToCartButton: CSSProperties = {
+  width: "100%",
+  minHeight: 46,
+  border: "none",
+  borderRadius: 10,
+  background: "#0f172a",
+  color: "#ffffff",
+  fontSize: 14,
+  fontWeight: 800,
+  cursor: "pointer",
+  boxShadow: "0 4px 12px rgba(15,23,42,0.12)",
 };

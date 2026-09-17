@@ -88,7 +88,7 @@ export default {
     "phone": "ტელეფონი *",
     "email": "ელ.ფოსტა *",
     "membershipType": "წევრობის ტიპი *",
-    "buyer": "საბითუმო მყიდველი",
+    "buyer": "მყიდველი",
     "seller": "გამყიდველი",
     "logistics": "ლოგისტიკური კომპანია",
     "companyType": "კომპანიის ტიპი",

@@ -167,6 +167,15 @@ export default function App() {
         />
 
         <Route
+          path="/seller/products/:id/edit"
+          element={
+            <PrivateRoute role="SELLER">
+              <SellerProductCreatePage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
           path="/admin"
           element={
             <AdminRoute>

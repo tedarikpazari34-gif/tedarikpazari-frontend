@@ -326,6 +326,18 @@ export default function ProductDetailPage() {
     }
   };
 
+  const buyNow = () => {
+    if (!product) return;
+
+    if (quantity < product.moq) {
+      alert(t("productDetailPage.cartInvalidQuantity"));
+      return;
+    }
+
+    addToCart();
+    navigate("/cart");
+  };
+
   const toggleCompare = () => {
     try {
       const raw = localStorage.getItem("compareProductIds");
@@ -489,75 +501,6 @@ export default function ProductDetailPage() {
             {product.description || t("productDetailPage.noDescription")}
           </p>
 
-          <div style={priceBlockStyle}>
-            <div style={priceLabelStyle}>{t("productDetailPage.startingPrice")}</div>
-            <div style={priceStyle}>
-              {Number(product.basePrice || 0).toLocaleString(locale)} ₺
-            </div>
-            <div style={unitStyle}>/ {unitLabel(product.unitType, t)}</div>
-          </div>
-          <div style={infoGridStyle}>
-            <InfoBox
-              label={t("productDetailPage.unit")}
-              value={unitLabel(product.unitType, t)}
-            />
-            <InfoBox label="MOQ" value={product.moq} />
-            <InfoBox
-              label={t("productDetailPage.deliveryTime")}
-              value={
-                product.leadTimeDays
-                  ? t("productDetailPage.days", { count: product.leadTimeDays })
-                  : "-"
-              }
-            />
-            <InfoBox
-              label={t("productDetailPage.stockType")}
-              value={stockTypeLabel(product.stockType, t)}
-            />
-            <InfoBox
-              label={t("productDetailPage.vat")}
-              value={
-                product.vatRate !== null && product.vatRate !== undefined
-                  ? `%${product.vatRate}`
-                  : "-"
-              }
-            />
-            <InfoBox
-              label={t("productDetailPage.country")}
-              value={product.country || product.seller?.country || "-"}
-            />
-            <InfoBox
-              label={t("productDetailPage.city")}
-              value={product.city || product.seller?.city || "-"}
-            />
-            <InfoBox
-              label={t("productDetailPage.supplier")}
-              value={t("productDetailPage.hiddenInfo")}
-              green
-            />
-          </div>
-
-          <div style={noticeStyle}>
-            <strong>{t("productDetailPage.platformProtectedSupply")}</strong>
-            <p style={{ marginBottom: 0 }}>
-              {t("productDetailPage.platformProtectedText")}
-            </p>
-          </div>
-          <div style={supplierCardStyle}>
-  <div>
-    <div style={supplierTitleStyle}>{t("productDetailPage.supplierProfile")}</div>
-    <div style={supplierNameStyle}>{t("productDetailPage.supplierHidden")}</div>
-    <p style={supplierDescStyle}>
-      {t("productDetailPage.supplierHiddenText")}
-    </p>
-  </div>
-
-  <div style={supplierStatsStyle}>
-    <span>{t("productDetailPage.inPlatformQuote")}</span>
-    <span>{t("productDetailPage.securePayment")}</span>
-    <span>{t("productDetailPage.controlledTrade")}</span>
-  </div>
-</div>
           <div style={purchaseBoxStyle}>
             <div style={purchaseHeaderStyle}>
               <div>
@@ -565,6 +508,9 @@ export default function ProductDetailPage() {
                 <strong style={purchasePriceStyle}>
                   {Number(product.basePrice || 0).toLocaleString(locale)} ₺
                 </strong>
+                <span style={vatIncludedPurchaseStyle}>
+                  KDV dahil
+                </span>
               </div>
 
               <span style={purchaseUnitStyle}>/ {unitLabel(product.unitType, t)}</span>
@@ -579,13 +525,11 @@ export default function ProductDetailPage() {
               </div>
 
               <div style={purchaseFeatureStyle}>
-                <span>{t("productDetailPage.estimatedDelivery")}</span>
+                <span>Kargoya hazırlama</span>
                 <strong>
                   {product.leadTimeDays
-                    ? t("productDetailPage.days", {
-                        count: product.leadTimeDays,
-                      })
-                    : t("productDetailPage.askSeller")}
+                    ? `En geç ${product.leadTimeDays} iş günü içinde kargoya verilir`
+                    : "Kargoya hazırlama süresi için bilgi alın"}
                 </strong>
               </div>
 
@@ -598,15 +542,7 @@ export default function ProductDetailPage() {
                 </strong>
               </div>
 
-              <div style={purchaseFeatureStyle}>
-                <span>{t("productDetailPage.vatLabel")}</span>
-                <strong>
-                  {product.vatRate !== null &&
-                  product.vatRate !== undefined
-                    ? `%${product.vatRate}`
-                    : t("productDetailPage.unspecified")}
-                </strong>
-              </div>
+
             </div>
 
             <div style={quickActionGridStyle}>
@@ -627,55 +563,49 @@ export default function ProductDetailPage() {
                     : t("productDetailPage.addFavorite")}
               </button>
 
-              <button
-                type="button"
-                onClick={toggleCompare}
+            </div>
+
+            <div style={{ marginTop: 18 }}>
+              <label
                 style={{
-                  ...quickActionButtonStyle,
-                  color: isCompared ? "#1d4ed8" : "#334155",
-                  background: isCompared ? "#eff6ff" : "#f8fafc",
+                  display: "block",
+                  fontWeight: 700,
+                  marginBottom: 8,
+                  color: "#0f172a",
                 }}
               >
-                {isCompared
-                  ? t("productDetailPage.inComparison")
-                  : t("productDetailPage.compare")}
-              </button>
+                {t("productDetailPage.quantity")}
+              </label>
+
+              <input
+                type="number"
+                min={product.moq}
+                value={quantity}
+                onChange={(e) =>
+                  setQuantity(
+                    Math.max(product.moq, Number(e.target.value || product.moq))
+                  )
+                }
+                style={{
+                  width: 140,
+                  padding: "12px 14px",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: 10,
+                  fontSize: 16,
+                }}
+              />
             </div>
           </div>
 
-          <div style={{ marginTop: 18 }}>
-            <label
-              style={{
-                display: "block",
-                fontWeight: 700,
-                marginBottom: 8,
-                color: "#0f172a",
-              }}
-            >
-              {t("productDetailPage.quantity")}
-            </label>
-
-            <input
-              type="number"
-              min={product.moq}
-              value={quantity}
-              onChange={(e) =>
-                setQuantity(
-                  Math.max(product.moq, Number(e.target.value || product.moq))
-                )
-              }
-              style={{
-                width: 140,
-                padding: "12px 14px",
-                border: "1px solid #cbd5e1",
-                borderRadius: 10,
-                fontSize: 16,
-                marginBottom: 14,
-              }}
-            />
-          </div>
-
           <div style={actionsStyle}>
+            <button
+              type="button"
+              onClick={buyNow}
+              style={buyNowButtonStyle}
+            >
+              Hemen Al
+            </button>
+
             <button
               type="button"
               onClick={addToCart}
@@ -695,13 +625,6 @@ export default function ProductDetailPage() {
                 {t("productDetailPage.viewCart")}
               </button>
             )}
-
-            <Link
-              to={product.category?.id ? `/category/${product.category.id}` : "/"}
-              style={secondaryButtonStyle}
-            >
-              {t("productDetailPage.backCategory")}
-            </Link>
           </div>
         </div>
       </section>
@@ -860,8 +783,9 @@ const mainImageStyle: CSSProperties = {
   width: "100%",
   maxWidth: "100%",
   height: window.innerWidth < 700 ? 320 : 520,
-  objectFit: "cover",
+  objectFit: "contain",
   display: "block",
+  background: "#ffffff",
 };
 
 const emptyImageStyle: CSSProperties = {
@@ -1369,6 +1293,27 @@ const quickActionButtonStyle: CSSProperties = {
   border: "1px solid #cbd5e1",
   borderRadius: 12,
   fontSize: 13,
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const vatIncludedPurchaseStyle: CSSProperties = {
+  display: "block",
+  marginTop: 5,
+  color: "#64748b",
+  fontSize: 12,
+  fontWeight: 700,
+};
+
+const buyNowButtonStyle: CSSProperties = {
+  flex: 1,
+  minWidth: 190,
+  height: 52,
+  border: "1px solid #2563eb",
+  borderRadius: 16,
+  background: "#ffffff",
+  color: "#2563eb",
+  fontSize: 16,
   fontWeight: 900,
   cursor: "pointer",
 };

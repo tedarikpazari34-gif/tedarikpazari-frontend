@@ -25,6 +25,7 @@ export default function RegisterPage() {
     useState<MembershipType>("BUYER");
   const [companyType, setCompanyType] = useState("Şahıs");
   const [categories, setCategories] = useState<string[]>([]);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [country, setCountry] = useState("Türkiye");
   const [city, setCity] = useState("");
   const [district, setDistrict] = useState("");
@@ -295,61 +296,80 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>{t("registerPage.categories")}</label>
-
-              <div
+              <button
+                type="button"
+                onClick={() => setCategoriesOpen((prev) => !prev)}
+                aria-expanded={categoriesOpen}
                 style={{
-                  border: "1px solid #d1d5db",
-                  borderRadius: 10,
-                  padding: 12,
-                  maxHeight: 220,
-                  overflowY: "auto",
+                  ...inputStyle,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                  textAlign: "start",
                   background: "#fff",
                 }}
               >
-                {sectors.map((sector) => {
-                  const checked = categories.includes(sector.name);
-                  const sectorKey = sector.id.replace(/-/g, "_");
+                <span>{t("registerPage.categories")} ({categories.length}/3)</span>
+                <span aria-hidden="true">{categoriesOpen ? "▲" : "▼"}</span>
+              </button>
 
-                  return (
-                    <label
-                      key={sector.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        padding: "6px 0",
-                        cursor: "pointer",
-                        color: "#0f172a",
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => {
-                          setCategories((prev) => {
-                            if (prev.includes(sector.name)) {
-                              return prev.filter((x) => x !== sector.name);
-                            }
+              {categoriesOpen && (
+                <div
+                  style={{
+                    border: "1px solid #d1d5db",
+                    borderRadius: 10,
+                    padding: 12,
+                    marginTop: 6,
+                    maxHeight: 220,
+                    overflowY: "auto",
+                    background: "#fff",
+                  }}
+                >
+                  {sectors.map((sector) => {
+                    const checked = categories.includes(sector.name);
+                    const sectorKey = sector.id.replace(/-/g, "_");
 
-                            if (prev.length >= 3) {
-                              alert(t("registerPage.maxCategories"));
-                              return prev;
-                            }
-
-                            return [...prev, sector.name];
-                          });
+                    return (
+                      <label
+                        key={sector.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "6px 0",
+                          cursor: "pointer",
+                          color: "#0f172a",
                         }}
-                      />
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => {
+                            setCategories((prev) => {
+                              if (prev.includes(sector.name)) {
+                                return prev.filter((x) => x !== sector.name);
+                              }
 
-                      {t(
-                        `popularSectors.sectors.${sectorKey}.name`,
-                        sector.name
-                      )}
-                    </label>
-                  );
-                })}
-              </div>
+                              if (prev.length >= 3) {
+                                alert(t("registerPage.maxCategories"));
+                                return prev;
+                              }
+
+                              return [...prev, sector.name];
+                            });
+                          }}
+                        />
+
+                        {t(
+                          `popularSectors.sectors.${sectorKey}.name`,
+                          sector.name
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
 
               <div style={{ marginTop: 6, fontSize: 12, color: "#6b7280" }}>
                 {t("registerPage.maxCategories")}
