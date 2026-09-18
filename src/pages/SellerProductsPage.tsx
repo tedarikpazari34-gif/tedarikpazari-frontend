@@ -35,6 +35,10 @@ export default function SellerProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "ALL" | "ACTIVE" | "INACTIVE" | "APPROVED" | "PENDING"
+  >("ALL");
 
   const loadProducts = async () => {
     try {
@@ -76,6 +80,27 @@ export default function SellerProductsPage() {
   useEffect(() => {
     loadProducts();
   }, []);
+
+  const normalizedSearch = searchTerm.trim().toLocaleLowerCase(locale);
+
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
+      !normalizedSearch ||
+      product.title?.toLocaleLowerCase(locale).includes(normalizedSearch) ||
+      product.description?.toLocaleLowerCase(locale).includes(normalizedSearch) ||
+      product.category?.name
+        ?.toLocaleLowerCase(locale)
+        .includes(normalizedSearch);
+
+    const matchesStatus =
+      statusFilter === "ALL" ||
+      (statusFilter === "ACTIVE" && product.isActive) ||
+      (statusFilter === "INACTIVE" && !product.isActive) ||
+      (statusFilter === "APPROVED" && product.isApproved) ||
+      (statusFilter === "PENDING" && !product.isApproved);
+
+    return matchesSearch && matchesStatus;
+  });
 
   const toggleProductActive = async (product: Product) => {
     const nextActive = !product.isActive;
@@ -160,8 +185,81 @@ export default function SellerProductsPage() {
         )}
 
         {!loading && !error && products.length > 0 && (
+          <>
+            <section style={productToolsStyle}>
+              <div style={productSearchRowStyle}>
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Ürün adı, kategori veya açıklama ara..."
+                  aria-label="Ürünlerde ara"
+                  style={productSearchInputStyle}
+                />
+
+                <strong style={productResultCountStyle}>
+                  {filteredProducts.length} / {products.length} ürün
+                </strong>
+              </div>
+
+              <div style={productFilterRowStyle}>
+                {[
+                  ["ALL", "Tümü"],
+                  ["ACTIVE", "Aktif"],
+                  ["INACTIVE", "Pasif"],
+                  ["APPROVED", "Onaylı"],
+                  ["PENDING", "Onay Bekleyen"],
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() =>
+                      setStatusFilter(
+                        value as
+                          | "ALL"
+                          | "ACTIVE"
+                          | "INACTIVE"
+                          | "APPROVED"
+                          | "PENDING"
+                      )
+                    }
+                    aria-pressed={statusFilter === value}
+                    style={{
+                      ...productFilterButtonStyle,
+                      ...(statusFilter === value
+                        ? productFilterButtonActiveStyle
+                        : {}),
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {filteredProducts.length === 0 && (
+              <div style={filteredEmptyStyle}>
+                <strong style={filteredEmptyTitleStyle}>
+                  Ürün bulunamadı
+                </strong>
+                <p style={filteredEmptyTextStyle}>
+                  Aramanıza veya seçtiğiniz filtreye uygun ürün bulunamadı.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setStatusFilter("ALL");
+                  }}
+                  style={clearFiltersButtonStyle}
+                >
+                  Filtreleri Temizle
+                </button>
+              </div>
+            )}
+
           <div style={gridStyle}>
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <article key={product.id} style={cardStyle}>
                 <div style={imageWrapStyle}>
                   {product.imageUrl ? (
@@ -279,21 +377,28 @@ export default function SellerProductsPage() {
                       <a
                         href={`/seller/products/${product.id}/edit`}
                         style={editButtonStyle}
+                        aria-label={`${product.title} ürününü düzenle`}
                       >
-                        Ürünü Düzenle
+                        Düzenle
                       </a>
 
                       <a
                         href={`/product/${product.id}`}
                         style={viewButtonStyle}
+                        aria-label={`${product.title} ürününü görüntüle`}
                       >
-                        {t("sellerProductsPage.viewProduct")}
+                        Görüntüle
                       </a>
                     </div>
 
                     <button
                       type="button"
                       onClick={() => toggleProductActive(product)}
+                      aria-label={
+                        product.isActive
+                          ? `${product.title} ürününü yayından kaldır`
+                          : `${product.title} ürününü yeniden yayınla`
+                      }
                       style={
                         product.isActive
                           ? deactivateButtonStyle
@@ -309,6 +414,7 @@ export default function SellerProductsPage() {
               </article>
             ))}
           </div>
+          </>
         )}
       </main>
     </SellerLayout>
@@ -554,4 +660,101 @@ const emptyStyle: CSSProperties = {
   borderRadius: 20,
   padding: 36,
   boxShadow: "0 14px 30px rgba(15,23,42,0.08)",
+};
+
+const productToolsStyle: CSSProperties = {
+  marginBottom: 18,
+  padding: 14,
+  background: "#ffffff",
+  border: "1px solid #e2e8f0",
+  borderRadius: 16,
+  boxShadow: "0 8px 24px rgba(15,23,42,0.05)",
+};
+
+const productSearchRowStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 12,
+  flexWrap: "wrap",
+};
+
+const productSearchInputStyle: CSSProperties = {
+  flex: "1 1 260px",
+  minWidth: 0,
+  height: 44,
+  padding: "0 14px",
+  border: "1px solid #cbd5e1",
+  borderRadius: 12,
+  background: "#ffffff",
+  color: "#0f172a",
+  fontSize: 14,
+  outline: "none",
+};
+
+const productResultCountStyle: CSSProperties = {
+  whiteSpace: "nowrap",
+  color: "#64748b",
+  fontSize: 13,
+  fontWeight: 800,
+};
+
+const productFilterRowStyle: CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 8,
+  marginTop: 12,
+};
+
+const productFilterButtonStyle: CSSProperties = {
+  minHeight: 36,
+  padding: "7px 12px",
+  border: "1px solid #cbd5e1",
+  borderRadius: 999,
+  background: "#ffffff",
+  color: "#475569",
+  fontSize: 13,
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
+const productFilterButtonActiveStyle: CSSProperties = {
+  background: "#0f172a",
+  borderColor: "#0f172a",
+  color: "#ffffff",
+};
+
+const filteredEmptyStyle: CSSProperties = {
+  padding: "36px 20px",
+  marginBottom: 18,
+  textAlign: "center",
+  background: "#ffffff",
+  border: "1px dashed #cbd5e1",
+  borderRadius: 16,
+};
+
+const filteredEmptyTitleStyle: CSSProperties = {
+  display: "block",
+  marginBottom: 8,
+  color: "#0f172a",
+  fontSize: 17,
+  fontWeight: 800,
+};
+
+const filteredEmptyTextStyle: CSSProperties = {
+  margin: "0 0 16px",
+  color: "#64748b",
+  fontSize: 14,
+  lineHeight: 1.6,
+};
+
+const clearFiltersButtonStyle: CSSProperties = {
+  minHeight: 40,
+  padding: "8px 15px",
+  border: "1px solid #cbd5e1",
+  borderRadius: 10,
+  background: "#ffffff",
+  color: "#0f172a",
+  fontSize: 13,
+  fontWeight: 800,
+  cursor: "pointer",
 };
