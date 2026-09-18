@@ -312,26 +312,66 @@ export default function SellerProductCreatePage() {
 
       if (!res.ok) {
         setError(data?.message || t("sellerProductCreatePage.uploadFailed"));
-        setUploadedImages([]);
         return;
       }
 
       const images = Array.isArray(data?.images) ? data.images : [];
 
-      const withCover = images.map((img: any, index: number) => ({
-        ...img,
-        isCover: index === 0,
-      }));
+      setUploadedImages((currentImages) => {
+        const hasExistingCover = currentImages.some((img) => img.isCover);
 
-      setUploadedImages(withCover);
+        const newImages = images.map((img: any, index: number) => ({
+          ...img,
+          sortOrder: currentImages.length + index,
+          isCover:
+            currentImages.length === 0 && !hasExistingCover && index === 0,
+        }));
+
+        return [...currentImages, ...newImages];
+      });
+
       setMessage(t("sellerProductCreatePage.uploadSuccess"));
     } catch (err) {
       console.error("UPLOAD ERROR:", err);
       setError(t("sellerProductCreatePage.uploadError"));
-      setUploadedImages([]);
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleSetCoverImage = (selectedIndex: number) => {
+    setUploadedImages((currentImages) =>
+      currentImages.map((img, index) => ({
+        ...img,
+        sortOrder: index,
+        isCover: index === selectedIndex,
+      }))
+    );
+  };
+
+  const handleRemoveImage = (selectedIndex: number) => {
+    setUploadedImages((currentImages) => {
+      const removedImageWasCover = currentImages[selectedIndex]?.isCover;
+
+      const remainingImages = currentImages
+        .filter((_, index) => index !== selectedIndex)
+        .map((img, index) => ({
+          ...img,
+          sortOrder: index,
+        }));
+
+      if (
+        remainingImages.length > 0 &&
+        (removedImageWasCover || !remainingImages.some((img) => img.isCover))
+      ) {
+        return remainingImages.map((img, index) => ({
+          ...img,
+          isCover: index === 0,
+        }));
+      }
+
+      return remainingImages;
+    });
   };
 
   const handleCreateProduct = async (e: React.FormEvent) => {
@@ -418,9 +458,13 @@ export default function SellerProductCreatePage() {
         return;
       }
 
-      if (!isEditMode && uploadedImages.length > 0) {
-        await fetch(`${BASE_URL}/api/products/${savedProduct.id}/images`, {
-          method: "POST",
+      const productIdForImages =
+        isEditMode && editProductId ? editProductId : savedProduct.id;
+
+      const imagesRes = await fetch(
+        `${BASE_URL}/api/products/${productIdForImages}/images`,
+        {
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -428,7 +472,17 @@ export default function SellerProductCreatePage() {
           body: JSON.stringify({
             images: uploadedImages,
           }),
-        });
+        }
+      );
+
+      if (!imagesRes.ok) {
+        const imagesError = await imagesRes.json().catch(() => null);
+
+        setError(
+          imagesError?.message ||
+            "Ürün bilgileri kaydedildi ancak ürün fotoğrafları güncellenemedi."
+        );
+        return;
       }
 
       setMessage(
@@ -862,13 +916,47 @@ export default function SellerProductCreatePage() {
 
             {uploadedImages.length > 0 && (
               <div style={imageGridStyle}>
-                {uploadedImages.map((img, i) => (
-                  <img
-                    key={i}
-                    src={`${BASE_URL}${img.url}`}
-                    style={imageStyle}
-                  />
-                ))}
+                {uploadedImages.map((img, i) => {
+                  const imageSrc = /^https?:\/\//i.test(img.url)
+                    ? img.url
+                    : `${BASE_URL}${img.url}`;
+
+                  return (
+                    <div key={`${img.url}-${i}`} style={imageCardStyle}>
+                      <div style={{ position: "relative" }}>
+                        <img
+                          src={imageSrc}
+                          alt={`Ürün görseli ${i + 1}`}
+                          style={imageStyle}
+                        />
+
+                        {img.isCover && (
+                          <span style={coverBadgeStyle}>Kapak Fotoğrafı</span>
+                        )}
+                      </div>
+
+                      <div style={imageActionsStyle}>
+                        {!img.isCover && (
+                          <button
+                            type="button"
+                            onClick={() => handleSetCoverImage(i)}
+                            style={coverButtonStyle}
+                          >
+                            Kapak Yap
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(i)}
+                          style={removeImageButtonStyle}
+                        >
+                          Kaldır
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
@@ -1007,6 +1095,54 @@ const imageStyle: CSSProperties = {
   objectFit: "cover",
   borderRadius: 14,
   boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+};
+
+const imageCardStyle: CSSProperties = {
+  background: "#ffffff",
+  border: "1px solid #e2e8f0",
+  borderRadius: 14,
+  padding: 10,
+  boxShadow: "0 8px 20px rgba(15,23,42,0.06)",
+};
+
+const coverBadgeStyle: CSSProperties = {
+  position: "absolute",
+  left: 10,
+  top: 10,
+  background: "#0f172a",
+  color: "#ffffff",
+  fontSize: 12,
+  fontWeight: 700,
+  padding: "6px 9px",
+  borderRadius: 8,
+};
+
+const imageActionsStyle: CSSProperties = {
+  display: "flex",
+  gap: 8,
+  marginTop: 10,
+};
+
+const coverButtonStyle: CSSProperties = {
+  flex: 1,
+  border: "1px solid #cbd5e1",
+  background: "#f8fafc",
+  color: "#0f172a",
+  padding: "9px 10px",
+  borderRadius: 9,
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const removeImageButtonStyle: CSSProperties = {
+  flex: 1,
+  border: "1px solid #fecaca",
+  background: "#fff7f7",
+  color: "#b91c1c",
+  padding: "9px 10px",
+  borderRadius: 9,
+  fontWeight: 700,
+  cursor: "pointer",
 };
 
 const fileBoxStyle: CSSProperties = {
