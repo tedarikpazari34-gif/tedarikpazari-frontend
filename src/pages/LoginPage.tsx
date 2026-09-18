@@ -59,19 +59,25 @@ export default function LoginPage() {
       const token = res.data?.token;
       const role = res.data?.user?.role || res.data?.role;
       const emailVerified = res.data?.user?.emailVerified === true;
+      const companyVerified = res.data?.user?.companyVerified === true;
 
       if (!token) {
         setError(t("loginPage.tokenMissing"));
         return;
       }
 
+      if (!emailVerified) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        localStorage.setItem("emailVerified", "false");
+        alert(t("loginPage.emailNotVerified"));
+        return;
+      }
+
       localStorage.setItem("token", token);
       localStorage.setItem("role", role || "");
-      localStorage.setItem("emailVerified", String(emailVerified));
-
-      if (!emailVerified) {
-        alert(t("loginPage.emailNotVerified"));
-      }
+      localStorage.setItem("emailVerified", "true");
+      localStorage.setItem("companyVerified", String(companyVerified));
 
       window.dispatchEvent(new Event("storage"));
 
