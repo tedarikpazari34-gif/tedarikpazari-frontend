@@ -30,6 +30,7 @@ export default function RegisterPage() {
   const [city, setCity] = useState("");
   const [district, setDistrict] = useState("");
   const [taxNumber, setTaxNumber] = useState("");
+  const [paymentIdentityNumber, setPaymentIdentityNumber] = useState("");
   const [taxOffice, setTaxOffice] = useState("");
   const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -46,11 +47,30 @@ export default function RegisterPage() {
       !email.trim() ||
       !password.trim() ||
       !country.trim() ||
+      !city.trim() ||
+      !district.trim() ||
+      !address.trim() ||
+      !taxOffice.trim() ||
       categories.length === 0
     ) {
-      setError(
-        t("registerPage.requiredFields")
-      );
+      setError(t("registerPage.requiredFields"));
+      return;
+    }
+
+    if (country === "Türkiye") {
+      if (companyType === "Şahıs") {
+        if (!/^\d{11}$/.test(paymentIdentityNumber.trim())) {
+          setError(t("registerPage.invalidIdentityNumber"));
+          return;
+        }
+      } else if (["Limited", "Anonim"].includes(companyType)) {
+        if (!/^\d{10}$/.test(taxNumber.trim())) {
+          setError(t("registerPage.invalidTaxNumber"));
+          return;
+        }
+      }
+    } else if (!taxNumber.trim()) {
+      setError(t("registerPage.internationalTaxNumberRequired"));
       return;
     }
 
@@ -98,9 +118,16 @@ export default function RegisterPage() {
         country,
         city,
         district,
-        taxNumber,
-        taxOffice,
-        address,
+        taxNumber:
+          country === "Türkiye" && companyType === "Şahıs"
+            ? ""
+            : taxNumber.trim(),
+        taxOffice: taxOffice.trim(),
+        paymentIdentityNumber:
+          country === "Türkiye" && companyType === "Şahıs"
+            ? paymentIdentityNumber.trim()
+            : undefined,
+        address: address.trim(),
       });
 
       if (typeof window !== "undefined" && typeof (window as any).fbq === "function") {
@@ -259,7 +286,11 @@ export default function RegisterPage() {
               <select
                 style={inputStyle}
                 value={companyType}
-                onChange={(e) => setCompanyType(e.target.value)}
+                onChange={(e) => {
+                  setCompanyType(e.target.value);
+                  setTaxNumber("");
+                  setPaymentIdentityNumber("");
+                }}
               >
                 {country === "Türkiye" ? (
                   <>
@@ -382,8 +413,19 @@ export default function RegisterPage() {
                 style={inputStyle}
                 value={country}
                 onChange={(e) => {
-                  setCountry(e.target.value);
+                  const nextCountry = e.target.value;
+
+                  setCountry(nextCountry);
                   setCity("");
+                  setDistrict("");
+                  setTaxNumber("");
+                  setPaymentIdentityNumber("");
+
+                  setCompanyType(
+                    nextCountry === "Türkiye"
+                      ? "Şahıs"
+                      : "Sole Proprietorship"
+                  );
                 }}
               >
                 <option value="">{t("registerPage.selectCountry")}</option>
@@ -433,29 +475,49 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>
-                {country === "Türkiye"
-                  ? t("registerPage.taxNumber")
-                  : t("registerPage.internationalTaxNumber")}
-              </label>
-              <input
-                style={inputStyle}
-                placeholder={
-                  country === "Türkiye"
-                    ? t("registerPage.taxNumberPlaceholder")
-                    : t("registerPage.internationalTaxNumberPlaceholder")
-                }
-                value={taxNumber}
-                inputMode={country === "Türkiye" ? "numeric" : "text"}
-                maxLength={country === "Türkiye" ? 10 : 50}
-                onChange={(e) =>
-                  setTaxNumber(
-                    country === "Türkiye"
-                      ? e.target.value.replace(/\D/g, "").slice(0, 10)
-                      : e.target.value
-                  )
-                }
-              />
+              {country === "Türkiye" && companyType === "Şahıs" ? (
+                <>
+                  <label style={labelStyle}>{t("registerPage.identityNumber")}</label>
+                  <input
+                    style={inputStyle}
+                    placeholder={t("registerPage.identityNumberPlaceholder")}
+                    value={paymentIdentityNumber}
+                    inputMode="numeric"
+                    maxLength={11}
+                    onChange={(e) =>
+                      setPaymentIdentityNumber(
+                        e.target.value.replace(/\D/g, "").slice(0, 11)
+                      )
+                    }
+                  />
+                </>
+              ) : (
+                <>
+                  <label style={labelStyle}>
+                    {country === "Türkiye"
+                      ? t("registerPage.taxNumber")
+                      : t("registerPage.internationalTaxNumber")}
+                  </label>
+                  <input
+                    style={inputStyle}
+                    placeholder={
+                      country === "Türkiye"
+                        ? t("registerPage.taxNumberPlaceholder")
+                        : t("registerPage.internationalTaxNumberPlaceholder")
+                    }
+                    value={taxNumber}
+                    inputMode={country === "Türkiye" ? "numeric" : "text"}
+                    maxLength={country === "Türkiye" ? 10 : 50}
+                    onChange={(e) =>
+                      setTaxNumber(
+                        country === "Türkiye"
+                          ? e.target.value.replace(/\D/g, "").slice(0, 10)
+                          : e.target.value
+                      )
+                    }
+                  />
+                </>
+              )}
             </div>
 
             <div>
