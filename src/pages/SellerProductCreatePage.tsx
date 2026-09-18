@@ -41,6 +41,7 @@ export default function SellerProductCreatePage() {
   const [moq, setMoq] = useState("1");
   const [leadTimeDays, setLeadTimeDays] = useState("3");
   const [stockType, setStockType] = useState("STOCK");
+  const [stockQuantity, setStockQuantity] = useState("");
   const [vatRate, setVatRate] = useState("20");
 
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
@@ -123,6 +124,11 @@ export default function SellerProductCreatePage() {
         setMoq(String(product.moq ?? 1));
         setLeadTimeDays(String(product.leadTimeDays ?? 3));
         setStockType(product.stockType || "STOCK");
+        setStockQuantity(
+          product.stockQuantity !== null && product.stockQuantity !== undefined
+            ? String(product.stockQuantity)
+            : ""
+        );
         setVatRate(String(product.vatRate ?? 20));
 
         const parent = categories.find((main) =>
@@ -383,6 +389,8 @@ export default function SellerProductCreatePage() {
       const priceValue = Number(basePrice);
       const moqValue = Number(moq);
       const leadTimeValue = Number(leadTimeDays);
+      const stockQuantityValue =
+        stockQuantity.trim() === "" ? null : Number(stockQuantity);
       const vatValue = Number(vatRate);
 
       if (!Number.isFinite(priceValue) || priceValue <= 0) {
@@ -397,6 +405,14 @@ export default function SellerProductCreatePage() {
 
       if (!Number.isInteger(leadTimeValue) || leadTimeValue < 1) {
         setError("Kargoya hazırlama süresi en az 1 iş günü olmalıdır.");
+        return;
+      }
+
+      if (
+        stockQuantityValue !== null &&
+        (!Number.isInteger(stockQuantityValue) || stockQuantityValue < 0)
+      ) {
+        setError("Stok adedi 0 veya daha büyük bir tam sayı olmalıdır.");
         return;
       }
 
@@ -439,6 +455,7 @@ export default function SellerProductCreatePage() {
             basePrice: priceValue,
             leadTimeDays: leadTimeValue,
             stockType,
+            stockQuantity: stockQuantityValue,
             vatRate: vatValue,
             rfqEnabled: true,
             imageUrl: coverImage,
@@ -503,6 +520,7 @@ export default function SellerProductCreatePage() {
         setMoq("1");
         setLeadTimeDays("3");
         setStockType("STOCK");
+        setStockQuantity("");
         setVatRate("20");
         setUploadedImages([]);
         setSelectedFileNames([]);
@@ -797,6 +815,28 @@ export default function SellerProductCreatePage() {
                     {t("sellerProductCreatePage.stockOnDemand")}
                   </option>
                 </select>
+              </div>
+
+              <div>
+                <label style={fieldLabelStyle}>Stok Adedi</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={stockQuantity}
+                  onChange={(e) => setStockQuantity(e.target.value)}
+                  placeholder="Örn. 250"
+                  style={inputStyle}
+                />
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 12,
+                    color: "#64748b",
+                  }}
+                >
+                  Satışa hazır toplam ürün adedini girin. Stok yoksa 0 yazın.
+                </div>
               </div>
 
               <div>
