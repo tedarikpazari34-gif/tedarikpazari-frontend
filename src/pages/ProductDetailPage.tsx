@@ -106,6 +106,7 @@ export default function ProductDetailPage() {
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [isCompared, setIsCompared] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [quantityInput, setQuantityInput] = useState("1");
   const [addedToCart, setAddedToCart] = useState(false);
 
   useEffect(() => {
@@ -165,7 +166,10 @@ export default function ProductDetailPage() {
         }
 
         setProduct(data);
-        setQuantity(Math.max(Number(data.moq || 1), 1));
+
+        const initialQuantity = Math.max(Number(data.moq || 1), 1);
+        setQuantity(initialQuantity);
+        setQuantityInput(String(initialQuantity));
       } catch (error) {
         console.error("PRODUCT DETAIL ERROR:", error);
         setProduct(null);
@@ -306,6 +310,7 @@ export default function ProductDetailPage() {
         productId: product.id,
         title: product.title,
         quantity,
+        moq: Math.max(Number(product.moq || 1), 1),
         unitType: product.unitType,
         unitPrice: Number(product.basePrice || 0),
         sellerId: product.seller?.id || null,
@@ -565,36 +570,214 @@ export default function ProductDetailPage() {
 
             </div>
 
-            <div style={{ marginTop: 18 }}>
-              <label
+              <div
                 style={{
-                  display: "block",
-                  fontWeight: 700,
-                  marginBottom: 8,
-                  color: "#0f172a",
+                  marginTop: 18,
+                  paddingTop: 18,
+                  borderTop: "1px solid #e2e8f0",
                 }}
               >
-                {t("productDetailPage.quantity")}
-              </label>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 20,
+                    alignItems: "flex-end",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 700,
+                        marginBottom: 8,
+                        color: "#334155",
+                      }}
+                    >
+                      {t("productDetailPage.quantity")}
+                    </div>
 
-              <input
-                type="number"
-                min={product.moq}
-                value={quantity}
-                onChange={(e) =>
-                  setQuantity(
-                    Math.max(product.moq, Number(e.target.value || product.moq))
-                  )
-                }
-                style={{
-                  width: 140,
-                  padding: "12px 14px",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: 10,
-                  fontSize: 16,
-                }}
-              />
-            </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        aria-label="Miktarı azalt"
+                        onClick={() => {
+                          const minimum = Math.max(
+                            Number(product.moq || 1),
+                            1
+                          );
+                          const next = Math.max(minimum, quantity - 1);
+
+                          setQuantity(next);
+                          setQuantityInput(String(next));
+                        }}
+                        disabled={
+                          quantity <= Math.max(Number(product.moq || 1), 1)
+                        }
+                        style={{
+                          width: 44,
+                          height: 44,
+                          border: "1px solid #cbd5e1",
+                          borderRadius: 10,
+                          background: "#ffffff",
+                          fontSize: 20,
+                          fontWeight: 800,
+                          cursor:
+                            quantity <= Math.max(Number(product.moq || 1), 1)
+                              ? "not-allowed"
+                              : "pointer",
+                          opacity:
+                            quantity <= Math.max(Number(product.moq || 1), 1)
+                              ? 0.45
+                              : 1,
+                        }}
+                      >
+                        −
+                      </button>
+
+                      <input
+                        type="number"
+                        min={product.moq}
+                        step={1}
+                        inputMode="numeric"
+                        value={quantityInput}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setQuantityInput(value);
+
+                          if (value === "") return;
+
+                          const next = Number(value);
+                          if (Number.isInteger(next) && next > 0) {
+                            setQuantity(next);
+                          }
+                        }}
+                        onBlur={() => {
+                          const minimum = Math.max(
+                            Number(product.moq || 1),
+                            1
+                          );
+                          const parsed = Number(quantityInput);
+                          const normalized =
+                            Number.isInteger(parsed) && parsed >= minimum
+                              ? parsed
+                              : minimum;
+
+                          setQuantity(normalized);
+                          setQuantityInput(String(normalized));
+                        }}
+                        style={{
+                          width: 96,
+                          height: 44,
+                          boxSizing: "border-box",
+                          padding: "8px 10px",
+                          border: "1px solid #94a3b8",
+                          borderRadius: 10,
+                          textAlign: "center",
+                          fontSize: 16,
+                          fontWeight: 800,
+                          color: "#0f172a",
+                        }}
+                      />
+
+                      <button
+                        type="button"
+                        aria-label="Miktarı artır"
+                        onClick={() => {
+                          const next = quantity + 1;
+                          setQuantity(next);
+                          setQuantityInput(String(next));
+                        }}
+                        style={{
+                          width: 44,
+                          height: 44,
+                          border: "1px solid #cbd5e1",
+                          borderRadius: 10,
+                          background: "#ffffff",
+                          fontSize: 20,
+                          fontWeight: 800,
+                          cursor: "pointer",
+                        }}
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 7,
+                        fontSize: 12,
+                        color: "#64748b",
+                      }}
+                    >
+                      Minimum sipariş:{" "}
+                      <strong>
+                        {product.moq} {unitLabel(product.unitType, t)}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      minWidth: 190,
+                      textAlign: "right",
+                    }}
+                  >
+                    <div
+                      style={{
+                        marginBottom: 4,
+                        fontSize: 12,
+                        color: "#64748b",
+                      }}
+                    >
+                      {quantity} {unitLabel(product.unitType, t)} ×{" "}
+                      {Number(product.basePrice || 0).toLocaleString(locale)} ₺
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: "#475569",
+                      }}
+                    >
+                      Toplam ödeme
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 2,
+                        fontSize: 24,
+                        lineHeight: 1.2,
+                        fontWeight: 900,
+                        color: "#0f172a",
+                      }}
+                    >
+                      {Number(
+                        Number(product.basePrice || 0) * quantity
+                      ).toLocaleString(locale)}{" "}
+                      ₺
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 3,
+                        fontSize: 11,
+                        color: "#64748b",
+                      }}
+                    >
+                      KDV dahil
+                    </div>
+                  </div>
+                </div>
+              </div>
           </div>
 
           <div style={actionsStyle}>

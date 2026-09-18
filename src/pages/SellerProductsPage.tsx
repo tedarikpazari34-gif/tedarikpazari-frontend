@@ -180,18 +180,7 @@ export default function SellerProductsPage() {
                     </div>
                   )}
 
-                  <span
-                    style={{
-                      ...statusBadgeStyle,
-                      ...(product.isApproved
-                        ? approvedBadgeStyle
-                        : pendingBadgeStyle),
-                    }}
-                  >
-                    {product.isApproved
-                      ? t("sellerProductsPage.approved")
-                      : t("sellerProductsPage.pendingApproval")}
-                  </span>
+
                 </div>
 
                 <div style={contentStyle}>
@@ -206,22 +195,52 @@ export default function SellerProductsPage() {
                   </p>
 
                   <div style={priceStyle}>
-                    {Number(product.basePrice || 0).toLocaleString(locale)} ₺
+                    <div>
+                      {Number(product.basePrice || 0).toLocaleString(locale)} ₺
+                      <span
+                        style={{
+                          marginLeft: 6,
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: "#64748b",
+                        }}
+                      >
+                        / {unitLabel(product.unitType, t)}
+                      </span>
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 4,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "#64748b",
+                      }}
+                    >
+                      KDV dahil birim fiyat
+                    </div>
                   </div>
 
                   <div style={detailsGridStyle}>
                     <Info
-                      label={t("sellerProductsPage.unit")}
-                      value={unitLabel(product.unitType, t)}
+                      label="Minimum Sipariş"
+                      value={`${product.moq} ${unitLabel(product.unitType, t)}`}
                     />
+
                     <Info
-                      label={t("sellerProductsPage.minimumShort")}
-                      value={product.moq}
-                    />
-                    <Info
-                      label="Kargoya hazırlama"
+                      label="Kargoya Hazırlama"
                       value={`${product.leadTimeDays} iş günü`}
                     />
+
+                    <Info
+                      label="Stok Durumu"
+                      value={
+                        product.stockType === "STOCK"
+                          ? "Stoktan Teslim"
+                          : "Sipariş Üzerine"
+                      }
+                    />
+
                     <Info
                       label={t("sellerProductsPage.vat")}
                       value={`%${product.vatRate}`}
@@ -232,13 +251,26 @@ export default function SellerProductsPage() {
                     <span
                       style={{
                         ...smallBadgeStyle,
-                        background: product.isActive ? "#dcfce7" : "#fee2e2",
-                        color: product.isActive ? "#166534" : "#991b1b",
+                        ...(product.isApproved
+                          ? approvedBadgeStyle
+                          : pendingBadgeStyle),
+                      }}
+                    >
+                      {product.isApproved
+                        ? `✓ ${t("sellerProductsPage.approved")}`
+                        : `⏳ ${t("sellerProductsPage.pendingApproval")}`}
+                    </span>
+
+                    <span
+                      style={{
+                        ...smallBadgeStyle,
+                        background: product.isActive ? "#dcfce7" : "#f1f5f9",
+                        color: product.isActive ? "#166534" : "#475569",
                       }}
                     >
                       {product.isActive
-                        ? t("sellerProductsPage.active")
-                        : t("sellerProductsPage.inactive")}
+                        ? `● ${t("sellerProductsPage.active")}`
+                        : `○ ${t("sellerProductsPage.inactive")}`}
                     </span>
                   </div>
 
@@ -363,16 +395,6 @@ const imagePlaceholderStyle: CSSProperties = {
   justifyContent: "center",
   color: "#64748b",
   fontWeight: 800,
-};
-
-const statusBadgeStyle: CSSProperties = {
-  position: "absolute",
-  top: 14,
-  right: 14,
-  padding: "7px 10px",
-  borderRadius: 999,
-  fontSize: 12,
-  fontWeight: 900,
 };
 
 const approvedBadgeStyle: CSSProperties = {

@@ -12,6 +12,7 @@ type CartItem = {
   productId: string;
   title: string;
   quantity: number;
+  moq?: number;
   unitType: string;
   unitPrice: number;
   sellerId?: string | null;
@@ -24,13 +25,21 @@ export default function CartPage() {
   const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
 
   const [items, setItems] = useState<CartItem[]>([]);
+  const [quantityInputs, setQuantityInputs] = useState<Record<string, string>>({});
   const [loadingId, setLoadingId] = useState("");
 
   const loadCart = () => {
     try {
       const raw = localStorage.getItem("tedarikCart");
       const parsed = raw ? JSON.parse(raw) : [];
-      setItems(Array.isArray(parsed) ? parsed : []);
+      const cartItems: CartItem[] = Array.isArray(parsed) ? parsed : [];
+
+      setItems(cartItems);
+      setQuantityInputs(
+        Object.fromEntries(
+          cartItems.map((item) => [item.productId, String(item.quantity)])
+        )
+      );
     } catch {
       setItems([]);
     }
@@ -66,18 +75,64 @@ export default function CartPage() {
     saveItems(items.filter((item) => item.productId !== productId));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity < 1) return;
+  const getMinimumQuantity = (item: CartItem) =>
+    Math.max(Number(item.moq || 1), 1);
+
+  const commitQuantity = (item: CartItem, requestedQuantity: number) => {
+    const minimum = getMinimumQuantity(item);
+
+    const normalized =
+      Number.isInteger(requestedQuantity) && requestedQuantity >= minimum
+        ? requestedQuantity
+        : minimum;
+
+    setQuantityInputs((current) => ({
+      ...current,
+      [item.productId]: String(normalized),
+    }));
 
     saveItems(
-      items.map((item) =>
-        item.productId === productId ? { ...item, quantity } : item
+      items.map((currentItem) =>
+        currentItem.productId === item.productId
+          ? { ...currentItem, quantity: normalized }
+          : currentItem
       )
     );
   };
 
+  const handleQuantityInput = (item: CartItem, value: string) => {
+    setQuantityInputs((current) => ({
+      ...current,
+      [item.productId]: value,
+    }));
+
+    if (value === "") return;
+
+    const next = Number(value);
+
+    if (Number.isInteger(next) && next > 0) {
+      setItems((current) =>
+        current.map((currentItem) =>
+          currentItem.productId === item.productId
+            ? { ...currentItem, quantity: next }
+            : currentItem
+        )
+      );
+    }
+  };
+
   const checkoutItem = async (item: CartItem) => {
     if (loadingId) return;
+
+    const minimum = getMinimumQuantity(item);
+
+    if (!Number.isInteger(item.quantity) || item.quantity < minimum) {
+      commitQuantity(item, minimum);
+      alert(
+        `Bu ürün için minimum sipariş miktarı ${minimum} ${item.unitType}.`
+      );
+      return;
+    }
 
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
@@ -255,43 +310,171 @@ export default function CartPage() {
                     </strong>
                   </p>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 12,
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <label>
-                      {t("cartPage.quantity")}{" "}
-                      <input
-                        type="number"
-                        min={1}
-                        value={item.quantity}
-                        onChange={(e) =>
-                          updateQuantity(
-                            item.productId,
-                            Math.max(1, Number(e.target.value || 1))
-                          )
-                        }
-                        style={{
-                          width: 110,
-                          padding: "10px 12px",
-                          border: "1px solid #cbd5e1",
-                          borderRadius: 8,
-                        }}
-                      />
-                    </label>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: 20,
+                        alignItems: "flex-end",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <div>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 700,
+                            color: "#334155",
+                            marginBottom: 8,
+                          }}
+                        >
+                          {t("cartPage.quantity")}
+                        </div>
 
-                    <strong>
-                      {t("cartPage.lineTotal")}:{" "}
-                      {Number(item.unitPrice * item.quantity).toLocaleString(
-                        locale
-                      )}{" "}
-                      ₺
-                    </strong>
-                  </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() =>
+                              commitQuantity(
+                                item,
+                                Math.max(
+                                  getMinimumQuantity(item),
+                                  item.quantity - 1
+                                )
+                              )
+                            }
+                            disabled={item.quantity <= getMinimumQuantity(item)}
+                            style={{
+                              width: 42,
+                              height: 42,
+                              border: "1px solid #cbd5e1",
+                              borderRadius: 10,
+                              background: "#ffffff",
+                              fontSize: 20,
+                              fontWeight: 800,
+                              cursor:
+                                item.quantity <= getMinimumQuantity(item)
+                                  ? "not-allowed"
+                                  : "pointer",
+                              opacity:
+                                item.quantity <= getMinimumQuantity(item)
+                                  ? 0.45
+                                  : 1,
+                            }}
+                          >
+                            −
+                          </button>
+
+                          <input
+                            type="number"
+                            min={getMinimumQuantity(item)}
+                            step={1}
+                            inputMode="numeric"
+                            value={
+                              quantityInputs[item.productId] ??
+                              String(item.quantity)
+                            }
+                            onChange={(e) =>
+                              handleQuantityInput(item, e.target.value)
+                            }
+                            onBlur={() => {
+                              const raw =
+                                quantityInputs[item.productId] ??
+                                String(item.quantity);
+
+                              commitQuantity(item, Number(raw));
+                            }}
+                            style={{
+                              width: 92,
+                              height: 42,
+                              boxSizing: "border-box",
+                              padding: "8px 10px",
+                              textAlign: "center",
+                              border: "1px solid #94a3b8",
+                              borderRadius: 10,
+                              fontSize: 16,
+                              fontWeight: 800,
+                              color: "#0f172a",
+                            }}
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              commitQuantity(item, item.quantity + 1)
+                            }
+                            style={{
+                              width: 42,
+                              height: 42,
+                              border: "1px solid #cbd5e1",
+                              borderRadius: 10,
+                              background: "#ffffff",
+                              fontSize: 20,
+                              fontWeight: 800,
+                              cursor: "pointer",
+                            }}
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        <div
+                          style={{
+                            marginTop: 7,
+                            fontSize: 12,
+                            color: "#64748b",
+                          }}
+                        >
+                          Minimum sipariş:{" "}
+                          <strong>
+                            {getMinimumQuantity(item)} {item.unitType}
+                          </strong>
+                        </div>
+                      </div>
+
+                      <div style={{ textAlign: "right" }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: "#64748b",
+                            marginBottom: 4,
+                          }}
+                        >
+                          {item.quantity} {item.unitType} ×{" "}
+                          {Number(item.unitPrice).toLocaleString(locale)} ₺
+                        </div>
+
+                        <div
+                          style={{
+                            fontSize: 18,
+                            fontWeight: 900,
+                            color: "#0f172a",
+                          }}
+                        >
+                          {t("cartPage.lineTotal")}:{" "}
+                          {Number(
+                            item.unitPrice * item.quantity
+                          ).toLocaleString(locale)}{" "}
+                          ₺
+                        </div>
+
+                        <div
+                          style={{
+                            marginTop: 3,
+                            fontSize: 11,
+                            color: "#64748b",
+                          }}
+                        >
+                          KDV dahil
+                        </div>
+                      </div>
+                    </div>
 
                   <div
                     style={{

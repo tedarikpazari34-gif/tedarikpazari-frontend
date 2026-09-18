@@ -337,9 +337,35 @@ export default function SellerProductCreatePage() {
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setSaving(true);
     setError("");
     setMessage("");
+
+      const priceValue = Number(basePrice);
+      const moqValue = Number(moq);
+      const leadTimeValue = Number(leadTimeDays);
+      const vatValue = Number(vatRate);
+
+      if (!Number.isFinite(priceValue) || priceValue <= 0) {
+        setError("KDV dahil birim fiyat 0 ₺'den büyük olmalıdır.");
+        return;
+      }
+
+      if (!Number.isInteger(moqValue) || moqValue < 1) {
+        setError("Minimum sipariş miktarı (MOQ) en az 1 olmalıdır.");
+        return;
+      }
+
+      if (!Number.isInteger(leadTimeValue) || leadTimeValue < 1) {
+        setError("Kargoya hazırlama süresi en az 1 iş günü olmalıdır.");
+        return;
+      }
+
+      if (![0, 1, 10, 20].includes(vatValue)) {
+        setError("Geçerli bir KDV oranı seçin.");
+        return;
+      }
+
+      setSaving(true);
 
     try {
       const token = localStorage.getItem("token");
@@ -369,11 +395,11 @@ export default function SellerProductCreatePage() {
             country,
             city,
             unitType,
-            moq: Number(moq),
-            basePrice: Number(basePrice),
-            leadTimeDays: Number(leadTimeDays),
+            moq: moqValue,
+            basePrice: priceValue,
+            leadTimeDays: leadTimeValue,
             stockType,
-            vatRate: Number(vatRate),
+            vatRate: vatValue,
             rfqEnabled: true,
             imageUrl: coverImage,
           }),
@@ -525,13 +551,35 @@ export default function SellerProductCreatePage() {
                 required
               />
 
-              <input
-                placeholder={t("sellerProductCreatePage.price")}
-                value={basePrice}
-                onChange={(e) => setBasePrice(e.target.value)}
-                style={inputStyle}
-                required
-              />
+              <div>
+                <label style={fieldLabelStyle}>
+                  KDV Dahil Birim Fiyat (₺)
+                </label>
+
+                <input
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  inputMode="decimal"
+                  placeholder="Örn. 90"
+                  value={basePrice}
+                  onChange={(e) => setBasePrice(e.target.value)}
+                  style={inputStyle}
+                  required
+                />
+
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 12,
+                    lineHeight: 1.45,
+                    color: "#64748b",
+                  }}
+                >
+                  Bir satış birimi için alıcının ödeyeceği KDV dahil fiyatı
+                  girin. Örneğin 1 adet 90 ₺ ise buraya 90 yazın.
+                </div>
+              </div>
 
               <select
                 value={mainCategoryId}
@@ -606,66 +654,188 @@ export default function SellerProductCreatePage() {
                 />
               )}
 
-              <select
-                value={unitType}
-                onChange={(e) => setUnitType(e.target.value)}
-                style={inputStyle}
-              >
-                <option value="adet">{t("sellerProductCreatePage.piece")}</option>
-                <option value="koli">{t("sellerProductCreatePage.box")}</option>
-                <option value="kg">{t("sellerProductCreatePage.kilogramShort")}</option>
-                <option value="litre">{t("sellerProductCreatePage.litre")}</option>
-                <option value="metre">{t("sellerProductCreatePage.meter")}</option>
-                <option value="paket">{t("sellerProductCreatePage.package")}</option>
-              </select>
+              <div>
+                <label style={fieldLabelStyle}>Satış Birimi</label>
+                <select
+                  value={unitType}
+                  onChange={(e) => setUnitType(e.target.value)}
+                  style={inputStyle}
+                >
+                  <option value="adet">{t("sellerProductCreatePage.piece")}</option>
+                  <option value="koli">{t("sellerProductCreatePage.box")}</option>
+                  <option value="kg">{t("sellerProductCreatePage.kilogramShort")}</option>
+                  <option value="litre">{t("sellerProductCreatePage.litre")}</option>
+                  <option value="metre">{t("sellerProductCreatePage.meter")}</option>
+                  <option value="paket">{t("sellerProductCreatePage.package")}</option>
+                </select>
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 12,
+                    color: "#64748b",
+                  }}
+                >
+                  Birim fiyatın hangi satış birimi için geçerli olduğunu seçin.
+                </div>
+              </div>
 
               <div>
                 <label style={fieldLabelStyle}>
-                  {t("sellerProductCreatePage.moq")}
+                  Minimum Sipariş Miktarı (MOQ)
                 </label>
                 <input
                   type="number"
                   min="1"
+                  step="1"
+                  inputMode="numeric"
                   value={moq}
                   onChange={(e) => setMoq(e.target.value)}
                   style={inputStyle}
                   required
                 />
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 12,
+                    color: "#64748b",
+                  }}
+                >
+                  Alıcının verebileceği en düşük sipariş miktarı.
+                </div>
               </div>
 
               <div>
                 <label style={fieldLabelStyle}>
-                  {t("sellerProductCreatePage.leadTime")}
+                  Kargoya Hazırlama Süresi
                 </label>
                 <input
                   type="number"
                   min="1"
+                  step="1"
+                  inputMode="numeric"
                   value={leadTimeDays}
                   onChange={(e) => setLeadTimeDays(e.target.value)}
                   style={inputStyle}
                   required
                 />
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 12,
+                    color: "#64748b",
+                  }}
+                >
+                  Siparişten sonra en geç kaç iş günü içinde kargoya verilir?
+                </div>
               </div>
 
-              <select
-                value={stockType}
-                onChange={(e) => setStockType(e.target.value)}
-                style={inputStyle}
-              >
-                <option value="STOCK">{t("sellerProductCreatePage.stockInStock")}</option>
-                <option value="ON_DEMAND">{t("sellerProductCreatePage.stockOnDemand")}</option>
-              </select>
+              <div>
+                <label style={fieldLabelStyle}>Stok / Tedarik Durumu</label>
+                <select
+                  value={stockType}
+                  onChange={(e) => setStockType(e.target.value)}
+                  style={inputStyle}
+                >
+                  <option value="STOCK">
+                    {t("sellerProductCreatePage.stockInStock")}
+                  </option>
+                  <option value="ON_DEMAND">
+                    {t("sellerProductCreatePage.stockOnDemand")}
+                  </option>
+                </select>
+              </div>
 
-              <select
-                value={vatRate}
-                onChange={(e) => setVatRate(e.target.value)}
-                style={inputStyle}
+              <div>
+                <label style={fieldLabelStyle}>KDV Oranı</label>
+                <select
+                  value={vatRate}
+                  onChange={(e) => setVatRate(e.target.value)}
+                  style={inputStyle}
+                >
+                  <option value="0">{t("sellerProductCreatePage.vat0")}</option>
+                  <option value="1">{t("sellerProductCreatePage.vat1")}</option>
+                  <option value="10">{t("sellerProductCreatePage.vat10")}</option>
+                  <option value="20">{t("sellerProductCreatePage.vat20")}</option>
+                </select>
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 12,
+                    color: "#64748b",
+                  }}
+                >
+                  Birim fiyat KDV dahildir. Seçilen KDV oranı fiyata tekrar
+                  eklenmez.
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: 16,
+                  border: "1px solid #dbeafe",
+                  borderRadius: 12,
+                  background: "#f8fafc",
+                }}
               >
-                <option value="0">{t("sellerProductCreatePage.vat0")}</option>
-                <option value="1">{t("sellerProductCreatePage.vat1")}</option>
-                <option value="10">{t("sellerProductCreatePage.vat10")}</option>
-                <option value="20">{t("sellerProductCreatePage.vat20")}</option>
-              </select>
+                <div
+                  style={{
+                    marginBottom: 8,
+                    fontSize: 12,
+                    fontWeight: 800,
+                    color: "#475569",
+                  }}
+                >
+                  Minimum sipariş toplamı
+                </div>
+
+                {Number(basePrice) > 0 && Number(moq) > 0 ? (
+                  <>
+                    <div
+                      style={{
+                        marginBottom: 4,
+                        fontSize: 13,
+                        color: "#64748b",
+                      }}
+                    >
+                      {Number(moq).toLocaleString("tr-TR")} {unitType} ×{" "}
+                      {Number(basePrice).toLocaleString("tr-TR")} ₺
+                    </div>
+
+                    <strong
+                      style={{
+                        display: "block",
+                        fontSize: 24,
+                        lineHeight: 1.2,
+                        color: "#0f172a",
+                      }}
+                    >
+                      {(Number(basePrice) * Number(moq)).toLocaleString("tr-TR")} ₺
+                    </strong>
+
+                    <span
+                      style={{
+                        display: "block",
+                        marginTop: 4,
+                        fontSize: 11,
+                        color: "#64748b",
+                      }}
+                    >
+                      KDV dahil
+                    </span>
+                  </>
+                ) : (
+                  <div
+                    style={{
+                      fontSize: 13,
+                      lineHeight: 1.5,
+                      color: "#64748b",
+                    }}
+                  >
+                    Birim fiyat ve minimum sipariş miktarını girdiğinizde toplam
+                    burada otomatik hesaplanır.
+                  </div>
+                )}
+              </div>
 
               <input
                 type="file"

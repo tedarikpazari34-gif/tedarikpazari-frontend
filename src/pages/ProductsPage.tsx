@@ -140,6 +140,7 @@ export default function ProductsPage() {
   
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [favoriteLoadingId, setFavoriteLoadingId] = useState("");
+  const [addedCartIds, setAddedCartIds] = useState<Set<string>>(new Set());
   const [compareIds, setCompareIds] = useState<string[]>([]);
 useEffect(() => {
     setSearch(q);
@@ -372,6 +373,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
         productId: product.id,
         title: getProductTitle(product, t("productsPage.productFallback")),
         quantity,
+        moq: Math.max(Number(product.moq || 1), 1),
         unitType: product.unitType,
         unitPrice: Number(product.basePrice ?? product.price ?? 0),
         sellerId: product.seller?.id || null,
@@ -379,13 +381,28 @@ const res = await fetch(`${API}/products?${query.toString()}`);
       };
 
       if (existingIndex >= 0) {
-        cart[existingIndex] = item;
+        const existing = cart[existingIndex];
+
+        cart[existingIndex] = {
+          ...existing,
+          ...item,
+          quantity: Math.max(
+            Number(existing.quantity || quantity),
+            quantity
+          ),
+        };
       } else {
         cart.push(item);
       }
 
       localStorage.setItem("tedarikCart", JSON.stringify(cart));
       window.dispatchEvent(new Event("tedarik-cart-changed"));
+
+      setAddedCartIds((current) => {
+        const next = new Set(current);
+        next.add(product.id);
+        return next;
+      });
     } catch (err) {
       console.error("ADD TO CART ERROR:", err);
     }
@@ -646,10 +663,38 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                     <button
                       type="button"
                       onClick={() => addToCart(product)}
-                      style={addToCartButton}
+                      style={{
+                        ...addToCartButton,
+                        background: addedCartIds.has(product.id)
+                          ? "#047857"
+                          : "#0f172a",
+                      }}
                     >
-                      Sepete Ekle
+                      {addedCartIds.has(product.id)
+                        ? "✓ Sepete Eklendi"
+                        : "Sepete Ekle"}
                     </button>
+
+                    {addedCartIds.has(product.id) && (
+                      <button
+                        type="button"
+                        onClick={() => navigate("/cart")}
+                        style={{
+                          width: "100%",
+                          marginTop: 8,
+                          minHeight: 42,
+                          border: "1px solid #cbd5e1",
+                          borderRadius: 10,
+                          background: "#ffffff",
+                          color: "#0f172a",
+                          fontSize: 13,
+                          fontWeight: 750,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Sepeti Gör →
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
