@@ -154,6 +154,17 @@ export default function RegisterPage() {
 
   return (
     <main style={pageStyle}>
+      <style>{`
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+          -webkit-text-fill-color: #ffffff !important;
+          -webkit-box-shadow: 0 0 0 1000px #172033 inset !important;
+          caret-color: #ffffff;
+          transition: background-color 9999s ease-out 0s;
+        }
+      `}</style>
       <div style={overlayStyle}>
         <div style={cardStyle}>
           <div style={topRowStyle}>
@@ -338,7 +349,6 @@ export default function RegisterPage() {
                   justifyContent: "space-between",
                   cursor: "pointer",
                   textAlign: "start",
-                  background: "#fff",
                 }}
               >
                 <span>{t("registerPage.categories")} ({categories.length}/3)</span>
