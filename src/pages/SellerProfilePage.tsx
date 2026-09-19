@@ -23,6 +23,7 @@ type CompanyProfile = {
   banner?: string | null;
   taxNumber?: string | null;
   taxOffice?: string | null;
+  hasPaymentIdentityNumber?: boolean;
   address?: {
     address?: string;
     district?: string;
@@ -249,14 +250,18 @@ export default function SellerProfilePage() {
       return;
     }
 
-    if (
-      country === "Türkiye" &&
-      companyType === "Şahıs" &&
-      paymentIdentityNumber.trim() &&
-      !/^\d{11}$/.test(paymentIdentityNumber.trim())
-    ) {
-      setError(t("registerPage.invalidIdentityNumber"));
-      return;
+    if (country === "Türkiye" && companyType === "Şahıs") {
+      const identityNumber = paymentIdentityNumber.trim();
+
+      if (!profile?.hasPaymentIdentityNumber && !identityNumber) {
+        setError(t("registerPage.identityNumberRequired"));
+        return;
+      }
+
+      if (identityNumber && !/^\d{11}$/.test(identityNumber)) {
+        setError(t("registerPage.invalidIdentityNumber"));
+        return;
+      }
     }
 
     if (
@@ -648,6 +653,7 @@ export default function SellerProfilePage() {
               <label style={fieldStyle}>
                 <span style={labelStyle}>
                   {t("sellerProfilePage.identityNumber")}
+                  {!profile?.hasPaymentIdentityNumber ? " *" : ""}
                 </span>
                 <input
                   value={paymentIdentityNumber}
@@ -665,7 +671,11 @@ export default function SellerProfilePage() {
                   )}
                 />
                 <small style={helperStyle}>
-                  {t("sellerProfilePage.identityNumberHelp")}
+                  {t(
+                    profile?.hasPaymentIdentityNumber
+                      ? "sellerProfilePage.identityNumberHelp"
+                      : "sellerProfilePage.identityNumberMissingHelp"
+                  )}
                 </small>
               </label>
             ) : (
