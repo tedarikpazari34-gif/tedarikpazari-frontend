@@ -29,6 +29,7 @@ export default function RegisterPage() {
   const [country, setCountry] = useState("Türkiye");
   const [city, setCity] = useState("");
   const [district, setDistrict] = useState("");
+  const [postalCode, setPostalCode] = useState("");
   const [taxNumber, setTaxNumber] = useState("");
   const [paymentIdentityNumber, setPaymentIdentityNumber] = useState("");
   const [taxOffice, setTaxOffice] = useState("");
@@ -118,6 +119,7 @@ export default function RegisterPage() {
         country,
         city,
         district,
+        postalCode: postalCode.trim(),
         taxNumber:
           country === "Türkiye" && companyType === "Şahıs"
             ? ""
@@ -481,6 +483,19 @@ export default function RegisterPage() {
                 placeholder={t("registerPage.districtPlaceholder")}
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Posta Kodu</label>
+              <input
+                style={inputStyle}
+                placeholder="Posta kodu"
+                value={postalCode}
+                inputMode="numeric"
+                onChange={(e) =>
+                  setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 10))
+                }
               />
             </div>
 

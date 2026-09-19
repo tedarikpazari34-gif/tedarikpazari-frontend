@@ -27,6 +27,7 @@ type CompanyProfile = {
   address?: {
     address?: string;
     district?: string;
+    postalCode?: string;
     companyType?: string;
     fullName?: string;
     category?: string;
@@ -82,6 +83,7 @@ export default function SellerProfilePage() {
   const [fullName, setFullName] = useState("");
   const [companyType, setCompanyType] = useState("");
   const [district, setDistrict] = useState("");
+  const [postalCode, setPostalCode] = useState("");
   const [address, setAddress] = useState("");
   const [taxOffice, setTaxOffice] = useState("");
   const [taxNumber, setTaxNumber] = useState("");
@@ -134,6 +136,7 @@ export default function SellerProfilePage() {
       setFullName(data.address?.fullName || "");
       setCompanyType(data.address?.companyType || "");
       setDistrict(data.address?.district || "");
+      setPostalCode(data.address?.postalCode || "");
       setAddress(data.address?.address || "");
       setTaxOffice(data.taxOffice || "");
       setTaxNumber(data.taxNumber || "");
@@ -301,6 +304,7 @@ export default function SellerProfilePage() {
           fullName: fullName.trim(),
           companyType: companyType.trim(),
           district: district.trim(),
+          postalCode: postalCode.trim(),
           address: address.trim(),
           taxOffice: taxOffice.trim(),
           taxNumber:
@@ -620,6 +624,21 @@ export default function SellerProfilePage() {
                   onChange={(event) => setDistrict(event.target.value)}
                   style={inputStyle}
                   maxLength={100}
+                />
+              </label>
+
+              <label style={fieldStyle}>
+                <span style={labelStyle}>Posta Kodu</span>
+                <input
+                  value={postalCode}
+                  onChange={(event) =>
+                    setPostalCode(
+                      event.target.value.replace(/\D/g, "").slice(0, 10)
+                    )
+                  }
+                  inputMode="numeric"
+                  style={inputStyle}
+                  maxLength={10}
                 />
               </label>
 
