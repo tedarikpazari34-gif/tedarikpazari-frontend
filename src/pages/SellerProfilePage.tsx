@@ -7,6 +7,7 @@ import {
 
 import { TURKEY_CITIES } from "../constants/turkeyCities";
 import { COUNTRIES } from "../constants/countries";
+import { sectors } from "../data/sectors";
 import { useTranslation } from "react-i18next";
 
 type CompanyProfile = {
@@ -20,6 +21,16 @@ type CompanyProfile = {
   website?: string | null;
   logo?: string | null;
   banner?: string | null;
+  taxNumber?: string | null;
+  taxOffice?: string | null;
+  address?: {
+    address?: string;
+    district?: string;
+    companyType?: string;
+    fullName?: string;
+    category?: string;
+    categories?: string[];
+  } | null;
   verified?: boolean;
   status?: string;
 };
@@ -67,6 +78,16 @@ export default function SellerProfilePage() {
   const [logo, setLogo] = useState("");
   const [banner, setBanner] = useState("");
 
+  const [fullName, setFullName] = useState("");
+  const [companyType, setCompanyType] = useState("");
+  const [district, setDistrict] = useState("");
+  const [address, setAddress] = useState("");
+  const [taxOffice, setTaxOffice] = useState("");
+  const [taxNumber, setTaxNumber] = useState("");
+  const [paymentIdentityNumber, setPaymentIdentityNumber] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -109,6 +130,20 @@ export default function SellerProfilePage() {
       setCountry(data.country || "Türkiye");
       setLogo(data.logo || "");
       setBanner(data.banner || "");
+      setFullName(data.address?.fullName || "");
+      setCompanyType(data.address?.companyType || "");
+      setDistrict(data.address?.district || "");
+      setAddress(data.address?.address || "");
+      setTaxOffice(data.taxOffice || "");
+      setTaxNumber(data.taxNumber || "");
+      setPaymentIdentityNumber("");
+      setCategories(
+        Array.isArray(data.address?.categories)
+          ? data.address.categories
+          : data.address?.category
+            ? [data.address.category]
+            : []
+      );
     } catch (err) {
       console.error("COMPANY PROFILE LOAD ERROR:", err);
       setError(t("sellerProfilePage.loadError"));
@@ -195,6 +230,49 @@ export default function SellerProfilePage() {
       return;
     }
 
+    if (
+      !fullName.trim() ||
+      !companyType.trim() ||
+      !country.trim() ||
+      !city.trim() ||
+      !district.trim() ||
+      !address.trim() ||
+      !taxOffice.trim() ||
+      categories.length < 1
+    ) {
+      setError(t("sellerProfilePage.legalFieldsRequired"));
+      return;
+    }
+
+    if (categories.length > 3) {
+      setError(t("sellerProfilePage.maxCategories"));
+      return;
+    }
+
+    if (
+      country === "Türkiye" &&
+      companyType === "Şahıs" &&
+      paymentIdentityNumber.trim() &&
+      !/^\d{11}$/.test(paymentIdentityNumber.trim())
+    ) {
+      setError(t("registerPage.invalidIdentityNumber"));
+      return;
+    }
+
+    if (
+      country === "Türkiye" &&
+      (companyType === "Limited" || companyType === "Anonim") &&
+      !/^\d{10}$/.test(taxNumber.trim())
+    ) {
+      setError(t("registerPage.invalidTaxNumber"));
+      return;
+    }
+
+    if (country !== "Türkiye" && !taxNumber.trim()) {
+      setError(t("registerPage.internationalTaxNumberRequired"));
+      return;
+    }
+
     try {
       setSaving(true);
       setError("");
@@ -215,6 +293,22 @@ export default function SellerProfilePage() {
           country: country.trim(),
           logo,
           banner,
+          fullName: fullName.trim(),
+          companyType: companyType.trim(),
+          district: district.trim(),
+          address: address.trim(),
+          taxOffice: taxOffice.trim(),
+          taxNumber:
+            country === "Türkiye" && companyType === "Şahıs"
+              ? undefined
+              : taxNumber.trim(),
+          paymentIdentityNumber:
+            country === "Türkiye" &&
+            companyType === "Şahıs" &&
+            paymentIdentityNumber.trim()
+              ? paymentIdentityNumber.trim()
+              : undefined,
+          categories,
         }),
       });
 
@@ -226,6 +320,7 @@ export default function SellerProfilePage() {
       }
 
       setProfile(data);
+      setPaymentIdentityNumber("");
       setSuccess(t("sellerProfilePage.saveSuccess"));
     } catch (err) {
       console.error("COMPANY PROFILE SAVE ERROR:", err);
@@ -321,8 +416,13 @@ export default function SellerProfilePage() {
               <select
                 value={country}
                 onChange={(event) => {
-                  setCountry(event.target.value);
+                  const nextCountry = event.target.value;
+
+                  setCountry(nextCountry);
                   setCity("");
+                  setCompanyType("");
+                  setTaxNumber("");
+                  setPaymentIdentityNumber("");
                 }}
                 style={inputStyle}
               >
@@ -361,6 +461,240 @@ export default function SellerProfilePage() {
                 />
               )}
             </label>
+          </div>
+
+          <div style={legalSectionStyle}>
+            <div style={sectionEyebrowStyle}>
+              {t("sellerProfilePage.legalInfo")}
+            </div>
+            <h3 style={legalTitleStyle}>
+              {t("sellerProfilePage.legalInfoTitle")}
+            </h3>
+            <p style={legalTextStyle}>
+              {t("sellerProfilePage.legalInfoHelp")}
+            </p>
+
+            <div style={twoColumnStyle}>
+              <label style={fieldStyle}>
+                <span style={labelStyle}>
+                  {t("sellerProfilePage.companyType")}
+                </span>
+                <select
+                  value={companyType}
+                  onChange={(event) => {
+                    const nextType = event.target.value;
+                    setCompanyType(nextType);
+
+                    if (country === "Türkiye") {
+                      if (nextType === "Şahıs") {
+                        setTaxNumber("");
+                      } else {
+                        setPaymentIdentityNumber("");
+                      }
+                    }
+                  }}
+                  style={inputStyle}
+                >
+                  <option value="">
+                    {t("sellerProfilePage.companyType")}
+                  </option>
+
+                  {country === "Türkiye" ? (
+                    <>
+                      <option value="Şahıs">
+                        {t("sellerProfilePage.soleProprietorship")}
+                      </option>
+                      <option value="Limited">
+                        {t("sellerProfilePage.limitedCompany")}
+                      </option>
+                      <option value="Anonim">
+                        {t("sellerProfilePage.jointStockCompany")}
+                      </option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="Sole Proprietorship">
+                        {t("registerPage.soleProprietorship")}
+                      </option>
+                      <option value="Limited Liability Company">
+                        {t("registerPage.limitedLiabilityCompany")}
+                      </option>
+                      <option value="Corporation">
+                        {t("registerPage.corporation")}
+                      </option>
+                      <option value="Partnership">
+                        {t("registerPage.partnership")}
+                      </option>
+                      <option value="Other">
+                        {t("registerPage.otherCompanyType")}
+                      </option>
+                    </>
+                  )}
+                </select>
+              </label>
+
+              <label style={fieldStyle}>
+                <span style={labelStyle}>
+                  {t("sellerProfilePage.fullName")}
+                </span>
+                <input
+                  value={fullName}
+                  onChange={(event) => setFullName(event.target.value)}
+                  style={inputStyle}
+                  maxLength={160}
+                />
+              </label>
+            </div>
+            <div style={fieldStyle}>
+              <button
+                type="button"
+                onClick={() => setCategoriesOpen((prev) => !prev)}
+                aria-expanded={categoriesOpen}
+                style={{
+                  ...inputStyle,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                  textAlign: "start",
+                }}
+              >
+                <span>
+                  {t("sellerProfilePage.categories")} ({categories.length}/3)
+                </span>
+                <span aria-hidden="true">
+                  {categoriesOpen ? "▲" : "▼"}
+                </span>
+              </button>
+
+              {categoriesOpen && (
+                <div style={categoryListStyle}>
+                  {sectors.map((sector) => {
+                    const checked = categories.includes(sector.name);
+                    const sectorKey = sector.id.replace(/-/g, "_");
+
+                    return (
+                      <label key={sector.id} style={categoryOptionStyle}>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => {
+                            setCategories((prev) => {
+                              if (prev.includes(sector.name)) {
+                                return prev.filter((x) => x !== sector.name);
+                              }
+
+                              if (prev.length >= 3) {
+                                alert(t("sellerProfilePage.maxCategories"));
+                                return prev;
+                              }
+
+                              return [...prev, sector.name];
+                            });
+                          }}
+                        />
+
+                        {t(
+                          `popularSectors.sectors.${sectorKey}.name`,
+                          sector.name
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div style={twoColumnStyle}>
+              <label style={fieldStyle}>
+                <span style={labelStyle}>
+                  {t("sellerProfilePage.district")}
+                </span>
+                <input
+                  value={district}
+                  onChange={(event) => setDistrict(event.target.value)}
+                  style={inputStyle}
+                  maxLength={100}
+                />
+              </label>
+
+              <label style={fieldStyle}>
+                <span style={labelStyle}>
+                  {t("sellerProfilePage.taxOffice")}
+                </span>
+                <input
+                  value={taxOffice}
+                  onChange={(event) => setTaxOffice(event.target.value)}
+                  style={inputStyle}
+                  maxLength={100}
+                />
+              </label>
+            </div>
+
+            <label style={fieldStyle}>
+              <span style={labelStyle}>
+                {t("sellerProfilePage.address")}
+              </span>
+              <textarea
+                value={address}
+                onChange={(event) => setAddress(event.target.value)}
+                style={{ ...textareaStyle, minHeight: 100 }}
+                maxLength={1000}
+                placeholder={t("sellerProfilePage.addressPlaceholder")}
+              />
+            </label>
+
+            {country === "Türkiye" && companyType === "Şahıs" ? (
+              <label style={fieldStyle}>
+                <span style={labelStyle}>
+                  {t("sellerProfilePage.identityNumber")}
+                </span>
+                <input
+                  value={paymentIdentityNumber}
+                  onChange={(event) =>
+                    setPaymentIdentityNumber(
+                      event.target.value.replace(/\D/g, "").slice(0, 11)
+                    )
+                  }
+                  style={inputStyle}
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={11}
+                  placeholder={t(
+                    "sellerProfilePage.identityNumberPlaceholder"
+                  )}
+                />
+                <small style={helperStyle}>
+                  {t("sellerProfilePage.identityNumberHelp")}
+                </small>
+              </label>
+            ) : (
+              <label style={fieldStyle}>
+                <span style={labelStyle}>
+                  {country === "Türkiye"
+                    ? t("sellerProfilePage.taxNumber")
+                    : t("sellerProfilePage.internationalTaxNumber")}
+                </span>
+                <input
+                  value={taxNumber}
+                  onChange={(event) =>
+                    setTaxNumber(
+                      country === "Türkiye"
+                        ? event.target.value.replace(/\D/g, "").slice(0, 10)
+                        : event.target.value
+                    )
+                  }
+                  style={inputStyle}
+                  inputMode={country === "Türkiye" ? "numeric" : "text"}
+                  maxLength={country === "Türkiye" ? 10 : 50}
+                  placeholder={
+                    country === "Türkiye"
+                      ? t("sellerProfilePage.taxNumberPlaceholder")
+                      : undefined
+                  }
+                />
+              </label>
+            )}
           </div>
 
           <div style={privateSectionStyle}>
@@ -644,6 +978,45 @@ const twoColumnStyle: CSSProperties = {
 const helperStyle: CSSProperties = {
   color: "#64748b",
   lineHeight: 1.5,
+};
+
+const legalSectionStyle: CSSProperties = {
+  margin: "8px 0 22px",
+  padding: 20,
+  borderRadius: 16,
+  border: "1px solid #e2e8f0",
+  background: "#f8fafc",
+};
+
+const legalTitleStyle: CSSProperties = {
+  margin: "6px 0 8px",
+  color: "#0f172a",
+  fontSize: 20,
+};
+
+const legalTextStyle: CSSProperties = {
+  margin: "0 0 20px",
+  color: "#64748b",
+  lineHeight: 1.6,
+  fontSize: 14,
+};
+
+const categoryListStyle: CSSProperties = {
+  maxHeight: 220,
+  overflowY: "auto",
+  padding: 12,
+  border: "1px solid #cbd5e1",
+  borderRadius: 12,
+  background: "#ffffff",
+};
+
+const categoryOptionStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  padding: "7px 4px",
+  color: "#334155",
+  cursor: "pointer",
 };
 
 const privateSectionStyle: CSSProperties = {
