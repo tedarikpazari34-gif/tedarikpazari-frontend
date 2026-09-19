@@ -293,7 +293,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>{t("registerPage.companyType")}</label>
+              <label style={labelStyle}>{t("registerPage.companyType")} *</label>
               <select
                 style={inputStyle}
                 value={companyType}
@@ -351,7 +351,7 @@ export default function RegisterPage() {
                   textAlign: "start",
                 }}
               >
-                <span>{t("registerPage.categories")} ({categories.length}/3)</span>
+                <span>{t("registerPage.categories")} * ({categories.length}/3)</span>
                 <span aria-hidden="true">{categoriesOpen ? "▲" : "▼"}</span>
               </button>
 
@@ -418,7 +418,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>{t("registerPage.country")}</label>
+              <label style={labelStyle}>{t("registerPage.country")} *</label>
               <select
                 style={inputStyle}
                 value={country}
@@ -448,7 +448,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>{t("registerPage.city")}</label>
+              <label style={labelStyle}>{t("registerPage.city")} *</label>
 
               {country === "Türkiye" ? (
                 <select
@@ -475,7 +475,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>{t("registerPage.district")}</label>
+              <label style={labelStyle}>{t("registerPage.district")} *</label>
               <input
                 style={inputStyle}
                 placeholder={t("registerPage.districtPlaceholder")}
@@ -487,7 +487,7 @@ export default function RegisterPage() {
             <div>
               {country === "Türkiye" && companyType === "Şahıs" ? (
                 <>
-                  <label style={labelStyle}>{t("registerPage.identityNumber")}</label>
+                  <label style={labelStyle}>{t("registerPage.identityNumber")} *</label>
                   <input
                     style={inputStyle}
                     placeholder={t("registerPage.identityNumberPlaceholder")}
@@ -506,7 +506,7 @@ export default function RegisterPage() {
                   <label style={labelStyle}>
                     {country === "Türkiye"
                       ? t("registerPage.taxNumber")
-                      : t("registerPage.internationalTaxNumber")}
+                      : t("registerPage.internationalTaxNumber")} *
                   </label>
                   <input
                     style={inputStyle}
@@ -534,7 +534,7 @@ export default function RegisterPage() {
               <label style={labelStyle}>
                 {country === "Türkiye"
                   ? t("registerPage.taxOffice")
-                  : t("registerPage.internationalTaxOffice")}
+                  : t("registerPage.internationalTaxOffice")} *
               </label>
               <input
                 style={inputStyle}
@@ -561,7 +561,7 @@ export default function RegisterPage() {
           </div>
 
           <div style={{ marginTop: 18 }}>
-            <label style={labelStyle}>{t("registerPage.address")}</label>
+            <label style={labelStyle}>{t("registerPage.address")} *</label>
             <textarea
               style={textareaStyle}
               placeholder={t("registerPage.addressPlaceholder")}
