@@ -1943,7 +1943,7 @@ const resources = {
           supportTitle: "Destek talebinizde bulunması gerekenler",
           supportText: "Daha hızlı yardımcı olabilmemiz için firma adınızı, hesabınızda kullandığınız e-posta adresini ve yaşadığınız sorunun kısa açıklamasını paylaşın.",
           legalTitle: "Yasal İşletme Bilgileri",
-          businessBrand: "İşletme / Marka:",
+          businessBrand: "Platform / Marka:",
           securityTitle: "Güvenlik uyarısı",
           securityText: "Şifrenizi, kart bilgilerinizi veya tek kullanımlık doğrulama kodlarınızı hiçbir destek mesajında paylaşmayın."
         },
