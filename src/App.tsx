@@ -129,6 +129,16 @@ export default function App() {
           }
         />
 
+        {/* BUYER COMPANY PROFILE */}
+        <Route
+          path="/buyer/profile"
+          element={
+            <PrivateRoute role="BUYER">
+              <SellerProfilePage />
+            </PrivateRoute>
+          }
+        />
+
         {/* SELLER */}
         <Route
           path="/seller/profile"

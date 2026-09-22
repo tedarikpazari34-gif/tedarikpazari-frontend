@@ -103,6 +103,9 @@ export default function SellerProfilePage() {
   const [success, setSuccess] = useState("");
 
   const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+  const isSeller = role === "SELLER";
+  const isBuyer = role === "BUYER";
 
   const loadProfile = async () => {
     try {
@@ -256,11 +259,18 @@ export default function SellerProfilePage() {
       return;
     }
 
-    if (country === "Türkiye" && companyType === "Şahıs") {
+    if (
+      country === "Türkiye" &&
+      (companyType === "Şahıs" || isBuyer)
+    ) {
       const identityNumber = paymentIdentityNumber.trim();
 
       if (!profile?.hasPaymentIdentityNumber && !identityNumber) {
-        setError(t("registerPage.identityNumberRequired"));
+        setError(
+          companyType === "Şahıs"
+            ? t("registerPage.identityNumberRequired")
+            : "Ödeme için yetkili kişinin T.C. kimlik numarası zorunludur."
+        );
         return;
       }
 
@@ -316,7 +326,7 @@ export default function SellerProfilePage() {
               : taxNumber.trim(),
           paymentIdentityNumber:
             country === "Türkiye" &&
-            companyType === "Şahıs" &&
+            (companyType === "Şahıs" || isBuyer) &&
             paymentIdentityNumber.trim()
               ? paymentIdentityNumber.trim()
               : undefined,
@@ -776,6 +786,35 @@ export default function SellerProfilePage() {
             )}
           </div>
 
+          {country === "Türkiye" &&
+          isBuyer &&
+          (companyType === "Limited" || companyType === "Anonim") ? (
+            <label style={fieldStyle}>
+              <span style={labelStyle}>
+                Ödeme Yetkilisi T.C. Kimlik No
+                {!profile?.hasPaymentIdentityNumber ? " *" : ""}
+              </span>
+              <input
+                value={paymentIdentityNumber}
+                onChange={(event) =>
+                  setPaymentIdentityNumber(
+                    event.target.value.replace(/\D/g, "").slice(0, 11)
+                  )
+                }
+                style={inputStyle}
+                inputMode="numeric"
+                autoComplete="off"
+                maxLength={11}
+                placeholder="11 haneli T.C. kimlik numarası"
+              />
+              <small style={helperStyle}>
+                {profile?.hasPaymentIdentityNumber
+                  ? "T.C. kimlik numarası güvenli olarak kayıtlıdır. Değiştirmek istiyorsanız yeniden girin."
+                  : "iyzico ödemesinin başlatılabilmesi için yetkili kişinin T.C. kimlik numarası gereklidir."}
+              </small>
+            </label>
+          ) : null}
+
           <div style={privateSectionStyle}>
             <div style={privateTitleStyle}>{t("sellerProfilePage.privateContact")}</div>
 
@@ -808,6 +847,7 @@ export default function SellerProfilePage() {
             </div>
           </div>
 
+          {isSeller ? (
           <div style={privateSectionStyle}>
             <div style={privateTitleStyle}>iyzico Ödeme Hesabı</div>
 
@@ -863,6 +903,7 @@ export default function SellerProfilePage() {
               </>
             )}
           </div>
+          ) : null}
 
           <button
             type="button"
