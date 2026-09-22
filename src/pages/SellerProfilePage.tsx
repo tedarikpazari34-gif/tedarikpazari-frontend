@@ -24,6 +24,7 @@ type CompanyProfile = {
   taxNumber?: string | null;
   taxOffice?: string | null;
   hasPaymentIdentityNumber?: boolean;
+  iyzicoOnboardingCompleted?: boolean;
   address?: {
     address?: string;
     district?: string;
@@ -88,6 +89,8 @@ export default function SellerProfilePage() {
   const [taxOffice, setTaxOffice] = useState("");
   const [taxNumber, setTaxNumber] = useState("");
   const [paymentIdentityNumber, setPaymentIdentityNumber] = useState("");
+  const [iyzicoIban, setIyzicoIban] = useState("");
+  const [iyzicoSaving, setIyzicoSaving] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
 
@@ -328,14 +331,61 @@ export default function SellerProfilePage() {
         return;
       }
 
-      setProfile(data);
       setPaymentIdentityNumber("");
+      await loadProfile();
       setSuccess(t("sellerProfilePage.saveSuccess"));
     } catch (err) {
       console.error("COMPANY PROFILE SAVE ERROR:", err);
       setError(t("sellerProfilePage.saveError"));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleIyzicoOnboarding = async () => {
+    const normalizedIban = iyzicoIban.replace(/\s+/g, "").toUpperCase();
+
+    if (!/^TR\d{24}$/.test(normalizedIban)) {
+      setError("Geçerli bir Türkiye IBAN giriniz.");
+      return;
+    }
+
+    if (!token) {
+      setError(t("sellerProfilePage.loginRequired"));
+      return;
+    }
+
+    try {
+      setIyzicoSaving(true);
+      setError("");
+      setSuccess("");
+
+      const res = await fetch(`${API}/payments/iyzico/submerchant`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          iban: normalizedIban,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        setError(data?.message || "iyzico ödeme hesabı oluşturulamadı.");
+        return;
+      }
+
+      setIyzicoIban("");
+      await loadProfile();
+      setSuccess("iyzico ödeme hesabınız başarıyla oluşturuldu.");
+    } catch (err) {
+      console.error("IYZICO ONBOARDING ERROR:", err);
+      setError("iyzico ödeme hesabı oluşturulurken bağlantı hatası oluştu.");
+    } finally {
+      setIyzicoSaving(false);
     }
   };
 
@@ -756,6 +806,62 @@ export default function SellerProfilePage() {
                 />
               </label>
             </div>
+          </div>
+
+          <div style={privateSectionStyle}>
+            <div style={privateTitleStyle}>iyzico Ödeme Hesabı</div>
+
+            {profile?.iyzicoOnboardingCompleted ? (
+              <p style={successStyle}>
+                Ödeme hesabınız aktif. Satış ödemeleri için iyzico Marketplace
+                kaydınız tamamlandı.
+              </p>
+            ) : (
+              <>
+                <p style={privateTextStyle}>
+                  Satışlardan ödeme alabilmek için şirketinize ait Türkiye
+                  IBAN'ını girerek iyzico Marketplace ödeme hesabınızı oluşturun.
+                </p>
+
+                <label style={fieldStyle}>
+                  <span style={labelStyle}>IBAN</span>
+                  <input
+                    value={iyzicoIban}
+                    onChange={(event) =>
+                      setIyzicoIban(
+                        event.target.value
+                          .toUpperCase()
+                          .replace(/[^A-Z0-9\s]/g, "")
+                          .slice(0, 32)
+                      )
+                    }
+                    style={inputStyle}
+                    autoComplete="off"
+                    spellCheck={false}
+                    placeholder="TR00 0000 0000 0000 0000 0000 00"
+                  />
+                  <small style={helperStyle}>
+                    IBAN yalnızca iyzico ödeme hesabınızı oluşturmak için
+                    gönderilir.
+                  </small>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={handleIyzicoOnboarding}
+                  disabled={iyzicoSaving}
+                  style={{
+                    ...saveButtonStyle,
+                    opacity: iyzicoSaving ? 0.65 : 1,
+                    cursor: iyzicoSaving ? "wait" : "pointer",
+                  }}
+                >
+                  {iyzicoSaving
+                    ? "iyzico hesabı oluşturuluyor..."
+                    : "iyzico Ödeme Hesabını Etkinleştir"}
+                </button>
+              </>
+            )}
           </div>
 
           <button
