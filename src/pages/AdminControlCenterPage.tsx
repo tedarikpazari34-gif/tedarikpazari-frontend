@@ -395,13 +395,6 @@ export default function AdminControlCenterPage() {
                 />
 
                 <ActionCard
-                  title={t("adminControlCenterPage.pendingPayouts")}
-                  value={data.actions.pendingPayouts}
-                  description={t("adminControlCenterPage.pendingPayoutsText")}
-                  to="/admin/payouts"
-                />
-
-                <ActionCard
                   title={t("adminControlCenterPage.flaggedMessages")}
                   value={data.actions.flaggedMessages}
                   description={t("adminControlCenterPage.flaggedMessagesText")}

@@ -52,7 +52,6 @@ const adminLinks: NavItem[] = [
   { labelKey: "common.companies", to: "/admin/companies" },
   { labelKey: "common.verificationRequests", to: "/admin/verification-requests" },
   { labelKey: "common.productManagement", to: "/admin/products" },
-  { labelKey: "common.payments", to: "/admin/payouts" },
   { labelKey: "common.disputes", to: "/admin/disputes" },
   { labelKey: "common.finance", to: "/admin/finance" },
   { labelKey: "common.chatModeration", to: "/admin/chat-moderation" },

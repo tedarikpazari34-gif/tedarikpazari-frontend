@@ -305,13 +305,6 @@ export default function AdminDashboardPage() {
           />
 
           <PriorityStat
-            label={t("adminDashboardPage.pendingPayout")}
-            value={overview?.marketplace.payoutsPending ?? 0}
-            to="/admin/payouts"
-            tone="money"
-          />
-
-          <PriorityStat
             label={t("adminDashboardPage.totalOrders")}
             value={overview?.orders.total ?? totalOrders}
             to="/admin/finance"
@@ -364,12 +357,6 @@ export default function AdminDashboardPage() {
               {t("adminDashboardPage.chatModerationText")}
             </span>
           </Link>
-          <Link to="/admin/payouts" style={actionCardStyle}>
-            <strong>{t("adminDashboardPage.payoutManagement")}</strong>
-
-            <span>{t("adminDashboardPage.payoutManagementText")}</span>
-          </Link>
-
           <Link to="/admin/disputes" style={actionCardStyle}>
             <strong>{t("adminDashboardPage.disputeManagement")}</strong>
 

@@ -19,10 +19,6 @@ const items = [
     path: "/admin/products",
   },
   {
-    labelKey: "adminSidebar.payouts",
-    path: "/admin/payouts",
-  },
-  {
     labelKey: "adminSidebar.disputes",
     path: "/admin/disputes",
   },

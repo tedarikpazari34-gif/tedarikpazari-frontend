@@ -24,7 +24,6 @@ import SellerProfilePage from "./pages/SellerProfilePage";
 
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminProductsPage from "./pages/AdminProductsPage";
-import AdminPayoutsPage from "./pages/AdminPayoutsPage";
 import AdminDisputesPage from "./pages/AdminDisputesPage";
 import AdminCompaniesPage from "./pages/AdminCompaniesPage";
 import AdminFinancePage from "./pages/AdminFinancePage";
@@ -226,15 +225,6 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminProductsPage />
-            </AdminRoute>
-          }
-        />
-
-        <Route
-          path="/admin/payouts"
-          element={
-            <AdminRoute>
-              <AdminPayoutsPage />
             </AdminRoute>
           }
         />
