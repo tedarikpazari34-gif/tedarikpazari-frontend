@@ -21,6 +21,8 @@ type Order = {
 
   shippingTrackingNo?: string | null;
   shippingCompany?: string | null;
+  shippingMethod?: "CARGO" | "FREIGHT" | null;
+  shippingDispatchNo?: string | null;
   shippedAt?: string | null;
 
   rfq?: {
@@ -541,13 +543,26 @@ export default function BuyerOrdersPage() {
                   ) : (
                     <>
                       <div>
-                        🚚 {o.shippingCompany || "-"}
+                        🚚{" "}
+                        {o.shippingMethod === "FREIGHT"
+                          ? "Ambar / Nakliye"
+                          : "Kargo"}
+                        : {o.shippingCompany || "-"}
                       </div>
 
                       <div>
-                        {t("buyerOrdersPage.trackingNo")}:{" "}
+                        {o.shippingMethod === "FREIGHT"
+                          ? "Ambar Fiş / Gönderi No"
+                          : t("buyerOrdersPage.trackingNo")}
+                        :{" "}
                         {o.shippingTrackingNo || "-"}
                       </div>
+
+                      {o.shippingDispatchNo && (
+                        <div>
+                          Sevk İrsaliyesi No: {o.shippingDispatchNo}
+                        </div>
+                      )}
 
                       <div>
                         {t("buyerOrdersPage.shippingDate")}:{" "}
