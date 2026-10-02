@@ -25,6 +25,8 @@ type Company = {
   role?: string | null;
   status?: string | null;
   verified?: boolean;
+  iyzicoOnboardingCompleted?: boolean;
+  iyzicoOnboardingPending?: boolean;
   address?: {
     address?: string;
     district?: string;
@@ -267,6 +269,62 @@ export default function AdminCompaniesPage() {
     } catch (err) {
       console.error(err);
       alert(t("adminCompaniesPage.operationFailed"));
+    } finally {
+      setActionId("");
+    }
+  };
+
+  const reconcileIyzicoSubMerchant = async (id: string) => {
+    if (
+      !window.confirm(
+        "Bekleyen iyzico satıcı hesabı sağlayıcıdan doğrulanacak. Devam edilsin mi?"
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setActionId(id);
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert(t("adminCompaniesPage.adminLoginRequired"));
+        return;
+      }
+
+      const res = await fetch(
+        `https://tedarik-backend.onrender.com/api/payments/iyzico/submerchant/reconcile/${id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.message || "iyzico mutabakatı tamamlanamadı.");
+        return;
+      }
+
+      await loadCompanies();
+
+      setSelectedCompany((current) =>
+        current?.id === id
+          ? {
+              ...current,
+              iyzicoOnboardingCompleted: true,
+              iyzicoOnboardingPending: false,
+            }
+          : current
+      );
+
+      alert(data?.message || "iyzico mutabakatı tamamlandı.");
+    } catch (err) {
+      console.error("IYZICO SUBMERCHANT RECONCILE ERROR:", err);
+      alert("iyzico mutabakatı sırasında bağlantı hatası oluştu.");
     } finally {
       setActionId("");
     }
@@ -641,6 +699,54 @@ export default function AdminCompaniesPage() {
                 }
               />
             </div>
+
+            {(selectedCompany.role ||
+              selectedCompany.users?.[0]?.role) === "SELLER" && (
+              <div
+                style={{
+                  margin: "20px 0",
+                  padding: 16,
+                  border: "1px solid #e5e7eb",
+                  borderRadius: 12,
+                }}
+              >
+                <div style={{ fontWeight: 700, marginBottom: 8 }}>
+                  iyzico Marketplace
+                </div>
+
+                <div style={{ marginBottom: 12 }}>
+                  {selectedCompany.iyzicoOnboardingCompleted
+                    ? "Ödeme hesabı aktif."
+                    : selectedCompany.iyzicoOnboardingPending
+                    ? "Onboarding işlemi bekliyor ve mutabakat gerektiriyor."
+                    : "Onboarding henüz başlatılmadı."}
+                </div>
+
+                {selectedCompany.iyzicoOnboardingPending &&
+                  !selectedCompany.iyzicoOnboardingCompleted && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        reconcileIyzicoSubMerchant(selectedCompany.id)
+                      }
+                      disabled={actionId === selectedCompany.id}
+                      style={{
+                        padding: "10px 14px",
+                        borderRadius: 8,
+                        border: "1px solid #d1d5db",
+                        cursor:
+                          actionId === selectedCompany.id
+                            ? "not-allowed"
+                            : "pointer",
+                      }}
+                    >
+                      {actionId === selectedCompany.id
+                        ? "Mutabakat yapılıyor..."
+                        : "iyzico Mutabakat"}
+                    </button>
+                  )}
+              </div>
+            )}
 
             <div style={{ margin: "20px 0" }}>
               <button
