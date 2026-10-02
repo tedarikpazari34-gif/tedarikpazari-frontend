@@ -25,6 +25,7 @@ type CompanyProfile = {
   taxOffice?: string | null;
   hasPaymentIdentityNumber?: boolean;
   iyzicoOnboardingCompleted?: boolean;
+  iyzicoOnboardingPending?: boolean;
   address?: {
     address?: string;
     district?: string;
@@ -855,6 +856,12 @@ export default function SellerProfilePage() {
               <p style={successStyle}>
                 Ödeme hesabınız aktif. Satış ödemeleri için iyzico Marketplace
                 kaydınız tamamlandı.
+              </p>
+            ) : profile?.iyzicoOnboardingPending ? (
+              <p style={privateTextStyle}>
+                iyzico ödeme hesabı oluşturma işleminiz başlatıldı. İşlem
+                kesinleşene kadar yeniden başlatılamaz. Gerekirse yönetici
+                tarafından ödeme sağlayıcısıyla mutabakat yapılacaktır.
               </p>
             ) : (
               <>
