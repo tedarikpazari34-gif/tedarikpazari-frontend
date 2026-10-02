@@ -78,6 +78,12 @@ export default function SellerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [shippingOrderId, setShippingOrderId] = useState<string | null>(null);
+  const [shippingMethod, setShippingMethod] = useState<"CARGO" | "FREIGHT">("CARGO");
+  const [shippingCompany, setShippingCompany] = useState("");
+  const [shippingTrackingNo, setShippingTrackingNo] = useState("");
+  const [shippingDispatchNo, setShippingDispatchNo] = useState("");
+  const [shippingSubmitting, setShippingSubmitting] = useState(false);
 
   const loadOrders = async () => {
     try {
@@ -148,58 +154,80 @@ export default function SellerOrdersPage() {
     }
   };
 
-  const handleShip = async (orderId: string) => {
-  const shippingCompany = window.prompt(
-    t("sellerOrdersPage.shippingCompanyPrompt"),
-    "Yurtiçi Kargo"
-  );
+  const openShippingModal = (orderId: string) => {
+    setShippingOrderId(orderId);
+    setShippingMethod("CARGO");
+    setShippingCompany("");
+    setShippingTrackingNo("");
+    setShippingDispatchNo("");
+  };
 
-  if (!shippingCompany?.trim()) {
-    return;
-  }
+  const closeShippingModal = () => {
+    if (shippingSubmitting) return;
+    setShippingOrderId(null);
+    setShippingMethod("CARGO");
+    setShippingCompany("");
+    setShippingTrackingNo("");
+    setShippingDispatchNo("");
+  };
 
-  const shippingTrackingNo = window.prompt(
-    t("sellerOrdersPage.trackingNoPrompt")
-  );
-
-  if (!shippingTrackingNo?.trim()) {
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert(t("sellerOrdersPage.loginShort"));
+  const handleShip = async () => {
+    if (
+      !shippingOrderId ||
+      !shippingCompany.trim() ||
+      !shippingTrackingNo.trim() ||
+      shippingSubmitting
+    ) {
       return;
     }
 
-    const res = await fetch(`${API}/orders/${orderId}/ship`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        shippingCompany: shippingCompany.trim(),
-        shippingTrackingNo: shippingTrackingNo.trim(),
-      }),
-    });
+    try {
+      setShippingSubmitting(true);
 
-    const data = await res.json().catch(() => null);
+      const token = localStorage.getItem("token");
 
-    if (!res.ok) {
-      alert(data?.message || t("sellerOrdersPage.shippingFailed"));
-      return;
+      if (!token) {
+        alert(t("sellerOrdersPage.loginShort"));
+        return;
+      }
+
+      const res = await fetch(`${API}/orders/${shippingOrderId}/ship`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          shippingMethod,
+          shippingCompany: shippingCompany.trim(),
+          shippingTrackingNo: shippingTrackingNo.trim(),
+          ...(shippingDispatchNo.trim()
+            ? { shippingDispatchNo: shippingDispatchNo.trim() }
+            : {}),
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        alert(data?.message || t("sellerOrdersPage.shippingFailed"));
+        return;
+      }
+
+      setShippingOrderId(null);
+      setShippingMethod("CARGO");
+      setShippingCompany("");
+      setShippingTrackingNo("");
+      setShippingDispatchNo("");
+      alert(t("sellerOrdersPage.shippingSuccess"));
+      await loadOrders();
+    } catch {
+      alert(t("sellerOrdersPage.shippingError"));
+    } finally {
+      setShippingSubmitting(false);
     }
+  };
 
-    alert(t("sellerOrdersPage.shippingSuccess"));
-    await loadOrders();
-  } catch (err) {
-    console.error("SHIP ERROR:", err);
-    alert(t("sellerOrdersPage.shippingError"));
-  }
-};
   const handleOpenDispute = async (orderId: string) => {
     const reason = window.prompt(t("sellerOrdersPage.disputeReasonPrompt"));
 
@@ -354,51 +382,12 @@ export default function SellerOrdersPage() {
                 )}
 
                 {o.status === "PREPARING" && (
-                  <>
-                    <button onClick={() => handleShip(o.id)} style={blueButtonStyle}>
-                      {t("sellerOrdersPage.shipOrder")}
-                    </button>
-
-                    <button
-                      onClick={async () => {
-                        const ok = window.confirm(
-                          t("sellerOrdersPage.selfDeliveryConfirm")
-                        );
-
-                        if (!ok) return;
-
-                        try {
-                          const token = localStorage.getItem("token");
-
-                          const res = await fetch(
-                            `${API}/orders/${o.id}/self-delivery`,
-                            {
-                              method: "POST",
-                              headers: {
-                                Authorization: `Bearer ${token}`,
-                              },
-                            }
-                          );
-
-                          const data = await res.json().catch(() => null);
-
-                          if (!res.ok) {
-                            alert(data?.message || t("sellerOrdersPage.operationFailed"));
-                            return;
-                          }
-
-                          alert(t("sellerOrdersPage.selfDeliverySuccess"));
-                          loadOrders();
-                        } catch (err) {
-                          console.error("SELF DELIVERY ERROR:", err);
-                          alert(t("sellerOrdersPage.operationError"));
-                        }
-                      }}
-                      style={orangeButtonStyle}
-                    >
-                      {t("sellerOrdersPage.readyForDelivery")}
-                    </button>
-                  </>
+                  <button
+                    onClick={() => openShippingModal(o.id)}
+                    style={blueButtonStyle}
+                  >
+                    {t("sellerOrdersPage.shipOrder")}
+                  </button>
                 )}
 
                 {o.status !== "PAID" && o.status !== "PREPARING" && (
@@ -420,6 +409,180 @@ export default function SellerOrdersPage() {
           ))}
         </section>
       )}
+        {shippingOrderId && (
+          <div
+            style={modalOverlayStyle}
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) closeShippingModal();
+            }}
+          >
+            <div
+              style={modalCardStyle}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="shipping-modal-title"
+            >
+              <div style={modalHeaderStyle}>
+                <div>
+                  <div style={smallLabelStyle}>GÖNDERİM BİLGİLERİ</div>
+                  <h2 id="shipping-modal-title" style={modalTitleStyle}>
+                    Gönderim Bilgileri
+                  </h2>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={closeShippingModal}
+                  disabled={shippingSubmitting}
+                  style={modalCloseButtonStyle}
+                  aria-label="Kapat"
+                >
+                  ×
+                </button>
+              </div>
+
+              <p style={modalDescriptionStyle}>
+                Siparişin hangi yöntemle gönderileceğini seçin ve gönderi
+                bilgilerini girin.
+              </p>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
+                <button
+                  type="button"
+                  onClick={() => setShippingMethod("CARGO")}
+                  disabled={shippingSubmitting}
+                  style={{
+                    padding: "14px 12px",
+                    borderRadius: 12,
+                    border: shippingMethod === "CARGO" ? "2px solid #2563eb" : "1px solid #d1d5db",
+                    background: shippingMethod === "CARGO" ? "#eff6ff" : "#fff",
+                    cursor: shippingSubmitting ? "not-allowed" : "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <strong style={{ display: "block", marginBottom: 4 }}>Kargo</strong>
+                  <span style={{ fontSize: 12, color: "#64748b" }}>
+                    Standart kargo firması ile gönderim
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShippingMethod("FREIGHT")}
+                  disabled={shippingSubmitting}
+                  style={{
+                    padding: "14px 12px",
+                    borderRadius: 12,
+                    border: shippingMethod === "FREIGHT" ? "2px solid #2563eb" : "1px solid #d1d5db",
+                    background: shippingMethod === "FREIGHT" ? "#eff6ff" : "#fff",
+                    cursor: shippingSubmitting ? "not-allowed" : "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <strong style={{ display: "block", marginBottom: 4 }}>
+                    Ambar / Nakliye
+                  </strong>
+                  <span style={{ fontSize: 12, color: "#64748b" }}>
+                    Ambar, nakliye veya lojistik firması ile gönderim
+                  </span>
+                </button>
+              </div>
+
+              <label style={modalLabelStyle}>
+                <span>
+                  {shippingMethod === "FREIGHT"
+                    ? "Ambar / Nakliye Firması"
+                    : "Kargo Firması"}
+                </span>
+                <input
+                  value={shippingCompany}
+                  onChange={(e) => setShippingCompany(e.target.value)}
+                  placeholder={
+                    shippingMethod === "FREIGHT"
+                      ? "Örn. ABC Ambarı / XYZ Nakliyat"
+                      : "Örn. Yurtiçi Kargo"
+                  }
+                  maxLength={100}
+                  autoFocus
+                  style={modalInputStyle}
+                />
+              </label>
+
+              <label style={modalLabelStyle}>
+                <span>
+                  {shippingMethod === "FREIGHT"
+                    ? "Ambar Fiş / Gönderi No"
+                    : "Takip Numarası"}
+                </span>
+                <input
+                  value={shippingTrackingNo}
+                  onChange={(e) => setShippingTrackingNo(e.target.value)}
+                  placeholder={
+                    shippingMethod === "FREIGHT"
+                      ? "Ambar fişi veya gönderi referans numarası"
+                      : "Kargo takip numarası"
+                  }
+                  maxLength={150}
+                  style={modalInputStyle}
+                />
+              </label>
+
+              <label style={modalLabelStyle}>
+                <span>Sevk İrsaliyesi No (İsteğe Bağlı)</span>
+                <input
+                  value={shippingDispatchNo}
+                  onChange={(e) => setShippingDispatchNo(e.target.value)}
+                  placeholder="Varsa sevk irsaliyesi numarası"
+                  maxLength={100}
+                  style={modalInputStyle}
+                />
+              </label>
+
+              <div style={modalInfoStyle}>
+                Gönderim tarihi, gönderim onaylandığında sistem tarafından
+                otomatik kaydedilir.
+              </div>
+
+              <div style={modalActionsStyle}>
+                <button
+                  type="button"
+                  onClick={closeShippingModal}
+                  disabled={shippingSubmitting}
+                  style={modalCancelButtonStyle}
+                >
+                  Vazgeç
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleShip}
+                  disabled={
+                    shippingSubmitting ||
+                    !shippingCompany.trim() ||
+                    !shippingTrackingNo.trim()
+                  }
+                  style={{
+                    ...blueButtonStyle,
+                    opacity:
+                      shippingSubmitting ||
+                      !shippingCompany.trim() ||
+                      !shippingTrackingNo.trim()
+                        ? 0.55
+                        : 1,
+                    cursor:
+                      shippingSubmitting ||
+                      !shippingCompany.trim() ||
+                      !shippingTrackingNo.trim()
+                        ? "not-allowed"
+                        : "pointer",
+                  }}
+                >
+                  {shippingSubmitting ? "Kaydediliyor..." : "Gönderimi Onayla"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
     </main>
   );
 }
@@ -636,6 +799,107 @@ const disputeButtonStyle: CSSProperties = {
   border: "none",
   background: "#dc2626",
   color: "white",
+  padding: "12px 16px",
+  borderRadius: 12,
+  cursor: "pointer",
+  fontWeight: 900,
+};
+const modalOverlayStyle: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 1000,
+  background: "rgba(15, 23, 42, 0.62)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 20,
+};
+
+const modalCardStyle: CSSProperties = {
+  width: "100%",
+  maxWidth: 520,
+  background: "white",
+  borderRadius: 24,
+  padding: 24,
+  boxShadow: "0 28px 70px rgba(15,23,42,0.28)",
+  boxSizing: "border-box",
+};
+
+const modalHeaderStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: 16,
+  marginBottom: 14,
+};
+
+const modalTitleStyle: CSSProperties = {
+  margin: 0,
+  color: "#0f172a",
+  fontSize: 24,
+  fontWeight: 900,
+};
+
+const modalCloseButtonStyle: CSSProperties = {
+  width: 38,
+  height: 38,
+  border: "none",
+  borderRadius: 12,
+  background: "#f1f5f9",
+  color: "#475569",
+  cursor: "pointer",
+  fontSize: 24,
+  lineHeight: 1,
+};
+
+const modalDescriptionStyle: CSSProperties = {
+  margin: "0 0 20px",
+  color: "#64748b",
+  lineHeight: 1.6,
+};
+
+const modalLabelStyle: CSSProperties = {
+  display: "grid",
+  gap: 8,
+  marginBottom: 16,
+  color: "#334155",
+  fontSize: 14,
+  fontWeight: 800,
+};
+
+const modalInputStyle: CSSProperties = {
+  width: "100%",
+  boxSizing: "border-box",
+  border: "1px solid #cbd5e1",
+  borderRadius: 12,
+  padding: "13px 14px",
+  fontSize: 15,
+  color: "#0f172a",
+  background: "white",
+  outline: "none",
+};
+
+const modalInfoStyle: CSSProperties = {
+  padding: 13,
+  marginBottom: 20,
+  borderRadius: 12,
+  background: "#eff6ff",
+  color: "#1e40af",
+  fontSize: 13,
+  lineHeight: 1.5,
+};
+
+const modalActionsStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: 10,
+  flexWrap: "wrap",
+};
+
+const modalCancelButtonStyle: CSSProperties = {
+  border: "1px solid #cbd5e1",
+  background: "white",
+  color: "#334155",
   padding: "12px 16px",
   borderRadius: 12,
   cursor: "pointer",
