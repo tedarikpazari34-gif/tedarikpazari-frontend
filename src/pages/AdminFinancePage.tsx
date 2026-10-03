@@ -4,6 +4,27 @@ import AdminSidebar from "../components/admin/AdminSidebar";
 
 const API = import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
+type PaymentReview = {
+  id: string;
+  orderId: string;
+  status: string;
+  conversationId?: string | null;
+  iyzicoPaymentId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  reviewedAt?: string | null;
+  callbackVerifiedAt?: string | null;
+  order: {
+    status: string;
+    totalAmount: string | number;
+    iyzicoPaymentId?: string | null;
+    iyzicoPaymentTransactionId?: string | null;
+    iyzicoPaidAt?: string | null;
+    buyer?: { name?: string } | null;
+    seller?: { name?: string } | null;
+  };
+};
+
 type LedgerEntry = {
   id: string;
   type: string;
@@ -25,6 +46,8 @@ export default function AdminFinancePage() {
 
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [paymentReviews, setPaymentReviews] = useState<PaymentReview[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   async function loadLedger() {
     try {
@@ -55,8 +78,75 @@ export default function AdminFinancePage() {
     }
   }
 
+  async function loadPaymentReviews() {
+    try {
+      setReviewsLoading(true);
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API}/payments/iyzico/reviews`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error(data?.message || "iyzico mutabakat kayıtları yüklenemedi");
+        setPaymentReviews([]);
+        return;
+      }
+
+      setPaymentReviews(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+      setPaymentReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  }
+
+  async function inspectPaymentReview(paymentAttemptId: string) {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `${API}/payments/iyzico/inspect/${paymentAttemptId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.message || "iyzico ödeme incelemesi başarısız.");
+        return;
+      }
+
+      const result = data?.result ?? data;
+
+      alert(
+        [
+          "iyzico kontrol sonucu",
+          `Durum: ${result?.status ?? "-"}`,
+          `Ödeme durumu: ${result?.paymentStatus ?? "-"}`,
+          `Payment ID: ${result?.paymentId ?? "-"}`,
+          `Hata kodu: ${result?.errorCode ?? "-"}`,
+          `Hata mesajı: ${result?.errorMessage ?? "-"}`,
+        ].join("\n"),
+      );
+    } catch (err) {
+      console.error(err);
+      alert("iyzico ödeme incelemesi sırasında bağlantı hatası oluştu.");
+    }
+  }
+
   useEffect(() => {
     loadLedger();
+    loadPaymentReviews();
   }, []);
 
   const totals = useMemo(() => {
@@ -124,6 +214,78 @@ export default function AdminFinancePage() {
             title={t("adminFinancePage.adjustment")}
             value={money(totals.adjustment, locale)}
           />
+        </section>
+
+        <section style={{ ...panelStyle, marginBottom: 24 }}>
+          <div style={panelHeaderStyle}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: 24 }}>iyzico Mutabakat</h2>
+              <p style={{ margin: "6px 0 0", color: "#64748b" }}>
+                Manuel inceleme bekleyen iyzico ödeme kayıtları
+              </p>
+            </div>
+
+            <button onClick={loadPaymentReviews} style={refreshButtonStyle}>
+              Yenile
+            </button>
+          </div>
+
+          {reviewsLoading ? (
+            <div style={emptyStyle}>Mutabakat kayıtları yükleniyor...</div>
+          ) : paymentReviews.length === 0 ? (
+            <div style={emptyStyle}>İnceleme bekleyen ödeme bulunmuyor.</div>
+          ) : (
+            <div style={{ display: "grid", gap: 14 }}>
+              {paymentReviews.map((review) => (
+                <article key={review.id} style={ledgerCardStyle}>
+                  <div style={ledgerTopStyle}>
+                    <strong>REVIEW</strong>
+                    <span style={{ fontWeight: 900 }}>
+                      {money(review.order.totalAmount, locale)}
+                    </span>
+                  </div>
+
+                  <div style={metaStyle}>
+                    Sipariş: <strong>{review.orderId}</strong>
+                  </div>
+
+                  <div style={metaStyle}>
+                    Alıcı: {review.order.buyer?.name || "-"} · Satıcı:{" "}
+                    {review.order.seller?.name || "-"}
+                  </div>
+
+                  <div style={metaStyle}>
+                    Sipariş durumu: {review.order.status}
+                  </div>
+
+                  <div style={metaStyle}>
+                    Ödeme Attempt ID: {review.id}
+                  </div>
+
+                  <div style={metaStyle}>
+                    iyzico Payment ID: {review.iyzicoPaymentId || "-"}
+                  </div>
+
+                  <div style={metaStyle}>
+                    İncelemeye alınma:{" "}
+                    {review.reviewedAt
+                      ? new Date(review.reviewedAt).toLocaleString(locale)
+                      : "-"}
+                  </div>
+
+                  <div style={{ marginTop: 14 }}>
+                    <button
+                      type="button"
+                      onClick={() => inspectPaymentReview(review.id)}
+                      style={refreshButtonStyle}
+                    >
+                      iyzico’da Kontrol Et
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
 
         <section style={panelStyle}>
