@@ -144,6 +144,58 @@ export default function AdminFinancePage() {
     }
   }
 
+  async function resolvePaymentReviewAsFailed(paymentAttemptId: string) {
+    const reason = window.prompt(
+      "Bu ödeme kaydını FAILED olarak sonuçlandırma gerekçesini yazın (en az 10 karakter):",
+    );
+
+    if (reason === null) return;
+
+    const normalizedReason = reason.trim();
+
+    if (normalizedReason.length < 10) {
+      alert("Gerekçe en az 10 karakter olmalıdır.");
+      return;
+    }
+
+    if (
+      !window.confirm(
+        "Bu REVIEW kaydı FAILED olarak sonuçlandırılacak. Devam etmek istiyor musunuz?",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `${API}/payments/iyzico/resolve-review-failed/${paymentAttemptId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ reason: normalizedReason }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.message || "Ödeme incelemesi sonuçlandırılamadı.");
+        return;
+      }
+
+      alert("Ödeme incelemesi FAILED olarak sonuçlandırıldı.");
+      await loadPaymentReviews();
+    } catch (err) {
+      console.error(err);
+      alert("Ödeme incelemesi sonuçlandırılırken bağlantı hatası oluştu.");
+    }
+  }
+
   useEffect(() => {
     loadLedger();
     loadPaymentReviews();
@@ -281,6 +333,16 @@ export default function AdminFinancePage() {
                     >
                       iyzico’da Kontrol Et
                     </button>
+
+                    {review.status === "REVIEW" && (
+                      <button
+                        type="button"
+                        onClick={() => resolvePaymentReviewAsFailed(review.id)}
+                        style={{ ...refreshButtonStyle, marginLeft: 10 }}
+                      >
+                        FAILED Olarak Sonuçlandır
+                      </button>
+                    )}
                   </div>
                 </article>
               ))}
