@@ -239,7 +239,7 @@ export default function AdminFinancePage() {
               {paymentReviews.map((review) => (
                 <article key={review.id} style={ledgerCardStyle}>
                   <div style={ledgerTopStyle}>
-                    <strong>REVIEW</strong>
+                    <strong>{review.status}</strong>
                     <span style={{ fontWeight: 900 }}>
                       {money(review.order.totalAmount, locale)}
                     </span>
