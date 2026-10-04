@@ -38,7 +38,9 @@ export default function Footer() {
             gridColumn: isMobile ? "1 / -1" : undefined,
           }}
         >
-          <div style={logoStyle}>TP</div>
+          <div style={logoStyle}>
+            <span style={{ fontSize: 10, letterSpacing: 1.4, fontWeight: 900 }}>NEX</span>
+          </div>
 
           <div>
             <div style={{ lineHeight: 1.05 }}>
@@ -132,7 +134,7 @@ export default function Footer() {
       <div
         style={{
           width: "100%",
-          maxWidth: 1180,
+          maxWidth: 1360,
           margin: isMobile ? "28px auto 0" : "38px auto 0",
           display: "flex",
           alignItems: "center",
@@ -226,12 +228,12 @@ const footerStyle: CSSProperties = {
   padding: "56px 24px 22px",
   color: "#e2e8f0",
   background:
-    "linear-gradient(135deg, #020617 0%, #0f172a 55%, #172554 100%)",
+    "linear-gradient(135deg, #082F55 0%, #0B3D6E 52%, #123A63 100%)",
 };
 
 const mainStyle: CSSProperties = {
   width: "100%",
-  maxWidth: 1180,
+  maxWidth: 1360,
   minWidth: 0,
   margin: "0 auto",
   display: "grid",
@@ -254,8 +256,8 @@ const logoStyle: CSSProperties = {
   placeItems: "center",
   color: "#ffffff",
   fontWeight: 900,
-  background: "linear-gradient(135deg, #2563eb, #06b6d4)",
-  boxShadow: "0 10px 24px rgba(37,99,235,0.32)",
+  background: "linear-gradient(135deg, #16B83E, #22C55E)",
+  boxShadow: "0 10px 24px rgba(22,184,62,0.24)",
 };
 
 const brandStyle: CSSProperties = {
@@ -266,7 +268,7 @@ const brandStyle: CSSProperties = {
 const textStyle: CSSProperties = {
   maxWidth: 360,
   margin: "10px 0 0",
-  color: "#94a3b8",
+  color: "#C7D6E5",
   lineHeight: 1.7,
 };
 
@@ -285,7 +287,7 @@ const columnTitleStyle: CSSProperties = {
 
 const linkStyle: CSSProperties = {
   minWidth: 0,
-  color: "#cbd5e1",
+  color: "#DCE7F0",
   textDecoration: "none",
   fontSize: 14,
   overflowWrap: "anywhere",
@@ -294,22 +296,22 @@ const linkStyle: CSSProperties = {
 
 const smallTextStyle: CSSProperties = {
   marginTop: 4,
-  color: "#64748b",
+  color: "#AFC3D6",
   fontSize: 12,
   lineHeight: 1.6,
 };
 
 const bottomStyle: CSSProperties = {
   width: "100%",
-  maxWidth: 1180,
+  maxWidth: 1360,
   minWidth: 0,
   margin: "42px auto 0",
   paddingTop: 20,
-  borderTop: "1px solid rgba(148,163,184,0.2)",
+  borderTop: "1px solid rgba(255,255,255,0.14)",
   display: "flex",
   justifyContent: "space-between",
   flexWrap: "wrap",
   gap: 12,
-  color: "#64748b",
+  color: "#AFC3D6",
   fontSize: 13,
 };

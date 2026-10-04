@@ -2161,7 +2161,7 @@ export default {
     }
   },
   "footer": {
-    "description": "Bu — korxonalar (B2B) uchun takliflar, buyurtmalar va xavfsiz to'lovlarni ta'minlovchi platforma bo'lib, korxonalarni ishonchli yetkazib beruvchilar bilan bog'laydi.",
+    "description": "Bu — korxonalar (B2B) uchun xaridlar, buyurtmalar va xavfsiz to'lovlarni ta'minlovchi platforma bo'lib, korxonalarni ishonchli yetkazib beruvchilar bilan bog'laydi.",
     "corporate": "Kompaniya",
     "about": "Biz haqimizda",
     "contact": "Aloqa",

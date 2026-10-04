@@ -2260,7 +2260,7 @@ const resources = {
         }
       },
       footer: {
-        description: "İşletmeleri güvenilir tedarikçilerle buluşturan B2B teklif, sipariş ve güvenli ödeme platformu.",
+        description: "İşletmeleri güvenilir tedarikçilerle buluşturan B2B satın alma, sipariş ve güvenli ödeme platformu.",
         corporate: "Kurumsal",
         about: "Hakkımızda",
         contact: "İletişim",
@@ -4773,7 +4773,7 @@ const resources = {
         }
       },
       footer: {
-        description: "A B2B quotation, ordering and secure payment platform connecting businesses with reliable suppliers.",
+        description: "A B2B purchasing, ordering and secure payment platform connecting businesses with reliable suppliers.",
         corporate: "Company",
         about: "About Us",
         contact: "Contact",

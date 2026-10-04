@@ -2161,7 +2161,7 @@ export default {
     }
   },
   "footer": {
-    "description": "Plattform für B2B-Angebote, Bestellungen und sichere Zahlungen, die Unternehmen mit zuverlässigen Lieferanten verbindet.",
+    "description": "B2B-Plattform für Einkauf, Bestellungen und sichere Zahlungen, die Unternehmen mit zuverlässigen Lieferanten verbindet.",
     "corporate": "Unternehmen",
     "about": "Über uns",
     "contact": "Kontakt",
