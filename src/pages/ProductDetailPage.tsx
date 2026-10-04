@@ -812,6 +812,71 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
+      <section style={productDetailsSectionStyle}>
+        <div style={productDetailsHeaderStyle}>
+          <span style={productDetailsEyebrowStyle}>ÜRÜN DETAYLARI</span>
+          <h2 style={productDetailsTitleStyle}>Ürün Bilgileri</h2>
+          <p style={productDetailsDescriptionStyle}>
+            {product.description || "Bu ürün için henüz ayrıntılı açıklama eklenmemiş."}
+          </p>
+        </div>
+
+        <div style={productDetailsContentStyle}>
+          <div style={productSpecsCardStyle}>
+            <h3 style={productSpecsTitleStyle}>Ürün Özellikleri</h3>
+
+            <div style={productSpecsGridStyle}>
+              <div style={productSpecItemStyle}>
+                <span style={productSpecLabelStyle}>Kategori</span>
+                <strong style={productSpecValueStyle}>
+                  {product.category?.name || "-"}
+                </strong>
+              </div>
+
+              <div style={productSpecItemStyle}>
+                <span style={productSpecLabelStyle}>Satış Birimi</span>
+                <strong style={productSpecValueStyle}>
+                  {unitLabel(product.unitType, t)}
+                </strong>
+              </div>
+
+              <div style={productSpecItemStyle}>
+                <span style={productSpecLabelStyle}>Minimum Sipariş</span>
+                <strong style={productSpecValueStyle}>
+                  {product.moq} {unitLabel(product.unitType, t)}
+                </strong>
+              </div>
+
+              <div style={productSpecItemStyle}>
+                <span style={productSpecLabelStyle}>KDV</span>
+                <strong style={productSpecValueStyle}>
+                  %{Number(product.vatRate || 0)}
+                </strong>
+              </div>
+
+              <div style={productSpecItemStyle}>
+                <span style={productSpecLabelStyle}>Stok Durumu</span>
+                <strong style={productSpecValueStyle}>
+                  {product.stockType
+                    ? stockTypeLabel(product.stockType, t)
+                    : "Bilgi alın"}
+                </strong>
+              </div>
+
+              <div style={productSpecItemStyle}>
+                <span style={productSpecLabelStyle}>Hazırlama Süresi</span>
+                <strong style={productSpecValueStyle}>
+                  {product.leadTimeDays
+                    ? `${product.leadTimeDays} iş günü`
+                    : "Bilgi alın"}
+                </strong>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       {similarProducts.length > 0 && (
         <ProductCollection
           title={t("productDetailPage.similarProducts")}
@@ -926,20 +991,21 @@ function InfoBox({
 
 const pageStyle: CSSProperties = {
   minHeight: "100vh",
-  background: "#f1f5f9",
-  padding: window.innerWidth < 700 ? "24px 12px" : "40px 24px",
+  background: "#f7f9fb",
+  padding: window.innerWidth < 700 ? "18px 12px" : "30px 24px 48px",
   width: "100%",
   maxWidth: "100%",
   overflowX: "hidden",
 };
 
 const containerStyle: CSSProperties = {
-  maxWidth: 1220,
+  maxWidth: 1360,
   margin: "0 auto",
   display: "grid",
   gridTemplateColumns:
-    window.innerWidth < 900 ? "1fr" : "1fr 1fr",
-  gap: 28,
+    window.innerWidth < 900 ? "1fr" : "minmax(0, 0.86fr) minmax(0, 1.14fr)",
+  gap: window.innerWidth < 900 ? 20 : 30,
+  alignItems: "start",
 };
 
 const gallerySectionStyle: CSSProperties = {
@@ -952,12 +1018,12 @@ const gallerySectionStyle: CSSProperties = {
 };
 
 const mainImageBoxStyle: CSSProperties = {
-  background: "white",
-  borderRadius: window.innerWidth < 700 ? 20 : 28,
+  background: "#ffffff",
+  borderRadius: window.innerWidth < 700 ? 14 : 16,
   overflow: "hidden",
-  minHeight: window.innerWidth < 700 ? 320 : 520,
-  boxShadow: "0 20px 50px rgba(15,23,42,0.1)",
-  border: "1px solid #e2e8f0",
+  minHeight: window.innerWidth < 700 ? 320 : 540,
+  boxShadow: "0 8px 24px rgba(11,61,110,0.06)",
+  border: "1px solid #dfe7ee",
   width: "100%",
   maxWidth: "100%",
 };
@@ -965,10 +1031,12 @@ const mainImageBoxStyle: CSSProperties = {
 const mainImageStyle: CSSProperties = {
   width: "100%",
   maxWidth: "100%",
-  height: window.innerWidth < 700 ? 320 : 520,
+  height: window.innerWidth < 700 ? 320 : 540,
   objectFit: "contain",
   display: "block",
   background: "#ffffff",
+  padding: window.innerWidth < 700 ? 10 : 18,
+  boxSizing: "border-box",
 };
 
 const emptyImageStyle: CSSProperties = {
@@ -1025,18 +1093,18 @@ const thumbFallbackStyle: CSSProperties = {
 };
 
 const infoSectionStyle: CSSProperties = {
-  background: "white",
-  borderRadius: 28,
-  padding: 36,
-  boxShadow: "0 20px 50px rgba(15,23,42,0.1)",
-  border: "1px solid #e2e8f0",
+  background: "#ffffff",
+  borderRadius: window.innerWidth < 700 ? 14 : 16,
+  padding: window.innerWidth < 700 ? 20 : 28,
+  boxShadow: "0 8px 24px rgba(11,61,110,0.06)",
+  border: "1px solid #dfe7ee",
 };
 
 const categoryStyle: CSSProperties = {
-  color: "#2563eb",
-  fontSize: 14,
+  color: "#16A34A",
+  fontSize: 13,
   fontWeight: 900,
-  marginBottom: 12,
+  marginBottom: 10,
 };
 
 const badgeRowStyle: CSSProperties = {
@@ -1064,18 +1132,19 @@ const approvalBadgeStyle: CSSProperties = {
 };
 
 const titleStyle: CSSProperties = {
-  fontSize: 40,
-  lineHeight: 1.1,
+  fontSize: window.innerWidth < 700 ? 27 : 34,
+  lineHeight: 1.18,
   fontWeight: 900,
-  margin: "0 0 16px",
-  color: "#0f172a",
+  margin: "0 0 12px",
+  color: "#0B3D6E",
+  letterSpacing: -0.5,
 };
 
 const descriptionStyle: CSSProperties = {
   color: "#64748b",
-  fontSize: 17,
-  lineHeight: 1.7,
-  marginBottom: 26,
+  fontSize: 14,
+  lineHeight: 1.65,
+  margin: "0 0 20px",
 };
 
 const priceBlockStyle: CSSProperties = {
@@ -1145,13 +1214,15 @@ const actionsStyle: CSSProperties = {
 const primaryButtonStyle: CSSProperties = {
   flex: 1,
   minWidth: 190,
-  height: 52,
+  height: 54,
   border: "none",
-  borderRadius: 16,
-  background: "#2563eb",
-  color: "white",
+  borderRadius: 12,
+  background: "linear-gradient(135deg, #16B83E 0%, #22C55E 100%)",
+  color: "#ffffff",
   fontSize: 16,
   fontWeight: 900,
+  cursor: "pointer",
+  boxShadow: "0 8px 18px rgba(22,184,62,0.20)",
 };
 
 const secondaryButtonStyle: CSSProperties = {
@@ -1178,141 +1249,6 @@ const loadingCardStyle: CSSProperties = {
   padding: 32,
   boxShadow: "0 20px 50px rgba(15,23,42,0.1)",
 };
-const supplierCardStyle: CSSProperties = {
-  background: "#f8fafc",
-  border: "1px solid #e2e8f0",
-  borderRadius: 20,
-  padding: 18,
-  marginBottom: 24,
-};
-
-const supplierTitleStyle: CSSProperties = {
-  color: "#2563eb",
-  fontSize: 13,
-  fontWeight: 900,
-  marginBottom: 6,
-};
-
-const supplierNameStyle: CSSProperties = {
-  color: "#0f172a",
-  fontSize: 20,
-  fontWeight: 900,
-  marginBottom: 8,
-};
-
-const supplierDescStyle: CSSProperties = {
-  color: "#64748b",
-  lineHeight: 1.6,
-  margin: 0,
-};
-
-const supplierStatsStyle: CSSProperties = {
-  display: "flex",
-  gap: 8,
-  flexWrap: "wrap",
-  marginTop: 14,
-  color: "#166534",
-  fontSize: 13,
-  fontWeight: 800,
-};
-const sellerCardStyle: CSSProperties = {
-  background: "#f8fafc",
-  border: "1px solid #e2e8f0",
-  borderRadius: 18,
-  padding: 18,
-  display: "flex",
-  flexDirection: window.innerWidth < 700 ? "column" : "row",
-  justifyContent: "space-between",
-  alignItems: window.innerWidth < 700 ? "stretch" : "center",
-  gap: 16,
-  marginBottom: 22,
-  width: "100%",
-  maxWidth: "100%",
-  overflow: "hidden",
-};
-
-const sellerLabelStyle: CSSProperties = {
-  color: "#2563eb",
-  fontSize: 12,
-  fontWeight: 900,
-  marginBottom: 6,
-};
-
-const sellerNameStyle: CSSProperties = {
-  color: "#0f172a",
-  fontSize: 18,
-};
-
-const sellerMetaStyle: CSSProperties = {
-  marginTop: 8,
-  color: "#64748b",
-  fontSize: 13,
-  fontWeight: 700,
-};
-
-const sellerStoreButtonStyle: CSSProperties = {
-  textDecoration: "none",
-  background: "#2563eb",
-  color: "white",
-  padding: "11px 14px",
-  borderRadius: 12,
-  fontWeight: 900,
-  whiteSpace: "nowrap",
-  textAlign: "center",
-  width: window.innerWidth < 700 ? "100%" : "auto",
-  maxWidth: "100%",
-};
-
-const sellerIdentityStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 14,
-  minWidth: 0,
-};
-
-const sellerLogoStyle: CSSProperties = {
-  width: 62,
-  height: 62,
-  flexShrink: 0,
-  display: "grid",
-  placeItems: "center",
-  overflow: "hidden",
-  borderRadius: 16,
-  background: "linear-gradient(135deg, #dbeafe, #eff6ff)",
-  color: "#1d4ed8",
-  fontSize: 20,
-  fontWeight: 900,
-};
-
-const sellerLogoImageStyle: CSSProperties = {
-  width: "100%",
-  height: "100%",
-  objectFit: "cover",
-};
-
-const sellerNameRowStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  flexWrap: "wrap",
-  gap: 8,
-};
-
-const sellerVerifiedStyle: CSSProperties = {
-  padding: "5px 8px",
-  borderRadius: 999,
-  background: "#dcfce7",
-  color: "#166534",
-  fontSize: 11,
-  fontWeight: 900,
-};
-
-const sellerLocationStyle: CSSProperties = {
-  marginTop: 7,
-  color: "#64748b",
-  fontSize: 12,
-  lineHeight: 1.5,
-};
-
 const collectionStyle: CSSProperties = {
   maxWidth: 1220,
   margin: "28px auto 0",
@@ -1361,9 +1297,13 @@ const collectionCardStyle: CSSProperties = {
 
 const collectionImageStyle: CSSProperties = {
   width: "100%",
-  height: 170,
-  objectFit: "cover",
-  background: "#f1f5f9",
+  height: 190,
+  objectFit: "contain",
+  display: "block",
+  boxSizing: "border-box",
+  padding: 12,
+  background: "#ffffff",
+  borderBottom: "1px solid #eef2f6",
 };
 
 const collectionPlaceholderStyle: CSSProperties = {
@@ -1491,12 +1431,103 @@ const vatIncludedPurchaseStyle: CSSProperties = {
 const buyNowButtonStyle: CSSProperties = {
   flex: 1,
   minWidth: 190,
-  height: 52,
-  border: "1px solid #2563eb",
-  borderRadius: 16,
+  height: 54,
+  border: "1.5px solid #0B3D6E",
+  borderRadius: 12,
   background: "#ffffff",
-  color: "#2563eb",
+  color: "#0B3D6E",
   fontSize: 16,
   fontWeight: 900,
   cursor: "pointer",
+};
+
+const productDetailsSectionStyle: CSSProperties = {
+  maxWidth: 1360,
+  margin: "28px auto 0",
+  padding: window.innerWidth < 700 ? 20 : 28,
+  background: "#ffffff",
+  border: "1px solid #dfe7ee",
+  borderRadius: 16,
+  boxShadow: "0 8px 24px rgba(11,61,110,0.05)",
+};
+
+const productDetailsHeaderStyle: CSSProperties = {
+  paddingBottom: 22,
+  borderBottom: "1px solid #e8eef3",
+};
+
+const productDetailsEyebrowStyle: CSSProperties = {
+  display: "block",
+  marginBottom: 7,
+  color: "#16A34A",
+  fontSize: 11,
+  fontWeight: 900,
+  letterSpacing: 1.2,
+};
+
+const productDetailsTitleStyle: CSSProperties = {
+  margin: 0,
+  color: "#0B3D6E",
+  fontSize: window.innerWidth < 700 ? 24 : 28,
+  lineHeight: 1.2,
+  fontWeight: 900,
+};
+
+const productDetailsDescriptionStyle: CSSProperties = {
+  maxWidth: 900,
+  margin: "12px 0 0",
+  color: "#475569",
+  fontSize: 14,
+  lineHeight: 1.75,
+};
+
+const productDetailsContentStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr",
+  gap: 22,
+  paddingTop: 24,
+  alignItems: "start",
+  width: "100%",
+};
+
+const productSpecsCardStyle: CSSProperties = {
+  minWidth: 0,
+};
+
+const productSpecsTitleStyle: CSSProperties = {
+  margin: "0 0 16px",
+  color: "#0f172a",
+  fontSize: 18,
+  fontWeight: 900,
+};
+
+const productSpecsGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: window.innerWidth < 700 ? "1fr" : "1fr 1fr",
+  borderTop: "1px solid #e5eaf0",
+  borderLeft: "1px solid #e5eaf0",
+};
+
+const productSpecItemStyle: CSSProperties = {
+  minHeight: 66,
+  padding: "13px 16px",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  gap: 5,
+  borderRight: "1px solid #e5eaf0",
+  borderBottom: "1px solid #e5eaf0",
+  background: "#ffffff",
+};
+
+const productSpecLabelStyle: CSSProperties = {
+  color: "#64748b",
+  fontSize: 12,
+  fontWeight: 700,
+};
+
+const productSpecValueStyle: CSSProperties = {
+  color: "#0B3D6E",
+  fontSize: 14,
+  fontWeight: 900,
 };

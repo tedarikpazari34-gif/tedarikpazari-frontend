@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 const API_URL =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
@@ -10,7 +11,7 @@ export default function LoginPage() {
   const returnUrl =
     new URLSearchParams(window.location.search).get("returnUrl") || "";
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("123456");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
@@ -161,6 +162,13 @@ export default function LoginPage() {
         {resendMessage && (
           <div style={resendMessageStyle}>{resendMessage}</div>
         )}
+
+        <div style={{ marginTop: 18, textAlign: "center", fontSize: 14, color: "#94A3B8" }}>
+          Hesabınız yok mu?{" "}
+          <Link to="/register" style={{ color: "#22C55E", fontWeight: 800, textDecoration: "none" }}>
+            Üye Ol
+          </Link>
+        </div>
       </div>
     </div>
   );

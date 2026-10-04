@@ -21,8 +21,15 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [membershipType, setMembershipType] =
-    useState<MembershipType>("BUYER");
+  const [membershipType, setMembershipType] = useState<MembershipType>(() => {
+    const requestedRole = new URLSearchParams(window.location.search)
+      .get("role")
+      ?.toUpperCase();
+
+    return requestedRole === "SELLER" || requestedRole === "LOGISTICS"
+      ? requestedRole
+      : "BUYER";
+  });
   const [companyType, setCompanyType] = useState("Şahıs");
   const [categories, setCategories] = useState<string[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);

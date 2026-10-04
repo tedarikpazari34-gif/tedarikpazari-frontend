@@ -8,6 +8,12 @@ type Sector = {
   image: string;
 };
 
+type HomeCategory = {
+  id: string;
+  name: string;
+  parentId?: string | null;
+};
+
 
 
 
@@ -35,6 +41,8 @@ type ApiProduct = {
   moq?: number;
   unitType?: string;
   leadTimeDays?: number | null;
+  vatRate?: number | null;
+  createdAt?: string;
   seller?: {
     name?: string;
     verified?: boolean;
@@ -52,6 +60,8 @@ type ProductCard = {
   moq?: number;
   unitType?: string;
   leadTimeDays?: number | null;
+  vatRate?: number | null;
+  createdAt?: string;
 };
 
 const sectors: Sector[] = [
@@ -71,7 +81,7 @@ const sectors: Sector[] = [
 
 const primaryButtonStyle: React.CSSProperties = {
   textDecoration: "none",
-  background: "linear-gradient(135deg, #84cc16, #65a30d)",
+  background: "linear-gradient(135deg, var(--nex-turquoise-700), var(--nex-turquoise-500))",
   color: "#fff",
   padding: "13px 20px",
   borderRadius: 12,
@@ -82,7 +92,7 @@ const primaryButtonStyle: React.CSSProperties = {
 const secondaryButtonStyle: React.CSSProperties = {
   textDecoration: "none",
   background: "#ffffff",
-  color: "#0f172a",
+  color: "#0B3D6E",
   padding: "13px 20px",
   borderRadius: 12,
   fontWeight: 700,
@@ -92,10 +102,15 @@ const secondaryButtonStyle: React.CSSProperties = {
 function formatPrice(value: number | string | undefined, fallback: string): string {
   if (value === undefined || value === null || value === "") return fallback;
 
-  if (typeof value === "number") return `₺${value}`;
-
   const numeric = Number(value);
-  if (!Number.isNaN(numeric)) return `₺${numeric}`;
+  if (!Number.isNaN(numeric)) {
+    return new Intl.NumberFormat("tr-TR", {
+      style: "currency",
+      currency: "TRY",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(numeric);
+  }
 
   return String(value);
 }
@@ -169,6 +184,8 @@ function mapApiProductToCard(product: ApiProduct, fallbackCategory: string, fall
     moq: product.moq,
     unitType: product.unitType,
     leadTimeDays: product.leadTimeDays,
+    vatRate: product.vatRate,
+    createdAt: product.createdAt,
   };
 }
 
@@ -178,6 +195,7 @@ export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] =
   useState<ProductCard[]>([]);
   const [search, setSearch] = useState("");
+  const [homeCategories, setHomeCategories] = useState<HomeCategory[]>([]);
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 700 : false
   );
@@ -209,6 +227,11 @@ export default function HomePage() {
 
               return true;
             })
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt || 0).getTime() -
+                new Date(a.createdAt || 0).getTime()
+            )
             .slice(0, 8)
             .map((product) => mapApiProductToCard(
               product,
@@ -224,6 +247,21 @@ export default function HomePage() {
         console.error("products error:", err);
       });
   }, []);
+  useEffect(() => {
+    const api = import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
+    fetch(`${api}/categories`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Kategoriler alınamadı: ${res.status}`);
+        return res.json();
+      })
+      .then((data: unknown) => {
+        if (Array.isArray(data)) {
+          setHomeCategories((data as HomeCategory[]).filter((category) => category?.id && category?.name));
+        }
+      })
+      .catch((err) => console.error("categories error:", err));
+  }, []);
+
 
   return (
     <>
@@ -250,9 +288,8 @@ export default function HomePage() {
           minHeight: "100vh",
           width: "100%",
           overflowX: "hidden",
-          background:
-            "radial-gradient(circle at top left, rgba(37,99,235,0.18), transparent 30%), #081120",
-          color: "#ffffff",
+          background: "linear-gradient(180deg, #FFFFFF 0%, #F7FAFC 18%, #F3F7FA 100%)",
+          color: "#0B3D6E",
         }}
       >
         <div
@@ -269,233 +306,74 @@ export default function HomePage() {
             style={{
               display: "grid",
               gridTemplateColumns: "1fr",
-              gap: 24,
-              alignItems: "stretch",
-              marginBottom: 28,
+              gap: isMobile ? 24 : 30,
+              alignItems: "center",
+              padding: isMobile ? "24px 0 30px" : "36px 0 46px",
             }}
           >
-            <div
-              style={{
-                position: "relative",
-                overflow: "hidden",
-                borderRadius: 28,
-                minHeight: 560,
-                width: "100%",
-                backgroundImage:
-                  "linear-gradient(90deg, rgba(8,15,30,0.92) 0%, rgba(8,15,30,0.72) 42%, rgba(8,15,30,0.28) 100%), url('/images/hero-b2b.jpg')",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                boxShadow: "0 30px 60px rgba(2, 132, 199, 0.20)",
-              }}
-            >
+            <div style={{ position: "relative", minWidth: 0 }}>
               <div
                 style={{
-                  padding: isMobile ? 22 : 38,
-                  maxWidth: 720,
+                  position: "absolute",
+                  width: isMobile ? 180 : 300,
+                  height: isMobile ? 180 : 300,
+                  right: isMobile ? -70 : -70,
+                  top: isMobile ? -50 : -70,
+                  borderRadius: "50%",
+                  background: "rgba(22,184,62,0.09)",
+                  pointerEvents: "none",
+                }}
+              />
+
+              <div
+                style={{
+                  position: "relative",
+                  overflow: "hidden",
+                  borderRadius: isMobile ? 22 : 30,
+                  border: "1px solid #D5E5EA",
+                  background: "#F8FAFC",
+                  boxShadow:
+                    "0 28px 70px rgba(11,61,110,0.14), 0 10px 28px rgba(15,23,42,0.08)",
                 }}
               >
-                <div
+                <img
+                  src="/images/nex-hero-b2b.jpg"
+                  alt="Nex Tedarik Pazarı B2B tedarik, depo ve lojistik ağı"
                   style={{
-                    display: "inline-block",
-                    padding: "8px 12px",
-                    borderRadius: 999,
-                    background: "rgba(59,130,246,0.26)",
-                    fontSize: 13,
-                    fontWeight: 700,
-                    marginBottom: 18,
-                    border: "1px solid rgba(255,255,255,0.18)",
-                  }}
-                >
-                  {t("homePage.heroBadge")}
-                </div>
-
-                <h1
-                  style={{
-                    fontSize: isMobile ? 36 : 44,
-                    lineHeight: isMobile ? 1.12 : 1.08,
-                    margin: "0 0 18px",
-                    fontWeight: 900,
-                    maxWidth: 760,
-                    textShadow: "0 8px 30px rgba(0,0,0,0.38)",
-                  }}
-                >
-                  {t("homePage.heroTitle")}
-                </h1>
-
-                <p
-                  style={{
-                    fontSize: isMobile ? 17 : 19,
-                    lineHeight: isMobile ? 1.55 : 1.75,
-                    margin: "0 0 24px",
-                    maxWidth: 720,
-                    color: "rgba(255,255,255,0.96)",
-                  }}
-                >
-                  {t("homePage.heroDescription")}
-                </p>
-                <div style={{ marginBottom: 14, maxWidth: 650 }}>
-                  <div
-                    style={{
-                      fontSize: isMobile ? 20 : 24,
-                      fontWeight: 900,
-                      marginBottom: 6,
-                      color: "#ffffff",
-                    }}
-                  >
-                    {t("homePage.heroQuestion")}
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: isMobile ? 13 : 15,
-                      lineHeight: 1.5,
-                      color: "#dbeafe",
-                    }}
-                  >
-                    {t("homePage.heroSearchDescription")}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    marginBottom: 10,
-                    maxWidth: 650,
-                    flexWrap: "wrap",
+                    display: "block",
                     width: "100%",
+                    height: isMobile ? "auto" : 270,
+                    aspectRatio: isMobile ? "16 / 9" : undefined,
+                    objectFit: "cover",
                   }}
-                >
-                  <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && search.trim()) {
-                        navigate(
-                          `/products?q=${encodeURIComponent(search.trim())}`
-                        );
-                      }
-                    }}
-                    placeholder={t("homePage.searchPlaceholder")}
-                    style={{
-                      flex: "1 1 340px",
-                      height: 52,
-                      borderRadius: 14,
-                      border: "1px solid rgba(255,255,255,0.22)",
-                      padding: "0 16px",
-                      fontSize: 15,
-                      outline: "none",
-                    }}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const query = search.trim();
-
-                      navigate(
-                        query
-                          ? `/products?q=${encodeURIComponent(query)}`
-                          : "/products"
-                      );
-                    }}
-                    style={{
-                      minWidth: isMobile ? "100%" : 110,
-                      width: isMobile ? "100%" : "auto",
-                      height: 52,
-                      border: "none",
-                      background: "#2563eb",
-                      color: "#fff",
-                      padding: "0 22px",
-                      borderRadius: 14,
-                      fontWeight: 800,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {t("homePage.searchButton")}
-                  </button>
-                </div>
+                />
 
                 <div
                   style={{
-                    color: "#dbeafe",
-                    fontSize: 14,
-                    marginBottom: 20,
-                  }}
-                >
-                  {t("homePage.productNotFound")}{" "}
-                  <Link
-                    to="/products"
-                    style={{
-                      color: "#ffffff",
-                      fontWeight: 900,
-                      textDecoration: "underline",
-                    }}
-                  >
-                    {t("homePage.browseProducts")}
-                  </Link>
-                </div>
-
-                <div
-                  style={{
+                    position: "absolute",
+                    left: isMobile ? 12 : 18,
+                    bottom: isMobile ? 12 : 18,
                     display: "flex",
-                    gap: 12,
+                    gap: 7,
                     flexWrap: "wrap",
-                    marginBottom: 24,
-                    width: "100%",
                   }}
                 >
-                  <Link
-                    to="/products"
-                    style={{
-                      ...primaryButtonStyle,
-                      width: isMobile ? "100%" : "auto",
-                      textAlign: "center",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    {t("homePage.browseProducts")}
-                  </Link>
-
-                  <Link
-                    to="/register"
-                    style={{
-                      ...secondaryButtonStyle,
-                      background: "rgba(255,255,255,0.96)",
-                      width: isMobile ? "100%" : "auto",
-                      textAlign: "center",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    {t("homePage.startAsSeller")}
-                  </Link>
-                </div>
-
-                
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    flexWrap: "wrap",
-                    marginBottom: 26,
-                  }}
-                >
-                  {[
-                    t("homePage.badges.verified"),
-                    t("homePage.badges.rfq"),
-                    t("homePage.badges.payment"),
-                    t("homePage.badges.nationwide"),
-                  ].map((item) => (
+                  {["Gıda", "Temizlik", "Ambalaj", "Hırdavat", "Otomotiv"].map(
+                    (item, index) => (
                       <span
                         key={item}
                         style={{
-                          background: "rgba(255,255,255,0.16)",
-                          padding: "10px 14px",
+                          padding: "8px 11px",
                           borderRadius: 999,
-                          fontSize: 14,
-                          fontWeight: 600,
-                          border: "1px solid rgba(255,255,255,0.14)",
+                          background:
+                            index === 0
+                              ? "rgba(22,184,62,0.96)"
+                              : "rgba(255,255,255,0.94)",
+                          color: index === 0 ? "#ffffff" : "#0B3D6E",
+                          border: "1px solid rgba(255,255,255,0.72)",
+                          fontSize: 11,
+                          fontWeight: 800,
+                          boxShadow: "0 7px 18px rgba(15,23,42,0.14)",
                         }}
                       >
                         {item}
@@ -503,306 +381,504 @@ export default function HomePage() {
                     )
                   )}
                 </div>
+              </div>
+            </div>
 
-                <div
+            <div>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "8px 13px",
+                  borderRadius: 999,
+                  background: "linear-gradient(135deg, #E9FBEF, #F5FBFF)",
+                  border: "1px solid #BFE8CD",
+                  color: "#128A35",
+                  fontSize: 12,
+                  fontWeight: 900,
+                  letterSpacing: 0.4,
+                  marginBottom: 18,
+                }}
+              >
+                TEDARİK PAZARI • TÜRKİYE B2B PAZARYERİ
+              </div>
+
+              <h1
+                style={{
+                  margin: "0 0 18px",
+                  color: "#0B3D6E",
+                  fontSize: isMobile ? 38 : 56,
+                  lineHeight: 1.04,
+                  letterSpacing: isMobile ? -1.2 : -2.2,
+                  fontWeight: 900,
+                }}
+              >
+                Toptan Ticaretin{" "}
+                <span style={{ color: "#16B83E" }}>Yeni Adresi</span>
+              </h1>
+
+              <p
+                style={{
+                  margin: "0 0 25px",
+                  maxWidth: 610,
+                  color: "#475569",
+                  fontSize: isMobile ? 16 : 18,
+                  lineHeight: 1.7,
+                  fontWeight: 500,
+                }}
+              >
+                Doğrulanmış firmalarla güvenli, hızlı ve profesyonel B2B ticaret.
+              </p>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  flexWrap: "wrap",
+                  marginBottom: 24,
+                }}
+              >
+                <Link
+                  to="/products"
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                    gap: 12,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: 46,
+                    padding: "0 20px",
+                    borderRadius: 13,
+                    background:
+                      "linear-gradient(135deg, #082F55 0%, #0B4C82 100%)",
+                    color: "#ffffff",
+                    textDecoration: "none",
+                    fontWeight: 850,
+                    fontSize: 14,
+                    boxShadow: "0 9px 20px rgba(11,61,110,0.18)",
                   }}
                 >
-                  {[
-                    { value: "🛡️", label: t("homePage.stats.safeTrade") },
-                    { value: "🛒", label: t("homePage.stats.rfq") },
-                    { value: "💳", label: t("homePage.stats.payment") },
-                    { value: "🚚", label: t("homePage.stats.delivery") },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      style={{
-                        background: "rgba(255,255,255,0.08)",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        borderRadius: 18,
-                        padding: 14,
-                      }}
-                    >
-                      <div style={{ fontSize: 24, fontWeight: 800 }}>
-                        {item.value}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 13,
-                          color: "rgba(255,255,255,0.80)",
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {item.label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+                  Tüm Ürünleri İncele
+                </Link>
 
-            <div
-              style={{
-                background: "#ffffff",
-                color: "#0f172a",
-                borderRadius: isMobile ? 20 : 28,
-                padding: isMobile ? 18 : 28,
-                width: "100%",
-                boxShadow: "0 20px 40px rgba(15, 23, 42, 0.16)",
-                border: "1px solid rgba(226,232,240,0.8)",
-              }}
-            >
-              <div
-                style={{
-                  fontWeight: 800,
-                  color: "#4f46e5",
-                  marginBottom: isMobile ? 6 : 10,
-                  fontSize: isMobile ? 12 : 14,
-                }}
-              >
-                {t("homePage.advantagesEyebrow")}
+                <Link
+                  to="/register?role=SELLER"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: 46,
+                    padding: "0 20px",
+                    borderRadius: 13,
+                    background:
+                      "linear-gradient(135deg, #16B83E 0%, #22C55E 100%)",
+                    border: "1px solid #16B83E",
+                    color: "#ffffff",
+                    textDecoration: "none",
+                    fontWeight: 850,
+                    fontSize: 14,
+                    boxShadow: "0 9px 20px rgba(22,184,62,0.18)",
+                  }}
+                >
+                  Satıcı Olarak Başla
+                </Link>
               </div>
-
-              <h2
-                style={{
-                  margin: isMobile ? "0 0 12px" : "0 0 18px",
-                  fontSize: isMobile ? 22 : 28,
-                  lineHeight: 1.2,
-                }}
-              >
-                {t("homePage.advantagesTitle")}
-              </h2>
 
               <div
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: isMobile
-                    ? "repeat(2, minmax(0, 1fr))"
-                    : "1fr",
-                  gap: isMobile ? 9 : 14,
+                  display: "flex",
+                  gap: isMobile ? 10 : 18,
+                  flexWrap: "wrap",
+                  color: "#475569",
+                  fontSize: 13,
+                  fontWeight: 700,
                 }}
               >
-                {[
-                  {
-                    title: t("homePage.highlights.verificationTitle"),
-                    description: t("homePage.highlights.verificationDescription"),
-                  },
-                  {
-                    title: t("homePage.highlights.quotesTitle"),
-                    description: t("homePage.highlights.quotesDescription"),
-                  },
-                  {
-                    title: t("homePage.highlights.discoveryTitle"),
-                    description: t("homePage.highlights.discoveryDescription"),
-                  },
-                  {
-                    title: t("homePage.highlights.purchasingTitle"),
-                    description: t("homePage.highlights.purchasingDescription"),
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.title}
-                    style={{
-                      background: "#f8fafc",
-                      border: "1px solid #e5e7eb",
-                      borderRadius: isMobile ? 13 : 16,
-                      padding: isMobile ? 11 : 16,
-                      minWidth: 0,
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        marginBottom: isMobile ? 4 : 6,
-                        color: "#111827",
-                        fontSize: isMobile ? 13 : 16,
-                        lineHeight: 1.25,
-                      }}
-                    >
-                      {item.title}
-                    </div>
-                    <div
-                      style={{
-                        color: "#6b7280",
-                        lineHeight: isMobile ? 1.4 : 1.6,
-                        fontSize: isMobile ? 11 : 15,
-                      }}
-                    >
-                      {item.description}
-                    </div>
-                  </div>
-                ))}
+                <span>✓ Doğrulanmış firmalar</span>
+                <span>✓ Güvenli ödeme</span>
+                <span>✓ Toptan satın alma</span>
+                <span>✓ Türkiye geneli ticaret</span>
               </div>
             </div>
+
           </section>
 
           <section
             style={{
               display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))",
-              gap: 16,
-              marginBottom: 28,
+              gridTemplateColumns: isMobile
+                ? "repeat(2, minmax(0, 1fr))"
+                : "repeat(4, minmax(0, 1fr))",
+              gap: 12,
+              marginBottom: isMobile ? 28 : 40,
             }}
           >
-            <div
-              style={{
-                background: "linear-gradient(135deg, #eff6ff, #ffffff)",
-                color: "#0f172a",
-                borderRadius: 22,
-                padding: isMobile ? 20 : 28,
-                border: "1px solid #bfdbfe",
-                boxShadow: "0 16px 34px rgba(37,99,235,0.10)",
-              }}
-            >
+            {[
+              ["✓", "Doğrulanmış Firmalar", "Kurumsal alıcı ve satıcı ağı"],
+              ["₺", "Güvenli Ödeme", "Kontrollü ödeme altyapısı"],
+              ["□", "Toptan Ticaret", "MOQ ve toplu satın alma"],
+              ["→", "Lojistik", "Türkiye geneli sevkiyat süreci"],
+            ].map(([icon, title, text], index) => (
               <div
+                key={title}
                 style={{
-                  display: "inline-flex",
-                  width: 46,
-                  height: 46,
-                  borderRadius: 14,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "#dbeafe",
-                  fontSize: 22,
-                  marginBottom: 16,
+                  padding: isMobile ? 14 : 18,
+                  borderRadius: 18,
+                  background: "#ffffff",
+                  border: "1px solid #DCE6EE",
+                  borderTop: "3px solid #0B3D6E",
+                  boxShadow:
+                    "0 10px 28px rgba(11,61,110,0.07), 0 2px 5px rgba(15,23,42,0.03)",
                 }}
               >
-                🛒
+                <div
+                  style={{
+                    width: 38,
+                    height: 38,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 12,
+                    marginBottom: 10,
+                    background:
+                      "linear-gradient(135deg, #E8F2FA 0%, #E9FBEF 100%)",
+                    border: "1px solid #D5E8E0",
+                    color: "#0B3D6E",
+                    fontWeight: 900,
+                    fontSize: 17,
+                  }}
+                >
+                  {icon}
+                </div>
+                <div
+                  style={{
+                    color: "#0B3D6E",
+                    fontWeight: 900,
+                    fontSize: isMobile ? 13 : 15,
+                    marginBottom: 4,
+                  }}
+                >
+                  {title}
+                </div>
+                <div
+                  style={{
+                    color: "#64748b",
+                    fontSize: isMobile ? 11 : 13,
+                    lineHeight: 1.45,
+                  }}
+                >
+                  {text}
+                </div>
               </div>
-
-              <div
-                style={{
-                  color: "#2563eb",
-                  fontWeight: 900,
-                  fontSize: 13,
-                  marginBottom: 8,
-                }}
-              >
-                {t("homePage.buyerEyebrow")}
-              </div>
-
-              <h2
-                style={{
-                  margin: "0 0 10px",
-                  fontSize: isMobile ? 23 : 28,
-                  lineHeight: 1.2,
-                }}
-              >
-                {t("homePage.buyerTitle")}
-              </h2>
-
-              <p
-                style={{
-                  margin: "0 0 18px",
-                  color: "#64748b",
-                  lineHeight: 1.65,
-                }}
-              >
-                {t("homePage.buyerDescription")}
-              </p>
-
-              <Link
-                to="/products"
-                style={{
-                  display: "inline-block",
-                  textDecoration: "none",
-                  background: "#2563eb",
-                  color: "#ffffff",
-                  padding: "12px 18px",
-                  borderRadius: 12,
-                  fontWeight: 900,
-                }}
-              >
-                {t("homePage.browseProducts")}
-              </Link>
-            </div>
-
-            <div
-              style={{
-                background: "linear-gradient(135deg, #f0fdf4, #ffffff)",
-                color: "#0f172a",
-                borderRadius: 22,
-                padding: isMobile ? 20 : 28,
-                border: "1px solid #bbf7d0",
-                boxShadow: "0 16px 34px rgba(22,163,74,0.10)",
-              }}
-            >
-              <div
-                style={{
-                  display: "inline-flex",
-                  width: 46,
-                  height: 46,
-                  borderRadius: 14,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "#dcfce7",
-                  fontSize: 22,
-                  marginBottom: 16,
-                }}
-              >
-                📈
-              </div>
-
-              <div
-                style={{
-                  color: "#16a34a",
-                  fontWeight: 900,
-                  fontSize: 13,
-                  marginBottom: 8,
-                }}
-              >
-                {t("homePage.sellerEyebrow")}
-              </div>
-
-              <h2
-                style={{
-                  margin: "0 0 10px",
-                  fontSize: isMobile ? 23 : 28,
-                  lineHeight: 1.2,
-                }}
-              >
-                {t("homePage.sellerTitle")}
-              </h2>
-
-              <p
-                style={{
-                  margin: "0 0 18px",
-                  color: "#64748b",
-                  lineHeight: 1.65,
-                }}
-              >
-                {t("homePage.sellerDescription")}
-              </p>
-
-              <Link
-                to="/register"
-                style={{
-                  display: "inline-block",
-                  textDecoration: "none",
-                  background: "#16a34a",
-                  color: "#ffffff",
-                  padding: "12px 18px",
-                  borderRadius: 12,
-                  fontWeight: 900,
-                }}
-              >
-                {t("homePage.sellerJoin")}
-              </Link>
-            </div>
+            ))}
           </section>
 
           <section
             style={{
-              background: "#0f172a",
-              border: "1px solid rgba(148, 163, 184, 0.12)",
-              borderRadius: 24,
-              padding: 28,
-              marginBottom: 28,
+              display: "grid",
+              gridTemplateColumns: isMobile
+                ? "repeat(2, minmax(0, 1fr))"
+                : "repeat(4, minmax(0, 1fr))",
+              gap: isMobile ? 10 : 14,
+              marginBottom: isMobile ? 28 : 36,
             }}
           >
+            {[
+              {
+                icon: "↗️",
+                eyebrow: "YENİ GELENLER",
+                title: "Yeni Ürünler",
+                text: "Pazaryerine yeni eklenen ürünleri keşfet.",
+                to: "/products",
+              },
+              {
+                icon: "□",
+                eyebrow: "TOPLU ALIM",
+                title: "Toptan Ürünler",
+                text: "MOQ ve toptan fiyatlarla satın al.",
+                to: "/products",
+              },
+              {
+                icon: "▦",
+                eyebrow: "KEŞFET",
+                title: "Popüler Kategoriler",
+                text: "İşletmen için ürünleri kategorilere göre bul.",
+                to: "/categories",
+              },
+              {
+                icon: "♡",
+                eyebrow: "KAYDETTİKLERİN",
+                title: "Favorilerim",
+                text: "Beğendiğin ürünlere hızlıca yeniden ulaş.",
+                to: "/favorites",
+              },
+            ].map((item, index) => (
+              <Link
+                key={item.title}
+                to={item.to}
+                style={{
+                  position: "relative",
+                  overflow: "hidden",
+                  minHeight: isMobile ? 142 : 164,
+                  padding: isMobile ? 14 : 18,
+                  boxSizing: "border-box",
+                  borderRadius: 18,
+                  border: "1px solid #DCE6EE",
+                  borderTop: "3px solid #16B83E",
+                  background:
+                    "linear-gradient(145deg, #FFFFFF 0%, #FBFDFE 100%)",
+                  color: "#0B3D6E",
+                  textDecoration: "none",
+                  boxShadow:
+                    "0 10px 28px rgba(11,61,110,0.08), 0 2px 6px rgba(15,23,42,0.03)",
+                }}
+              >
+                <div
+                  style={{
+                    width: isMobile ? 36 : 42,
+                    height: isMobile ? 36 : 42,
+                    display: "grid",
+                    placeItems: "center",
+                    borderRadius: 12,
+                    background:
+                      "linear-gradient(135deg, #E8F2FA 0%, #E9FBEF 100%)",
+                    border: "1px solid #D5E8E0",
+                    color: "#0B3D6E",
+                    fontSize: isMobile ? 17 : 20,
+                    fontWeight: 900,
+                    marginBottom: 12,
+                  }}
+                >
+                  {item.icon}
+                </div>
+
+                <div
+                  style={{
+                    color: "#16A34A",
+                    fontSize: 9,
+                    fontWeight: 900,
+                    letterSpacing: 0.8,
+                    marginBottom: 5,
+                  }}
+                >
+                  {item.eyebrow}
+                </div>
+
+                <div
+                  style={{
+                    color: "#0B3D6E",
+                    fontSize: isMobile ? 14 : 17,
+                    fontWeight: 900,
+                    marginBottom: 6,
+                  }}
+                >
+                  {item.title}
+                </div>
+
+                <div
+                  style={{
+                    color: "#64748b",
+                    fontSize: isMobile ? 10 : 12,
+                    lineHeight: 1.45,
+                  }}
+                >
+                  {item.text}
+                </div>
+              </Link>
+            ))}
+          </section>
+
+          <section style={{ marginBottom: isMobile ? 24 : 36 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "end",
+                justifyContent: "space-between",
+                gap: 16,
+                marginBottom: 18,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    color: "#16B83E",
+                    fontSize: 12,
+                    fontWeight: 900,
+                    letterSpacing: 0.7,
+                    marginBottom: 6,
+                  }}
+                >
+                  SEKTÖRLERE GÖRE KEŞFET
+                </div>
+                <h2
+                  style={{
+                    margin: 0,
+                    color: "#0B3D6E",
+                    fontSize: isMobile ? 24 : 30,
+                    lineHeight: 1.2,
+                    fontWeight: 900,
+                  }}
+                >
+                  İşletmeniz İçin Sektörleri Keşfedin
+                </h2>
+              </div>
+
+              {!isMobile && (
+                <Link
+                  to="/categories"
+                  style={{
+                    color: "#0B3D6E",
+                    textDecoration: "none",
+                    fontSize: 13,
+                    fontWeight: 900,
+                  }}
+                >
+                  Tüm sektörler →
+                </Link>
+              )}
+            </div>
+
+            <div
+              style={{
+                display: isMobile ? "flex" : "grid",
+                gridTemplateColumns: isMobile
+                  ? undefined
+                  : "repeat(3, minmax(0, 1fr))",
+                gap: 14,
+                overflowX: isMobile ? "auto" : "visible",
+                paddingBottom: isMobile ? 8 : 0,
+                scrollSnapType: isMobile ? "x mandatory" : undefined,
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              {[
+                {
+                  title: "Ev, Yaşam & Ofis",
+                  image: "/images/discover-ev-yasam.jpeg",
+                  categoryName: "Mobilya ve Ofis",
+                },
+                {
+                  title: "Kozmetik & Kişisel Bakım",
+                  image: "/images/discover-kozmetik.jpeg",
+                  categoryName: "Kozmetik ve Kuaför",
+                },
+                {
+                  title: "Bahçe & Yapı Malzemeleri",
+                  image: "/images/discover-bahce-yapi.jpeg",
+                  categoryName: "İnşaat ve Yapı Malzemeleri",
+                },
+                {
+                  title: "Gıda & Horeca",
+                  image: "/images/discover-gida-horeca.jpeg",
+                  categoryName: "Gıda ve Horeca",
+                },
+                {
+                  title: "Temizlik & Hijyen",
+                  image: "/images/discover-temizlik-hijyen.jpeg",
+                  categoryName: "Temizlik ve Hijyen",
+                },
+                {
+                  title: "Sanayi & Üretim",
+                  image: "/images/discover-sanayi.jpeg",
+                  categoryName: "Maden ve Endüstriyel Üretim",
+                },
+              ].map((item) => (
+                <Link
+                  key={item.title}
+                  to={
+                    homeCategories.find(
+                      (category) =>
+                        category.name.toLocaleLowerCase("tr-TR") ===
+                        item.categoryName.toLocaleLowerCase("tr-TR")
+                    )?.id
+                      ? `/category/${homeCategories.find(
+                          (category) =>
+                            category.name.toLocaleLowerCase("tr-TR") ===
+                            item.categoryName.toLocaleLowerCase("tr-TR")
+                        )!.id}`
+                      : "/categories"
+                  }
+                  style={{
+                    position: "relative",
+                    minWidth: isMobile ? 270 : 0,
+                    height: isMobile ? 190 : 230,
+                    overflow: "hidden",
+                    borderRadius: 20,
+                    border: "1px solid #DCE6EE",
+                    textDecoration: "none",
+                    scrollSnapAlign: isMobile ? "start" : undefined,
+                    boxShadow:
+                      "0 14px 34px rgba(11,61,110,0.10), 0 3px 8px rgba(15,23,42,0.04)",
+                  }}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    loading="lazy"
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background:
+                        "linear-gradient(180deg, rgba(4,24,43,0.02) 30%, rgba(4,31,56,0.88) 100%)",
+                    }}
+                  />
+
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: 18,
+                      right: 18,
+                      bottom: 16,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 12,
+                    }}
+                  >
+                    <strong
+                      style={{
+                        color: "#ffffff",
+                        fontSize: isMobile ? 17 : 19,
+                        lineHeight: 1.2,
+                        fontWeight: 900,
+                        textShadow: "0 2px 10px rgba(0,0,0,0.32)",
+                      }}
+                    >
+                      {item.title}
+                    </strong>
+
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        width: 34,
+                        height: 34,
+                        flexShrink: 0,
+                        display: "grid",
+                        placeItems: "center",
+                        borderRadius: 11,
+                        background: "#16B83E",
+                        color: "#ffffff",
+                        fontSize: 17,
+                        fontWeight: 900,
+                        boxShadow: "0 7px 18px rgba(22,184,62,0.30)",
+                      }}
+                    >
+                      →
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section style={{ marginBottom: isMobile ? 28 : 40 }}>
             <div
               style={{
                 display: "flex",
@@ -810,21 +886,31 @@ export default function HomePage() {
                 justifyContent: "space-between",
                 gap: 16,
                 flexWrap: "wrap",
-                marginBottom: 20,
+                marginBottom: 16,
               }}
             >
               <div>
                 <div
                   style={{
-                    color: "#38bdf8",
-                    fontWeight: 700,
-                    marginBottom: 8,
+                    color: "#16B83E",
+                    fontSize: 11,
+                    fontWeight: 900,
+                    letterSpacing: 0.6,
+                    marginBottom: 6,
                   }}
                 >
-                  {t("homePage.popularEyebrow")}
+                  ALIŞVERİŞE BAŞLA
                 </div>
-                <h2 style={{ margin: 0, fontSize: 30 }}>
-                  {t("homePage.sectorsTitle")}
+
+                <h2
+                  style={{
+                    margin: 0,
+                    color: "#0B3D6E",
+                    fontSize: isMobile ? 24 : 30,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Popüler Kategoriler
                 </h2>
               </div>
 
@@ -832,11 +918,12 @@ export default function HomePage() {
                 to="/categories"
                 style={{
                   textDecoration: "none",
-                  color: "#93c5fd",
-                  fontWeight: 700,
+                  color: "#0B3D6E",
+                  fontSize: 13,
+                  fontWeight: 900,
                 }}
               >
-                {t("homePage.allCategories")}
+                Tüm kategoriler →
               </Link>
             </div>
 
@@ -845,295 +932,403 @@ export default function HomePage() {
                 display: isMobile ? "flex" : "grid",
                 gridTemplateColumns: isMobile
                   ? undefined
-                  : "repeat(auto-fit, minmax(240px, 1fr))",
-                gap: isMobile ? 12 : 16,
+                  : "repeat(4, minmax(0, 1fr))",
+                gap: isMobile ? 10 : 14,
                 overflowX: isMobile ? "auto" : "visible",
                 paddingBottom: isMobile ? 8 : 0,
                 scrollSnapType: isMobile ? "x mandatory" : undefined,
                 WebkitOverflowScrolling: "touch",
               }}
             >
-              {sectors.map((sector, index) => {
-                const sectorLabel = [
-                  t("homePage.sectors.packaging"),
-                  t("homePage.sectors.cleaning"),
-                  t("homePage.sectors.food"),
-                  t("homePage.sectors.electric"),
-                  t("homePage.sectors.safety"),
-                  t("homePage.sectors.automotive"),
-                  t("homePage.sectors.hardware"),
-                  t("homePage.sectors.logistics"),
-                ][index];
-
-                return (
-  <div
-    key={sector.title}
-    onClick={() =>
-      navigate(`/category/${encodeURIComponent(sector.title)}`)
-    }
-    style={{
-      cursor: "pointer",
-                    position: "relative",
-                    minHeight: isMobile ? 138 : 180,
-                    minWidth: isMobile ? 168 : undefined,
-                    width: isMobile ? 168 : undefined,
-                    flex: isMobile ? "0 0 168px" : undefined,
+              {sectors.map((sector) => (
+                <Link
+                  key={sector.title}
+                  to={homeCategories.find((category) => category.name.toLocaleLowerCase("tr-TR") === sector.title.toLocaleLowerCase("tr-TR"))?.id ? `/category/${homeCategories.find((category) => category.name.toLocaleLowerCase("tr-TR") === sector.title.toLocaleLowerCase("tr-TR"))!.id}` : "/categories"}
+                  style={{
+                    minWidth: isMobile ? 155 : 0,
+                    flex: isMobile ? "0 0 155px" : undefined,
                     scrollSnapAlign: isMobile ? "start" : undefined,
                     overflow: "hidden",
-                    borderRadius: isMobile ? 16 : 20,
-                    backgroundImage: `linear-gradient(180deg, rgba(8,17,32,0.00) 0%, rgba(8,17,32,0.28) 100%), url('${sector.image}')`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    border: "1px solid rgba(148, 163, 184, 0.14)",
-                    padding: isMobile ? 13 : 18,
-                    display: "flex",
-                    alignItems: "end",
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 12,
-                        display: "grid",
-                        placeItems: "center",
-                        background: "rgba(56, 189, 248, 0.16)",
-                        color: "#38bdf8",
-                        fontWeight: 800,
-                        marginBottom: 14,
-                        border: "1px solid rgba(56, 189, 248, 0.18)",
-                      }}
-                    >
-                      {sectorLabel.charAt(0)}
-                    </div>
-                    <div style={{ fontWeight: 700, fontSize: 18 }}>
-                      {sectorLabel}
-                    </div>
-                  </div>
-                </div>
-                );
-              })}
-            </div>
-          </section>
-
-                    {/* Gerçek ürünler yayına alındığında ürün vitrini yeniden açılacak. */}
-
-          <section
-            style={{
-              display: "grid",
-              gridTemplateColumns: isMobile
-                ? "1fr"
-                : "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: isMobile ? 9 : 18,
-              marginBottom: isMobile ? 18 : 28,
-            }}
-          >
-            {[
-              {
-                step: "1",
-                title: t("homePage.steps.oneTitle"),
-                description: t("homePage.steps.oneDescription"),
-              },
-              {
-                step: "2",
-                title: t("homePage.steps.twoTitle"),
-                description: t("homePage.steps.twoDescription"),
-              },
-              {
-                step: "3",
-                title: t("homePage.steps.threeTitle"),
-                description: t("homePage.steps.threeDescription"),
-              },
-            ].map((item) => (
-              <div
-                key={item.step}
-                style={{
-                  background: "#ffffff",
-                  color: "#111827",
-                  borderRadius: isMobile ? 15 : 22,
-                  padding: isMobile ? 13 : 24,
-                  boxShadow: isMobile
-                    ? "0 8px 18px rgba(15,23,42,0.08)"
-                    : "0 18px 36px rgba(15, 23, 42, 0.10)",
-                  display: isMobile ? "grid" : "block",
-                  gridTemplateColumns: isMobile ? "34px 1fr" : undefined,
-                  columnGap: isMobile ? 11 : undefined,
-                  alignItems: isMobile ? "start" : undefined,
-                  border: "1px solid rgba(226,232,240,0.7)",
-                }}
-              >
-                <div
-                  style={{
-                    width: isMobile ? 34 : 44,
-                    height: isMobile ? 34 : 44,
-                    borderRadius: 999,
-                    display: "grid",
-                    placeItems: "center",
-                    background: "#dbeafe",
-                    color: "#1d4ed8",
-                    fontWeight: 800,
-                    marginBottom: isMobile ? 0 : 14,
-                    fontSize: isMobile ? 14 : 16,
-                    gridRow: isMobile ? "1 / span 2" : undefined,
-                  }}
-                >
-                  {item.step}
-                </div>
-
-                <h3
-                  style={{
-                    margin: isMobile ? "1px 0 4px" : "0 0 10px",
-                    fontSize: isMobile ? 15 : 20,
-                    lineHeight: 1.25,
-                  }}
-                >
-                  {item.title}
-                </h3>
-
-                <p
-                  style={{
-                    margin: 0,
-                    color: "#6b7280",
-                    lineHeight: isMobile ? 1.4 : 1.65,
-                    fontSize: isMobile ? 12 : 16,
-                  }}
-                >
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </section>
-
-          <section style={{ marginBottom: 28 }}>
-            <div style={{ marginBottom: 20 }}>
-              <div
-                style={{
-                  color: "#38bdf8",
-                  fontWeight: 700,
-                  marginBottom: 8,
-                }}
-              >
-                {t("homePage.trustEyebrow")}
-              </div>
-
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: isMobile ? 24 : 32,
-                  lineHeight: 1.2,
-                }}
-              >
-                {t("homePage.trustTitle")}
-              </h2>
-
-              <p
-                style={{
-                  color: "#94a3b8",
-                  maxWidth: 760,
-                  lineHeight: 1.7,
-                  fontSize: isMobile ? 13 : 16,
-                }}
-              >
-                {t("homePage.trustDescription")}
-              </p>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: isMobile
-                  ? "1fr"
-                  : "repeat(3, minmax(0, 1fr))",
-                gap: 16,
-              }}
-            >
-              {[
-                {
-                  icon: "✓",
-                  title: t("homePage.trustCards.verificationTitle"),
-                  text: t("homePage.trustCards.verificationText"),
-                },
-                {
-                  icon: "🔒",
-                  title: t("homePage.trustCards.communicationTitle"),
-                  text: t("homePage.trustCards.communicationText"),
-                },
-                {
-                  icon: "🛡️",
-                  title: t("homePage.trustCards.flowTitle"),
-                  text: t("homePage.trustCards.flowText"),
-                },
-              ].map((item) => (
-                <div
-                  key={item.title}
-                  style={{
+                    borderRadius: 18,
+                    border: "1px solid #DCE6EE",
                     background: "#ffffff",
-                    color: "#0f172a",
-                    borderRadius: 20,
-                    padding: isMobile ? 18 : 24,
-                    border: "1px solid #e2e8f0",
-                    boxShadow: "0 14px 32px rgba(15,23,42,0.08)",
+                    color: "#0B3D6E",
+                    textDecoration: "none",
+                    boxShadow:
+                      "0 10px 28px rgba(11,61,110,0.08), 0 2px 5px rgba(15,23,42,0.03)",
                   }}
                 >
                   <div
                     style={{
-                      width: 46,
-                      height: 46,
-                      borderRadius: 14,
-                      display: "grid",
-                      placeItems: "center",
-                      background: "#eff6ff",
-                      color: "#1d4ed8",
-                      fontSize: 22,
-                      fontWeight: 900,
-                      marginBottom: 14,
+                      height: isMobile ? 112 : 145,
+                      overflow: "hidden",
+                      background: "#EEF4F8",
+                      borderBottom: "1px solid #E4ECF2",
                     }}
                   >
-                    {item.icon}
+                    <img
+                      src={sector.image}
+                      alt={sector.title}
+                      loading="lazy"
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
                   </div>
 
-                  <h3 style={{ margin: "0 0 8px", fontSize: 19 }}>
-                    {item.title}
-                  </h3>
-
-                  <p
+                  <div
                     style={{
-                      margin: 0,
-                      color: "#64748b",
-                      lineHeight: 1.65,
+                      minHeight: isMobile ? 48 : 56,
+                      padding: isMobile ? "10px 11px" : "12px 14px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 8,
+                      boxSizing: "border-box",
+                      background:
+                        "linear-gradient(180deg, #FFFFFF 0%, #F8FBFD 100%)",
                     }}
                   >
-                    {item.text}
-                  </p>
-                </div>
+                    <strong
+                      style={{
+                        color: "#0B3D6E",
+                        fontSize: isMobile ? 12 : 14,
+                        lineHeight: 1.3,
+                        fontWeight: 850,
+                      }}
+                    >
+                      {sector.title}
+                    </strong>
+
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        flexShrink: 0,
+                        width: 28,
+                        height: 28,
+                        display: "grid",
+                        placeItems: "center",
+                        borderRadius: 9,
+                        color: "#ffffff",
+                        background: "#16B83E",
+                        fontWeight: 900,
+                        fontSize: 14,
+                        boxShadow: "0 5px 12px rgba(22,184,62,0.20)",
+                      }}
+                    >
+                      →
+                    </span>
+                  </div>
+                </Link>
               ))}
             </div>
+          </section>
 
-            <div style={{ marginTop: 20, textAlign: "center" }}>
-              <Link
-                to="/register"
+          {featuredProducts.length > 0 && (
+            <section style={{ marginBottom: isMobile ? 28 : 42 }}>
+              <div
                 style={{
-                  display: "inline-block",
-                  textDecoration: "none",
-                  background: "#2563eb",
-                  color: "#ffffff",
-                  padding: "13px 22px",
-                  borderRadius: 12,
-                  fontWeight: 800,
+                  display: "flex",
+                  alignItems: "end",
+                  justifyContent: "space-between",
+                  gap: 16,
+                  flexWrap: "wrap",
+                  marginBottom: 18,
                 }}
               >
-                {t("homePage.createFreeCompany")}
-              </Link>
-            </div>
+                <div>
+                  <div
+                    style={{
+                      color: "#16B83E",
+                      fontSize: 12,
+                      fontWeight: 900,
+                      letterSpacing: 0.5,
+                      marginBottom: 6,
+                    }}
+                  >
+                    TOPTAN ALIŞVERİŞ
+                  </div>
+
+                  <h2
+                    style={{
+                      margin: 0,
+                      color: "#0B3D6E",
+                      fontSize: isMobile ? 24 : 30,
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    Yeni Eklenen Ürünler
+                  </h2>
+                </div>
+
+                <Link
+                  to="/products"
+                  style={{
+                    color: "#0B3D6E",
+                    textDecoration: "none",
+                    fontSize: 13,
+                    fontWeight: 900,
+                  }}
+                >
+                  Tüm ürünleri gör →
+                </Link>
+              </div>
+
+              <div
+                style={{
+                  display: isMobile ? "flex" : "grid",
+                  gridTemplateColumns: isMobile
+                    ? undefined
+                    : "repeat(4, minmax(0, 1fr))",
+                  gap: 12,
+                  overflowX: isMobile ? "auto" : "visible",
+                  paddingBottom: isMobile ? 8 : 0,
+                  scrollSnapType: isMobile ? "x mandatory" : undefined,
+                  WebkitOverflowScrolling: "touch",
+                }}
+              >
+                {featuredProducts.map((product) => (
+                  <Link
+                    key={product.id}
+                    to={`/product/${product.id}`}
+                    style={{
+                      minWidth: isMobile ? 220 : 0,
+                      flex: isMobile ? "0 0 220px" : undefined,
+                      scrollSnapAlign: isMobile ? "start" : undefined,
+                      display: "flex",
+                      flexDirection: "column",
+                      overflow: "hidden",
+                      borderRadius: 18,
+                      border: "1px solid #DCE6EE",
+                      background: "#ffffff",
+                      color: "#0B3D6E",
+                      textDecoration: "none",
+                      boxShadow:
+                        "0 10px 28px rgba(11,61,110,0.08), 0 2px 5px rgba(15,23,42,0.03)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "relative",
+                        aspectRatio: "4 / 3",
+                        overflow: "hidden",
+                        background:
+                          "linear-gradient(180deg, #FFFFFF 0%, #F4F8FA 100%)",
+                        borderBottom: "1px solid #E7EEF3",
+                      }}
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.title}
+                        loading="lazy"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          display: "block",
+                          objectFit: "contain",
+                          padding: 8,
+                          boxSizing: "border-box",
+                        }}
+                      />
+
+                      {product.moq ? (
+                        <span
+                          style={{
+                            position: "absolute",
+                            left: 10,
+                            bottom: 10,
+                            padding: "6px 9px",
+                            borderRadius: 9,
+                            background: "rgba(11,61,110,0.95)",
+                            color: "#ffffff",
+                            fontSize: 10,
+                            fontWeight: 850,
+                            boxShadow: "0 4px 12px rgba(11,61,110,0.18)",
+                          }}
+                        >
+                          Min. {product.moq} {product.unitType || "adet"}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div
+                      style={{
+                        padding: 11,
+                        display: "flex",
+                        flexDirection: "column",
+                        flex: 1,
+                      }}
+                    >
+                      <div
+                        style={{
+                          color: "#16A34A",
+                          fontSize: 10,
+                          fontWeight: 850,
+                          letterSpacing: 0.25,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {product.category}
+                      </div>
+
+                      <div
+                        style={{
+                          minHeight: 42,
+                          color: "#16324A",
+                          fontSize: 13,
+                          fontWeight: 800,
+                          lineHeight: 1.35,
+                          marginBottom: 9,
+                        }}
+                      >
+                        {product.title}
+                      </div>
+
+                      <div style={{ marginTop: "auto" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "baseline",
+                            gap: 5,
+                            marginBottom: 6,
+                          }}
+                        >
+                          <strong
+                            style={{
+                              color: "#0B3D6E",
+                              fontSize: 20,
+                              fontWeight: 950,
+                              letterSpacing: -0.3,
+                            }}
+                          >
+                            {product.price}
+                          </strong>
+                          <span
+                            style={{
+                              color: "#64748b",
+                              fontSize: 11,
+                              fontWeight: 700,
+                            }}
+                          >
+                            / {product.unitType || "adet"}
+                          </span>
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: 8,
+                            color: "#64748b",
+                            fontSize: 10,
+                            fontWeight: 650,
+                            paddingTop: 7,
+                            borderTop: "1px solid #EDF2F5",
+                            marginBottom: 10,
+                          }}
+                        >
+                          <span>
+                            {product.vatRate != null
+                              ? `KDV %${product.vatRate}`
+                              : "KDV bilgisi üründe"}
+                          </span>
+                          {product.leadTimeDays != null && (
+                            <span>{product.leadTimeDays} gün teslim</span>
+                          )}
+                        </div>
+
+                        <div
+                          style={{
+                            minHeight: 36,
+                            display: "grid",
+                            placeItems: "center",
+                            borderRadius: 10,
+                            background:
+                              "linear-gradient(135deg, #16B83E 0%, #22C55E 100%)",
+                            color: "#ffffff",
+                            fontSize: 12,
+                            fontWeight: 900,
+                            boxShadow: "0 7px 16px rgba(22,184,62,0.18)",
+                          }}
+                        >
+                          Ürünü İncele
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          
+
+                    <section
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile
+                ? "1fr"
+                : "repeat(3, minmax(0, 1fr))",
+              border: "1px solid #e2e8f0",
+              borderRadius: 16,
+              overflow: "hidden",
+              background: "#ffffff",
+              marginBottom: isMobile ? 20 : 28,
+            }}
+          >
+            {[
+              ["✓", "Doğrulanmış Firmalar"],
+              ["🔒", "Güvenli Ödeme"],
+              ["🛡️", "Kontrollü Ticaret"],
+            ].map(([icon, title], index) => (
+              <div
+                key={title}
+                style={{
+                  minHeight: isMobile ? 52 : 64,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 9,
+                  padding: "10px 14px",
+                  borderRight:
+                    !isMobile && index < 2 ? "1px solid #e2e8f0" : undefined,
+                  borderBottom:
+                    isMobile && index < 2 ? "1px solid #e2e8f0" : undefined,
+                  boxSizing: "border-box",
+                }}
+              >
+                <span
+                  style={{
+                    color: "#16B83E",
+                    fontSize: 17,
+                    fontWeight: 900,
+                  }}
+                >
+                  {icon}
+                </span>
+                <strong
+                  style={{
+                    color: "#0B3D6E",
+                    fontSize: isMobile ? 12 : 14,
+                  }}
+                >
+                  {title}
+                </strong>
+              </div>
+            ))}
           </section>
+
+
 
           <section
             style={{
               position: "relative",
               overflow: "hidden",
               backgroundImage:
-                "linear-gradient(90deg, rgba(15,23,42,0.90) 0%, rgba(23,37,84,0.72) 100%), url('/images/cta-banner.jpg')",
+                "linear-gradient(90deg, rgba(6,30,55,0.96) 0%, rgba(11,61,110,0.86) 55%, rgba(8,47,78,0.82) 100%), url('/images/cta-banner.jpg')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               borderRadius: isMobile ? 17 : 28,
@@ -1146,8 +1341,11 @@ export default function HomePage() {
             <h2
               style={{
                 margin: "0 0 12px",
+                color: "#ffffff",
                 fontSize: isMobile ? 21 : 34,
                 lineHeight: 1.2,
+                fontWeight: 900,
+                textShadow: "0 2px 18px rgba(0,0,0,0.24)",
               }}
             >
               {t("homePage.ctaTitle")}
@@ -1156,7 +1354,7 @@ export default function HomePage() {
               style={{
                 margin: isMobile ? "0 auto 13px" : "0 auto 20px",
                 maxWidth: 760,
-                color: "#cbd5e1",
+                color: "#E7F0F7",
                 fontSize: isMobile ? 12 : 17,
                 lineHeight: isMobile ? 1.4 : 1.7,
               }}
@@ -1173,36 +1371,43 @@ export default function HomePage() {
               }}
             >
               <Link
-                to="/register"
+                to="/register?role=BUYER"
                 style={{
                   textDecoration: "none",
-                  background: "#22c55e",
-                  color: "#fff",
+                  background: "linear-gradient(135deg, #16B83E, #22C55E)",
+                  color: "#ffffff",
                   padding: isMobile ? "10px 13px" : "13px 20px",
                   borderRadius: 12,
-                  fontWeight: 700,
+                  fontWeight: 800,
                   fontSize: isMobile ? 13 : 16,
                   boxShadow: "0 10px 24px rgba(34,197,94,0.24)",
                   width: isMobile ? "100%" : "auto",
                   maxWidth: isMobile ? 360 : "none",
                   boxSizing: "border-box",
+                  textAlign: "center",
                 }}
               >
-                {t("homePage.startFree")}
+                Alıcı Olarak Üye Ol
               </Link>
               <Link
-                to="/products"
+                to="/register?role=SELLER"
                 style={{
                   ...secondaryButtonStyle,
                   width: isMobile ? "100%" : "auto",
-                  maxWidth: isMobile ? "none" : "none",
+                  maxWidth: isMobile ? 360 : "none",
                   boxSizing: "border-box",
                   textAlign: "center",
                   padding: isMobile ? "10px 13px" : "13px 20px",
                   fontSize: isMobile ? 13 : 16,
+                  fontWeight: 800,
+                  color: "#ffffff",
+                  background: "rgba(255,255,255,0.12)",
+                  border: "1px solid rgba(255,255,255,0.52)",
+                  boxShadow: "none",
+                  backdropFilter: "blur(8px)",
                 }}
               >
-                {t("homePage.browseProducts")}
+                Satıcı Olarak Başla
               </Link>
             </div>
           </section>

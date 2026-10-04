@@ -446,7 +446,13 @@ const res = await fetch(`${API}/products?${query.toString()}`);
           </button>
         </div>
       </section>
+        <div style={catalogLayoutStyle}>
+          <aside style={filterSidebarStyle}>
       <section style={filterPanel}>
+          <div style={filterHeaderStyle}>
+            <span style={filterEyebrowStyle}>ÜRÜNLERİ DARALT</span>
+            <strong style={filterTitleStyle}>Filtreler</strong>
+          </div>
   <input
     type="number"
     min="0"
@@ -524,6 +530,9 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     {t("productsPage.clearFilters")}
   </button>
 </section>
+          </aside>
+
+          <div style={catalogContentStyle}>
       <section style={toolbar}>
         <div>
           <strong>
@@ -601,7 +610,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                   )}
                 </Link>
 
-                <div style={{ padding: 18 }}>
+                <div style={{ padding: 16 }}>
                   <div style={category}>
                     {getCategory(product, t("productsPage.categoryFallback"))}
                   </div>
@@ -613,12 +622,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                     )}
                   </h3>
 
-                  <div style={professionalSupplier}>
-                    <span style={verifiedDot}>✓</span>
-                    <span>{t("productsPage.verifiedSupplier")}</span>
-                  </div>
-
-                  <div style={professionalPriceBlock}>
+<div style={professionalPriceBlock}>
                     <div style={professionalPriceLine}>
                       <strong style={professionalPriceText}>
                         {getPrice(
@@ -667,7 +671,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                         ...addToCartButton,
                         background: addedCartIds.has(product.id)
                           ? "#047857"
-                          : "#0f172a",
+                          : "#16B83E",
                       }}
                     >
                       {addedCartIds.has(product.id)
@@ -703,6 +707,9 @@ const res = await fetch(`${API}/products?${query.toString()}`);
         </div>
       )}
 
+          </div>
+        </div>
+
       {compareIds.length > 0 && (
         <div style={compareBarStyle}>
           <div>
@@ -737,22 +744,22 @@ const res = await fetch(`${API}/products?${query.toString()}`);
 
 const page: CSSProperties = {
   minHeight: "100vh",
-  background: "#f8fafc",
-  padding: 40,
+  background: "#f7f9fb",
+  padding: window.innerWidth < 700 ? "18px 12px 40px" : "28px 24px 56px",
 };
 
 const hero: CSSProperties = {
-  maxWidth: 1180,
-  margin: "0 auto 24px",
-  background: "linear-gradient(135deg, #0f172a, #1e3a8a)",
-  color: "white",
-  borderRadius: 28,
-  padding: 32,
-  boxShadow: "0 24px 50px rgba(15,23,42,0.18)",
+  maxWidth: 1360,
+  margin: "0 auto 22px",
+  background: "linear-gradient(135deg, #082f57 0%, #0B3D6E 62%, #11558f 100%)",
+  color: "#ffffff",
+  borderRadius: 18,
+  padding: window.innerWidth < 700 ? 22 : 30,
+  boxShadow: "0 12px 30px rgba(11,61,110,0.14)",
 };
 
 const eyebrow: CSSProperties = {
-  color: "#93c5fd",
+  color: "#86efac",
   fontSize: 13,
   fontWeight: 900,
   marginBottom: 8,
@@ -790,17 +797,58 @@ const searchInput: CSSProperties = {
 
 const searchButton: CSSProperties = {
   border: "none",
-  background: "#f97316",
-  color: "white",
+  background: "linear-gradient(135deg, #16B83E 0%, #22C55E 100%)",
+  color: "#ffffff",
   padding: "13px 28px",
-  borderRadius: 14,
+  borderRadius: 12,
   fontWeight: 900,
   cursor: "pointer",
+  boxShadow: "0 6px 14px rgba(22,184,62,0.18)",
+};
+
+const catalogLayoutStyle: CSSProperties = {
+  maxWidth: 1360,
+  margin: "0 auto",
+  display: "grid",
+  gridTemplateColumns: window.innerWidth < 980 ? "1fr" : "230px minmax(0, 1fr)",
+  gap: 20,
+  alignItems: "start",
+};
+
+const filterSidebarStyle: CSSProperties = {
+  minWidth: 0,
+};
+
+const catalogContentStyle: CSSProperties = {
+  minWidth: 0,
+};
+
+const filterHeaderStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 4,
+  paddingBottom: 14,
+  marginBottom: 4,
+  borderBottom: "1px solid #eef2f6",
+  gridColumn: window.innerWidth < 980 ? "1 / -1" : undefined,
+};
+
+const filterEyebrowStyle: CSSProperties = {
+  color: "#16A34A",
+  fontSize: 10,
+  fontWeight: 900,
+  letterSpacing: 0.8,
+};
+
+const filterTitleStyle: CSSProperties = {
+  color: "#0B3D6E",
+  fontSize: 18,
+  fontWeight: 900,
 };
 
 const toolbar: CSSProperties = {
-  maxWidth: 1180,
-  margin: "0 auto 24px",
+  width: "100%",
+  margin: "0 0 18px",
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
@@ -814,27 +862,34 @@ const countText: CSSProperties = {
 };
 
 const grid: CSSProperties = {
-  maxWidth: 1180,
-  margin: "0 auto",
+  width: "100%",
+  margin: 0,
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 340px))",
-  justifyContent: "start",
-  gap: 20,
+  gridTemplateColumns:
+    window.innerWidth < 700
+      ? "1fr"
+      : window.innerWidth < 980
+        ? "repeat(auto-fill, minmax(220px, 1fr))"
+        : "repeat(auto-fill, minmax(210px, 1fr))",
+  gap: 16,
 };
 
 const card: CSSProperties = {
   position: "relative",
-  background: "white",
-  borderRadius: 22,
+  background: "#ffffff",
+  borderRadius: 14,
   overflow: "hidden",
-  boxShadow: "0 14px 34px rgba(15,23,42,0.10)",
-  border: "1px solid #e5e7eb",
+  boxShadow: "0 6px 18px rgba(11,61,110,0.06)",
+  border: "1px solid #dfe7ee",
 };
 
 const imageLink: CSSProperties = {
   display: "block",
   height: 210,
-  background: "#e2e8f0",
+  padding: 10,
+  boxSizing: "border-box",
+  background: "#ffffff",
+  borderBottom: "1px solid #eef2f6",
 };
 
 const img: CSSProperties = {
@@ -852,17 +907,19 @@ const placeholder: CSSProperties = {
 };
 
 const category: CSSProperties = {
-  color: "#2563eb",
+  color: "#16A34A",
   fontSize: 13,
   fontWeight: 900,
   marginBottom: 8,
 };
 
 const productTitle: CSSProperties = {
-  minHeight: 52,
+  minHeight: 44,
   margin: "0 0 10px",
-  fontSize: 20,
-  color: "#0f172a",
+  fontSize: 17,
+  lineHeight: 1.35,
+  fontWeight: 800,
+  color: "#0B3D6E",
 };
 
 const supplierBadge: CSSProperties = {
@@ -896,7 +953,7 @@ const moqText: CSSProperties = {
 const actions: CSSProperties = {
   display: "flex",
   gap: 10,
-  marginTop: 16,
+  marginTop: 12,
 };
 
 const detailBtn: CSSProperties = {
@@ -927,30 +984,44 @@ const emptyCard: CSSProperties = {
   boxShadow: "0 14px 34px rgba(15,23,42,0.10)",
 };
 const filterPanel: CSSProperties = {
-  maxWidth: 1180,
-  margin: "0 auto 24px",
-  background: "white",
-  border: "1px solid #e2e8f0",
-  borderRadius: 20,
+  width: "100%",
+  boxSizing: "border-box",
+  margin: 0,
+  background: "#ffffff",
+  border: "1px solid #dfe7ee",
+  borderRadius: 14,
   padding: 16,
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+  gridTemplateColumns:
+    window.innerWidth < 980
+      ? "repeat(auto-fit, minmax(160px, 1fr))"
+      : "1fr",
   gap: 12,
-  boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
+  boxShadow: "0 6px 18px rgba(11,61,110,0.05)",
+  position: window.innerWidth < 980 ? "static" : "sticky",
+  top: window.innerWidth < 980 ? undefined : 90,
 };
 
 const filterInput: CSSProperties = {
+  width: "100%",
   height: 44,
+  boxSizing: "border-box",
   border: "1px solid #cbd5e1",
-  borderRadius: 12,
+  borderRadius: 10,
   padding: "0 12px",
+  background: "#ffffff",
+  color: "#0f172a",
   fontSize: 14,
+  outline: "none",
 };
 
 const checkLabel: CSSProperties = {
+  minHeight: 44,
   display: "flex",
   alignItems: "center",
   gap: 8,
+  padding: "0 2px",
+  fontSize: 13,
   fontWeight: 800,
   color: "#334155",
 };
@@ -966,12 +1037,13 @@ const standardSupplierBadge: CSSProperties = {
 };
 
 const clearButton: CSSProperties = {
+  width: "100%",
   minHeight: 44,
-  border: "1px solid #fecaca",
-  borderRadius: 12,
+  border: "1px solid #dbe4ec",
+  borderRadius: 10,
   padding: "0 14px",
-  background: "#fff1f2",
-  color: "#be123c",
+  background: "#f8fafc",
+  color: "#0B3D6E",
   fontSize: 14,
   fontWeight: 800,
   cursor: "pointer",
@@ -1062,10 +1134,10 @@ const newBadge: CSSProperties = {
   padding: "7px 11px",
   borderRadius: 999,
   color: "#ffffff",
-  background: "#f97316",
+  background: "#16B83E",
   fontSize: 12,
   fontWeight: 900,
-  boxShadow: "0 8px 18px rgba(249,115,22,0.28)",
+  boxShadow: "0 6px 14px rgba(22,184,62,0.22)",
 };
 
 const sellerRow: CSSProperties = {
@@ -1165,8 +1237,8 @@ const verifiedDot: CSSProperties = {
 };
 
 const professionalPriceBlock: CSSProperties = {
-  paddingBottom: 14,
-  marginBottom: 14,
+  paddingBottom: 10,
+  marginBottom: 10,
   borderBottom: "1px solid #eef2f7",
 };
 
@@ -1177,8 +1249,8 @@ const professionalPriceLine: CSSProperties = {
 };
 
 const professionalPriceText: CSSProperties = {
-  color: "#111827",
-  fontSize: 25,
+  color: "#0B3D6E",
+  fontSize: 24,
   lineHeight: 1.15,
   fontWeight: 800,
   letterSpacing: "-0.4px",
@@ -1201,7 +1273,7 @@ const vatIncludedText: CSSProperties = {
 const professionalDetails: CSSProperties = {
   display: "flex",
   flexDirection: "column",
-  gap: 8,
+  gap: 6,
 };
 
 const professionalDetailRow: CSSProperties = {
@@ -1214,8 +1286,8 @@ const professionalDetailRow: CSSProperties = {
 };
 
 const professionalShipping: CSSProperties = {
-  marginTop: 3,
-  padding: "9px 10px",
+  marginTop: 2,
+  padding: "7px 9px",
   borderRadius: 9,
   background: "#f8fafc",
   color: "#475569",

@@ -1990,7 +1990,7 @@ const resources = {
           description: "Tedarik Pazarı kullanıcıları için kişisel veri işleme aydınlatma metni.",
           updatedAt: "15 Temmuz 2026",
           h1: "Veri sorumlusu",
-          p1: "Veri sorumlusu: Tedarik Pazarı. Şirketin tam ticari unvanı, MERSİS numarası, adresi ve iletişim bilgileri yayına alınmadan önce bu bölüme eklenmelidir.",
+          p1: "Veri sorumlusu: Selma Çetin. Tedarik Pazarı platformuna ilişkin kişisel verilerin korunması konusundaki başvurularınızı tedarikpazari34@gmail.com adresine iletebilirsiniz.",
           h2: "İşlenen kişisel veriler",
           p2: "Ad, soyad, e-posta, telefon, firma bilgileri, vergi ve ticaret bilgileri, IP ve oturum kayıtları, teklif, sipariş, ödeme, kargo, mesajlaşma ve destek verileri işlenebilir.",
           h3: "İşleme amaçları ve hukuki sebepler",
@@ -2042,7 +2042,7 @@ const resources = {
           h5: "5. Yasaklı kullanım",
           p5: "Hukuka aykırı ürün, yanıltıcı ilan, sahte belge, sistem güvenliğini tehlikeye atan işlem ve platform dışına yönlendirme amacı taşıyan kötüye kullanım yasaktır.",
           h6: "6. Uyuşmazlıklar",
-          p6: "Taraflar platform içi uyuşmazlık sistemini kullanabilir. Yetkili hukuk ve mahkeme bilgileri, şirketin ticari merkezine göre hukukçu tarafından son metinde belirlenmelidir."
+          p6: "Taraflar, uyuşmazlığın çözümü için platform içi uyuşmazlık sistemini kullanabilir. Tarafların yürürlükteki mevzuattan doğan başvuru, dava ve takip hakları saklıdır."
         },
 
         delivery: {
@@ -2104,7 +2104,7 @@ const resources = {
           h3: "Çerez yönetimi",
           p3: "Çerez tercihleri tarayıcı ayarlarından değiştirilebilir. Zorunlu çerezlerin kapatılması platformun bazı özelliklerinin çalışmamasına yol açabilir.",
           h4: "Güncelleme",
-          p4: "Gerçekte kullanılan her çerezin adı, sağlayıcısı, amacı ve saklama süresi canlıya çıkmadan önce bu metne tablo halinde eklenmelidir."
+          p4: "Platform, oturum ve hesap bilgilerinin yönetimi, dil tercihinin hatırlanması, sepet ve ürün karşılaştırma gibi işlevlerin sağlanması amacıyla tarayıcının yerel depolama teknolojilerinden yararlanabilir. Çerez veya benzeri teknolojilerin kullanımı değiştiğinde bu politika buna uygun olarak güncellenir."
         }
       },
       panelPage: {
@@ -2477,10 +2477,10 @@ const resources = {
         description: "Ürünleri inceleyin, fiyatları karşılaştırın ve doğrudan satın alın.",
         searchPlaceholder: "Ürün ara... örn: koli, ampul, eldiven",
         search: "Ara",
-        minPrice: "Min fiyat",
-        maxPrice: "Max fiyat",
-        minMoq: "Min MOQ",
-        maxMoq: "Max MOQ",
+        minPrice: "Minimum fiyat",
+        maxPrice: "Maksimum fiyat",
+        minMoq: "Minimum sipariş",
+        maxMoq: "Maksimum sipariş",
         allCities: "Tüm şehirler",
         newest: "En yeni",
         priceAsc: "Fiyat: Artan",
@@ -4990,8 +4990,8 @@ const resources = {
         description: "Browse products, compare prices and buy directly from suppliers.",
         searchPlaceholder: "Search products... e.g. boxes, bulbs, gloves",
         search: "Search",
-        minPrice: "Min price",
-        maxPrice: "Max price",
+        minPrice: "Minimum price",
+        maxPrice: "Maximum price",
         minMoq: "Min MOQ",
         maxMoq: "Max MOQ",
         allCities: "All cities",
