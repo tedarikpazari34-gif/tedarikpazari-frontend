@@ -314,9 +314,11 @@ export default function SellerProductBulkImportPage() {
   };
 
   const progress =
-    job && job.totalRows > 0
-      ? Math.min(100, Math.round((job.processedRows / job.totalRows) * 100))
-      : 0;
+    job?.status === "COMPLETED"
+      ? 100
+      : job && job.totalRows > 0
+        ? Math.min(100, Math.round((job.processedRows / job.totalRows) * 100))
+        : 0;
 
   return (
     <SellerLayout title="Toplu Ürün Yönetimi">
