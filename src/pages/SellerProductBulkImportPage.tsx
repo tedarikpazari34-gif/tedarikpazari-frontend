@@ -5,6 +5,7 @@ const API_URL =
   import.meta.env.VITE_API_URL ||
   "https://tedarik-backend.onrender.com/api";
 
+type ImportSource = "EXCEL" | "XML";
 type ImportAction = "NEW" | "UPDATE" | "UNCHANGED" | "ERROR";
 type ImportStatus =
   | "UPLOADED"
@@ -101,6 +102,7 @@ function saveBlob(blob: Blob, fileName: string) {
 
 export default function SellerProductBulkImportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importSource, setImportSource] = useState<ImportSource>("EXCEL");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [job, setJob] = useState<ImportJob | null>(null);
   const [rows, setRows] = useState<RowsResponse | null>(null);
@@ -161,17 +163,21 @@ export default function SellerProductBulkImportPage() {
     return data;
   };
 
-  const uploadExcel = async () => {
+  const uploadFile = async () => {
+    const isExcel = importSource === "EXCEL";
+    const extension = isExcel ? ".xlsx" : ".xml";
+    const sourceLabel = isExcel ? "Excel" : "XML";
+
     if (!selectedFile) {
-      setError("Önce bir Excel dosyası seçin.");
+      setError(`Önce bir ${sourceLabel} dosyası seçin.`);
       return;
     }
-    if (!selectedFile.name.toLocaleLowerCase("tr-TR").endsWith(".xlsx")) {
-      setError("Yalnızca .xlsx dosyaları kabul edilir.");
+    if (!selectedFile.name.toLocaleLowerCase("tr-TR").endsWith(extension)) {
+      setError(`Yalnızca ${extension} dosyaları kabul edilir.`);
       return;
     }
     if (selectedFile.size > 10 * 1024 * 1024) {
-      setError("Excel dosyası en fazla 10 MB olabilir.");
+      setError(`${sourceLabel} dosyası en fazla 10 MB olabilir.`);
       return;
     }
 
@@ -185,7 +191,11 @@ export default function SellerProductBulkImportPage() {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      const response = await authorizedFetch("/products/bulk-import/excel", {
+      const endpoint = isExcel
+        ? "/products/bulk-import/excel"
+        : "/products/bulk-import/xml";
+
+      const response = await authorizedFetch(endpoint, {
         method: "POST",
         body: formData,
       });
@@ -199,7 +209,11 @@ export default function SellerProductBulkImportPage() {
         "Ön kontrol tamamlandı. Aşağıdaki sonuçları inceleyin; onay vermeden ürünleriniz değiştirilmez.",
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Excel dosyası yüklenemedi.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : `${sourceLabel} dosyası yüklenemedi.`,
+      );
     } finally {
       setBusy(false);
     }
@@ -328,65 +342,104 @@ export default function SellerProductBulkImportPage() {
             <a href="/seller/products" style={backLinkStyle}>
               ← Ürünlerime Dön
             </a>
-            <h1 style={titleStyle}>Excel ile Toplu Ürün Yönetimi</h1>
+            <h1 style={titleStyle}>Toplu Ürün Yönetimi</h1>
             <p style={subtitleStyle}>
-              Binlerce ürünü tek dosyada ön kontrolden geçirin, hataları görün ve
-              yalnızca onayınızdan sonra ürünlerinizi ekleyin veya güncelleyin.
+              Excel veya XML dosyanızdaki ürünleri tek akışta ön kontrolden geçirin,
+              hataları görün ve yalnızca onayınızdan sonra ürünlerinizi ekleyin veya
+              güncelleyin.
             </p>
           </div>
         </div>
 
         <section style={guideStyle}>
-          <div style={stepStyle}><b>1</b><span>Şablonu indir veya mevcut ürünlerini dışa aktar.</span></div>
-          <div style={stepStyle}><b>2</b><span>Excel'i doldur ve ön kontrol için yükle.</span></div>
+          <div style={stepStyle}><b>1</b><span>Excel veya XML kaynağını seç.</span></div>
+          <div style={stepStyle}><b>2</b><span>Dosyanı yükle ve güvenli ön kontrolden geçir.</span></div>
           <div style={stepStyle}><b>3</b><span>Yeni, güncellenecek ve hatalı satırları incele.</span></div>
           <div style={stepStyle}><b>4</b><span>Onay ver; ürünler kontrollü gruplar halinde işlensin.</span></div>
         </section>
 
         <section style={panelStyle}>
+          <div style={sourceTabsStyle}>
+            {(["EXCEL", "XML"] as const).map((source) => (
+              <button
+                key={source}
+                type="button"
+                disabled={busy || processing}
+                onClick={() => {
+                  if (source === importSource) return;
+                  setImportSource(source);
+                  setSelectedFile(null);
+                  setJob(null);
+                  setRows(null);
+                  setRowFilter("ALL");
+                  setError("");
+                  setNotice("");
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                style={{
+                  ...sourceTabStyle,
+                  ...(importSource === source ? activeSourceTabStyle : {}),
+                }}
+              >
+                {source === "EXCEL" ? "Excel (.xlsx)" : "XML (.xml)"}
+              </button>
+            ))}
+          </div>
+
           <div style={panelHeaderStyle}>
             <div>
-              <h2 style={sectionTitleStyle}>Excel Dosyaları</h2>
+              <h2 style={sectionTitleStyle}>
+                {importSource === "EXCEL" ? "Excel Dosyası" : "XML Dosyası"}
+              </h2>
               <p style={sectionTextStyle}>
-                Ürün ID sütununu değiştirmeyin. Görsel alanına HTTPS adresleri
-                ekleyebilirsiniz. Birden fazla görseli | işaretiyle ayırabilirsiniz.
+                {importSource === "EXCEL"
+                  ? "Şablonu kullanabilir veya mevcut ürünlerinizi Excel'e aktarabilirsiniz. Ürün ID alanını değiştirmeyin."
+                  : "XML dosyanız güvenli ön kontrolden geçirilir. products > product yapısı kullanılır; ürünler onayınız olmadan kaydedilmez."}
+                {" "}Görsel adresleri HTTPS olmalı; birden fazla görseli | işaretiyle ayırabilirsiniz.
               </p>
             </div>
-            <div style={buttonGroupStyle}>
-              <button
-                type="button"
-                disabled={busy || processing}
-                onClick={() =>
-                  downloadFile(
-                    "/products/bulk-import/template",
-                    "nex-tedarik-pazari-urun-sablonu.xlsx",
-                  )
-                }
-                style={secondaryButtonStyle}
-              >
-                Boş Şablonu İndir
-              </button>
-              <button
-                type="button"
-                disabled={busy || processing}
-                onClick={() =>
-                  downloadFile(
-                    "/products/bulk-import/export",
-                    "nex-tedarik-pazari-urunler.xlsx",
-                  )
-                }
-                style={secondaryButtonStyle}
-              >
-                Mevcut Ürünleri Excel'e Aktar
-              </button>
-            </div>
+
+            {importSource === "EXCEL" && (
+              <div style={buttonGroupStyle}>
+                <button
+                  type="button"
+                  disabled={busy || processing}
+                  onClick={() =>
+                    downloadFile(
+                      "/products/bulk-import/template",
+                      "nex-tedarik-pazari-urun-sablonu.xlsx",
+                    )
+                  }
+                  style={secondaryButtonStyle}
+                >
+                  Boş Şablonu İndir
+                </button>
+                <button
+                  type="button"
+                  disabled={busy || processing}
+                  onClick={() =>
+                    downloadFile(
+                      "/products/bulk-import/export",
+                      "nex-tedarik-pazari-urunler.xlsx",
+                    )
+                  }
+                  style={secondaryButtonStyle}
+                >
+                  Mevcut Ürünleri Excel'e Aktar
+                </button>
+              </div>
+            )}
           </div>
 
           <div style={uploadBoxStyle}>
             <input
               ref={fileInputRef}
               type="file"
-              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              accept={
+                importSource === "EXCEL"
+                  ? ".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                  : ".xml,application/xml,text/xml"
+              }
               onChange={(event) => {
                 const file = event.target.files?.[0] || null;
                 setSelectedFile(file);
@@ -396,6 +449,7 @@ export default function SellerProductBulkImportPage() {
               disabled={busy || processing}
               style={fileInputStyle}
             />
+
             <div style={fileMetaStyle}>
               {selectedFile ? (
                 <>
@@ -403,16 +457,22 @@ export default function SellerProductBulkImportPage() {
                   <span>{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span>
                 </>
               ) : (
-                <span>En fazla 10 MB, yalnızca .xlsx</span>
+                <span>
+                  En fazla 10 MB, yalnızca{" "}
+                  {importSource === "EXCEL" ? ".xlsx" : ".xml"}
+                </span>
               )}
             </div>
+
             <button
               type="button"
-              onClick={uploadExcel}
+              onClick={uploadFile}
               disabled={!selectedFile || busy || processing}
               style={primaryButtonStyle}
             >
-              {busy && !job ? "Ön Kontrol Yapılıyor..." : "Excel'i Ön Kontrole Gönder"}
+              {busy && !job
+                ? "Ön Kontrol Yapılıyor..."
+                : `${importSource === "EXCEL" ? "Excel" : "XML"}'i Ön Kontrole Gönder`}
             </button>
           </div>
         </section>
@@ -427,7 +487,7 @@ export default function SellerProductBulkImportPage() {
                 <div>
                   <h2 style={sectionTitleStyle}>Ön Kontrol Sonucu</h2>
                   <p style={sectionTextStyle}>
-                    {job.originalFileName || "Excel dosyası"} · Durum:{" "}
+                    {job.originalFileName || `${job.source} dosyası`} · Kaynak:{" "}<strong>{job.source}</strong> · Durum:{" "}
                     <strong>{job.status}</strong>
                   </p>
                 </div>
@@ -510,7 +570,7 @@ export default function SellerProductBulkImportPage() {
                 <div>
                   <h2 style={sectionTitleStyle}>Satır Önizleme</h2>
                   <p style={sectionTextStyle}>
-                    Excel satırlarını işlem türüne göre inceleyin.
+                    {job.source === "XML" ? "XML" : "Excel"} satırlarını işlem türüne göre inceleyin.
                   </p>
                 </div>
               </div>
@@ -653,6 +713,9 @@ const guideStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repea
 const stepStyle: CSSProperties = { display: "flex", gap: 10, alignItems: "flex-start", padding: 14, background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 14, color: "#334155", lineHeight: 1.45 };
 const panelStyle: CSSProperties = { background: "#fff", border: "1px solid #e2e8f0", borderRadius: 18, padding: 20, marginBottom: 18, boxShadow: "0 8px 28px rgba(15,23,42,.05)" };
 const panelHeaderStyle: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" };
+const sourceTabsStyle: CSSProperties = { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18, paddingBottom: 18, borderBottom: "1px solid #e2e8f0" };
+const sourceTabStyle: CSSProperties = { border: "1px solid #cbd5e1", borderRadius: 10, padding: "10px 16px", background: "#fff", color: "#475569", fontWeight: 800, cursor: "pointer" };
+const activeSourceTabStyle: CSSProperties = { background: "#0f172a", borderColor: "#0f172a", color: "#fff" };
 const sectionTitleStyle: CSSProperties = { margin: "0 0 6px", color: "#0f172a", fontSize: 20 };
 const sectionTextStyle: CSSProperties = { margin: 0, color: "#64748b", lineHeight: 1.55, maxWidth: 760 };
 const buttonGroupStyle: CSSProperties = { display: "flex", gap: 10, flexWrap: "wrap" };
