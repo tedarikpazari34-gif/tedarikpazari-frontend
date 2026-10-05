@@ -288,7 +288,7 @@ export default function SellerProductBulkImportPage() {
 
       if (currentJob.status === "COMPLETED") {
         setNotice(
-          `İçe aktarma tamamlandı. ${currentJob.processedRows} satır işlendi, ${currentJob.errorRows} hatalı satır ayrıldı.`,
+          `İçe aktarma tamamlandı. ${currentJob.totalRows} satır değerlendirildi: ${currentJob.totalRows - currentJob.errorRows} başarılı, ${currentJob.errorRows} hatalı.`,
         );
       } else {
         setNotice("İşlem durumu güncellendi.");
