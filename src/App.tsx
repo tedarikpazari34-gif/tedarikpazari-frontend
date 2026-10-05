@@ -20,6 +20,7 @@ import BuyerQuotesPage from "./pages/BuyerQuotesPage";
 import SellerOrdersPage from "./pages/SellerOrdersPage";
 import SellerProductsPage from "./pages/SellerProductsPage";
 import SellerProductCreatePage from "./pages/SellerProductCreatePage";
+import SellerProductBulkImportPage from "./pages/SellerProductBulkImportPage";
 import SellerProfilePage from "./pages/SellerProfilePage";
 
 import AdminDashboardPage from "./pages/AdminDashboardPage";
@@ -162,6 +163,15 @@ export default function App() {
           element={
             <PrivateRoute role="SELLER">
               <SellerProductsPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/seller/products/import"
+          element={
+            <PrivateRoute role="SELLER">
+              <SellerProductBulkImportPage />
             </PrivateRoute>
           }
         />

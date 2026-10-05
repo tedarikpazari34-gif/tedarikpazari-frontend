@@ -161,9 +161,14 @@ export default function SellerProductsPage() {
             </p>
           </div>
 
-          <a href="/seller/products/new" style={addButtonStyle}>
-            {t("sellerProductsPage.newProduct")}
-          </a>
+          <div style={headerActionsStyle}>
+            <a href="/seller/products/import" style={bulkButtonStyle}>
+              Toplu Ürün Yönetimi
+            </a>
+            <a href="/seller/products/new" style={addButtonStyle}>
+              {t("sellerProductsPage.newProduct")}
+            </a>
+          </div>
         </div>
 
         {loading && (
@@ -452,6 +457,28 @@ const titleStyle: CSSProperties = {
 const subtitleStyle: CSSProperties = {
   marginTop: 8,
   color: "#64748b",
+};
+
+const headerActionsStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  gap: 10,
+  flexWrap: "wrap",
+};
+
+const bulkButtonStyle: CSSProperties = {
+  background: "white",
+  whiteSpace: "nowrap",
+  flexShrink: 0,
+  fontSize: 14,
+  color: "#0f766e",
+  textDecoration: "none",
+  padding: "12px 17px",
+  borderRadius: 14,
+  fontWeight: 800,
+  border: "1px solid #0f766e",
+  boxShadow: "0 8px 20px rgba(15,118,110,0.10)",
 };
 
 const addButtonStyle: CSSProperties = {
