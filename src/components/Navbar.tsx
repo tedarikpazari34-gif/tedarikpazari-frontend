@@ -1537,40 +1537,41 @@ const mobileButtonStyle: React.CSSProperties = {
 const mobileMenuStyle: React.CSSProperties = {
   maxWidth: 1240,
   margin: "0 auto",
-  padding: "0 20px 18px",
+  padding: "12px 20px 18px",
   display: "grid",
-  gap: 12,
+  gap: 10,
+  background: "#ffffff",
 };
 
 const mobileSectionStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.10)",
+  background: "#F8FBFD",
+  border: "1px solid #E2EAF0",
   borderRadius: 16,
   padding: 14,
   display: "grid",
-  gap: 8,
+  gap: 4,
 };
 
 const mobileTitleStyle: React.CSSProperties = {
-  color: "#38bdf8",
+  color: "#16A6A1",
   fontSize: 12,
   fontWeight: 900,
   marginBottom: 4,
 };
 
 const mobileLinkStyle: React.CSSProperties = {
-  color: "#e2e8f0",
+  color: "#0B3D6E",
   textDecoration: "none",
   fontWeight: 800,
-  padding: "9px 0",
+  padding: "10px 0",
 };
 
 const mobileNotificationStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.10)",
-  borderRadius: 16,
-  padding: 14,
-  color: "#e2e8f0",
+  background: "#F8FBFD",
+  border: "1px solid #E2EAF0",
+  borderRadius: 14,
+  padding: "12px 14px",
+  color: "#0B3D6E",
   textDecoration: "none",
   fontWeight: 900,
   display: "flex",
