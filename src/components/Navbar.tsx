@@ -155,6 +155,9 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.innerWidth < 980,
+  );
   const [panelMenuOpen, setPanelMenuOpen] = useState(false);
   const [activeCategoryGroup, setActiveCategoryGroup] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -192,6 +195,24 @@ export default function Navbar() {
           : role === "ADMIN"
             ? t("common.adminPanel")
             : t("common.menu");
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 980;
+      setIsMobile(mobile);
+
+      if (!mobile) {
+        setOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -374,8 +395,9 @@ export default function Navbar() {
 
   return (
     <header style={headerStyle}>
-      <div style={trustBarStyle}>
-        <div style={trustBarInnerStyle}>
+      {!isMobile && (
+        <div style={trustBarStyle}>
+          <div style={trustBarInnerStyle}>
           <div style={shoppingTopLinksStyle}>
             <Link to="/yardim" style={shoppingTopLinkStyle}>
               Destek Merkezi
@@ -414,23 +436,72 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+      )}
 
-      <div style={barStyle}>
+      <div
+        style={{
+          ...barStyle,
+          ...(isMobile
+            ? {
+                padding: "10px 14px 12px",
+                gap: 10,
+                flexWrap: "wrap",
+              }
+            : {}),
+        }}
+      >
         <Link
           to="/"
           style={brandStyle}
           onClick={() => setOpen(false)}
           aria-label="Nex Tedarik Pazarı ana sayfa"
         >
-          <div style={brandLogoStyle}>
-            <span style={brandNexStyle}>NEX</span>
-            <span style={brandNameStyle}>
+          <div
+            style={{
+              ...brandLogoStyle,
+              ...(isMobile
+                ? {
+                    minWidth: 0,
+                    height: 46,
+                  }
+                : {}),
+            }}
+          >
+            <span
+              style={{
+                ...brandNexStyle,
+                ...(isMobile ? { fontSize: 9, marginBottom: 3 } : {}),
+              }}
+            >
+              NEX
+            </span>
+            <span
+              style={{
+                ...brandNameStyle,
+                ...(isMobile ? { fontSize: 18, letterSpacing: -0.4 } : {}),
+              }}
+            >
               Tedarik <strong style={brandMarketStyle}>Pazarı</strong>
             </span>
           </div>
         </Link>
 
-        <form onSubmit={handleSearch} style={searchFormStyle}>
+        <form
+          onSubmit={handleSearch}
+          style={{
+            ...searchFormStyle,
+            ...(isMobile
+              ? {
+                  order: 3,
+                  flex: "1 0 100%",
+                  width: "100%",
+                  maxWidth: "none",
+                  minWidth: 0,
+                  height: 44,
+                }
+              : {}),
+          }}
+        >
           <span style={searchIconStyle} aria-hidden="true">⌕</span>
           <input
             type="search"
@@ -445,7 +516,12 @@ export default function Navbar() {
           </button>
         </form>
 
-        <nav style={desktopNavStyle}>
+        <nav
+          style={{
+            ...desktopNavStyle,
+            display: isMobile ? "none" : "flex",
+          }}
+        >
           {token ? (
             <div style={panelMenuWrapStyle}>
               <button
@@ -558,7 +634,19 @@ export default function Navbar() {
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
-          style={mobileButtonStyle}
+          style={{
+            ...mobileButtonStyle,
+            ...(isMobile
+              ? {
+                  display: "block",
+                  marginLeft: "auto",
+                  flexShrink: 0,
+                  background: "#F3F8FC",
+                  color: "#0B3D6E",
+                  border: "1px solid #C9D9E5",
+                }
+              : { display: "none" }),
+          }}
         >
           {open ? "✕" : "☰"}
         </button>
@@ -568,24 +656,77 @@ export default function Navbar() {
         style={categoryBarStyle}
         onMouseLeave={() => setActiveCategoryGroup(null)}
       >
-        <div style={categoryBarInnerStyle}>
+        <div
+          style={{
+            ...categoryBarInnerStyle,
+            ...(isMobile
+              ? {
+                  width: "100%",
+                  minHeight: 44,
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  padding: "0 10px",
+                  boxSizing: "border-box",
+                  WebkitOverflowScrolling: "touch",
+                }
+              : {}),
+          }}
+        >
           <Link
             to="/categories"
-            style={allCategoriesLinkStyle}
+            style={{
+              ...allCategoriesLinkStyle,
+              ...(isMobile
+                ? {
+                    minHeight: 44,
+                    padding: "0 14px",
+                    fontSize: 12,
+                    borderRadius: 10,
+                    margin: "5px 8px 5px 0",
+                    whiteSpace: "nowrap",
+                  }
+                : {}),
+            }}
             onMouseEnter={() => setActiveCategoryGroup(null)}
           >
             <span aria-hidden="true">☰</span>
             Tüm Kategoriler
           </Link>
 
-          <div style={categoryLinksStyle}>
+          <div
+            style={{
+              ...categoryLinksStyle,
+              ...(isMobile
+                ? {
+                    flex: "0 0 auto",
+                    minWidth: "max-content",
+                    overflow: "visible",
+                    alignItems: "center",
+                  }
+                : {}),
+            }}
+          >
             {categoryMenuGroups.map((group) => (
               <button
                 key={group.label}
                 type="button"
                 onMouseEnter={() => setActiveCategoryGroup(group.label)}
                 onFocus={() => setActiveCategoryGroup(group.label)}
-                style={categoryGroupButtonStyle}
+                style={{
+                  ...categoryGroupButtonStyle,
+                  ...(isMobile
+                    ? {
+                        flex: "0 0 auto",
+                        minWidth: "max-content",
+                        minHeight: 44,
+                        padding: "0 12px",
+                        gap: 7,
+                        borderRight: "1px solid #edf2f7",
+                        fontSize: 12,
+                        whiteSpace: "nowrap",
+                      }
+                    : {}),
+                }}
               >
                 <span style={categoryGroupIconStyle} aria-hidden="true">
                   {group.icon}
