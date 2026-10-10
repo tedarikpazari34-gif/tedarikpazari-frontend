@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import SellerLayout from "../components/SellerLayout";
 import { useTranslation } from "react-i18next";
 import { unitLabel } from "../lib/unitLabel";
@@ -28,11 +28,89 @@ type Product = {
 
 
 
+type RevisionCategory = {
+  id: string;
+  name: string;
+  children?: RevisionCategory[];
+};
+
+type ProductRevision = {
+  id: string;
+  brandName?: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  proposedData: Record<string, unknown>;
+  rejectionReason: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+const revisionFieldLabels: Record<string, string> = {
+  title: "Ürün Adı",
+  description: "Ürün Açıklaması",
+  categoryId: "Kategori Kimliği",
+  brandId: "Marka",
+  imageUrl: "Ana Görsel",
+  images: "Ürün Görselleri",
+  sku: "Stok Kodu (SKU)",
+  barcode: "Barkod",
+  manufacturerCode: "Üretici Kodu",
+  unitType: "Birim Türü",
+  moq: "Minimum Sipariş Miktarı",
+  quantityStep: "Miktar Artış Adımı",
+  vatRate: "KDV Oranı (%)",
+  leadTimeDays: "Hazırlama Süresi (Gün)",
+  stockType: "Stok Türü",
+  sourceLanguage: "Ürün Dili",
+  country: "Ülke",
+  city: "Şehir",
+  attributeValues: "Ürün Özellikleri",
+  variants: "Ürün Varyantları",
+};
+
+function findRevisionCategoryName(
+  categories: RevisionCategory[],
+  categoryId: string
+): string | null {
+  for (const category of categories) {
+    if (category.id === categoryId) {
+      return category.name;
+    }
+
+    const childName = findRevisionCategoryName(
+      category.children ?? [],
+      categoryId
+    );
+
+    if (childName) return childName;
+  }
+
+  return null;
+}
+
+function formatRevisionValue(value: unknown): string {
+  if (value === null || value === undefined) return "Belirtilmemiş";
+  if (typeof value === "boolean") return value ? "Evet" : "Hayır";
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+  return JSON.stringify(value, null, 2);
+}
+
 export default function SellerProductsPage() {
   const { t, i18n } = useTranslation();
   const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [revisionCategories, setRevisionCategories] = useState<RevisionCategory[]>([]);
+
+  const [openRevisionProductId, setOpenRevisionProductId] = useState<string | null>(null);
+  const [revisions, setRevisions] = useState<ProductRevision[]>([]);
+  const [revisionsLoading, setRevisionsLoading] = useState(false);
+  const [revisionsError, setRevisionsError] = useState("");
+  const revisionRequestId = useRef(0);
+
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -81,6 +159,40 @@ export default function SellerProductsPage() {
     loadProducts();
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadRevisionCategories = async () => {
+      try {
+        const res = await fetch(
+          `${BASE_URL}/api/categories/tree?lang=${encodeURIComponent(i18n.language)}`
+        );
+
+        if (!res.ok) {
+          throw new Error("Kategori listesi yüklenemedi.");
+        }
+
+        const data: unknown = await res.json();
+
+        if (!cancelled) {
+          setRevisionCategories(Array.isArray(data) ? data : []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setRevisionCategories([]);
+          console.error("REVISION CATEGORY ERROR:", err);
+        }
+      }
+    };
+
+    setRevisionCategories([]);
+    void loadRevisionCategories();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [i18n.language]);
+
   const normalizedSearch = searchTerm.trim().toLocaleLowerCase(locale);
 
   const filteredProducts = products.filter((product) => {
@@ -101,6 +213,67 @@ export default function SellerProductsPage() {
 
     return matchesSearch && matchesStatus;
   });
+
+  const openRevisionHistory = async (productId: string) => {
+    const requestId = ++revisionRequestId.current;
+
+    if (openRevisionProductId === productId) {
+      setOpenRevisionProductId(null);
+      setRevisions([]);
+      setRevisionsError("");
+      setRevisionsLoading(false);
+      return;
+    }
+
+    setOpenRevisionProductId(productId);
+    setRevisions([]);
+    setRevisionsError("");
+    setRevisionsLoading(true);
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setRevisionsError("Oturum bulunamadı. Lütfen tekrar giriş yapın.");
+      setRevisionsLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${BASE_URL}/api/products/${encodeURIComponent(productId)}/revisions`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (requestId !== revisionRequestId.current) return;
+
+      const data = await res.json();
+
+      if (requestId !== revisionRequestId.current) return;
+
+      if (!res.ok) {
+        throw new Error(
+          Array.isArray(data?.message)
+            ? data.message.join(", ")
+            : data?.message || "Revizyon geçmişi yüklenemedi."
+        );
+      }
+
+      if (!Array.isArray(data)) {
+        throw new Error("Sunucudan beklenmeyen yanıt alındı.");
+      }
+
+      setRevisions(data);
+    } catch (err) {
+      if (requestId !== revisionRequestId.current) return;
+      setRevisionsError(
+        err instanceof Error ? err.message : "Revizyon geçmişi yüklenemedi."
+      );
+    } finally {
+      if (requestId === revisionRequestId.current) {
+        setRevisionsLoading(false);
+      }
+    }
+  };
 
   const toggleProductActive = async (product: Product) => {
     const nextActive = !product.isActive;
@@ -395,6 +568,114 @@ export default function SellerProductsPage() {
                         Görüntüle
                       </a>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => void openRevisionHistory(product.id)}
+                      aria-expanded={openRevisionProductId === product.id}
+                      aria-controls={`revisions-${product.id}`}
+                      style={{
+                        padding: "11px 14px",
+                        borderRadius: 12,
+                        border: "1px solid #0f766e",
+                        background: "#f0fdfa",
+                        color: "#0f766e",
+                        fontWeight: 800,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {openRevisionProductId === product.id
+                        ? "Revizyon Geçmişini Kapat"
+                        : "Revizyon Geçmişi"}
+                    </button>
+
+                    {openRevisionProductId === product.id && (
+                      <section
+                        id={`revisions-${product.id}`}
+                        aria-label={`${product.title} revizyon geçmişi`}
+                        style={{
+                          padding: 14,
+                          borderRadius: 12,
+                          background: "#f8fafc",
+                          border: "1px solid #cbd5e1",
+                        }}
+                      >
+                        {revisionsLoading && <p>Revizyonlar yükleniyor...</p>}
+
+                        {revisionsError && (
+                          <p role="alert" style={{ color: "#b91c1c" }}>
+                            {revisionsError}
+                          </p>
+                        )}
+
+                        {!revisionsLoading && !revisionsError &&
+                          revisions.length === 0 && (
+                            <p>Bu ürün için revizyon geçmişi bulunmuyor.</p>
+                          )}
+
+                        {!revisionsLoading && !revisionsError &&
+                          revisions.map((revision) => (
+                            <div
+                              key={revision.id}
+                              style={{
+                                padding: 12,
+                                marginTop: 10,
+                                borderRadius: 10,
+                                background: "white",
+                                border: "1px solid #e2e8f0",
+                              }}
+                            >
+                              <strong>
+                                {revision.status === "PENDING"
+                                  ? "⏳ Onay Bekliyor"
+                                  : revision.status === "APPROVED"
+                                    ? "✓ Onaylandı"
+                                    : revision.status === "REJECTED"
+                                      ? "✕ Reddedildi"
+                                      : revision.status}
+                              </strong>
+                              <p style={{ fontSize: 13 }}>
+                                Talep tarihi:{" "}
+                                {new Date(revision.createdAt).toLocaleString(locale)}
+                              </p>
+                              {revision.reviewedAt && (
+                                <p style={{ fontSize: 13 }}>
+                                  İnceleme tarihi:{" "}
+                                  {new Date(revision.reviewedAt).toLocaleString(locale)}
+                                </p>
+                              )}
+                              {revision.rejectionReason && (
+                                <p style={{ color: "#b91c1c" }}>
+                                  <strong>Ret gerekçesi:</strong>{" "}
+                                  {revision.rejectionReason}
+                                </p>
+                              )}
+                              <details>
+                                <summary style={{ cursor: "pointer", fontWeight: 700 }}>
+                                  Değişiklikleri görüntüle
+                                </summary>
+                                <pre style={{
+                                  whiteSpace: "pre-wrap",
+                                  overflowWrap: "anywhere",
+                                  fontSize: 12,
+                                }}>
+                                  {Object.entries(revision.proposedData ?? {})
+                                    .map(([field, value]) =>
+                                      `${field === "categoryId" ? "Kategori" : revisionFieldLabels[field] ?? field}: ${
+                                        field === "categoryId" && typeof value === "string"
+                                          ? findRevisionCategoryName(revisionCategories, value) ?? value
+                                          : field === "brandId" && typeof value === "string"
+                                            ? revision.brandName ?? value
+                                            : formatRevisionValue(value)
+                                      }`
+                                    )
+                                    .join("\n\n")}
+                                </pre>
+                              </details>
+                            </div>
+                          ))}
+                      </section>
+                    )}
 
                     <button
                       type="button"

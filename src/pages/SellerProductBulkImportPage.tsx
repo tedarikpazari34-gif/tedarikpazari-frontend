@@ -1,9 +1,28 @@
-import { useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import SellerLayout from "../components/SellerLayout";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
   "https://tedarik-backend.onrender.com/api";
+
+type Category = {
+  id: string;
+  name: string;
+  children?: Category[];
+};
+
+type CategoryAttribute = {
+  id: string;
+  code: string;
+  name: string;
+  type: string;
+  isRequired: boolean;
+  options: Array<{
+    id: string;
+    code: string;
+    name: string;
+  }>;
+};
 
 type ImportSource = "EXCEL" | "XML";
 type ImportAction = "NEW" | "UPDATE" | "UNCHANGED" | "ERROR";
@@ -102,6 +121,14 @@ function saveBlob(blob: Blob, fileName: string) {
 
 export default function SellerProductBulkImportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [mainCategoryId, setMainCategoryId] = useState("");
+  const [subCategoryId, setSubCategoryId] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [categoryAttributes, setCategoryAttributes] = useState<CategoryAttribute[]>([]);
+  const [categoryLoading, setCategoryLoading] = useState(false);
+  const [categoryError, setCategoryError] = useState("");
+
   const [importSource, setImportSource] = useState<ImportSource>("EXCEL");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [job, setJob] = useState<ImportJob | null>(null);
@@ -111,6 +138,89 @@ export default function SellerProductBulkImportPage() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadCategories() {
+      try {
+        const response = await fetch(`${API_URL}/categories/tree?lang=tr`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("Kategoriler yüklenemedi.");
+
+        const data: unknown = await response.json();
+        if (!Array.isArray(data)) throw new Error("Kategori yanıtı geçersiz.");
+
+        if (!controller.signal.aborted) {
+          setCategories(data as Category[]);
+        }
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          setCategoryError(
+            err instanceof Error ? err.message : "Kategoriler yüklenemedi.",
+          );
+        }
+      }
+    }
+
+    void loadCategories();
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!categoryId) {
+      setCategoryAttributes([]);
+      setCategoryError("");
+      setCategoryLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    async function loadCategoryAttributes() {
+      setCategoryLoading(true);
+      setCategoryError("");
+      setCategoryAttributes([]);
+
+      try {
+        const response = await fetch(
+          `${API_URL}/categories/${encodeURIComponent(categoryId)}/attributes?lang=tr`,
+          { signal: controller.signal },
+        );
+
+        if (!response.ok) {
+          throw new Error("Kategori özellikleri yüklenemedi.");
+        }
+
+        const data: unknown = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("Kategori özellikleri yanıtı geçersiz.");
+        }
+
+        if (!controller.signal.aborted) {
+          setCategoryAttributes(data as CategoryAttribute[]);
+        }
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          setCategoryError(
+            err instanceof Error
+              ? err.message
+              : "Kategori özellikleri yüklenemedi.",
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setCategoryLoading(false);
+        }
+      }
+    }
+
+    void loadCategoryAttributes();
+
+    return () => controller.abort();
+  }, [categoryId]);
 
   const authorizedFetch = async (
     path: string,
@@ -302,7 +412,7 @@ export default function SellerProductBulkImportPage() {
 
       if (currentJob.status === "COMPLETED") {
         setNotice(
-          `İçe aktarma tamamlandı. ${currentJob.totalRows} satır değerlendirildi: ${currentJob.totalRows - currentJob.errorRows} başarılı, ${currentJob.errorRows} hatalı.`,
+          `İçe aktarma tamamlandı. ${currentJob.processedRows} satır başarıyla işlendi (değişiklik olmayanlar dahil), ${currentJob.errorRows} hatalı. Yeni ürünler ve içerik revizyonları yönetici onayına tabidir; işlem tamamlanması satışa açıldıkları anlamına gelmez.`,
         );
       } else {
         setNotice("İşlem durumu güncellendi.");
@@ -356,6 +466,137 @@ export default function SellerProductBulkImportPage() {
           <div style={stepStyle}><b>2</b><span>Dosyanı yükle ve güvenli ön kontrolden geçir.</span></div>
           <div style={stepStyle}><b>3</b><span>Yeni, güncellenecek ve hatalı satırları incele.</span></div>
           <div style={stepStyle}><b>4</b><span>Onay ver; ürünler kontrollü gruplar halinde işlensin.</span></div>
+        </section>
+
+        <section style={panelStyle}>
+          <h2 style={sectionTitleStyle}>Kategori Özellikleri Rehberi</h2>
+          <p style={sectionTextStyle}>
+            Excel veya XML dosyanızı hazırlarken geçerli özellik ve seçenek
+            kodlarını kontrol edin. Buradaki seçim dosyanızı değiştirmez.
+          </p>
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 16 }}>
+            <select
+              aria-label="Ana kategori"
+              value={mainCategoryId}
+              onChange={(event) => {
+                setMainCategoryId(event.target.value);
+                setSubCategoryId("");
+                setCategoryId("");
+                setCategoryAttributes([]);
+                setCategoryError("");
+              }}
+              style={{ flex: "1 1 220px", minWidth: 0, padding: 10 }}
+            >
+              <option value="">Ana kategori seçin</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              aria-label="Alt kategori"
+              value={subCategoryId}
+              onChange={(event) => {
+                const selectedId = event.target.value;
+                setSubCategoryId(selectedId);
+                setCategoryId(selectedId);
+                setCategoryAttributes([]);
+                setCategoryError("");
+              }}
+              disabled={!mainCategoryId}
+              style={{ flex: "1 1 220px", minWidth: 0, padding: 10 }}
+            >
+              <option value="">Alt kategori seçin</option>
+              {(categories.find((item) => item.id === mainCategoryId)?.children || []).map(
+                (category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ),
+              )}
+            </select>
+
+            <select
+              aria-label="Üçüncü seviye kategori"
+              value={
+                categoryId !== subCategoryId ? categoryId : ""
+              }
+              onChange={(event) => {
+                setCategoryId(event.target.value || subCategoryId);
+                  setCategoryAttributes([]);
+                  setCategoryError("");
+              }}
+              disabled={
+                !subCategoryId ||
+                !(categories
+                  .find((item) => item.id === mainCategoryId)
+                  ?.children?.find((item) => item.id === subCategoryId)
+                  ?.children?.length)
+              }
+              style={{ flex: "1 1 220px", minWidth: 0, padding: 10 }}
+            >
+              <option value="">Üçüncü seviye (varsa)</option>
+              {(categories
+                .find((item) => item.id === mainCategoryId)
+                ?.children?.find((item) => item.id === subCategoryId)
+                ?.children || []).map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {categoryLoading && <p>Özellikler yükleniyor...</p>}
+          {categoryError && (
+            <p role="alert" style={{ color: "#b91c1c" }}>
+              {categoryError}
+            </p>
+          )}
+
+          {categoryId && !categoryLoading && !categoryError && (
+            categoryAttributes.length === 0 ? (
+              <p>Bu kategori için aktif özellik bulunmuyor.</p>
+            ) : (
+              <div style={{ overflowX: "auto", marginTop: 16 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                  <thead>
+                    <tr>
+                      {["Özellik", "Excel Özellik Kodu", "Tür", "Zorunlu", "Seçenek Kodları"].map(
+                        (heading) => (
+                          <th key={heading} style={{ padding: 10, borderBottom: "1px solid #cbd5e1" }}>
+                            {heading}
+                          </th>
+                        ),
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {categoryAttributes.map((attribute) => (
+                      <tr key={attribute.id}>
+                        <td style={{ padding: 10 }}>{attribute.name}</td>
+                        <td style={{ padding: 10 }}><code>{attribute.code}</code></td>
+                        <td style={{ padding: 10 }}>{attribute.type}</td>
+                        <td style={{ padding: 10 }}>{attribute.isRequired ? "Evet" : "Hayır"}</td>
+                        <td style={{ padding: 10 }}>
+                          {attribute.options?.length
+                            ? attribute.options.map((option) => (
+                                <div key={option.id}>
+                                  {option.name}: <code>{option.code}</code>
+                                </div>
+                              ))
+                            : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
+          )}
         </section>
 
         <section style={panelStyle}>
@@ -482,6 +723,28 @@ export default function SellerProductBulkImportPage() {
 
         {job && (
           <>
+            <div
+              role="note"
+              style={{
+                padding: 16,
+                marginBottom: 18,
+                border: "1px solid #99f6e4",
+                borderRadius: 12,
+                background: "#f0fdfa",
+                color: "#115e59",
+                lineHeight: 1.6,
+              }}
+            >
+              <strong>Ürün yayınlama ve onay bilgisi</strong>
+              <div>
+                Yeni ürünler yönetici onayından sonra satışa açılır.
+                Onaylı ürünlerde açıklama, başlık ve diğer içerik
+                değişiklikleri yönetici incelemesine gönderilir.
+                Yalnızca fiyat ve stok güncellemeleri doğrudan uygulanabilir.
+                Dosyanın başarıyla işlenmesi, bütün ürünlerin yayınlandığı
+                anlamına gelmez.
+              </div>
+            </div>
             <section style={panelStyle}>
               <div style={panelHeaderStyle}>
                 <div>
@@ -507,7 +770,7 @@ export default function SellerProductBulkImportPage() {
                 <Stat label="Güncellenecek" value={job.updateRows} />
                 <Stat label="Değişiklik Yok" value={job.unchangedRows} />
                 <Stat label="Hatalı" value={job.errorRows} />
-                <Stat label="İşlenen" value={job.processedRows} />
+                <Stat label="Başarıyla İşlenen (Değişmeyenler Dahil)" value={job.processedRows} />
               </div>
 
               {(job.status === "IMPORTING" || job.status === "COMPLETED") && (
