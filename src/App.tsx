@@ -195,6 +195,15 @@ export default function App() {
         />
 
         <Route
+          path="/seller/products/:id/view"
+          element={
+            <PrivateRoute role="SELLER">
+              <ProductDetailPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
           path="/admin"
           element={
             <AdminRoute>

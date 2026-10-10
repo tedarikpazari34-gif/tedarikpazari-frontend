@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { unitLabel } from "../lib/unitLabel";
 
@@ -93,8 +93,10 @@ export default function ProductDetailPage() {
 
   const params = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const productId = params.id as string;
+  const isSellerPreview = location.pathname.startsWith("/seller/products/") && location.pathname.endsWith("/view");
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -157,7 +159,17 @@ export default function ProductDetailPage() {
       try {
         setLoading(true);
 
-        const res = await fetch(`${BASE_URL}/api/products/${productId}?lang=${encodeURIComponent(i18n.language)}`);
+        const token = localStorage.getItem("token");
+        const url = isSellerPreview
+          ? `${BASE_URL}/api/products/mine/${productId}`
+          : `${BASE_URL}/api/products/${productId}?lang=${encodeURIComponent(i18n.language)}`;
+
+        const res = await fetch(url, {
+          headers:
+            isSellerPreview && token
+              ? { Authorization: `Bearer ${token}` }
+              : undefined,
+        });
         const data = await res.json();
 
         if (!res.ok) {
@@ -179,7 +191,7 @@ export default function ProductDetailPage() {
     }
 
     loadProduct();
-  }, [productId, i18n.language]);
+  }, [productId, i18n.language, isSellerPreview]);
 
   const galleryImages = useMemo(() => {
     if (!product) return [];

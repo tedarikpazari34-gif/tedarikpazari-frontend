@@ -561,7 +561,7 @@ export default function SellerProductsPage() {
                       </a>
 
                       <a
-                        href={`/product/${product.id}`}
+                        href={`/seller/products/${product.id}/view`}
                         style={viewButtonStyle}
                         aria-label={`${product.title} ürününü görüntüle`}
                       >
