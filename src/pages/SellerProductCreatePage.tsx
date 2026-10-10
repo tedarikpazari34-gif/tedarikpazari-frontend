@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import SellerLayout from "../components/SellerLayout";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { COUNTRIES } from "../constants/countries";
 import { TURKEY_CITIES } from "../constants/turkeyCities";
 
@@ -20,10 +20,29 @@ type UploadedImage = {
   isCover: boolean;
 };
 
+const normalizeProductValue = (value: unknown): string => {
+  if (value === null || value === undefined) return "";
+  return String(value);
+};
+
 export default function SellerProductCreatePage() {
   const { t, i18n } = useTranslation();
   const { id: editProductId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const isEditMode = Boolean(editProductId);
+
+  useEffect(() => {
+    const state = location.state as { productSaveError?: unknown } | null;
+    if (typeof state?.productSaveError === "string") {
+      navigate(location.pathname + location.search, {
+        replace: true,
+        state: null,
+      });
+    }
+  }, [location.pathname, location.search, location.state, navigate]);
+
+
 
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
@@ -45,15 +64,24 @@ export default function SellerProductCreatePage() {
   const [vatRate, setVatRate] = useState("20");
 
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [originalImages, setOriginalImages] = useState<UploadedImage[]>([]);
   const [selectedFileNames, setSelectedFileNames] = useState<string[]>([]);
 
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [originalProduct, setOriginalProduct] = useState<Record<string, unknown> | null>(null);
+  const [submittedContent, setSubmittedContent] = useState<Record<string, unknown>>({});
+  const [submittedImages, setSubmittedImages] = useState<UploadedImage[] | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
 
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() => {
+    const state = location.state as { productSaveError?: unknown } | null;
+    return typeof state?.productSaveError === "string"
+      ? state.productSaveError
+      : "";
+  });
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -114,6 +142,7 @@ export default function SellerProductCreatePage() {
           return;
         }
 
+        setOriginalProduct(product);
         setTitle(product.title || "");
         setDescription(product.description || "");
         setCategoryId(product.categoryId || "");
@@ -149,17 +178,19 @@ export default function SellerProductCreatePage() {
             }))
           : [];
 
-        if (existingImages.length > 0) {
-          setUploadedImages(existingImages);
-        } else if (product.imageUrl) {
-          setUploadedImages([
-            {
-              url: product.imageUrl,
-              sortOrder: 0,
-              isCover: true,
-            },
-          ]);
-        }
+        const initialImages: UploadedImage[] =
+          existingImages.length > 0
+            ? existingImages
+            : product.imageUrl
+              ? [{
+                  url: product.imageUrl,
+                  sortOrder: 0,
+                  isCover: true,
+                }]
+              : [];
+
+        setOriginalImages(initialImages);
+        setUploadedImages(initialImages);
       } catch (err) {
         console.error(err);
         setError("Ürün bilgileri yüklenirken bir hata oluştu.");
@@ -423,6 +454,9 @@ export default function SellerProductCreatePage() {
 
       setSaving(true);
 
+    let contentRevisionSubmitted = false;
+    let savedProduct: any = null;
+
     try {
       const token = localStorage.getItem("token");
 
@@ -434,17 +468,128 @@ export default function SellerProductCreatePage() {
       const coverImage =
         uploadedImages.find((img) => img.isCover)?.url || uploadedImages[0]?.url;
 
-      const productRes = await fetch(
-        isEditMode && editProductId
-          ? `${BASE_URL}/api/products/${editProductId}`
-          : `${BASE_URL}/api/products`,
-        {
-          method: isEditMode ? "PATCH" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
+      if (isEditMode && !originalProduct) {
+        setError("Ürün bilgileri henüz yüklenmedi. Lütfen bekleyin.");
+        return;
+      }
+
+      const currentFields: Record<string, unknown> = {
+        title,
+        description,
+        categoryId,
+        country,
+        city,
+        unitType,
+        moq: moqValue,
+        basePrice: priceValue,
+        leadTimeDays: leadTimeValue,
+        stockType,
+        stockQuantity: stockQuantityValue,
+        vatRate: vatValue,
+      };
+
+      const changedFields = Object.fromEntries(
+        Object.entries(currentFields).filter(
+          ([key, value]) =>
+            !originalProduct ||
+            normalizeProductValue(value) !==
+              normalizeProductValue(originalProduct[key])
+        )
+      );
+
+      const immediateFields = Object.fromEntries(
+        Object.entries(changedFields).filter(
+          ([key]) => key === "basePrice" || key === "stockQuantity"
+        )
+      );
+
+      const contentFields = Object.fromEntries(
+        Object.entries(changedFields).filter(
+          ([key, value]) =>
+            key !== "basePrice" &&
+            key !== "stockQuantity" &&
+            !(
+              originalProduct?.isApproved === true &&
+              Object.prototype.hasOwnProperty.call(submittedContent, key) &&
+              normalizeProductValue(value) ===
+                normalizeProductValue(submittedContent[key])
+            )
+        )
+      );
+
+      const imagesChanged =
+        JSON.stringify(uploadedImages.map(({ url, isCover }) => ({ url, isCover }))) !==
+        JSON.stringify(
+          (submittedImages ?? originalImages).map(({ url, isCover }) => ({
+            url,
+            isCover,
+          }))
+        );
+
+      if (
+        isEditMode &&
+        originalProduct?.isApproved === true &&
+        Object.prototype.hasOwnProperty.call(contentFields, "categoryId")
+      ) {
+        setError(
+          "Onaylı ürünün kategorisi bu ekrandan değiştirilemez. Kategori özelliklerinin de güncellenmesi gerekiyor."
+        );
+        return;
+      }
+
+      const isApprovedEdit =
+        isEditMode && originalProduct?.isApproved === true;
+
+      const productUrl = isEditMode && editProductId
+        ? `${BASE_URL}/api/products/${editProductId}`
+        : `${BASE_URL}/api/products`;
+
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+
+      const saveRequest = async (
+        method: "POST" | "PATCH",
+        fields: Record<string, unknown>
+      ) => {
+        const response = await fetch(productUrl, {
+          method,
+          headers,
+          body: JSON.stringify(fields),
+        });
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          const detail = Array.isArray(result?.message)
+            ? result.message.join(", ")
+            : result?.message;
+          throw new Error(detail || "Ürün kaydedilemedi.");
+        }
+
+        return result;
+      };
+
+      if (isApprovedEdit) {
+        if (Object.keys(contentFields).length > 0) {
+          savedProduct = await saveRequest("PATCH", contentFields);
+          contentRevisionSubmitted = true;
+          setSubmittedContent((previous) => ({
+            ...previous,
+            ...contentFields,
+          }));
+        }
+
+        if (Object.keys(immediateFields).length > 0) {
+          savedProduct = await saveRequest("PATCH", immediateFields);
+          setOriginalProduct((previous) =>
+            previous ? { ...previous, ...immediateFields } : previous
+          );
+        }
+      } else {
+        savedProduct = await saveRequest(
+          isEditMode ? "PATCH" : "POST",
+          {
             title,
             description,
             categoryId,
@@ -457,78 +602,104 @@ export default function SellerProductCreatePage() {
             stockType,
             stockQuantity: stockQuantityValue,
             vatRate: vatValue,
-            rfqEnabled: true,
+            ...(!isEditMode ? { rfqEnabled: false } : {}),
             imageUrl: coverImage,
-          }),
-        }
-      );
-
-      const savedProduct = await productRes.json();
-
-      if (!productRes.ok) {
-        setError(
-          savedProduct?.message ||
-            (isEditMode
-              ? "Ürün güncellenemedi."
-              : t("sellerProductCreatePage.createFailed"))
+          }
         );
-        return;
       }
 
       const productIdForImages =
-        isEditMode && editProductId ? editProductId : savedProduct.id;
+        isEditMode && editProductId ? editProductId : savedProduct?.id;
 
-      const imagesRes = await fetch(
-        `${BASE_URL}/api/products/${productIdForImages}/images`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            images: uploadedImages,
-          }),
+      if (!isEditMode || imagesChanged) {
+        const imagesRes = await fetch(
+          `${BASE_URL}/api/products/${productIdForImages}/images`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              images: uploadedImages,
+            }),
+          }
+        );
+
+        if (!imagesRes.ok) {
+          const imagesError = await imagesRes.json().catch(() => null);
+
+          const detail = Array.isArray(imagesError?.message)
+            ? imagesError.message.join(", ")
+            : imagesError?.message;
+
+          setError(
+            !isEditMode
+              ? `Ürün oluşturuldu (ID: ${productIdForImages}), ancak fotoğraflar kaydedilemedi. Aynı ürünü tekrar oluşturmayın. Ürünlerim ekranından mevcut ürünü düzenleyin.${detail ? ` Hata: ${detail}` : ""}`
+              : `Ürün bilgileri kaydedilmiş olabilir ancak fotoğraflar güncellenemedi.${detail ? ` Hata: ${detail}` : ""}`
+          );
+          if (!isEditMode && productIdForImages) {
+            navigate(`/seller/products/${productIdForImages}/edit`, {
+              replace: true,
+              state: {
+                productSaveError:
+                  "Ürün oluşturuldu ancak fotoğraflar kaydedilemedi. Lütfen fotoğrafları kontrol edip yeniden kaydedin.",
+              },
+            });
+          }
+          return;
         }
+
+        if (isApprovedEdit) {
+          setSubmittedImages(uploadedImages.map((image) => ({ ...image })));
+        }
+      }
+
+      const requiresApproval =
+        isApprovedEdit &&
+        (Object.keys(contentFields).length > 0 || imagesChanged);
+
+      const hasChanges =
+        Object.keys(changedFields).length > 0 || imagesChanged;
+
+      setMessage(
+        !isEditMode
+          ? t("sellerProductCreatePage.createSuccess")
+          : !hasChanges
+            ? "Üründe herhangi bir değişiklik yapılmadı."
+            : requiresApproval
+              ? "Değişiklikler kaydedildi. İçerik ve görsel değişiklikleri yönetici onayını bekliyor."
+              : "Ürün başarıyla güncellendi."
       );
 
-      if (!imagesRes.ok) {
-        const imagesError = await imagesRes.json().catch(() => null);
+      if (!isEditMode && savedProduct?.id) {
+        navigate(`/seller/products/${savedProduct.id}/edit`, {
+          replace: true,
+        });
+      }
+    } catch (err) {
+      console.error("PRODUCT SAVE ERROR:", err);
+      const errorMessage =
+        err instanceof Error && err.message
+          ? err.message
+          : t("sellerProductCreatePage.createError");
 
-        setError(
-          imagesError?.message ||
-            "Ürün bilgileri kaydedildi ancak ürün fotoğrafları güncellenemedi."
-        );
+      if (!isEditMode && savedProduct?.id) {
+        navigate(`/seller/products/${savedProduct.id}/edit`, {
+          replace: true,
+          state: {
+            productSaveError:
+              `Ürün oluşturuldu ancak sonraki işlem başarısız oldu: ${errorMessage}. Lütfen ürün bilgilerini ve fotoğrafları kontrol edin.`,
+          },
+        });
         return;
       }
 
-      setMessage(
-        isEditMode
-          ? "Ürün başarıyla güncellendi."
-          : t("sellerProductCreatePage.createSuccess")
+      setError(
+        contentRevisionSubmitted
+          ? `Ürün içeriği yönetici onayına gönderildi. Ancak sonraki işlem başarısız oldu: ${errorMessage}`
+          : errorMessage
       );
-
-      if (!isEditMode) {
-        setTitle("");
-        setDescription("");
-        setMainCategoryId("");
-        setCategoryId("");
-        setBasePrice("");
-        setCountry("Türkiye");
-        setCity("");
-        setUnitType("adet");
-        setMoq("1");
-        setLeadTimeDays("3");
-        setStockType("STOCK");
-        setStockQuantity("");
-        setVatRate("20");
-        setUploadedImages([]);
-        setSelectedFileNames([]);
-        setAiPrompt("");
-      }
-    } catch (err) {
-      console.error("CREATE ERROR:", err);
-      setError(t("sellerProductCreatePage.createError"));
     } finally {
       setSaving(false);
     }
