@@ -24,6 +24,7 @@ type Product = {
   categoryName?: string;
   category?: string | { id?: string; name?: string } | null;
   moq?: number;
+  quantityStep?: number;
   leadTimeDays?: number | null;
   stockType?: string | null;
   unitType?: string;
@@ -374,6 +375,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
         title: getProductTitle(product, t("productsPage.productFallback")),
         quantity,
         moq: Math.max(Number(product.moq || 1), 1),
+        quantityStep: Math.max(Number(product.quantityStep || 1), 1),
         unitType: product.unitType,
         unitPrice: Number(product.basePrice ?? product.price ?? 0),
         sellerId: product.seller?.id || null,

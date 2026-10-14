@@ -22,6 +22,7 @@ type Product = {
   city?: string | null;
   unitType: string;
   moq: number;
+  quantityStep?: number;
   basePrice: string;
   leadTimeDays?: number | null;
   stockType?: string | null;
@@ -304,7 +305,21 @@ export default function ProductDetailPage() {
   const addToCart = () => {
     if (!product) return;
 
-    if (quantity < product.moq) {
+    const minimum = Math.max(Number(product.moq || 1), 1);
+    const step = Math.max(Number(product.quantityStep || 1), 1);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < minimum ||
+      (quantity - minimum) % step !== 0
+    ) {
+      const normalized =
+        Number.isInteger(quantity) && quantity >= minimum
+          ? minimum + Math.ceil((quantity - minimum) / step) * step
+          : minimum;
+
+      setQuantity(normalized);
+      setQuantityInput(String(normalized));
       alert(t("productDetailPage.cartInvalidQuantity"));
       return;
     }
@@ -323,6 +338,7 @@ export default function ProductDetailPage() {
         title: product.title,
         quantity,
         moq: Math.max(Number(product.moq || 1), 1),
+        quantityStep: Math.max(Number(product.quantityStep || 1), 1),
         unitType: product.unitType,
         unitPrice: Number(product.basePrice || 0),
         sellerId: product.seller?.id || null,
@@ -346,7 +362,21 @@ export default function ProductDetailPage() {
   const buyNow = () => {
     if (!product) return;
 
-    if (quantity < product.moq) {
+    const minimum = Math.max(Number(product.moq || 1), 1);
+    const step = Math.max(Number(product.quantityStep || 1), 1);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < minimum ||
+      (quantity - minimum) % step !== 0
+    ) {
+      const normalized =
+        Number.isInteger(quantity) && quantity >= minimum
+          ? minimum + Math.ceil((quantity - minimum) / step) * step
+          : minimum;
+
+      setQuantity(normalized);
+      setQuantityInput(String(normalized));
       alert(t("productDetailPage.cartInvalidQuantity"));
       return;
     }
@@ -625,7 +655,11 @@ export default function ProductDetailPage() {
                             Number(product.moq || 1),
                             1
                           );
-                          const next = Math.max(minimum, quantity - 1);
+                          const step = Math.max(
+                            Number(product.quantityStep || 1),
+                            1
+                          );
+                          const next = Math.max(minimum, quantity - step);
 
                           setQuantity(next);
                           setQuantityInput(String(next));
@@ -657,7 +691,7 @@ export default function ProductDetailPage() {
                       <input
                         type="number"
                         min={product.moq}
-                        step={1}
+                        step={Math.max(Number(product.quantityStep || 1), 1)}
                         inputMode="numeric"
                         value={quantityInput}
                         onChange={(e) => {
@@ -676,10 +710,15 @@ export default function ProductDetailPage() {
                             Number(product.moq || 1),
                             1
                           );
+                          const step = Math.max(
+                            Number(product.quantityStep || 1),
+                            1
+                          );
                           const parsed = Number(quantityInput);
                           const normalized =
                             Number.isInteger(parsed) && parsed >= minimum
-                              ? parsed
+                              ? minimum +
+                                Math.ceil((parsed - minimum) / step) * step
                               : minimum;
 
                           setQuantity(normalized);
@@ -703,7 +742,11 @@ export default function ProductDetailPage() {
                         type="button"
                         aria-label="Miktarı artır"
                         onClick={() => {
-                          const next = quantity + 1;
+                          const step = Math.max(
+                            Number(product.quantityStep || 1),
+                            1
+                          );
+                          const next = quantity + step;
                           setQuantity(next);
                           setQuantityInput(String(next));
                         }}

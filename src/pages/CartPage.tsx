@@ -13,6 +13,7 @@ type CartItem = {
   title: string;
   quantity: number;
   moq?: number;
+  quantityStep?: number;
   unitType: string;
   unitPrice: number;
   sellerId?: string | null;
@@ -78,12 +79,17 @@ export default function CartPage() {
   const getMinimumQuantity = (item: CartItem) =>
     Math.max(Number(item.moq || 1), 1);
 
+  const getQuantityStep = (item: CartItem) =>
+    Math.max(Number(item.quantityStep || 1), 1);
+
   const commitQuantity = (item: CartItem, requestedQuantity: number) => {
     const minimum = getMinimumQuantity(item);
+    const step = getQuantityStep(item);
 
     const normalized =
       Number.isInteger(requestedQuantity) && requestedQuantity >= minimum
-        ? requestedQuantity
+        ? minimum +
+          Math.ceil((requestedQuantity - minimum) / step) * step
         : minimum;
 
     setQuantityInputs((current) => ({
@@ -125,12 +131,15 @@ export default function CartPage() {
     if (loadingId) return;
 
     const minimum = getMinimumQuantity(item);
+    const step = getQuantityStep(item);
 
-    if (!Number.isInteger(item.quantity) || item.quantity < minimum) {
-      commitQuantity(item, minimum);
-      alert(
-        `Bu ürün için minimum sipariş miktarı ${minimum} ${item.unitType}.`
-      );
+    if (
+      !Number.isInteger(item.quantity) ||
+      item.quantity < minimum ||
+      (item.quantity - minimum) % step !== 0
+    ) {
+      commitQuantity(item, item.quantity);
+      alert(t("productDetailPage.cartInvalidQuantity"));
       return;
     }
 
@@ -171,7 +180,7 @@ export default function CartPage() {
 
       removeItem(item.productId);
 
-      const orderId = data?.id;
+      const orderId = data?.order?.id || data?.id;
 
       if (!orderId) {
         navigate("/buyer/orders");
@@ -345,7 +354,7 @@ export default function CartPage() {
                                 item,
                                 Math.max(
                                   getMinimumQuantity(item),
-                                  item.quantity - 1
+                                  item.quantity - getQuantityStep(item)
                                 )
                               )
                             }
@@ -374,7 +383,7 @@ export default function CartPage() {
                           <input
                             type="number"
                             min={getMinimumQuantity(item)}
-                            step={1}
+                            step={getQuantityStep(item)}
                             inputMode="numeric"
                             value={
                               quantityInputs[item.productId] ??
@@ -407,7 +416,10 @@ export default function CartPage() {
                           <button
                             type="button"
                             onClick={() =>
-                              commitQuantity(item, item.quantity + 1)
+                              commitQuantity(
+                                item,
+                                item.quantity + getQuantityStep(item)
+                              )
                             }
                             style={{
                               width: 42,
