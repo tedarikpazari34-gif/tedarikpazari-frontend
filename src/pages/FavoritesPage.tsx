@@ -24,7 +24,6 @@ type FavoriteItem = {
       name?: string;
     } | null;
     seller?: {
-      name?: string;
       verified?: boolean;
       city?: string | null;
     };
@@ -199,8 +198,9 @@ export default function FavoritesPage() {
                   </p>
 
                   <div style={sellerStyle}>
-                    {product.seller?.verified ? "✓ " : ""}
-                    {product.seller?.name || t("favoritesPage.supplier")}
+                    {product.seller?.verified
+                      ? t("productsPage.verifiedSupplier")
+                      : t("favoritesPage.supplier")}
                     {product.seller?.city
                       ? ` · ${product.seller.city}`
                       : ""}

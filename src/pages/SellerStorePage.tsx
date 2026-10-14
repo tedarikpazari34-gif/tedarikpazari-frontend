@@ -204,25 +204,20 @@ export default function SellerStorePage() {
   const reviews = company.sellerReviews || [];
   const sellerBadges = getSellerBadges(company, products.length, t);
   const rating = Number(company.rating || 0);
-  const bannerUrl = resolveImageUrl(company.banner);
-  const logoUrl = resolveImageUrl(company.logo);
-  const initials = company.name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase())
-    .join("");
+  const publicSellerLabel = company.verified
+    ? t("productsPage.verifiedSupplier")
+    : t("favoritesPage.supplier");
+  const bannerUrl = "";
+  const logoUrl = "";
+  const initials = "TP";
 
   return (
     <main style={pageStyle}>
       <Helmet>
-        <title>{company.name} | Tedarik Pazarı</title>
+        <title>{publicSellerLabel} | Tedarik Pazarı</title>
         <meta
           name="description"
-          content={
-            company.description ||
-            t("sellerStorePage.metaDescription", { company: company.name })
-          }
+          content={publicSellerLabel}
         />
         <link
           rel="canonical"
@@ -248,7 +243,7 @@ export default function SellerStorePage() {
               {logoUrl ? (
                 <img
                   src={logoUrl}
-                  alt={t("sellerStorePage.companyLogoAlt", { company: company.name })}
+                  alt={publicSellerLabel}
                   style={logoImageStyle}
                 />
               ) : (
@@ -258,7 +253,7 @@ export default function SellerStorePage() {
 
             <div style={{ minWidth: 0 }}>
               <div style={titleRowStyle}>
-                <h1 style={companyTitleStyle}>{company.name}</h1>
+                <h1 style={companyTitleStyle}>{publicSellerLabel}</h1>
 
                 {company.verified && (
                   <span style={verifiedStyle}>
@@ -372,40 +367,6 @@ export default function SellerStorePage() {
           />
         </div>
 
-        <div style={completionBoxStyle}>
-          <div style={completionTopStyle}>
-            <strong>{t("sellerStorePage.profileCompletion")}</strong>
-            <strong>
-              {company.stats?.profileCompletion ?? 0}%
-            </strong>
-          </div>
-
-          <div style={completionTrackStyle}>
-            <div
-              style={{
-                ...completionBarStyle,
-                width: `${company.stats?.profileCompletion ?? 0}%`,
-              }}
-            />
-          </div>
-
-          <div style={completionChecklistStyle}>
-            <CompletionItem done={Boolean(company.logo)} label={t("sellerStorePage.logo")} />
-            <CompletionItem done={Boolean(company.banner)} label={t("sellerStorePage.banner")} />
-            <CompletionItem
-              done={Boolean(company.description)}
-              label={t("sellerStorePage.companyDescription")}
-            />
-            <CompletionItem
-              done={products.length > 0}
-              label={t("sellerStorePage.firstProduct")}
-            />
-            <CompletionItem
-              done={Boolean(company.verified)}
-              label={t("sellerStorePage.companyVerification")}
-            />
-          </div>
-        </div>
       </section>
 
       <section style={contentGridStyle}>
@@ -416,11 +377,6 @@ export default function SellerStorePage() {
               <h2 style={sectionTitleStyle}>{t("sellerStorePage.aboutCompany")}</h2>
             </div>
           </div>
-
-          <p style={descriptionStyle}>
-            {company.description ||
-              t("sellerStorePage.noCompanyDescription")}
-          </p>
 
           <div style={detailGridStyle}>
             <Detail
