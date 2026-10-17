@@ -162,6 +162,7 @@ export default function SellerXmlFeedManager() {
     const data = await requestJson<XmlFeed[]>("/products/xml-feeds");
     if (!Array.isArray(data)) throw new Error("XML bağlantı listesi geçersiz.");
     setFeeds(data);
+    return data;
   };
 
   const resetForm = () => {
@@ -346,12 +347,20 @@ export default function SellerXmlFeedManager() {
           disabled={!!working || loading}
           onClick={() => {
             setWorking("reload");
+            setError("");
+            setNotice("XML bağlantıları kontrol ediliyor...");
             void reload()
-              .catch((err: unknown) => setError(err instanceof Error ? err.message : "Liste yenilenemedi."))
+              .then((data) => {
+                setNotice(`Liste yenilendi. ${data.length} XML bağlantısı bulundu.`);
+              })
+              .catch((err: unknown) => {
+                setNotice("");
+                setError(err instanceof Error ? err.message : "Liste yenilenemedi.");
+              })
               .finally(() => setWorking(null));
           }}
         >
-          Listeyi Yenile
+          {working === "reload" ? "Yenileniyor..." : "Listeyi Yenile"}
         </button>
       </div>
 
