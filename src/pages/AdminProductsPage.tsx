@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AdminSidebar from '../components/admin/AdminSidebar';
+import AdminProductRevisions from '../components/admin/AdminProductRevisions';
 
 const API = 'https://tedarik-backend.onrender.com/api';
 
@@ -126,6 +127,8 @@ export default function AdminProductsPage() {
         >
           {t("adminProductsPage.title")}
         </h1>
+
+        <AdminProductRevisions />
 
         <section style={{ marginBottom: 40 }}>
           <h2 style={{ fontSize: 24, marginBottom: 18 }}>
