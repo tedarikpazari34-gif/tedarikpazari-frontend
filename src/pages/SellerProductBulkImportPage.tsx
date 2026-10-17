@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import SellerLayout from "../components/SellerLayout";
+import SellerXmlFeedManager from "../components/SellerXmlFeedManager";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
@@ -467,6 +468,8 @@ export default function SellerProductBulkImportPage() {
           <div style={stepStyle}><b>3</b><span>Yeni, güncellenecek ve hatalı satırları incele.</span></div>
           <div style={stepStyle}><b>4</b><span>Onay ver; ürünler kontrollü gruplar halinde işlensin.</span></div>
         </section>
+
+        <SellerXmlFeedManager />
 
         <section style={panelStyle}>
           <h2 style={sectionTitleStyle}>Kategori Özellikleri Rehberi</h2>
