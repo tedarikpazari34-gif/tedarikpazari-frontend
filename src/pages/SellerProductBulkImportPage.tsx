@@ -565,7 +565,7 @@ export default function SellerProductBulkImportPage() {
                 <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                   <thead>
                     <tr>
-                      {["Özellik", "Excel Özellik Kodu", "Tür", "Zorunlu", "Seçenek Kodları"].map(
+                      {["Özellik", "Dosya Özellik Kodu", "Tür", "Zorunlu", "Seçenek Kodları"].map(
                         (heading) => (
                           <th key={heading} style={{ padding: 10, borderBottom: "1px solid #cbd5e1" }}>
                             {heading}
@@ -635,7 +635,7 @@ export default function SellerProductBulkImportPage() {
               <p style={sectionTextStyle}>
                 {importSource === "EXCEL"
                   ? "Şablonu kullanabilir veya mevcut ürünlerinizi Excel'e aktarabilirsiniz. Ürün ID alanını değiştirmeyin."
-                  : "XML dosyanız güvenli ön kontrolden geçirilir. products > product yapısı kullanılır; ürünler onayınız olmadan kaydedilmez."}
+                  : "XML dosyanız güvenli ön kontrolden geçirilir. products > product yapısı kullanılır. Varyantlar variants > variant, kategori özellikleri attributes > attribute altında gönderilebilir; ürünler onayınız olmadan kaydedilmez."}
                 {" "}Görsel adresleri HTTPS olmalı; birden fazla görseli | işaretiyle ayırabilirsiniz.
               </p>
             </div>
@@ -671,6 +671,81 @@ export default function SellerProductBulkImportPage() {
               </div>
             )}
           </div>
+
+          {importSource === "XML" && (
+            <details
+              style={{
+                marginBottom: 18,
+                border: "1px solid #cbd5e1",
+                borderRadius: 12,
+                padding: 16,
+                background: "#f8fafc",
+              }}
+            >
+              <summary style={{ cursor: "pointer", fontWeight: 700 }}>
+                XML formatı ve varyant/özellik örneğini göster
+              </summary>
+
+              <p style={{ ...sectionTextStyle, marginTop: 14 }}>
+                Her ürün <code>product</code> düğümünde yer alır. Ürün SKU alanı
+                zorunludur. Varyant kullanıyorsanız her varyanta benzersiz SKU
+                vermeniz önerilir. Kategori özelliklerinde aşağıdaki rehberde
+                gösterilen özellik kodlarını kullanın.
+              </p>
+
+              <pre
+                style={{
+                  overflowX: "auto",
+                  marginTop: 14,
+                  padding: 14,
+                  borderRadius: 10,
+                  background: "#0f172a",
+                  color: "#e2e8f0",
+                  fontSize: 12,
+                  lineHeight: 1.55,
+                  whiteSpace: "pre",
+                }}
+              >{`<products>
+  <product>
+    <sku>URUN-001</sku>
+    <title>Örnek Ürün</title>
+    <categoryPath>Temizlik ve Hijyen > Hijyen Sarf Malzemeleri > Islak Mendiller</categoryPath>
+    <unitType>Adet</unitType>
+    <basePrice>90</basePrice>
+    <vatRate>20</vatRate>
+    <moq>10</moq>
+    <quantityStep>5</quantityStep>
+    <stockQuantity>100</stockQuantity>
+    <imageUrls>https://ornek.com/urun.jpg</imageUrls>
+
+    <variants>
+      <variant>
+        <name>80 Yaprak</name>
+        <sku>URUN-001-80</sku>
+        <manufacturerCode>MODEL-80</manufacturerCode>
+        <price>95</price>
+        <stockQuantity>25</stockQuantity>
+        <isActive>true</isActive>
+        <sortOrder>0</sortOrder>
+      </variant>
+    </variants>
+
+    <attributes>
+      <attribute>
+        <attributeCode>OZELLIK_KODU</attributeCode>
+        <value>DEGER</value>
+      </attribute>
+    </attributes>
+  </product>
+</products>`}</pre>
+
+              <p style={{ ...sectionTextStyle, marginTop: 12 }}>
+                Çok seçimli özelliklerde birden fazla seçenek kodunu{" "}
+                <code>|</code> ile ayırabilirsiniz. Görsel adresleri yalnızca
+                HTTPS olmalıdır. Tek dosyada en fazla 10.000 ürün işlenir.
+              </p>
+            </details>
+          )}
 
           <div style={uploadBoxStyle}>
             <input
