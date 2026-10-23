@@ -603,6 +603,25 @@ export default function Navbar() {
             </div>
           )}
 
+          {token && (
+            <Link
+              to="/notifications"
+              style={{ ...shoppingActionStyle, position: "relative" }}
+              aria-label={`Bildirimler${unreadCount > 0 ? ` (${unreadCount} okunmamış)` : ""}`}
+            >
+              <span style={shoppingActionIconStyle}>🔔</span>
+              <span style={shoppingActionTextStyle}>
+                <small style={shoppingActionSmallStyle}>Hesabım</small>
+                <strong>Bildirimler</strong>
+              </span>
+              {unreadCount > 0 && (
+                <span style={badgeStyle}>
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
+
           <Link
             to={token && role === "BUYER" ? "/favorites" : "/login"}
             style={shoppingActionStyle}
