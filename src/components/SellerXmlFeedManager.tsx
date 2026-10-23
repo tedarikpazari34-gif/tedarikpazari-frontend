@@ -367,7 +367,7 @@ export default function SellerXmlFeedManager() {
       <p style={{ color: "#9a3412", background: "#fff7ed", borderRadius: 10, padding: 13, lineHeight: 1.6 }}>
         <strong>Önemli:</strong> Otomatik senkronizasyonu etkinleştirdiğinizde her işlemde yeniden onayınız istenmez.
         Hatalı satırlar ön kontrolde tespit edilirse hiçbir değişiklik başlatılmaz.
-        İşleme başladıktan sonra oluşan hatalarda kısmi güncellemeler gerçekleşmiş olabilir.
+        Otomatik XML en fazla 100 ürünü destekler. Ürün güncellemesi sırasında hata oluşursa değişikliklerin tamamı geri alınır.
         Yeni ürünler ve içerik revizyonları yönetici onayına tabidir.
       </p>
 

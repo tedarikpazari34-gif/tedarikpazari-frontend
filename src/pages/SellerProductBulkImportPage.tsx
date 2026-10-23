@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import SellerLayout from "../components/SellerLayout";
 import SellerXmlFeedManager from "../components/SellerXmlFeedManager";
+import SellerImportHistory from "../components/SellerImportHistory";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
@@ -274,6 +275,28 @@ export default function SellerProductBulkImportPage() {
     return data;
   };
 
+  const openHistoryJob = async (jobId: string) => {
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      const response = await authorizedFetch(
+        `/products/bulk-import/jobs/${encodeURIComponent(jobId)}`,
+      );
+      if (!response.ok) throw new Error(await readApiError(response));
+
+      const savedJob = (await response.json()) as ImportJob;
+      await loadRows(savedJob.id, "ALL", 1);
+      setJob(savedJob);
+      setRowFilter("ALL");
+      setNotice("Geçmiş yükleme açıldı. Satırları ve işlem durumunu inceleyebilirsiniz.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Geçmiş yükleme açılamadı.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const uploadFile = async () => {
     const isExcel = importSource === "EXCEL";
     const extension = isExcel ? ".xlsx" : ".xml";
@@ -470,6 +493,15 @@ export default function SellerProductBulkImportPage() {
         </section>
 
         <SellerXmlFeedManager />
+        <SellerImportHistory
+          onOpen={openHistoryJob}
+          onDownloadErrors={(jobId) =>
+            downloadFile(
+              `/products/bulk-import/jobs/${encodeURIComponent(jobId)}/errors.xlsx`,
+              `urun-import-hatalari-${jobId}.xlsx`,
+            )
+          }
+        />
 
         <section style={panelStyle}>
           <h2 style={sectionTitleStyle}>Kategori Özellikleri Rehberi</h2>
