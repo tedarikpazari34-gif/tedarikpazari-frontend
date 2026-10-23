@@ -290,6 +290,12 @@ export default function SellerProductBulkImportPage() {
       setJob(savedJob);
       setRowFilter("ALL");
       setNotice("Geçmiş yükleme açıldı. Satırları ve işlem durumunu inceleyebilirsiniz.");
+      requestAnimationFrame(() => {
+        document.getElementById("import-job-result")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Geçmiş yükleme açılamadı.");
     } finally {
@@ -855,7 +861,7 @@ export default function SellerProductBulkImportPage() {
                 anlamına gelmez.
               </div>
             </div>
-            <section style={panelStyle}>
+            <section id="import-job-result" style={panelStyle}>
               <div style={panelHeaderStyle}>
                 <div>
                   <h2 style={sectionTitleStyle}>Ön Kontrol Sonucu</h2>
