@@ -606,14 +606,18 @@ export default function Navbar() {
           {token && (
             <Link
               to="/notifications"
-              style={{ ...shoppingActionStyle, position: "relative" }}
+              style={{
+                ...shoppingActionStyle,
+                position: "relative",
+                width: 44,
+                minWidth: 44,
+                justifyContent: "center",
+                padding: "5px 6px",
+              }}
               aria-label={`Bildirimler${unreadCount > 0 ? ` (${unreadCount} okunmamış)` : ""}`}
+              title="Bildirimler"
             >
               <span style={shoppingActionIconStyle}>🔔</span>
-              <span style={shoppingActionTextStyle}>
-                <small style={shoppingActionSmallStyle}>Hesabım</small>
-                <strong>Bildirimler</strong>
-              </span>
               {unreadCount > 0 && (
                 <span style={badgeStyle}>
                   {unreadCount > 99 ? "99+" : unreadCount}
