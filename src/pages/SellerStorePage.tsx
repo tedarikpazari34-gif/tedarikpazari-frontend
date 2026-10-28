@@ -204,9 +204,11 @@ export default function SellerStorePage() {
   const reviews = company.sellerReviews || [];
   const sellerBadges = getSellerBadges(company, products.length, t);
   const rating = Number(company.rating || 0);
-  const publicSellerLabel = company.verified
-    ? t("productsPage.verifiedSupplier")
-    : t("favoritesPage.supplier");
+  const publicSellerLabel = `${
+    company.verified
+      ? t("productsPage.verifiedSupplier")
+      : t("favoritesPage.supplier")
+  } · NEX-${company.id.slice(-12).toUpperCase()}`;
   const bannerUrl = "";
   const logoUrl = "";
   const initials = "TP";

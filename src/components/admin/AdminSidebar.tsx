@@ -11,6 +11,14 @@ const items = [
     path: "/admin/control-center",
   },
   {
+    labelKey: "adminSidebar.verificationRequests",
+    path: "/admin/verification-requests",
+  },
+  {
+    labelKey: "adminSidebar.chatModeration",
+    path: "/admin/chat-moderation",
+  },
+  {
     labelKey: "adminSidebar.companies",
     path: "/admin/companies",
   },
@@ -63,7 +71,10 @@ export default function AdminSidebar() {
           gap: 12,
         }}
       >
-        {items.map((item) => {
+        {items.filter((item) =>
+          item.path !== "/admin/chargebacks" ||
+          import.meta.env.VITE_CHARGEBACK_ENABLED === "true"
+        ).map((item) => {
           const active = location.pathname === item.path;
 
           return (
@@ -81,7 +92,12 @@ export default function AdminSidebar() {
             >
               {item.path === "/admin/chargebacks"
                 ? t(item.labelKey, { defaultValue: "Harcama İtirazları" })
-                : t(item.labelKey)}
+                : t(item.labelKey, {
+                    defaultValue: item.path === "/admin/verification-requests"
+                      ? "Doğrulama Başvuruları"
+                      : item.path === "/admin/chat-moderation"
+                        ? "Mesaj Denetimi" : item.labelKey,
+                  })}
             </Link>
           );
         })}

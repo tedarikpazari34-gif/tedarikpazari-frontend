@@ -20,6 +20,13 @@ type Product = {
   isActive: boolean;
   isApproved: boolean;
   createdAt: string;
+  variants?: Array<{
+    id: string;
+    name: string;
+    stockQuantity?: number | null;
+    reservedQuantity?: number;
+    minStockThreshold?: number | null;
+  }>;
   category?: {
     id: string;
     name: string;
@@ -102,6 +109,13 @@ export default function SellerProductsPage() {
   const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [variantDrafts, setVariantDrafts] = useState<Record<string, string>>({});
+  const [variantSaving, setVariantSaving] = useState<string | null>(null);
+  const [variantMessage, setVariantMessage] = useState<{
+    id: string;
+    text: string;
+    error: boolean;
+  } | null>(null);
   const [revisionCategories, setRevisionCategories] = useState<RevisionCategory[]>([]);
 
   const [openRevisionProductId, setOpenRevisionProductId] = useState<string | null>(null);
@@ -117,6 +131,106 @@ export default function SellerProductsPage() {
   const [statusFilter, setStatusFilter] = useState<
     "ALL" | "ACTIVE" | "INACTIVE" | "APPROVED" | "PENDING"
   >("ALL");
+
+  const saveVariantStockThreshold = async (
+    productId: string,
+    variantId: string,
+    previousThreshold: number | null | undefined
+  ) => {
+    const raw = variantDrafts[variantId] ??
+      (previousThreshold == null ? "" : String(previousThreshold));
+
+    const threshold = raw.trim() === "" ? null : Number(raw);
+
+    if (
+      threshold !== null &&
+      (!Number.isSafeInteger(threshold) ||
+        threshold < 0 ||
+        threshold > 2147483647)
+    ) {
+      setVariantMessage({
+        id: variantId,
+        text: "Kritik stok seviyesi 0 ile 2147483647 arasında tam sayı olmalıdır.",
+        error: true,
+      });
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setVariantMessage({
+        id: variantId,
+        text: "Oturumunuz sona ermiş. Yeniden giriş yapın.",
+        error: true,
+      });
+      return;
+    }
+
+    setVariantSaving(variantId);
+    setVariantMessage(null);
+
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/products/mine/${encodeURIComponent(productId)}` +
+        `/variants/${encodeURIComponent(variantId)}/stock-threshold`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ minStockThreshold: threshold }),
+        }
+      );
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        const message = Array.isArray(result?.message)
+          ? result.message.join(", ")
+          : typeof result?.message === "string"
+            ? result.message
+            : "Kritik stok seviyesi kaydedilemedi.";
+        throw new Error(message);
+      }
+
+      if (
+        result?.id !== variantId ||
+        result?.minStockThreshold !== threshold
+      ) {
+        throw new Error("Sunucu yanıtı doğrulanamadı.");
+      }
+
+      setProducts((previous) =>
+        previous.map((product) =>
+          product.id !== productId
+            ? product
+            : {
+                ...product,
+                variants: product.variants?.map((variant) =>
+                  variant.id === variantId
+                    ? { ...variant, minStockThreshold: threshold }
+                    : variant
+                ),
+              }
+        )
+      );
+
+      setVariantMessage({
+        id: variantId,
+        text: "Kritik stok seviyesi kaydedildi.",
+        error: false,
+      });
+    } catch (error) {
+      setVariantMessage({
+        id: variantId,
+        text: error instanceof Error ? error.message : "Kayıt başarısız.",
+        error: true,
+      });
+    } finally {
+      setVariantSaving(null);
+    }
+  };
 
   const loadProducts = async () => {
     try {
@@ -522,6 +636,133 @@ export default function SellerProductsPage() {
                       value={`%${product.vatRate}`}
                     />
                   </div>
+
+                  {product.variants && product.variants.length > 0 && (
+                    <details style={{
+                      marginTop: 12,
+                      padding: 12,
+                      border: "1px solid #99f6e4",
+                      borderRadius: 12,
+                      background: "#f0fdfa",
+                    }}>
+                      <summary style={{
+                        cursor: "pointer",
+                        color: "#0f766e",
+                        fontWeight: 800,
+                      }}>
+                        Varyant Stok Uyarıları ({product.variants.length})
+                      </summary>
+
+                      {product.variants.map((variant) => {
+                        const available = variant.stockQuantity == null
+                          ? null
+                          : Math.max(
+                              0,
+                              variant.stockQuantity - (variant.reservedQuantity ?? 0)
+                            );
+
+                        return (
+                          <div key={variant.id} style={{
+                            padding: "12px 0",
+                            borderBottom: "1px solid #ccfbf1",
+                          }}>
+                            <div style={{ fontWeight: 700, color: "#0f172a" }}>
+                              {variant.name}
+                            </div>
+
+                            <div style={{
+                              fontSize: 12,
+                              margin: "5px 0 9px",
+                              color: "#475569",
+                            }}>
+                              Toplam stok: {variant.stockQuantity ?? "Belirtilmemiş"}
+                              {" · "}
+                              Kullanılabilir: {available ?? "Belirtilmemiş"}
+                            </div>
+
+                            <div style={{
+                              display: "flex",
+                              gap: 8,
+                              alignItems: "end",
+                              flexWrap: "wrap",
+                            }}>
+                              <label style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 5,
+                                fontSize: 12,
+                                color: "#334155",
+                              }}>
+                                Kritik Stok Seviyesi
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="2147483647"
+                                  step="1"
+                                  value={
+                                    variantDrafts[variant.id] ??
+                                    (variant.minStockThreshold == null
+                                      ? ""
+                                      : String(variant.minStockThreshold))
+                                  }
+                                  onChange={(e) => {
+                                    setVariantDrafts((previous) => ({
+                                      ...previous,
+                                      [variant.id]: e.target.value,
+                                    }));
+                                    setVariantMessage(null);
+                                  }}
+                                  placeholder="Boş: uyarı kapalı"
+                                  style={{
+                                    width: 170,
+                                    padding: 9,
+                                    border: "1px solid #94a3b8",
+                                    borderRadius: 8,
+                                  }}
+                                />
+                              </label>
+
+                              <button
+                                type="button"
+                                disabled={variantSaving !== null}
+                                onClick={() => void saveVariantStockThreshold(
+                                  product.id,
+                                  variant.id,
+                                  variant.minStockThreshold
+                                )}
+                                style={{
+                                  padding: "10px 14px",
+                                  border: "none",
+                                  borderRadius: 8,
+                                  background: "#0f766e",
+                                  color: "white",
+                                  fontWeight: 700,
+                                  cursor: variantSaving ? "wait" : "pointer",
+                                  opacity: variantSaving ? 0.6 : 1,
+                                }}
+                              >
+                                {variantSaving === variant.id
+                                  ? "Kaydediliyor..."
+                                  : "Kaydet"}
+                              </button>
+                            </div>
+
+                            {variantMessage?.id === variant.id && (
+                              <div role="status" style={{
+                                marginTop: 7,
+                                fontSize: 12,
+                                color: variantMessage.error
+                                  ? "#b91c1c"
+                                  : "#166534",
+                              }}>
+                                {variantMessage.text}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </details>
+                  )}
 
                   <div style={badgeRowStyle}>
                     <span

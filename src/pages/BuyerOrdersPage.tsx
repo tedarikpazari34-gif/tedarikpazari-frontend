@@ -526,13 +526,15 @@ export default function BuyerOrdersPage() {
                 </p>
               </div>
 
-              {o.status === "SHIPPED" && (
+              {(o.status === "SHIPPED" || (o.status === "COMPLETED" && Boolean(o.shippingCompany || o.shippingTrackingNo || o.shippingDispatchNo))) && (
                 <div style={shippingBoxStyle}>
                   {o.shippingCompany === "Kendi Teslimatım" ? (
                     <>
                       <div>🤝 {t("buyerOrdersPage.delivery")}: {t("buyerOrdersPage.selfDelivery")}</div>
                       <div>
-                        {t("buyerOrdersPage.deliveryStatus")}: {t("buyerOrdersPage.readyForDelivery")}
+                        {t("buyerOrdersPage.deliveryStatus")}: {o.status === "COMPLETED"
+                          ? statusLabel(o.status, o.shippingCompany, t)
+                          : t("buyerOrdersPage.readyForDelivery")}
                       </div>
                       <div>
                         {t("buyerOrdersPage.readyDate")}:{" "}

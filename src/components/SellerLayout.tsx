@@ -51,9 +51,36 @@ export default function SellerLayout({
       icon: "➕",
     },
     {
+      label: t("sellerLayout.bulkImport", {
+        defaultValue: "Excel / XML Ürün Yükleme",
+      }),
+      href: "/seller/products/import",
+      icon: "📄",
+    },
+    {
       label: t("sellerLayout.orders"),
       href: "/seller/orders",
       icon: "🧾",
+    },
+    {
+      label: t("sellerLayout.profile", { defaultValue: "Firma Profilim" }),
+      href: "/seller/profile",
+      icon: "🏢",
+    },
+    {
+      label: t("sellerLayout.wallet", { defaultValue: "Kazançlarım" }),
+      href: "/wallet",
+      icon: "💳",
+    },
+    {
+      label: t("sellerLayout.messages", { defaultValue: "Mesajlar" }),
+      href: "/chat",
+      icon: "💬",
+    },
+    {
+      label: t("sellerLayout.notifications", { defaultValue: "Bildirimler" }),
+      href: "/notifications",
+      icon: "🔔",
     },
     {
       label: t("sellerLayout.chargebacks", {
@@ -84,7 +111,10 @@ export default function SellerLayout({
         </div>
 
         <nav style={menuWrap}>
-          {menu.map((item) => {
+          {menu.filter((item) =>
+            item.href !== "/seller/chargebacks" ||
+            import.meta.env.VITE_CHARGEBACK_ENABLED === "true"
+          ).map((item) => {
             const active = path === item.href;
 
             return (

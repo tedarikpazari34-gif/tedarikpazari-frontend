@@ -61,6 +61,7 @@ export default function SellerProductCreatePage() {
   const [leadTimeDays, setLeadTimeDays] = useState("3");
   const [stockType, setStockType] = useState("STOCK");
   const [stockQuantity, setStockQuantity] = useState("");
+  const [minStockThreshold, setMinStockThreshold] = useState("");
   const [vatRate, setVatRate] = useState("20");
 
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
@@ -156,6 +157,12 @@ export default function SellerProductCreatePage() {
         setStockQuantity(
           product.stockQuantity !== null && product.stockQuantity !== undefined
             ? String(product.stockQuantity)
+            : ""
+        );
+        setMinStockThreshold(
+          product.minStockThreshold !== null &&
+          product.minStockThreshold !== undefined
+            ? String(product.minStockThreshold)
             : ""
         );
         setVatRate(String(product.vatRate ?? 20));
@@ -422,6 +429,10 @@ export default function SellerProductCreatePage() {
       const leadTimeValue = Number(leadTimeDays);
       const stockQuantityValue =
         stockQuantity.trim() === "" ? null : Number(stockQuantity);
+      const minStockThresholdValue =
+        minStockThreshold.trim() === ""
+          ? null
+          : Number(minStockThreshold);
       const vatValue = Number(vatRate);
 
       if (!Number.isFinite(priceValue) || priceValue <= 0) {
@@ -444,6 +455,15 @@ export default function SellerProductCreatePage() {
         (!Number.isInteger(stockQuantityValue) || stockQuantityValue < 0)
       ) {
         setError("Stok adedi 0 veya daha büyük bir tam sayı olmalıdır.");
+        return;
+      }
+
+      if (
+        minStockThresholdValue !== null &&
+        (!Number.isInteger(minStockThresholdValue) ||
+          minStockThresholdValue < 0)
+      ) {
+        setError("Kritik stok seviyesi 0 veya daha büyük bir tam sayı olmalıdır.");
         return;
       }
 
@@ -485,6 +505,7 @@ export default function SellerProductCreatePage() {
         leadTimeDays: leadTimeValue,
         stockType,
         stockQuantity: stockQuantityValue,
+        minStockThreshold: minStockThresholdValue,
         vatRate: vatValue,
       };
 
@@ -499,7 +520,10 @@ export default function SellerProductCreatePage() {
 
       const immediateFields = Object.fromEntries(
         Object.entries(changedFields).filter(
-          ([key]) => key === "basePrice" || key === "stockQuantity"
+          ([key]) =>
+            key === "basePrice" ||
+            key === "stockQuantity" ||
+            key === "minStockThreshold"
         )
       );
 
@@ -508,6 +532,7 @@ export default function SellerProductCreatePage() {
           ([key, value]) =>
             key !== "basePrice" &&
             key !== "stockQuantity" &&
+            key !== "minStockThreshold" &&
             !(
               originalProduct?.isApproved === true &&
               Object.prototype.hasOwnProperty.call(submittedContent, key) &&
@@ -601,6 +626,7 @@ export default function SellerProductCreatePage() {
             leadTimeDays: leadTimeValue,
             stockType,
             stockQuantity: stockQuantityValue,
+            minStockThreshold: minStockThresholdValue,
             vatRate: vatValue,
             ...(!isEditMode ? { rfqEnabled: false } : {}),
             imageUrl: coverImage,
@@ -1007,6 +1033,32 @@ export default function SellerProductCreatePage() {
                   }}
                 >
                   Satışa hazır toplam ürün adedini girin. Stok yoksa 0 yazın.
+                </div>
+              </div>
+
+              <div>
+                <label style={fieldLabelStyle}>
+                  Kritik Stok Seviyesi
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={minStockThreshold}
+                  onChange={(e) => setMinStockThreshold(e.target.value)}
+                  placeholder="Örn. 20"
+                  style={inputStyle}
+                />
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 12,
+                    color: "#64748b",
+                  }}
+                >
+                  Kullanılabilir stok bu seviyeye düştüğünde
+                  uyarı alırsınız. Boş bırakırsanız uyarı
+                  eşiği tanımlanmaz.
                 </div>
               </div>
 

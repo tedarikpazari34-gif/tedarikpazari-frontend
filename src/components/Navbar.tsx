@@ -118,9 +118,11 @@ const buyerLinks: NavItem[] = [
   { labelKey: "common.products", to: "/products" },
   { labelKey: "common.myOrders", to: "/buyer/orders" },
   { labelKey: "common.shippingQuotes", to: "/buyer/shipping-quotes" },
+  { labelKey: "buyerDashboard.shippingRequests", to: "/buyer/shipping-request" },
   { labelKey: "common.favorites", to: "/favorites" },
   { labelKey: "common.messages", to: "/chat" },
   { labelKey: "common.wallet", to: "/wallet" },
+  { labelKey: "common.companyProfile", to: "/buyer/profile" },
   { labelKey: "common.companyVerification", to: "/company/verification" },
 ];
 

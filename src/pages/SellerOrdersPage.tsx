@@ -346,7 +346,7 @@ export default function SellerOrdersPage() {
               </div>
 
               <div style={infoGridStyle}>
-                <Info label={t("sellerOrdersPage.buyer")} value={o.buyer?.name || o.buyer?.companyName || "-"} />
+                <Info label={t("sellerOrdersPage.buyer")} value={o.buyer?.id ? `NEX-ALICI-${o.buyer.id.slice(-12).toUpperCase()}` : "-"} />
                 <Info
                   label={t("sellerOrdersPage.quantity")}
                   value={
