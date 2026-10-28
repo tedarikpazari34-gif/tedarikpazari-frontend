@@ -18,6 +18,7 @@ import BuyerOrdersPage from "./pages/BuyerOrdersPage";
 import BuyerQuotesPage from "./pages/BuyerQuotesPage";
 
 import SellerOrdersPage from "./pages/SellerOrdersPage";
+import SellerChargebacksPage from "./pages/SellerChargebacksPage";
 import SellerProductsPage from "./pages/SellerProductsPage";
 import SellerProductCreatePage from "./pages/SellerProductCreatePage";
 import SellerProductBulkImportPage from "./pages/SellerProductBulkImportPage";
@@ -26,6 +27,7 @@ import SellerProfilePage from "./pages/SellerProfilePage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminProductsPage from "./pages/AdminProductsPage";
 import AdminDisputesPage from "./pages/AdminDisputesPage";
+import AdminChargebacksPage from "./pages/AdminChargebacksPage";
 import AdminCompaniesPage from "./pages/AdminCompaniesPage";
 import AdminFinancePage from "./pages/AdminFinancePage";
 import AdminRoute from "./components/auth/AdminRoute";
@@ -159,6 +161,15 @@ export default function App() {
         />
 
         <Route
+          path="/seller/chargebacks"
+          element={
+            <PrivateRoute role="SELLER">
+              <SellerChargebacksPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
           path="/seller/products"
           element={
             <PrivateRoute role="SELLER">
@@ -253,6 +264,15 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminDisputesPage />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/chargebacks"
+          element={
+            <AdminRoute>
+              <AdminChargebacksPage />
             </AdminRoute>
           }
         />

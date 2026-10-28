@@ -4,6 +4,7 @@ import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
 import { useTranslation } from "react-i18next";
 import { unitLabel } from "../lib/unitLabel";
+import BuyerPaymentIssueInfo from "../components/BuyerPaymentIssueInfo";
 
 type Order = {
   id: string;
@@ -592,6 +593,12 @@ export default function BuyerOrdersPage() {
     </Link>
   </div>
 )}
+              {["PAID", "PREPARING", "SHIPPED", "COMPLETED"].includes(
+                o.status
+              ) && (
+                <BuyerPaymentIssueInfo orderId={o.id} />
+              )}
+
               <div style={actionsStyle}>
 
   <button

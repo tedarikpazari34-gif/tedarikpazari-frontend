@@ -55,6 +55,13 @@ export default function SellerLayout({
       href: "/seller/orders",
       icon: "🧾",
     },
+    {
+      label: t("sellerLayout.chargebacks", {
+        defaultValue: "Harcama İtirazlarım",
+      }),
+      href: "/seller/chargebacks",
+      icon: "🛡️",
+    },
   ];
 
   return (

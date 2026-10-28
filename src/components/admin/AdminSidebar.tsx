@@ -23,6 +23,10 @@ const items = [
     path: "/admin/disputes",
   },
   {
+    labelKey: "adminSidebar.chargebacks",
+    path: "/admin/chargebacks",
+  },
+  {
     labelKey: "adminSidebar.finance",
     path: "/admin/finance",
   },
@@ -75,7 +79,9 @@ export default function AdminSidebar() {
                 fontWeight: 600,
               }}
             >
-              {t(item.labelKey)}
+              {item.path === "/admin/chargebacks"
+                ? t(item.labelKey, { defaultValue: "Harcama İtirazları" })
+                : t(item.labelKey)}
             </Link>
           );
         })}
