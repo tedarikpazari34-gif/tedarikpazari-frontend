@@ -359,40 +359,106 @@ const res = await fetch(`${API}/products?${query.toString()}`);
     }
   };
 
-  const addToCart = (product: Product) => {
+  const addToCart = async (product: Product) => {
     try {
-      const quantity = Math.max(Number(product.moq || 1), 1);
+      const response = await fetch(
+        `${API}/products/${encodeURIComponent(product.id)}?lang=${encodeURIComponent(i18n.language)}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Ürün bilgileri alınamadı");
+      }
+
+      const detail: unknown = await response.json();
+
+      if (
+        !detail ||
+        typeof detail !== "object" ||
+        Array.isArray(detail) ||
+        !Array.isArray((detail as { variants?: unknown }).variants)
+      ) {
+        throw new Error("Ürün varyant bilgileri doğrulanamadı");
+      }
+
+      const fresh = detail as {
+        id?: string;
+        title?: string;
+        hasVariants?: boolean;
+        variants: unknown[];
+        moq?: number;
+        quantityStep?: number;
+        basePrice?: number | string;
+        unitType?: string;
+        availableStock?: number | null;
+        imageUrl?: string | null;
+      };
+
+      if (fresh.id !== product.id || typeof fresh.hasVariants !== "boolean") {
+        throw new Error("Güncel ürün bilgileri doğrulanamadı.");
+      }
+
+      if (fresh.hasVariants || fresh.variants.length > 0) {
+        navigate(`/product/${encodeURIComponent(product.id)}`);
+        return;
+      }
+
+      const minimum = Number(fresh.moq);
+      const step = minimum;
+      const unitPrice = Number(fresh.basePrice);
+      const availableStock = fresh.availableStock;
+
+      if (
+        !Number.isSafeInteger(minimum) || minimum < 1 ||
+        !Number.isSafeInteger(step) || step < 1 ||
+        !Number.isFinite(unitPrice) || unitPrice <= 0 ||
+        availableStock === undefined ||
+        (availableStock !== null &&
+          (!Number.isSafeInteger(availableStock) || availableStock < 0))
+      ) {
+        throw new Error("Güncel fiyat veya stok bilgileri doğrulanamadı.");
+      }
+
       const raw = localStorage.getItem("tedarikCart");
       const current = raw ? JSON.parse(raw) : [];
       const cart = Array.isArray(current) ? current : [];
 
       const existingIndex = cart.findIndex(
-        (item: any) => item.productId === product.id
+        (item: any) =>
+          item?.productId === product.id && !item.variantId
       );
+
+      let quantity = minimum;
+
+      if (existingIndex >= 0) {
+        const previous = Number(cart[existingIndex]?.quantity);
+        if (
+          Number.isSafeInteger(previous) &&
+          previous >= minimum &&
+          (previous - minimum) % step === 0
+        ) {
+          quantity = previous;
+        }
+      }
+
+      if (availableStock !== null && quantity > availableStock) {
+        throw new Error("Bu ürün için yeterli satılabilir stok bulunmuyor.");
+      }
 
       const item = {
         productId: product.id,
-        title: getProductTitle(product, t("productsPage.productFallback")),
+        variantId: null,
+        title: fresh.title || getProductTitle(product, t("productsPage.productFallback")),
         quantity,
-        moq: Math.max(Number(product.moq || 1), 1),
-        quantityStep: Math.max(Number(product.quantityStep || 1), 1),
-        unitType: product.unitType,
-        unitPrice: Number(product.basePrice ?? product.price ?? 0),
+        moq: minimum,
+        quantityStep: step,
+        unitType: fresh.unitType || product.unitType,
+        unitPrice,
         sellerId: product.seller?.id || null,
-        imageUrl: getImage(product) || null,
+        imageUrl: fresh.imageUrl || getImage(product) || null,
       };
 
       if (existingIndex >= 0) {
-        const existing = cart[existingIndex];
-
-        cart[existingIndex] = {
-          ...existing,
-          ...item,
-          quantity: Math.max(
-            Number(existing.quantity || quantity),
-            quantity
-          ),
-        };
+        cart[existingIndex] = { ...cart[existingIndex], ...item };
       } else {
         cart.push(item);
       }
@@ -407,6 +473,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
       });
     } catch (err) {
       console.error("ADD TO CART ERROR:", err);
+      alert("Ürün bilgileri doğrulanamadı. Lütfen tekrar deneyin.");
     }
   };
 

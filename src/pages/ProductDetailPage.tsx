@@ -13,6 +13,15 @@ type ProductImage = {
   isCover: boolean;
 };
 
+type ProductVariant = {
+  id: string;
+  name: string;
+  sku?: string | null;
+  price?: string | number | null;
+  stockQuantity?: number | null;
+  availableStock?: number | null;
+};
+
 type Product = {
   id: string;
   title: string;
@@ -23,6 +32,9 @@ type Product = {
   unitType: string;
   moq: number;
   quantityStep?: number;
+  stockQuantity?: number | null;
+  availableStock?: number | null;
+  hasVariants?: boolean;
   basePrice: string;
   leadTimeDays?: number | null;
   stockType?: string | null;
@@ -50,6 +62,7 @@ type Product = {
   };
 
   images?: ProductImage[];
+  variants?: ProductVariant[];
 };
 function getCategoryIcon(categoryName?: string) {
   if (!categoryName) return "📦";
@@ -111,6 +124,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [quantityInput, setQuantityInput] = useState("1");
   const [addedToCart, setAddedToCart] = useState(false);
+  const [selectedVariantId, setSelectedVariantId] = useState("");
 
   useEffect(() => {
     const loadSavedActions = async () => {
@@ -179,6 +193,8 @@ export default function ProductDetailPage() {
         }
 
         setProduct(data);
+        setSelectedVariantId("");
+        setAddedToCart(false);
 
         const initialQuantity = Math.max(Number(data.moq || 1), 1);
         setQuantity(initialQuantity);
@@ -302,11 +318,57 @@ export default function ProductDetailPage() {
     }
   };
 
-  const addToCart = () => {
-    if (!product) return;
+  const variants = Array.isArray(product?.variants) ? product.variants : [];
+  const selectedVariant = variants.find((variant) => variant.id === selectedVariantId);
+  const hasVariants = product?.hasVariants === true || variants.length > 0;
+  const selectedUnitPrice = Number(selectedVariant?.price ?? product?.basePrice ?? 0);
+  const selectedAvailableStock = selectedVariant
+    ? selectedVariant.availableStock
+    : product?.availableStock;
+
+  const addToCart = (): boolean => {
+    if (!product) return false;
+
+    if (!Array.isArray(product.variants)) {
+      alert("Varyant bilgileri doğrulanamadı. Lütfen tekrar deneyin.");
+      return false;
+    }
+
+    if (typeof product.hasVariants !== "boolean") {
+      alert("Güncel ürün bilgileri doğrulanamadı. Lütfen tekrar deneyin.");
+      return false;
+    }
+
+    if (hasVariants && !selectedVariant) {
+      alert("Lütfen önce bir varyant seçin.");
+      return false;
+    }
+
+    if (
+      selectedAvailableStock === undefined ||
+      (selectedAvailableStock !== null &&
+        (!Number.isSafeInteger(selectedAvailableStock) ||
+          selectedAvailableStock < 0))
+    ) {
+      alert("Satılabilir stok doğrulanamadı. Lütfen tekrar deneyin.");
+      return false;
+    }
+
+    if (!Number.isFinite(selectedUnitPrice) || selectedUnitPrice <= 0) {
+      alert("Seçilen ürünün fiyatı geçersiz.");
+      return false;
+    }
+
+    if (
+      selectedAvailableStock != null &&
+      quantity > selectedAvailableStock
+    ) {
+      alert("Seçilen ürün veya varyant için yeterli satılabilir stok bulunmuyor.");
+      return false;
+    }
 
     const minimum = Math.max(Number(product.moq || 1), 1);
-    const step = Math.max(Number(product.quantityStep || 1), 1);
+    const step = Math.max(Number(product.moq || 1), 1);
 
     if (
       !Number.isInteger(quantity) ||
@@ -321,7 +383,7 @@ export default function ProductDetailPage() {
       setQuantity(normalized);
       setQuantityInput(String(normalized));
       alert(t("productDetailPage.cartInvalidQuantity"));
-      return;
+      return false;
     }
 
     try {
@@ -330,17 +392,22 @@ export default function ProductDetailPage() {
       const cart = Array.isArray(current) ? current : [];
 
       const existingIndex = cart.findIndex(
-        (item: any) => item.productId === product.id
+        (item: any) =>
+          item.productId === product.id &&
+          (item.variantId ?? null) === (selectedVariant?.id ?? null)
       );
 
       const item = {
         productId: product.id,
+        variantId: selectedVariant?.id ?? null,
+        variantName: selectedVariant?.name ?? null,
+        variantSku: selectedVariant?.sku ?? null,
         title: product.title,
         quantity,
         moq: Math.max(Number(product.moq || 1), 1),
-        quantityStep: Math.max(Number(product.quantityStep || 1), 1),
+        quantityStep: Math.max(Number(product.moq || 1), 1),
         unitType: product.unitType,
-        unitPrice: Number(product.basePrice || 0),
+        unitPrice: selectedUnitPrice,
         sellerId: product.seller?.id || null,
         imageUrl: product.imageUrl || product.images?.[0]?.url || null,
       };
@@ -354,8 +421,10 @@ export default function ProductDetailPage() {
       localStorage.setItem("tedarikCart", JSON.stringify(cart));
       window.dispatchEvent(new Event("tedarik-cart-changed"));
       setAddedToCart(true);
+      return true;
     } catch (error) {
       console.error("ADD TO CART ERROR:", error);
+      return false;
     }
   };
 
@@ -363,7 +432,7 @@ export default function ProductDetailPage() {
     if (!product) return;
 
     const minimum = Math.max(Number(product.moq || 1), 1);
-    const step = Math.max(Number(product.quantityStep || 1), 1);
+    const step = Math.max(Number(product.moq || 1), 1);
 
     if (
       !Number.isInteger(quantity) ||
@@ -381,8 +450,9 @@ export default function ProductDetailPage() {
       return;
     }
 
-    addToCart();
-    navigate("/cart");
+    if (addToCart()) {
+      navigate("/cart");
+    }
   };
 
   const toggleCompare = () => {
@@ -553,7 +623,9 @@ export default function ProductDetailPage() {
               <div>
                 <span style={purchaseLabelStyle}>{t("productDetailPage.wholesalePurchase")}</span>
                 <strong style={purchasePriceStyle}>
-                  {Number(product.basePrice || 0).toLocaleString(locale)} ₺
+                  {hasVariants && !selectedVariant
+                    ? "Varyant seçin"
+                    : `${selectedUnitPrice.toLocaleString(locale)} ₺`}
                 </strong>
                 <span style={vatIncludedPurchaseStyle}>
                   KDV dahil
@@ -562,6 +634,62 @@ export default function ProductDetailPage() {
 
               <span style={purchaseUnitStyle}>/ {unitLabel(product.unitType, t)}</span>
             </div>
+
+            {hasVariants && (
+              <div style={{ marginTop: 20, marginBottom: 18 }}>
+                <label
+                  htmlFor="product-variant"
+                  style={{ display: "block", fontWeight: 800, marginBottom: 8 }}
+                >
+                  Paket / Varyant Seçimi
+                </label>
+                <select
+                  id="product-variant"
+                  value={selectedVariantId}
+                  onChange={(event) => {
+                    setSelectedVariantId(event.target.value);
+                    setAddedToCart(false);
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: 13,
+                    border: "1px solid #0f766e",
+                    borderRadius: 10,
+                    background: "#fff",
+                    fontSize: 15,
+                  }}
+                >
+                  <option value="">Lütfen varyant seçin</option>
+                  {variants.map((variant) => (
+                    <option
+                      key={variant.id}
+                      value={variant.id}
+                      disabled={
+                        variant.availableStock === undefined ||
+                        (variant.availableStock !== null &&
+                          variant.availableStock < product.moq)
+                      }
+                    >
+                      {variant.name} —{" "}
+                      {Number(variant.price ?? product.basePrice).toLocaleString(locale)} ₺
+                      {variant.availableStock === undefined
+                        ? " (Stok doğrulanamadı)"
+                        : variant.availableStock !== null &&
+                            variant.availableStock < product.moq
+                          ? " (Sipariş için stok yetersiz)"
+                          : ""}
+                    </option>
+                  ))}
+                </select>
+                {selectedVariant && (
+                  <p style={{ marginTop: 8, color: "#475569", fontSize: 13 }}>
+                    {selectedAvailableStock == null
+                      ? "Stok miktarı belirtilmemiş"
+                      : `Satılabilir stok: ${selectedAvailableStock}`}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div style={purchaseFeatureGridStyle}>
               <div style={purchaseFeatureStyle}>
@@ -656,7 +784,7 @@ export default function ProductDetailPage() {
                             1
                           );
                           const step = Math.max(
-                            Number(product.quantityStep || 1),
+                            Number(product.moq || 1),
                             1
                           );
                           const next = Math.max(minimum, quantity - step);
@@ -691,7 +819,7 @@ export default function ProductDetailPage() {
                       <input
                         type="number"
                         min={product.moq}
-                        step={Math.max(Number(product.quantityStep || 1), 1)}
+                        step={Math.max(Number(product.moq || 1), 1)}
                         inputMode="numeric"
                         value={quantityInput}
                         onChange={(e) => {
@@ -711,7 +839,7 @@ export default function ProductDetailPage() {
                             1
                           );
                           const step = Math.max(
-                            Number(product.quantityStep || 1),
+                            Number(product.moq || 1),
                             1
                           );
                           const parsed = Number(quantityInput);
@@ -743,7 +871,7 @@ export default function ProductDetailPage() {
                         aria-label="Miktarı artır"
                         onClick={() => {
                           const step = Math.max(
-                            Number(product.quantityStep || 1),
+                            Number(product.moq || 1),
                             1
                           );
                           const next = quantity + step;
@@ -793,7 +921,9 @@ export default function ProductDetailPage() {
                       }}
                     >
                       {quantity} {unitLabel(product.unitType, t)} ×{" "}
-                      {Number(product.basePrice || 0).toLocaleString(locale)} ₺
+                      {hasVariants && !selectedVariant
+                        ? "Varyant seçin"
+                        : `${selectedUnitPrice.toLocaleString(locale)} ₺`}
                     </div>
 
                     <div
@@ -815,10 +945,9 @@ export default function ProductDetailPage() {
                         color: "#0f172a",
                       }}
                     >
-                      {Number(
-                        Number(product.basePrice || 0) * quantity
-                      ).toLocaleString(locale)}{" "}
-                      ₺
+                      {hasVariants && !selectedVariant
+                        ? "—"
+                        : `${(selectedUnitPrice * quantity).toLocaleString(locale)} ₺`}
                     </div>
 
                     <div

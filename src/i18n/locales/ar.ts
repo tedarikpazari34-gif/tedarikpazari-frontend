@@ -437,6 +437,16 @@ export default {
     "chat": "دردشة"
   },
   "walletPage": {
+    "sellerTitle": "متابعة مستحقات البائع",
+    "sellerDescription": "تابع المستحقات المعلقة والمعتمدة من iyzico. هذه المبالغ لا تؤكد إتمام التحويل البنكي.",
+    "sellerSecurity": "IYZICO MARKETPLACE",
+    "sellerEscrowFlow": "عملية الدفع واعتماد المستحقات",
+    "sellerEscrowDescription": "تتم معالجة مدفوعات المشترين عبر iyzico. وبعد اكتمال الطلب والموافقة عليه، تعالج iyzico مستحقات البائع. ويتم التحقق من التحويل البنكي بشكل منفصل.",
+    "sellerStep2": "تدير iyzico عملية الدفع",
+    "sellerStep3": "تم اعتماد المستحقات",
+    "sellerTransactions": "الحركات المالية",
+    "sellerHistoryDescription": "راجع سجلات الطلبات والعمليات المحاسبية. تبقى طلبات السحب اليدوية السابقة محفوظة كسجل تاريخي، ولا تثبت إتمام تحويل بنكي.",
+    "sellerNoteSellerRelease": "تم تحرير مستحقات البائع في سجلات المنصة المحاسبية. ويتم التحقق من التحويل البنكي بشكل منفصل.",
     "loginRequired": "مطلوب تسجيل الدخول لعرض معلومات المحفظة.",
     "loadFailed": "تعذر استرداد بيانات المحفظة",
     "loadError": "حدث خطأ أثناء تحميل المحفظة",
@@ -954,6 +964,9 @@ export default {
     "paymentTitle": "سوق المشتريات – دفع آمن"
   },
   "sellerDashboardPage": {
+    "pendingIyzicoPayout": "مستحقات تنتظر اعتماد iyzico",
+    "approvedIyzicoPayout": "مستحقات معتمدة من iyzico",
+    "iyzicoApprovalInfo": "اعتماد iyzico لا يعني وصول الأموال إلى الحساب البنكي.",
     "loadFailed": "تعذر تحميل بيانات لوحة تحكم البائع",
     "loading": "جاري تحميل لوحة تحكم البائع...",
     "title": "لوحة تحكم البائع",

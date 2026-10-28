@@ -437,6 +437,16 @@ export default {
     "chat": "Chat"
   },
   "walletPage": {
+    "sellerTitle": "Auszahlungen verfolgen",
+    "sellerDescription": "Verfolgen Sie ausstehende und von iyzico genehmigte Auszahlungen. Diese Beträge bestätigen keine Banküberweisung.",
+    "sellerSecurity": "IYZICO MARKETPLACE",
+    "sellerEscrowFlow": "Zahlungs- und Freigabeprozess",
+    "sellerEscrowDescription": "Käuferzahlungen werden über iyzico abgewickelt. Nach Abschluss und Freigabe der Bestellung bearbeitet iyzico die Auszahlung an den Verkäufer. Die Banküberweisung wird separat bestätigt.",
+    "sellerStep2": "iyzico verwaltet die Zahlung",
+    "sellerStep3": "Auszahlung freigegeben",
+    "sellerTransactions": "FINANZBEWEGUNGEN",
+    "sellerHistoryDescription": "Verfolgen Sie Bestellungen und Buchungen. Frühere manuelle Auszahlungsanträge bleiben als Historie erhalten und sind kein Nachweis einer Banküberweisung.",
+    "sellerNoteSellerRelease": "Die Verkäuferauszahlung wurde in der Plattformbuchhaltung freigegeben. Die Banküberweisung wird separat bestätigt.",
     "loginRequired": "Zum Anzeigen der Wallet-Informationen ist eine Anmeldung erforderlich.",
     "loadFailed": "Wallet-Daten konnten nicht abgerufen werden",
     "loadError": "Beim Laden des Wallets ist ein Fehler aufgetreten",
@@ -954,6 +964,9 @@ export default {
     "paymentTitle": "Beschaffungsmarktplatz – Sichere Zahlung"
   },
   "sellerDashboardPage": {
+    "pendingIyzicoPayout": "Auszahlung wartet auf iyzico-Freigabe",
+    "approvedIyzicoPayout": "Von iyzico freigegebene Auszahlung",
+    "iyzicoApprovalInfo": "Eine iyzico-Freigabe bestätigt noch keinen Geldeingang auf dem Bankkonto.",
     "loadFailed": "Dashboard-Daten konnten nicht geladen werden",
     "loading": "Dashboard wird geladen...",
     "title": "Verkäufer-Dashboard",

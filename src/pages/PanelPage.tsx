@@ -373,28 +373,6 @@ export default function PanelPage() {
     }
   };
 
-  const payOrder = async (id: string) => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/orders/${id}/pay`, {
-        method: "POST",
-        headers: authHeaders(),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(JSON.stringify(data));
-        return;
-      }
-
-      alert(t("panelPage.errors.paymentSuccess"));
-      loadOrders();
-    } catch (err) {
-      console.error(err);
-      alert(t("panelPage.errors.paymentError"));
-    }
-  };
-
   const prepareOrder = async (id: string) => {
     try {
       const res = await fetch(`${API_BASE_URL}/orders/${id}/prepare`, {

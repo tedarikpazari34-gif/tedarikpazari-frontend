@@ -74,69 +74,6 @@ export default function AdminPayoutsPage() {
     }
   }
 
-  async function approve(id: string) {
-    if (!confirm(t("adminPayoutsPage.approveConfirm"))) return;
-
-    try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(`${API}/payouts/${id}/approve`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data?.message || t("adminPayoutsPage.approveFailed"));
-        return;
-      }
-
-      alert(t("adminPayoutsPage.approveSuccess"));
-      await loadPayouts();
-    } catch (err) {
-      console.error(err);
-      alert(t("adminPayoutsPage.approveError"));
-    }
-  }
-
-  async function reject(id: string) {
-    const note = prompt(
-      t("adminPayoutsPage.rejectPrompt"),
-      t("adminPayoutsPage.rejectDefaultNote"),
-    );
-
-    if (note === null) return;
-
-    try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(`${API}/payouts/${id}/reject`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ note }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data?.message || t("adminPayoutsPage.rejectFailed"));
-        return;
-      }
-
-      alert(t("adminPayoutsPage.rejectSuccess"));
-      await loadPayouts();
-    } catch (err) {
-      console.error(err);
-      alert(t("adminPayoutsPage.rejectError"));
-    }
-  }
-
   useEffect(() => {
     loadPayouts();
   }, []);
@@ -260,39 +197,7 @@ export default function AdminPayoutsPage() {
                   </span>
                 </div>
 
-                {item.status === "PENDING" && (
-                  <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
-                    <button
-                      onClick={() => approve(item.id)}
-                      style={{
-                        background: "#16a34a",
-                        color: "#fff",
-                        border: "none",
-                        padding: "12px 18px",
-                        borderRadius: 10,
-                        cursor: "pointer",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {t("adminPayoutsPage.approve")}
-                    </button>
 
-                    <button
-                      onClick={() => reject(item.id)}
-                      style={{
-                        background: "#dc2626",
-                        color: "#fff",
-                        border: "none",
-                        padding: "12px 18px",
-                        borderRadius: 10,
-                        cursor: "pointer",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {t("adminPayoutsPage.reject")}
-                    </button>
-                  </div>
-                )}
               </div>
             ))}
           </div>

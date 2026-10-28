@@ -20,6 +20,8 @@ type SellerDashboard = {
   totalPayout: number;
   walletAvailable: number;
   walletLocked: number;
+  pendingIyzicoPayout?: string;
+  approvedIyzicoPayout?: string;
   recentOrders: RecentOrder[];
 };
 
@@ -151,9 +153,9 @@ export default function SellerDashboardPage() {
           icon="💰"
         />
         <StatCard
-          title={t("sellerDashboardPage.availableBalance")}
-          value={money(data.walletAvailable, locale)}
-          icon="👛"
+          title={t("sellerDashboardPage.pendingIyzicoPayout")}
+          value={data.pendingIyzicoPayout == null ? "—" : money(data.pendingIyzicoPayout, locale)}
+          icon="⏳"
         />
       </div>
 
@@ -209,13 +211,16 @@ export default function SellerDashboardPage() {
 
           <div style={financeCardStyle}>
             <span style={mutedStyle}>
-              {t("sellerDashboardPage.lockedBalance")}
+              {t("sellerDashboardPage.approvedIyzicoPayout")}
             </span>
             <strong style={financeValueStyle}>
-              {money(data.walletLocked, locale)}
+              {data.approvedIyzicoPayout == null ? "—" : money(data.approvedIyzicoPayout, locale)}
             </strong>
           </div>
         </div>
+        <p style={mutedStyle}>
+          {t("sellerDashboardPage.iyzicoApprovalInfo")}
+        </p>
       </section>
 
       <section style={sectionStyle}>

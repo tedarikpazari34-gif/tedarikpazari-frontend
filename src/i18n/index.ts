@@ -468,6 +468,17 @@ const resources = {
         chat: "Chat"
       },
       walletPage: {
+        sellerTitle: "Hakediş Takibi",
+        sellerDescription: "Bekleyen ve iyzico tarafından onaylanan hakedişlerinizi takip edin. Bu tutarlar banka transferi teyidi değildir.",
+        sellerSecurity: "İYZİCO MARKETPLACE",
+        sellerEscrowFlow: "Ödeme ve hakediş onay süreci",
+        sellerEscrowDescription: "Alıcı ödemesi iyzico üzerinden alınır. Sipariş tamamlanıp gerekli onay verildiğinde satıcı hakedişi iyzico tarafından işleme alınır. Banka transferi ayrıca doğrulanır.",
+        sellerStep2: "Ödemeyi iyzico yönetir",
+        sellerStep3: "Hakediş onaylanır",
+        sellerTransactions: "FİNANSAL HAREKETLER",
+        sellerHistoryDescription: "Sipariş ve muhasebe hareketlerinizi takip edin. Geçmiş manuel para çekme kayıtları tarihsel bilgi olarak korunur; banka transferi kanıtı değildir.",
+        sellerNoteSellerRelease: "Satıcı hakedişi platform kayıtlarında serbest bırakıldı. Banka transferi ayrıca doğrulanır.",
+
         loginRequired: "Cüzdan bilgilerini görmek için giriş yapmalısınız.",
         loadFailed: "Cüzdan bilgisi alınamadı",
         loadError: "Cüzdan yüklenirken hata oluştu",
@@ -999,6 +1010,9 @@ const resources = {
         paymentTitle: "Tedarik Pazarı - Güvenli Ödeme"
       },
       sellerDashboardPage: {
+        pendingIyzicoPayout: "Bekleyen iyzico Hakedişi",
+        approvedIyzicoPayout: "iyzico Onaylı Hakediş",
+        iyzicoApprovalInfo: "iyzico onayı, banka hesabına transferin tamamlandığı anlamına gelmez.",
         loadFailed: "Dashboard verileri alınamadı",
         loading: "Dashboard yükleniyor...",
         title: "Satıcı Dashboard",
@@ -2981,6 +2995,17 @@ const resources = {
         chat: "Chat"
       },
       walletPage: {
+        sellerTitle: "Payout Tracking",
+        sellerDescription: "Track pending and iyzico-approved payouts. These amounts do not confirm a bank transfer.",
+        sellerSecurity: "IYZICO MARKETPLACE",
+        sellerEscrowFlow: "Payment and payout approval process",
+        sellerEscrowDescription: "Buyer payments are handled by iyzico. After order completion and approval, iyzico processes the seller payout. Bank transfer confirmation is separate.",
+        sellerStep2: "iyzico manages payment",
+        sellerStep3: "Payout is approved",
+        sellerTransactions: "FINANCIAL ACTIVITY",
+        sellerHistoryDescription: "Review order and accounting entries. Historical manual withdrawal records are retained and do not prove bank transfers.",
+        sellerNoteSellerRelease: "Seller payout was released in platform accounting records. Bank transfer confirmation is separate.",
+
         loginRequired: "You must log in to view your wallet.",
         loadFailed: "Wallet information could not be loaded",
         loadError: "An error occurred while loading the wallet",
@@ -3512,6 +3537,9 @@ const resources = {
         paymentTitle: "Nex Tedarik Pazarı - Secure Payment"
       },
       sellerDashboardPage: {
+        pendingIyzicoPayout: "Pending iyzico Payout",
+        approvedIyzicoPayout: "iyzico Approved Payout",
+        iyzicoApprovalInfo: "iyzico approval does not confirm that funds have reached the bank account.",
         loadFailed: "Dashboard data could not be loaded",
         loading: "Loading dashboard...",
         title: "Seller Dashboard",

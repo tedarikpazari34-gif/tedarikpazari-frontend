@@ -84,6 +84,7 @@ function getHistoryPrefix(direction: WalletHistoryItem["direction"]) {
 export default function WalletPage() {
   const { t, i18n } = useTranslation();
   const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
+  const isSeller = localStorage.getItem("role") === "SELLER";
 
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
@@ -99,6 +100,10 @@ export default function WalletPage() {
   }, []);
 
   const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [sellerPayouts, setSellerPayouts] = useState<{
+    pending: string;
+    approved: string;
+  } | null>(null);
   const [history, setHistory] = useState<WalletHistoryItem[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -131,6 +136,30 @@ export default function WalletPage() {
       }
 
       setWallet(data.wallet);
+
+      if (isSeller) {
+        const dashboardRes = await fetch(`${API}/dashboard/seller`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!dashboardRes.ok) {
+          throw new Error(t("sellerDashboardPage.loadFailed"));
+        }
+
+        const dashboard = await dashboardRes.json();
+
+        if (
+          typeof dashboard?.pendingIyzicoPayout !== "string" ||
+          typeof dashboard?.approvedIyzicoPayout !== "string"
+        ) {
+          throw new Error(t("sellerDashboardPage.loadFailed"));
+        }
+
+        setSellerPayouts({
+          pending: dashboard.pendingIyzicoPayout,
+          approved: dashboard.approvedIyzicoPayout,
+        });
+      }
 
       const historyRes = await fetch(`${API}/wallet/me/history`, {
         headers: {
@@ -176,8 +205,8 @@ export default function WalletPage() {
       >
         <div>
           <div style={eyebrowStyle}>{t("walletPage.financePanel")}</div>
-          <h1 style={titleStyle}>{t("walletPage.title")}</h1>
-          <p style={descStyle}>{t("walletPage.description")}</p>
+          <h1 style={titleStyle}>{t(isSeller ? "walletPage.sellerTitle" : "walletPage.title")}</h1>
+          <p style={descStyle}>{t(isSeller ? "walletPage.sellerDescription" : "walletPage.description")}</p>
         </div>
 
         <div
@@ -189,8 +218,8 @@ export default function WalletPage() {
             marginTop: isMobile ? 16 : 0,
           }}
         >
-          <span>{t("walletPage.available")}</span>
-          <strong>{formatMoney(wallet?.available, locale)}</strong>
+          <span>{isSeller ? t("sellerDashboardPage.pendingIyzicoPayout") : t("walletPage.available")}</span>
+          <strong>{isSeller ? (sellerPayouts ? formatMoney(sellerPayouts.pending, locale) : "—") : formatMoney(wallet?.available, locale)}</strong>
         </div>
       </section>
 
@@ -201,38 +230,38 @@ export default function WalletPage() {
           <section style={gridStyle}>
             <div style={balanceCardStyle}>
               <div style={cardIconStyle}>₺</div>
-              <p style={labelStyle}>{t("walletPage.availableBalance")}</p>
-              <h2 style={greenAmountStyle}>{formatMoney(wallet.available, locale)}</h2>
-              <span style={hintStyle}>{t("walletPage.availableHint")}</span>
+              <p style={labelStyle}>{isSeller ? t("sellerDashboardPage.pendingIyzicoPayout") : t("walletPage.availableBalance")}</p>
+              <h2 style={greenAmountStyle}>{isSeller ? (sellerPayouts ? formatMoney(sellerPayouts.pending, locale) : "—") : formatMoney(wallet.available, locale)}</h2>
+              <span style={hintStyle}>{isSeller ? t("sellerDashboardPage.iyzicoApprovalInfo") : t("walletPage.availableHint")}</span>
             </div>
 
             <div style={lockedCardStyle}>
               <div style={cardIconStyle}>🔒</div>
-              <p style={labelStyle}>{t("walletPage.lockedEscrow")}</p>
-              <h2 style={blueAmountStyle}>{formatMoney(wallet.locked, locale)}</h2>
-              <span style={hintStyle}>{t("walletPage.lockedHint")}</span>
+              <p style={labelStyle}>{isSeller ? t("sellerDashboardPage.approvedIyzicoPayout") : t("walletPage.lockedEscrow")}</p>
+              <h2 style={blueAmountStyle}>{isSeller ? (sellerPayouts ? formatMoney(sellerPayouts.approved, locale) : "—") : formatMoney(wallet.locked, locale)}</h2>
+              <span style={hintStyle}>{isSeller ? t("sellerDashboardPage.iyzicoApprovalInfo") : t("walletPage.lockedHint")}</span>
             </div>
           </section>
 
           <section style={infoPanelStyle}>
             <div>
-              <div style={smallLabelStyle}>{t("walletPage.platformSecurity")}</div>
-              <h2 style={panelTitleStyle}>{t("walletPage.escrowFlow")}</h2>
-              <p style={panelTextStyle}>{t("walletPage.escrowDescription")}</p>
+              <div style={smallLabelStyle}>{t(isSeller ? "walletPage.sellerSecurity" : "walletPage.platformSecurity")}</div>
+              <h2 style={panelTitleStyle}>{t(isSeller ? "walletPage.sellerEscrowFlow" : "walletPage.escrowFlow")}</h2>
+              <p style={panelTextStyle}>{t(isSeller ? "walletPage.sellerEscrowDescription" : "walletPage.escrowDescription")}</p>
             </div>
 
             <div style={stepGridStyle}>
               <Step number="1" title={t("walletPage.step1")} />
-              <Step number="2" title={t("walletPage.step2")} />
-              <Step number="3" title={t("walletPage.step3")} />
+              <Step number="2" title={t(isSeller ? "walletPage.sellerStep2" : "walletPage.step2")} />
+              <Step number="3" title={t(isSeller ? "walletPage.sellerStep3" : "walletPage.step3")} />
             </div>
           </section>
 
           <section style={{ ...historyPanelStyle, marginTop: 24 }}>
             <div>
-              <div style={smallLabelStyle}>{t("walletPage.walletTransactions")}</div>
+              <div style={smallLabelStyle}>{t(isSeller ? "walletPage.sellerTransactions" : "walletPage.walletTransactions")}</div>
               <h2 style={panelTitleStyle}>{t("walletPage.transactionHistory")}</h2>
-              <p style={panelTextStyle}>{t("walletPage.historyDescription")}</p>
+              <p style={panelTextStyle}>{t(isSeller ? "walletPage.sellerHistoryDescription" : "walletPage.historyDescription")}</p>
             </div>
 
             {history.length === 0 ? (
@@ -274,7 +303,7 @@ export default function WalletPage() {
 
                     {item.note && (
                       <div style={requestMetaStyle}>
-                        {getHistoryNote(item.note, t)}
+                        {isSeller && item.note === "Escrow released to seller after commission deduction" ? t("walletPage.sellerNoteSellerRelease") : getHistoryNote(item.note, t)}
                       </div>
                     )}
                   </div>

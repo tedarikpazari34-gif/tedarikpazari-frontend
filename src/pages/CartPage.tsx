@@ -10,6 +10,9 @@ const API =
 
 type CartItem = {
   productId: string;
+  variantId?: string | null;
+  variantName?: string | null;
+  variantSku?: string | null;
   title: string;
   quantity: number;
   moq?: number;
@@ -18,6 +21,66 @@ type CartItem = {
   unitPrice: number;
   sellerId?: string | null;
   imageUrl?: string | null;
+};
+
+const cartItemKey = (item: CartItem) =>
+  JSON.stringify([item.productId, item.variantId ?? null]);
+
+// Backend Decimal ROUND_HALF_UP ile aynı kuruş yuvarlamasını uygular.
+const calculateExpectedTotalAmount = (
+  rawPrice: string | number | null | undefined,
+  quantity: number
+): string | null => {
+  const price = String(rawPrice ?? "").trim();
+
+  if (
+    !Number.isSafeInteger(quantity) ||
+    quantity <= 0 ||
+    price.length > 70 ||
+    !/^\\d+(?:\\.\\d{1,30})?$/.test(price)
+  ) {
+    return null;
+  }
+
+  const [whole, fraction = ""] = price.split(".");
+  const scale = 10n ** BigInt(fraction.length);
+  const numerator =
+    BigInt(whole + fraction) * BigInt(quantity) * 100n;
+
+  const cents = (numerator * 2n + scale) / (2n * scale);
+
+  return `${cents / 100n}.${String(cents % 100n).padStart(2, "0")}`;
+};
+
+const formatMoney = (
+  amount: string | null,
+  locale: string
+): string => {
+  if (!amount || !/^\\d+\\.\\d{2}$/.test(amount)) {
+    return "—";
+  }
+
+  const [lira, kurus] = amount.split(".");
+  const separator = locale.startsWith("en") ? "." : ",";
+
+  return `${BigInt(lira).toLocaleString(locale)}${separator}${kurus}`;
+};
+
+const formatUnitPrice = (
+  amount: number,
+  locale: string
+): string => {
+  const value = String(amount);
+
+  if (!Number.isFinite(amount) || amount < 0 ||
+      !/^\d+(?:\.\d+)?$/.test(value)) {
+    return "—";
+  }
+
+  const [whole, fraction = ""] = value.split(".");
+  const separator = locale.startsWith("en") ? "." : ",";
+
+  return `${BigInt(whole).toLocaleString(locale)}${separator}${fraction.padEnd(2, "0")}`;
 };
 
 export default function CartPage() {
@@ -38,7 +101,7 @@ export default function CartPage() {
       setItems(cartItems);
       setQuantityInputs(
         Object.fromEntries(
-          cartItems.map((item) => [item.productId, String(item.quantity)])
+          cartItems.map((item) => [cartItemKey(item), String(item.quantity)])
         )
       );
     } catch {
@@ -57,14 +120,23 @@ export default function CartPage() {
     };
   }, []);
 
-  const total = useMemo(
-    () =>
-      items.reduce(
-        (sum, item) => sum + Number(item.unitPrice || 0) * Number(item.quantity || 0),
-        0
-      ),
-    [items]
-  );
+  const total = useMemo(() => {
+    let totalCents = 0n;
+
+    for (const item of items) {
+      const lineAmount = calculateExpectedTotalAmount(
+        item.unitPrice,
+        item.quantity
+      );
+
+      if (!lineAmount) return null;
+
+      const [lira, kurus] = lineAmount.split(".");
+      totalCents += BigInt(lira) * 100n + BigInt(kurus);
+    }
+
+    return `${totalCents / 100n}.${String(totalCents % 100n).padStart(2, "0")}`;
+  }, [items]);
 
   const saveItems = (next: CartItem[]) => {
     setItems(next);
@@ -72,15 +144,16 @@ export default function CartPage() {
     window.dispatchEvent(new Event("tedarik-cart-changed"));
   };
 
-  const removeItem = (productId: string) => {
-    saveItems(items.filter((item) => item.productId !== productId));
+  const removeItem = (target: CartItem) => {
+    const key = cartItemKey(target);
+    saveItems(items.filter((item) => cartItemKey(item) !== key));
   };
 
   const getMinimumQuantity = (item: CartItem) =>
     Math.max(Number(item.moq || 1), 1);
 
   const getQuantityStep = (item: CartItem) =>
-    Math.max(Number(item.quantityStep || 1), 1);
+    getMinimumQuantity(item);
 
   const commitQuantity = (item: CartItem, requestedQuantity: number) => {
     const minimum = getMinimumQuantity(item);
@@ -94,12 +167,12 @@ export default function CartPage() {
 
     setQuantityInputs((current) => ({
       ...current,
-      [item.productId]: String(normalized),
+      [cartItemKey(item)]: String(normalized),
     }));
 
     saveItems(
       items.map((currentItem) =>
-        currentItem.productId === item.productId
+        cartItemKey(currentItem) === cartItemKey(item)
           ? { ...currentItem, quantity: normalized }
           : currentItem
       )
@@ -109,7 +182,7 @@ export default function CartPage() {
   const handleQuantityInput = (item: CartItem, value: string) => {
     setQuantityInputs((current) => ({
       ...current,
-      [item.productId]: value,
+      [cartItemKey(item)]: value,
     }));
 
     if (value === "") return;
@@ -119,7 +192,7 @@ export default function CartPage() {
     if (Number.isInteger(next) && next > 0) {
       setItems((current) =>
         current.map((currentItem) =>
-          currentItem.productId === item.productId
+          cartItemKey(currentItem) === cartItemKey(item)
             ? { ...currentItem, quantity: next }
             : currentItem
         )
@@ -157,7 +230,123 @@ export default function CartPage() {
     }
 
     try {
-      setLoadingId(item.productId);
+      setLoadingId(cartItemKey(item));
+
+      // Sipariş oluşturmadan önce güncel ürün bilgilerini doğrula.
+      const detailRes = await fetch(
+        `${API}/products/${encodeURIComponent(item.productId)}?lang=${encodeURIComponent(i18n.language)}`
+      );
+
+      const detail = await detailRes.json().catch(() => null) as {
+        id?: string;
+        hasVariants?: boolean;
+        variants?: Array<{
+          id: string;
+          name?: string;
+          price?: string | number | null;
+          availableStock?: number | null;
+        }>;
+        basePrice?: string | number;
+        moq?: number;
+        quantityStep?: number;
+        availableStock?: number | null;
+      } | null;
+
+      if (
+        !detailRes.ok ||
+        !detail ||
+        detail.id !== item.productId ||
+        typeof detail.hasVariants !== "boolean" ||
+        !Array.isArray(detail.variants)
+      ) {
+        alert("Güncel ürün bilgileri doğrulanamadı. Ödeme başlatılmadı.");
+        return;
+      }
+
+      const variant = item.variantId
+        ? detail.variants.find((entry) => entry.id === item.variantId)
+        : null;
+
+      if (
+        (item.variantId && !variant) ||
+        (!item.variantId && detail.hasVariants)
+      ) {
+        alert("Ürünün varyant bilgileri değişmiş. Lütfen yeniden seçim yapın.");
+        navigate(`/product/${encodeURIComponent(item.productId)}`);
+        return;
+      }
+
+      const freshPrice = Number(variant?.price ?? detail.basePrice);
+      const freshMoq = Number(detail.moq);
+      const freshStep = freshMoq;
+      const availableStock = variant
+        ? variant.availableStock
+        : detail.availableStock;
+
+      if (
+        !Number.isFinite(freshPrice) ||
+        freshPrice <= 0 ||
+        !Number.isSafeInteger(freshMoq) ||
+        freshMoq < 1 ||
+        !Number.isSafeInteger(freshStep) ||
+        freshStep < 1 ||
+        availableStock === undefined ||
+        (availableStock !== null &&
+          (!Number.isSafeInteger(availableStock) || availableStock < 0))
+      ) {
+        alert("Fiyat veya stok bilgileri doğrulanamadı. Ödeme başlatılmadı.");
+        return;
+      }
+
+      const priceChanged =
+        Math.abs(Number(item.unitPrice) - freshPrice) > 0.000001;
+
+      const termsChanged =
+        Number(item.moq ?? 1) !== freshMoq ||
+        Number(item.quantityStep ?? 1) !== freshStep;
+
+      if (priceChanged || termsChanged) {
+        saveItems(
+          items.map((entry) =>
+            cartItemKey(entry) === cartItemKey(item)
+              ? {
+                  ...entry,
+                  unitPrice: freshPrice,
+                  moq: freshMoq,
+                  quantityStep: freshStep,
+                }
+              : entry
+          )
+        );
+
+        alert(
+          "Ürünün fiyatı veya sipariş koşulları değişmiş. Sepet güncellendi. Lütfen yeni bilgileri kontrol ederek tekrar devam edin."
+        );
+        return;
+      }
+
+      if (
+        item.quantity < freshMoq ||
+        (item.quantity - freshMoq) % freshStep !== 0
+      ) {
+        alert("Sipariş miktarı güncel satış koşullarına uygun değil.");
+        return;
+      }
+
+      if (availableStock !== null && item.quantity > availableStock) {
+        alert("Yeterli satılabilir stok bulunmuyor. Ödeme başlatılmadı.");
+        return;
+      }
+
+      const expectedTotalAmount = calculateExpectedTotalAmount(
+        variant?.price ?? detail.basePrice,
+        item.quantity
+      );
+
+      if (!expectedTotalAmount || expectedTotalAmount === "0.00") {
+        alert("Sipariş tutarı güvenle hesaplanamadı. Ödeme başlatılmadı.");
+        return;
+      }
 
       const res = await fetch(`${API}/orders/direct`, {
         method: "POST",
@@ -167,7 +356,9 @@ export default function CartPage() {
         },
         body: JSON.stringify({
           productId: item.productId,
+          ...(item.variantId ? { variantId: item.variantId } : {}),
           quantity: item.quantity,
+          expectedTotalAmount,
         }),
       });
 
@@ -178,7 +369,22 @@ export default function CartPage() {
         return;
       }
 
-      removeItem(item.productId);
+      const confirmedAmount = Number(data?.order?.totalAmount);
+
+      if (
+        !Number.isFinite(confirmedAmount) ||
+        Math.abs(confirmedAmount - Number(expectedTotalAmount)) > 0.000001
+      ) {
+        alert(
+          "Siparişin kesin tutarı sepetteki tutarla doğrulanamadı. " +
+          "Ödeme başlatılmadı. Lütfen Siparişlerim sayfasından kontrol edin."
+        );
+        removeItem(item);
+        navigate("/buyer/orders");
+        return;
+      }
+
+      removeItem(item);
 
       const orderId = data?.order?.id || data?.id;
 
@@ -302,7 +508,7 @@ export default function CartPage() {
             <div style={{ display: "grid", gap: 16 }}>
               {items.map((item) => (
                 <div
-                  key={item.productId}
+                  key={cartItemKey(item)}
                   style={{
                     background: "#fff",
                     borderRadius: 16,
@@ -311,11 +517,16 @@ export default function CartPage() {
                   }}
                 >
                   <h3 style={{ marginTop: 0 }}>{item.title}</h3>
+                  {item.variantId && (
+                    <p style={{ color: "#0f766e", fontWeight: 700 }}>
+                      Varyant: {item.variantName || item.variantSku || item.variantId}
+                    </p>
+                  )}
 
                   <p>
                     {t("cartPage.unitPrice")}:{" "}
                     <strong>
-                      {Number(item.unitPrice).toLocaleString(locale)} ₺
+                      {formatUnitPrice(item.unitPrice, locale)} ₺
                     </strong>
                   </p>
 
@@ -386,7 +597,7 @@ export default function CartPage() {
                             step={getQuantityStep(item)}
                             inputMode="numeric"
                             value={
-                              quantityInputs[item.productId] ??
+                              quantityInputs[cartItemKey(item)] ??
                               String(item.quantity)
                             }
                             onChange={(e) =>
@@ -394,7 +605,7 @@ export default function CartPage() {
                             }
                             onBlur={() => {
                               const raw =
-                                quantityInputs[item.productId] ??
+                                quantityInputs[cartItemKey(item)] ??
                                 String(item.quantity);
 
                               commitQuantity(item, Number(raw));
@@ -459,7 +670,7 @@ export default function CartPage() {
                           }}
                         >
                           {item.quantity} {item.unitType} ×{" "}
-                          {Number(item.unitPrice).toLocaleString(locale)} ₺
+                          {formatUnitPrice(item.unitPrice, locale)} ₺
                         </div>
 
                         <div
@@ -470,9 +681,10 @@ export default function CartPage() {
                           }}
                         >
                           {t("cartPage.lineTotal")}:{" "}
-                          {Number(
-                            item.unitPrice * item.quantity
-                          ).toLocaleString(locale)}{" "}
+                          {formatMoney(
+                            calculateExpectedTotalAmount(item.unitPrice, item.quantity),
+                            locale
+                          )}{" "}
                           ₺
                         </div>
 
@@ -499,17 +711,17 @@ export default function CartPage() {
                     <button
                       type="button"
                       onClick={() => checkoutItem(item)}
-                      disabled={loadingId === item.productId}
+                      disabled={loadingId === cartItemKey(item)}
                       style={primaryButton}
                     >
-                      {loadingId === item.productId
+                      {loadingId === cartItemKey(item)
                         ? t("cartPage.creatingOrder")
                         : t("cartPage.checkout")}
                     </button>
 
                     <button
                       type="button"
-                      onClick={() => removeItem(item.productId)}
+                      onClick={() => removeItem(item)}
                       style={secondaryButton}
                     >
                       {t("cartPage.remove")}
@@ -530,7 +742,7 @@ export default function CartPage() {
               }}
             >
               <strong style={{ fontSize: 22 }}>
-                {t("cartPage.cartTotal")}: {total.toLocaleString(locale)} ₺
+                {t("cartPage.cartTotal")}: {formatMoney(total, locale)} ₺
               </strong>
             </div>
           </>

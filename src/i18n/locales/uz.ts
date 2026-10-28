@@ -437,6 +437,16 @@ export default {
     "chat": "Suhbat"
   },
   "walletPage": {
+    "sellerTitle": "To‘lovlarni kuzatish",
+    "sellerDescription": "Kutilayotgan va iyzico tasdiqlagan to‘lovlarni kuzating. Bu summalar bank o‘tkazmasi amalga oshganini tasdiqlamaydi.",
+    "sellerSecurity": "IYZICO MARKETPLACE",
+    "sellerEscrowFlow": "To‘lov va tasdiqlash jarayoni",
+    "sellerEscrowDescription": "Xaridor to‘lovi iyzico orqali amalga oshiriladi. Buyurtma yakunlanib tasdiqlangach, iyzico sotuvchiga tegishli to‘lovni qayta ishlaydi. Bank o‘tkazmasi alohida tasdiqlanadi.",
+    "sellerStep2": "To‘lovni iyzico boshqaradi",
+    "sellerStep3": "To‘lov tasdiqlandi",
+    "sellerTransactions": "MOLIYAVIY OPERATSIYALAR",
+    "sellerHistoryDescription": "Buyurtmalar va hisob yozuvlarini ko‘ring. Avvalgi qo‘lda pul yechish so‘rovlari tarix uchun saqlanadi va bank o‘tkazmasini tasdiqlamaydi.",
+    "sellerNoteSellerRelease": "Sotuvchiga tegishli summa platforma hisobida ajratildi. Bank o‘tkazmasi alohida tasdiqlanadi.",
     "loginRequired": "Hamyon ma'lumotlarini ko'rish uchun tizimga kirish talab qilinadi.",
     "loadFailed": "Hamyon ma'lumotlarini olish imkoni bo'lmadi",
     "loadError": "Hamyon yuklanayotganda xato yuz berdi",
@@ -954,6 +964,9 @@ export default {
     "paymentTitle": "Xarid bozori – xavfsiz to'lov"
   },
   "sellerDashboardPage": {
+    "pendingIyzicoPayout": "iyzico tasdig‘ini kutayotgan to‘lov",
+    "approvedIyzicoPayout": "iyzico tasdiqlagan to‘lov",
+    "iyzicoApprovalInfo": "iyzico tasdig‘i pul bank hisobiga kelib tushganini anglatmaydi.",
     "loadFailed": "Sotuvchi boshqaruv paneli ma'lumotlarini yuklash mumkin bo'lmadi.",
     "loading": "Sotuvchi boshqaruv paneli yuklanmoqda...",
     "title": "Sotuvchi boshqaruv paneli",
