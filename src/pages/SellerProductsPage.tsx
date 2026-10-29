@@ -967,16 +967,18 @@ export default function SellerProductsPage() {
                       </section>
                     )}
 
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
                     <button
                       type="button"
                       onClick={() => archiveProduct(product)}
                       disabled={archivingProductId !== null}
                       aria-label={`${product.title} ürününü sil`}
                       style={{
-                        padding: "9px 14px",
-                        border: "1px solid #fecaca",
-                        borderRadius: 8,
-                        background: "#fff1f2",
+                        padding: "10px 8px",
+                        border: "1px solid #fca5a5",
+                        borderRadius: 10,
+                        background: "#fee2e2",
+                        minWidth: 0,
                         color: "#b91c1c",
                         fontWeight: 600,
                         cursor: archivingProductId !== null ? "wait" : "pointer",
@@ -988,21 +990,29 @@ export default function SellerProductsPage() {
                     <button
                       type="button"
                       onClick={() => toggleProductActive(product)}
+                      disabled={!product.isApproved && !product.isActive}
                       aria-label={
-                        product.isActive
-                          ? `${product.title} ürününü yayından kaldır`
-                          : `${product.title} ürününü yeniden yayınla`
+                        !product.isApproved && !product.isActive
+                          ? `${product.title} onay bekliyor`
+                          : product.isActive
+                            ? `${product.title} ürününü yayından kaldır`
+                            : `${product.title} ürününü yeniden yayınla`
                       }
                       style={
-                        product.isActive
-                          ? deactivateButtonStyle
-                          : activateButtonStyle
+                        !product.isApproved && !product.isActive
+                          ? pendingButtonStyle
+                          : product.isActive
+                            ? deactivateButtonStyle
+                            : activateButtonStyle
                       }
                     >
-                      {product.isActive
-                        ? "Yayından Kaldır"
-                        : "Yeniden Yayınla"}
+                      {!product.isApproved && !product.isActive
+                        ? "Onay Bekleniyor"
+                        : product.isActive
+                          ? "Yayından Kaldır"
+                            : "Yeniden Yayınla"}
                     </button>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -1200,10 +1210,10 @@ const smallBadgeStyle: CSSProperties = {
 };
 
 const actionsStyle: CSSProperties = {
-  marginTop: 18,
+  marginTop: 14,
   display: "flex",
   flexDirection: "column",
-  gap: 10,
+  gap: 8,
 };
 
 const primaryActionsStyle: CSSProperties = {
@@ -1214,7 +1224,7 @@ const primaryActionsStyle: CSSProperties = {
 const editButtonStyle: CSSProperties = {
   flex: 1,
   textAlign: "center",
-  background: "#2563eb",
+  background: "#0d9488",
   color: "white",
   textDecoration: "none",
   padding: "12px 10px",
@@ -1255,6 +1265,16 @@ const activateButtonStyle: CSSProperties = {
   borderRadius: 12,
   fontWeight: 800,
   cursor: "pointer",
+};
+
+const pendingButtonStyle: CSSProperties = {
+  ...activateButtonStyle,
+  border: "1px solid #cbd5e1",
+  background: "#f1f5f9",
+  color: "#475569",
+  cursor: "not-allowed",
+  padding: "10px 8px",
+  fontSize: 12,
 };
 
 const infoBoxStyle: CSSProperties = {
