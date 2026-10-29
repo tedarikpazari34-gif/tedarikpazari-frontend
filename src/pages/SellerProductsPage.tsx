@@ -109,6 +109,7 @@ export default function SellerProductsPage() {
   const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [archivingProductId, setArchivingProductId] = useState<string | null>(null);
   const [variantDrafts, setVariantDrafts] = useState<Record<string, string>>({});
   const [variantSaving, setVariantSaving] = useState<string | null>(null);
   const [variantMessage, setVariantMessage] = useState<{
@@ -386,6 +387,54 @@ export default function SellerProductsPage() {
       if (requestId === revisionRequestId.current) {
         setRevisionsLoading(false);
       }
+    }
+  };
+
+  const archiveProduct = async (product: Product) => {
+    if (archivingProductId !== null) return;
+
+    const confirmed = window.confirm(
+      `"${product.title}" ürününü silmek istediğinize emin misiniz?\n\n` +
+      "Ürün satıştan kaldırılacak ve normal ürün listenizden çıkarılacak. " +
+      "Geçmiş sipariş ve ödeme kayıtları korunacaktır."
+    );
+
+    if (!confirmed) return;
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setError(t("sellerProductsPage.loginAgain"));
+      return;
+    }
+
+    setArchivingProductId(product.id);
+    setError("");
+
+    try {
+      const res = await fetch(
+        `${BASE_URL}/api/products/mine/${encodeURIComponent(product.id)}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Ürün silinemedi.");
+      }
+
+      await loadProducts();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Ürün silinirken bir hata oluştu."
+      );
+    } finally {
+      setArchivingProductId(null);
     }
   };
 
@@ -918,6 +967,24 @@ export default function SellerProductsPage() {
                       </section>
                     )}
 
+                    <button
+                      type="button"
+                      onClick={() => archiveProduct(product)}
+                      disabled={archivingProductId !== null}
+                      aria-label={`${product.title} ürününü sil`}
+                      style={{
+                        padding: "9px 14px",
+                        border: "1px solid #fecaca",
+                        borderRadius: 8,
+                        background: "#fff1f2",
+                        color: "#b91c1c",
+                        fontWeight: 600,
+                        cursor: archivingProductId !== null ? "wait" : "pointer",
+                        opacity: archivingProductId !== null ? 0.6 : 1,
+                      }}
+                    >
+                        {archivingProductId === product.id ? "Siliniyor..." : "Sil"}
+                    </button>
                     <button
                       type="button"
                       onClick={() => toggleProductActive(product)}
