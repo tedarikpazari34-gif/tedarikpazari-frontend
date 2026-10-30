@@ -1,3 +1,4 @@
+import BuyerQuickSkuSearch from "../components/buyer/BuyerQuickSkuSearch";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { authFetch } from "../api";
@@ -134,6 +135,8 @@ export default function BuyerDashboardPage() {
           {t("buyerDashboard.browseProducts")}
         </Link>
       </div>
+
+      <BuyerQuickSkuSearch />
 
       {error && <div style={errorStyle}>{error}</div>}
 
