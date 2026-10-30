@@ -38,6 +38,10 @@ const items = [
     labelKey: "adminSidebar.finance",
     path: "/admin/finance",
   },
+  {
+    labelKey: "adminPayoutsPage.title",
+    path: "/admin/payouts",
+  },
 ];
 
 export default function AdminSidebar() {

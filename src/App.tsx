@@ -30,6 +30,7 @@ import AdminDisputesPage from "./pages/AdminDisputesPage";
 import AdminChargebacksPage from "./pages/AdminChargebacksPage";
 import AdminCompaniesPage from "./pages/AdminCompaniesPage";
 import AdminFinancePage from "./pages/AdminFinancePage";
+import AdminPayoutsPage from "./pages/AdminPayoutsPage";
 import AdminRoute from "./components/auth/AdminRoute";
 import WalletPage from "./pages/WalletPage";
 import ProductsPage from "./pages/ProductsPage";
@@ -282,6 +283,15 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminFinancePage />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/payouts"
+          element={
+            <AdminRoute>
+              <AdminPayoutsPage />
             </AdminRoute>
           }
         />

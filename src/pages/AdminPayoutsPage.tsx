@@ -83,6 +83,16 @@ export default function AdminPayoutsPage() {
       <AdminSidebar />
 
       <main style={{ flex: 1, minHeight: "100vh", padding: 40 }}>
+        <p role="note" style={{
+          padding: 14,
+          borderRadius: 10,
+          background: "#ecfeff",
+          color: "#155e75",
+        }}>
+          Bu ekran geçmiş hakediş taleplerini görüntüler.
+          Manuel ödeme ve onay işlemleri kapalıdır.
+          Hakedişler iyzico Marketplace üzerinden yönetilir.
+        </p>
         <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 8 }}>
           {t("adminPayoutsPage.title")}
         </h1>
