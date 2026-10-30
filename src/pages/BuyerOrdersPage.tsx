@@ -1,3 +1,4 @@
+import BuyerDisputeAction from "../components/buyer/BuyerDisputeAction";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
@@ -599,6 +600,10 @@ export default function BuyerOrdersPage() {
                 o.status
               ) && (
                 <BuyerPaymentIssueInfo orderId={o.id} />
+              )}
+
+              {["PAID", "PREPARING", "SHIPPED"].includes(o.status) && (
+                <BuyerDisputeAction orderId={o.id} />
               )}
 
               <div style={actionsStyle}>
