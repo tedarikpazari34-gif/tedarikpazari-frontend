@@ -1,3 +1,4 @@
+import BuyerOrderFinancialSummary from "../components/buyer/BuyerOrderFinancialSummary";
 import BuyerQuickSkuSearch from "../components/buyer/BuyerQuickSkuSearch";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
@@ -137,6 +138,8 @@ export default function BuyerDashboardPage() {
       </div>
 
       <BuyerQuickSkuSearch />
+
+      <BuyerOrderFinancialSummary />
 
       {error && <div style={errorStyle}>{error}</div>}
 
