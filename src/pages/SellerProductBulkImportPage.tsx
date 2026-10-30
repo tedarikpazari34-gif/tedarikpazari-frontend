@@ -121,6 +121,8 @@ function saveBlob(blob: Blob, fileName: string) {
   URL.revokeObjectURL(url);
 }
 
+const XML_SAMPLE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<products>\n  <product>\n    <sku>NEX-XML-ORNEK-001</sku>\n    <title>Örnek Islak Mendil</title>\n    <categoryPath>Temizlik ve Hijyen &gt; Hijyen Sarf Malzemeleri &gt; Islak Mendiller</categoryPath>\n    <unitType>Adet</unitType>\n    <basePrice>90</basePrice>\n    <vatRate>20</vatRate>\n    <moq>10</moq>\n    <quantityStep>10</quantityStep>\n    <stockQuantity>100</stockQuantity>\n  </product>\n</products>\n";
+
 export default function SellerProductBulkImportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -679,6 +681,32 @@ export default function SellerProductBulkImportPage() {
                   : "XML dosyanız güvenli ön kontrolden geçirilir. products > product yapısı kullanılır. Varyantlar variants > variant, kategori özellikleri attributes > attribute altında gönderilebilir; ürünler onayınız olmadan kaydedilmez."}
                 {" "}Görsel adresleri HTTPS olmalı; birden fazla görseli | işaretiyle ayırabilirsiniz.
               </p>
+              {importSource === "XML" && (
+                <button
+                  type="button"
+                  disabled={busy || processing}
+                  onClick={() =>
+                    saveBlob(
+                      new Blob([XML_SAMPLE], {
+                        type: "application/xml;charset=utf-8",
+                      }),
+                      "nex-ornek-urunler.xml"
+                    )
+                  }
+                  style={{
+                    marginTop: 12,
+                    padding: "11px 16px",
+                    borderRadius: 10,
+                    border: "none",
+                    background: "#0d9488",
+                    color: "#ffffff",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Örnek XML İndir
+                </button>
+              )}
             </div>
 
             {importSource === "EXCEL" && (
@@ -755,7 +783,7 @@ export default function SellerProductBulkImportPage() {
     <basePrice>90</basePrice>
     <vatRate>20</vatRate>
     <moq>10</moq>
-    <quantityStep>5</quantityStep>
+    <quantityStep>10</quantityStep>
     <stockQuantity>100</stockQuantity>
     <imageUrls>https://ornek.com/urun.jpg</imageUrls>
 
