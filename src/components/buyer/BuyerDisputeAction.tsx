@@ -68,6 +68,7 @@ export default function BuyerDisputeAction({
 
       setSuccess(true);
       setOpen(false);
+      window.dispatchEvent(new Event("nex:dispute-created"));
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Bağlantı hatası oluştu."

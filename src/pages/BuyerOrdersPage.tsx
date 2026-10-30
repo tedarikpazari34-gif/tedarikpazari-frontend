@@ -1,3 +1,4 @@
+import BuyerDisputesPanel from "../components/buyer/BuyerDisputesPanel";
 import BuyerDisputeAction from "../components/buyer/BuyerDisputeAction";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -685,6 +686,7 @@ export default function BuyerOrdersPage() {
           ))}
         </section>
       )}
+      <BuyerDisputesPanel />
     </main>
   );
 }
