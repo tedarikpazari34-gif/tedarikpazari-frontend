@@ -1,5 +1,6 @@
 export default {
   "invoice":   {
+    orderReference: "შეკვეთის ნომერი",
     "title": "ინვოისები და დოკუმენტები",
     "uploadTitle": "ინვოისის / დოკუმენტის ატვირთვა",
     "saleInvoice": "გაყიდვის ინვოისი",

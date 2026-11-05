@@ -15,6 +15,7 @@ const resources = {
   tr: {
     translation: {
       invoice: {
+        orderReference: "Sipariş numarası",
         "title": "Faturalar ve Belgeler",
         "uploadTitle": "Fatura / Belge Yükle",
         "saleInvoice": "Satış faturası",

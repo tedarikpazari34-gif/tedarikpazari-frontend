@@ -364,6 +364,7 @@ export default function SellerOrdersPage() {
             <div key={`invoice-${o.id}`} style={{ marginBottom: 16 }}>
               {hasActiveSale ? null : (
                 <>
+                  <h3 style={{ marginBottom: 10, fontSize: 16 }}>{t("invoice.orderReference")}: <code>{o.id.slice(-8)}</code></h3>
                   {rejectedSale?.reviewNote && (
                     <p role="note" style={{ color: "#b91c1c" }}>
                       {t("invoice.rejected")}: {rejectedSale.reviewNote}

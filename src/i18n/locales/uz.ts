@@ -1,5 +1,6 @@
 export default {
   "invoice":   {
+    orderReference: "Buyurtma raqami",
     "title": "Hisob-fakturalar va hujjatlar",
     "uploadTitle": "Hisob-faktura / hujjat yuklash",
     "saleInvoice": "Sotuv hisob-fakturasi",

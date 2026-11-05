@@ -1,5 +1,6 @@
 export default {
   "invoice":   {
+    orderReference: "Номер заказа",
     "title": "Счета и документы",
     "uploadTitle": "Загрузить счёт / документ",
     "saleInvoice": "Счёт-фактура продажи",

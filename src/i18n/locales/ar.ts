@@ -1,5 +1,6 @@
 export default {
   "invoice":   {
+    orderReference: "رقم الطلب",
     "title": "الفواتير والمستندات",
     "uploadTitle": "رفع فاتورة / مستند",
     "saleInvoice": "فاتورة البيع",

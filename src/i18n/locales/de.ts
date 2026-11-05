@@ -1,5 +1,6 @@
 export default {
   "invoice":   {
+    orderReference: "Bestellnummer",
     "title": "Rechnungen und Dokumente",
     "uploadTitle": "Rechnung / Dokument hochladen",
     "saleInvoice": "Verkaufsrechnung",
