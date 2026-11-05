@@ -1,11 +1,13 @@
-import React from "react";
+import InvoiceUploadForm from "./InvoiceUploadForm";
+import { invoiceDisputeEligible } from "../lib/invoiceDisputeEligible";
+import { invoiceApi, type InvoiceRecord } from "../lib/invoiceApi";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-const API = "https://tedarik-backend.onrender.com/api";
+const API = import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
 interface DisputeFile {
   id: string;
-  url: string;
   fileName?: string;
 }
 
@@ -15,6 +17,9 @@ interface DisputeItem {
   reason: string;
   description?: string;
   status: string;
+  resolution?: string | null;
+  resolvedAt?: string | null;
+  order?: { status?: string | null } | null;
   files?: DisputeFile[];
 }
 
@@ -28,6 +33,48 @@ export default function DisputeList({
   panelCardStyle,
 }: Props) {
   const { t } = useTranslation();
+  const [invoices, setInvoices] = useState<InvoiceRecord[]>([]);
+  const [invoiceError, setInvoiceError] = useState("");
+
+  const reloadInvoices = async () => {
+    try {
+      const data = await invoiceApi.mine();
+      setInvoices(Array.isArray(data) ? data : []);
+      setInvoiceError("");
+    } catch (error) {
+      setInvoiceError(
+        error instanceof Error ? error.message : "Faturalar yüklenemedi",
+      );
+    }
+  };
+
+  useEffect(() => {
+    void reloadInvoices();
+  }, []);
+
+
+  const openEvidence = async (disputeId: string, fileId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Oturum bulunamadı");
+
+      const res = await fetch(
+        `${API}/disputes/${encodeURIComponent(disputeId)}/evidence/${encodeURIComponent(fileId)}/download`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (!res.ok) throw new Error("Kanıt dosyası açılamadı");
+
+      const data = await res.json();
+      if (typeof data?.url !== "string" ||
+          !data.url.startsWith("https://")) {
+        throw new Error("Geçersiz indirme bağlantısı");
+      }
+      window.open(data.url, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error(error);
+      alert("Kanıt dosyası açılamadı.");
+    }
+  };
 
   const uploadFile = async (
     disputeId: string,
@@ -37,48 +84,32 @@ export default function DisputeList({
     if (!file) return;
 
     try {
-      const form = new FormData();
-      form.append("file", file);
-
       const token = localStorage.getItem("token");
 
-      // 1- Dosyayı yükle
-      const uploadRes = await fetch(`${API}/upload`, {
-        method: "POST",
-        body: form,
-      });
-
-      const uploadData = await uploadRes.json();
-
-      if (!uploadRes.ok) {
-        alert(uploadData.message || t("disputeList.uploadFailed"));
+      if (!token) {
+        alert(t("disputeList.genericError"));
         return;
       }
 
-      // 2- Dispute'e bağla
-      const res = await fetch(`${API}/disputes/${disputeId}/files`, {
+      const form = new FormData();
+      form.append("file", file);
+
+      const res = await fetch(`${API}/disputes/${disputeId}/evidence`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          url: uploadData.imageUrl,
-          fileName: file.name,
-          fileType: file.type,
-        }),
+        body: form,
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        alert(data.message || t("disputeList.attachFailed"));
+        alert(data?.message || t("disputeList.uploadFailed"));
         return;
       }
 
       alert(t("disputeList.attachSuccess"));
-
-      // Sayfayı yenilemek yerine sonra state güncelleyeceğiz.
       window.location.reload();
     } catch (err) {
       console.error(err);
@@ -90,6 +121,7 @@ export default function DisputeList({
     <>
       <h2>{t("disputeList.title")}</h2>
 
+      {invoiceError && <p role="alert">{invoiceError}</p>}
       {disputes.map((d) => (
         <div key={d.id} style={panelCardStyle}>
           <div>
@@ -110,6 +142,28 @@ export default function DisputeList({
             </div>
           )}
 
+          {invoiceDisputeEligible(d) &&
+            invoices.some(
+              item =>
+                item.orderId === d.orderId &&
+                item.kind === "SALE" &&
+                item.status === "RECORDED",
+            ) &&
+              !invoices.some(invoice =>
+                invoice.orderId === d.orderId &&
+                invoice.kind === "RETURN" &&
+                (invoice.status === "PENDING_REVIEW" ||
+                  invoice.status === "RECORDED")
+              ) && (
+                <InvoiceUploadForm
+                role="BUYER"
+                orderId={d.orderId}
+                disputeId={d.id}
+                invoices={invoices}
+                onUploaded={() => { void reloadInvoices(); }}
+              />
+            )}
+
           <div style={{ marginTop: 10 }}>
             <input
               type="file"
@@ -124,13 +178,13 @@ export default function DisputeList({
 
               {d.files.map((f) => (
                 <div key={f.id}>
-                  <a
-                    href={`https://tedarik-backend.onrender.com${f.url}`}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => openEvidence(d.id, f.id)}
+                    style={{ cursor: "pointer" }}
                   >
                     {f.fileName || t("disputeList.openFile")}
-                  </a>
+                  </button>
                 </div>
               ))}
             </div>

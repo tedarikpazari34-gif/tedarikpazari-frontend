@@ -1,5 +1,6 @@
 import BuyerDisputesPanel from "../components/buyer/BuyerDisputesPanel";
 import BuyerDisputeAction from "../components/buyer/BuyerDisputeAction";
+import InvoiceList from "../components/InvoiceList";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
@@ -436,6 +437,8 @@ export default function BuyerOrdersPage() {
           <span>{paymentNotice.message}</span>
         </div>
       )}
+
+      <InvoiceList role="BUYER" />
 
       {error ? (
         <div style={errorCardStyle}>

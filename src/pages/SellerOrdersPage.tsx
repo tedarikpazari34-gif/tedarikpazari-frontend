@@ -1,3 +1,7 @@
+import InvoiceUploadForm from "../components/InvoiceUploadForm";
+import { invoiceApi, type InvoiceRecord } from "../lib/invoiceApi";
+import InvoiceList from "../components/InvoiceList";
+import SellerDisputesPanel from "../components/SellerDisputesPanel";
 import { useEffect, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { unitLabel } from "../lib/unitLabel";
@@ -76,6 +80,30 @@ export default function SellerOrdersPage() {
   }, []);
 
   const [orders, setOrders] = useState<Order[]>([]);
+  const [invoiceRecords, setInvoiceRecords] = useState<InvoiceRecord[]>([]);
+  const [invoiceError, setInvoiceError] = useState("");
+  const [invoiceLoading, setInvoiceLoading] = useState(true);
+  const [invoiceRefreshKey, setInvoiceRefreshKey] = useState(0);
+
+  const reloadInvoiceRecords = async () => {
+    setInvoiceLoading(true);
+    try {
+      const data = await invoiceApi.mine();
+      if (!Array.isArray(data)) {
+        throw new Error("Fatura listesi geçersiz");
+      }
+      setInvoiceRecords(data);
+      setInvoiceError("");
+      setInvoiceRefreshKey(key => key + 1);
+    } catch (err) {
+      setInvoiceError(
+        err instanceof Error ? err.message : "Faturalar yüklenemedi",
+      );
+    } finally {
+      setInvoiceLoading(false);
+    }
+  };
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [shippingOrderId, setShippingOrderId] = useState<string | null>(null);
@@ -270,6 +298,11 @@ export default function SellerOrdersPage() {
     loadOrders();
   }, []);
 
+  useEffect(() => {
+    void reloadInvoiceRecords();
+  }, []);
+
+
   if (loading) {
     return (
       <main style={pageStyle}>
@@ -309,6 +342,45 @@ export default function SellerOrdersPage() {
           <strong>{orders.length}</strong>
         </div>
       </section>
+
+      <InvoiceList role="SELLER" refreshKey={invoiceRefreshKey} />
+
+      {invoiceError && <p role="alert">{invoiceError}</p>}
+      {invoiceLoading && <p>{t("invoice.loading")}</p>}
+      {!invoiceLoading && !invoiceError && orders
+        .filter(o =>
+          ["PAID", "PREPARING", "SHIPPED", "COMPLETED"].includes(o.status),
+        )
+        .map(o => {
+          const sales = invoiceRecords.filter(
+            record => record.orderId === o.id && record.kind === "SALE",
+          );
+          const hasActiveSale = sales.some(
+            record => record.status === "PENDING_REVIEW" || record.status === "RECORDED",
+          );
+          const rejectedSale = sales.find(record => record.status === "REJECTED");
+
+          return (
+            <div key={`invoice-${o.id}`} style={{ marginBottom: 16 }}>
+              {hasActiveSale ? null : (
+                <>
+                  {rejectedSale?.reviewNote && (
+                    <p role="note" style={{ color: "#b91c1c" }}>
+                      {t("invoice.rejected")}: {rejectedSale.reviewNote}
+                    </p>
+                  )}
+                  <InvoiceUploadForm
+                    role="SELLER"
+                    orderId={o.id}
+                    invoices={invoiceRecords}
+                    onUploaded={() => { void reloadInvoiceRecords(); }}
+                  />
+                </>
+              )}
+            </div>
+          );
+        })}
+
 
       <section style={statsStyle}>
         <Stat label={t("sellerOrdersPage.paidStat")} value={orders.filter((o) => o.status === "PAID").length} />
@@ -409,6 +481,8 @@ export default function SellerOrdersPage() {
           ))}
         </section>
       )}
+        <SellerDisputesPanel />
+
         {shippingOrderId && (
           <div
             style={modalOverlayStyle}

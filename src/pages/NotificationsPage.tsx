@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { resolveLegacyInvoiceNotificationRoute } from "../lib/legacyInvoiceNotificationRoute";
 
 type Notification = {
   id: string;
@@ -87,7 +88,7 @@ export default function NotificationsPage() {
     }
 
     if (item.link) {
-      navigate(item.link);
+      navigate(resolveLegacyInvoiceNotificationRoute(item.link));
     }
   };
 

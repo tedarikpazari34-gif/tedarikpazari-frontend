@@ -1,3 +1,4 @@
+import AdminInvoiceManager from "../components/AdminInvoiceManager";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import AdminSidebar from "../components/admin/AdminSidebar";
@@ -267,6 +268,8 @@ export default function AdminFinancePage() {
             value={money(totals.adjustment, locale)}
           />
         </section>
+
+        <AdminInvoiceManager />
 
         <section style={{ ...panelStyle, marginBottom: 24 }}>
           <div style={panelHeaderStyle}>
