@@ -15,7 +15,6 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
 
 import BuyerOrdersPage from "./pages/BuyerOrdersPage";
-import BuyerQuotesPage from "./pages/BuyerQuotesPage";
 
 import SellerOrdersPage from "./pages/SellerOrdersPage";
 import SellerChargebacksPage from "./pages/SellerChargebacksPage";
