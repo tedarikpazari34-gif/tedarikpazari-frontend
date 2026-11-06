@@ -21,12 +21,19 @@ type Order = {
   totalAmount?: number | string;
   commissionAmount?: number | string;
   status?: string;
+  quantity?: number | null;
+  unitPriceSnapshot?: number | string | null;
+  product?: {
+    title?: string | null;
+    unitType?: string | null;
+  } | null;
+  productTitleSnapshot?: string | null;
+  productSkuSnapshot?: string | null;
+  unitTypeSnapshot?: string | null;
+  variantName?: string | null;
+  variantSku?: string | null;
 };
 
-type RFQ = {
-  id: string;
-  status?: string;
-};
 type AdminOverview = {
   companies: {
     total: number;
@@ -41,8 +48,6 @@ type AdminOverview = {
     productsTotal: number;
     productsApproved: number;
     productsPending: number;
-    rfqsTotal: number;
-    quotesTotal: number;
     disputesOpen: number;
     payoutsPending: number;
   };
@@ -74,9 +79,6 @@ type AdminMetrics = {
   completedOrders: number;
   pendingOrders?: number;
   disputes: number;
-  totalRfqs: number;
-  openRfqs: number;
-  quotes: number;
   gmv: number;
   commission: number;
 };
@@ -103,7 +105,6 @@ export default function AdminDashboardPage() {
   const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
 
   const [orders, setOrders] = useState<Order[]>([]);
-  const [rfqs, setRfqs] = useState<RFQ[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [metrics, setMetrics] = useState<AdminMetrics | null>(null);
@@ -124,11 +125,10 @@ export default function AdminDashboardPage() {
         Authorization: `Bearer ${token}`,
       };
 
-      const [metricsRes, overviewRes, ordersRes, rfqsRes] = await Promise.all([
+      const [metricsRes, overviewRes, ordersRes] = await Promise.all([
         fetch(`${API}/dashboard/admin`, { headers }),
         fetch(`${API}/admin/metrics/overview`, { headers }),
         fetch(`${API}/orders`, { headers }),
-        fetch(`${API}/rfqs/open`, { headers }),
       ]);
 
       const metricsData = await metricsRes.json();
@@ -147,7 +147,6 @@ export default function AdminDashboardPage() {
       }
 
       const ordersData = await ordersRes.json();
-      const rfqsData = await rfqsRes.json();
 
       if (!ordersRes.ok) {
         setError(ordersData?.message || t("adminDashboardPage.ordersLoadFailed"));
@@ -162,16 +161,10 @@ export default function AdminDashboardPage() {
         setOrders(safeOrders);
       }
 
-      if (rfqsRes.ok) {
-        setRfqs(Array.isArray(rfqsData) ? rfqsData : []);
-      } else {
-        setRfqs([]);
-      }
     } catch (err) {
       console.error("ADMIN DASHBOARD ERROR:", err);
       setError(t("adminDashboardPage.dataLoadFailed"));
       setOrders([]);
-      setRfqs([]);
     } finally {
       setLoading(false);
     }
@@ -188,9 +181,6 @@ export default function AdminDashboardPage() {
   const totalCommission =
     metrics?.commission ??
     orders.reduce((sum, order) => sum + Number(order.commissionAmount || 0), 0);
-
-  const activeRfqs =
-    metrics?.openRfqs ?? rfqs.filter((rfq) => rfq.status === "OPEN").length;
 
   const completedOrders =
     metrics?.completedOrders ??
@@ -462,7 +452,48 @@ export default function AdminDashboardPage() {
             <div style={tableStyle}>
               {orders.slice(0, 10).map((order) => (
                 <div key={order.id} style={rowStyle}>
-                  <span style={orderIdStyle}>#{order.id.slice(0, 8)}</span>
+                  <span style={{ ...orderIdStyle, minWidth: 0 }}>
+                    <span style={{ display: "block" }}>
+                      #{order.id.slice(0, 8)}
+                    </span>
+                    {(order.productTitleSnapshot || order.product?.title) && (
+                      <span style={{
+                        display: "block",
+                        fontSize: 11,
+                        color: "#64748b",
+                        overflowWrap: "anywhere"
+                      }}>
+                        {order.productTitleSnapshot || order.product?.title}
+                        {order.productSkuSnapshot
+                          ? ` · SKU: ${order.productSkuSnapshot}` : ""}
+                        {order.variantName
+                          ? ` · ${order.variantName}` : ""}
+                        {order.variantSku
+                          ? ` · V-SKU: ${order.variantSku}` : ""}
+                        {(order.unitTypeSnapshot ?? order.product?.unitType)
+                          ? ` · ${order.unitTypeSnapshot ?? order.product?.unitType}` : ""}
+                      </span>
+                    )}
+                    {!order.productTitleSnapshot && Boolean(order.product?.title) && (
+                      <span role="note" style={{
+                        display: "block",
+                        fontSize: 11,
+                        color: "#92400e",
+                        marginTop: 4
+                      }}>
+                        {t("adminDashboardPage.currentProductInfoNotice")}
+                      </span>
+                    )}
+                    {order.unitPriceSnapshot != null && (
+                      <span style={{
+                        display: "block",
+                        fontSize: 11,
+                        marginTop: 4
+                      }}>
+                        {t("adminDashboardPage.unitPrice")}: {formatMoney(order.unitPriceSnapshot, locale)}
+                      </span>
+                    )}
+                  </span>
 
                   <span>{formatMoney(order.totalAmount || 0, locale)}</span>
 

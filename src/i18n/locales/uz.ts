@@ -395,6 +395,7 @@ export default {
     "pallet": "Palet"
   },
   "buyerOrdersPage": {
+    "currentProductInfoNotice": "Eski buyurtma: Mahsulot nomi joriy ma’lumotlardan olingan; xarid vaqtidagi nomini tasdiqlab bo‘lmaydi.",
     "loginRequired": "Kirish talab qilinadi",
     "loadFailed": "Buyurtmalar yuklanmadi",
     "paymentSuccessMessage": "To'lov muvaffaqiyatli tasdiqlandi. Buyurtma holati yangilandi.",
@@ -1082,6 +1083,7 @@ export default {
     "pallet": "palet"
   },
   "sellerOrdersPage": {
+    "currentProductInfoNotice": "Eski buyurtma: Mahsulot nomi joriy ma’lumotlardan olingan; xarid vaqtidagi nomini tasdiqlab bo‘lmaydi.",
     "loginRequired": "Buyurtmalarni ko'rish uchun tizimga kirishingiz kerak.",
     "loginShort": "Iltimos, tizimga kiring",
     "loadFailed": "Buyurtmalarni yuklab bo'lmadi",
@@ -1596,6 +1598,8 @@ export default {
     "orderDistribution": "Buyurtmalar taqsimoti",
     "latestActivity": "So'nggi faoliyatlar",
     "latestOrders": "So'nggi buyurtmalar",
+    "unitPrice": "Birlik narxi",
+    "currentProductInfoNotice": "Eski buyurtma: Mahsulot nomi joriy ma’lumotlardan olingan; xarid vaqtidagi nomini tasdiqlab bo‘lmaydi.",
     "noOrders": "Hech qanday buyurtma yo'q.",
     "manage": "Boshqarish →",
     "chartOrder": "Buyurtma",

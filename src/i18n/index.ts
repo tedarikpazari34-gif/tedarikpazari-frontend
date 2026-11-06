@@ -426,6 +426,7 @@ const resources = {
         pallet: "Palet"
       },
       buyerOrdersPage: {
+        "currentProductInfoNotice": "Eski sipariş: Ürün adı güncel kayıttan gösteriliyor; satın alma anındaki adı doğrulanamıyor.",
         loginRequired: "Giriş yapmanız gerekiyor",
         loadFailed: "Siparişler alınamadı",
         paymentSuccessMessage: "Ödemeniz başarıyla doğrulandı. Sipariş durumu güncellendi.",
@@ -1128,6 +1129,7 @@ const resources = {
         pallet: "Palet"
       },
       sellerOrdersPage: {
+        "currentProductInfoNotice": "Eski sipariş: Ürün adı güncel kayıttan gösteriliyor; satın alma anındaki adı doğrulanamıyor.",
         loginRequired: "Siparişlerinizi görmek için giriş yapmalısınız.",
         loginShort: "Lütfen giriş yapın",
         loadFailed: "Siparişler alınamadı",
@@ -1664,6 +1666,8 @@ const resources = {
         orderDistribution: "Sipariş Dağılımı",
         latestActivity: "SON HAREKETLER",
         latestOrders: "Son Siparişler",
+        "unitPrice": "Birim Fiyat",
+        "currentProductInfoNotice": "Eski sipariş: Ürün adı güncel kayıttan gösteriliyor; satın alma anındaki adı doğrulanamıyor.",
         noOrders: "Sipariş yok.",
         manage: "Yönet →",
         chartOrder: "Sipariş",
@@ -2953,6 +2957,7 @@ const resources = {
         pallet: "Pallets"
       },
       buyerOrdersPage: {
+        "currentProductInfoNotice": "Older order: The product name comes from current data; its name at purchase time cannot be verified.",
         loginRequired: "You must log in.",
         loadFailed: "Orders could not be loaded",
         paymentSuccessMessage: "Your payment was successfully verified. The order status has been updated.",
@@ -3655,6 +3660,7 @@ const resources = {
         pallet: "Pallets"
       },
       sellerOrdersPage: {
+        "currentProductInfoNotice": "Older order: The product name comes from current data; its name at purchase time cannot be verified.",
         loginRequired: "Please log in to view your orders.",
         loginShort: "Please log in",
         loadFailed: "Orders could not be loaded",
@@ -4191,6 +4197,8 @@ const resources = {
         orderDistribution: "Order Distribution",
         latestActivity: "LATEST ACTIVITY",
         latestOrders: "Latest Orders",
+        "unitPrice": "Unit Price",
+        "currentProductInfoNotice": "Older order: The product name comes from current data; its name at purchase time cannot be verified.",
         noOrders: "No orders.",
         manage: "Manage →",
         chartOrder: "Order",

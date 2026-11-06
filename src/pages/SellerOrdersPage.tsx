@@ -12,6 +12,12 @@ type Order = {
   totalAmount?: number | string;
   commissionAmount?: number | string;
   quantity?: number | null;
+  unitPriceSnapshot?: number | string | null;
+  productTitleSnapshot?: string | null;
+  productSkuSnapshot?: string | null;
+  unitTypeSnapshot?: string | null;
+  variantName?: string | null;
+  variantSku?: string | null;
   product?: {
     id?: string;
     title?: string;
@@ -36,7 +42,9 @@ type Order = {
   };
 };
 
-const API = "https://tedarik-backend.onrender.com/api";
+const API =
+  import.meta.env.VITE_API_URL ||
+  "https://tedarik-backend.onrender.com/api";
 
 function formatPrice(value: number | string | undefined, locale: string) {
   const numeric = Number(value || 0);
@@ -406,11 +414,41 @@ export default function SellerOrdersPage() {
                 <div>
                   <div style={smallLabelStyle}>{t("sellerOrdersPage.orderRequest")}</div>
                   <h2 style={cardTitleStyle}>
-                    {o.product?.title ||
+                    {o.productTitleSnapshot ||
+                      o.product?.title ||
                       o.rfq?.product?.title ||
                       o.rfq?.title ||
                       t("sellerOrdersPage.buyingRequest")}
                   </h2>
+                  {!o.productTitleSnapshot && Boolean(o.product?.title) && (
+                    <p
+                      role="note"
+                      style={{
+                        color: "#92400e",
+                        fontSize: 12,
+                        lineHeight: 1.5,
+                        margin: "6px 0 0"
+                      }}
+                    >
+                      {t("sellerOrdersPage.currentProductInfoNotice")}
+                    </p>
+                  )}
+                  {(o.productSkuSnapshot || o.variantName || o.variantSku) && (
+                    <div style={{
+                      fontSize: 12,
+                      color: "#64748b",
+                      marginTop: 4,
+                      overflowWrap: "anywhere"
+                    }}>
+                      {[
+                        o.productSkuSnapshot
+                          ? `SKU: ${o.productSkuSnapshot}` : null,
+                        o.variantName,
+                        o.variantSku
+                          ? `V-SKU: ${o.variantSku}` : null
+                      ].filter(Boolean).join(" · ")}
+                    </div>
+                  )}
                 </div>
 
                 <span style={{ ...badgeStyle, ...statusStyle(o.status) }}>
@@ -424,18 +462,17 @@ export default function SellerOrdersPage() {
                   label={t("sellerOrdersPage.quantity")}
                   value={
                     o.quantity
-                      ? `${o.quantity} ${o.product?.unitType ? unitLabel(o.product.unitType, t) : ""}`.trim()
+                      ? `${o.quantity} ${(o.unitTypeSnapshot ?? o.product?.unitType) ? unitLabel(o.unitTypeSnapshot ?? o.product?.unitType, t) : ""}`.trim()
                       : o.rfq?.quantity || "-"
                   }
                 />
                 <Info
                   label={t("sellerOrdersPage.unitPrice")}
                   value={formatPrice(
-                    o.product?.basePrice ||
-                      o.quote?.unitPrice ||
-                      (o.quantity
+                    o.unitPriceSnapshot ??
+                      (o.quantity && Number(o.quantity) > 0
                         ? Number(o.totalAmount || 0) / Number(o.quantity)
-                        : 0),
+                        : (o.quote?.unitPrice ?? 0)),
                     locale
                   )}
                 />

@@ -395,6 +395,7 @@ export default {
     "pallet": "Palette"
   },
   "buyerOrdersPage": {
+    "currentProductInfoNotice": "Ältere Bestellung: Der Produktname stammt aus aktuellen Daten; der Name zum Kaufzeitpunkt ist nicht bestätigt.",
     "loginRequired": "Anmeldung erforderlich",
     "loadFailed": "Bestellungen konnten nicht geladen werden",
     "paymentSuccessMessage": "Zahlung erfolgreich bestätigt. Bestellstatus wurde aktualisiert.",
@@ -1082,6 +1083,7 @@ export default {
     "pallet": "Palette"
   },
   "sellerOrdersPage": {
+    "currentProductInfoNotice": "Ältere Bestellung: Der Produktname stammt aus aktuellen Daten; der Name zum Kaufzeitpunkt ist nicht bestätigt.",
     "loginRequired": "Zum Anzeigen der Bestellungen müssen Sie sich anmelden.",
     "loginShort": "Bitte anmelden",
     "loadFailed": "Bestellungen konnten nicht geladen werden",
@@ -1596,6 +1598,8 @@ export default {
     "orderDistribution": "Auftragsverteilung",
     "latestActivity": "Letzte Aktivität",
     "latestOrders": "Neueste Bestellungen",
+    "unitPrice": "Stückpreis",
+    "currentProductInfoNotice": "Ältere Bestellung: Der Produktname stammt aus aktuellen Daten; der Name zum Kaufzeitpunkt ist nicht bestätigt.",
     "noOrders": "Keine Bestellungen.",
     "manage": "Verwalten →",
     "chartOrder": "Bestellung",

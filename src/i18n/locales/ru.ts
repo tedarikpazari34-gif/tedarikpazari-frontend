@@ -395,6 +395,7 @@ export default {
     "pallet": "поддон"
   },
   "buyerOrdersPage": {
+    "currentProductInfoNotice": "Старый заказ: название товара взято из текущих данных; название на момент покупки не подтверждено.",
     "loginRequired": "Требуется вход в систему",
     "loadFailed": "Не удалось загрузить заказы",
     "paymentSuccessMessage": "Платёж успешно подтверждён. Статус заказа обновлён.",
@@ -1082,6 +1083,7 @@ export default {
     "pallet": "палета"
   },
   "sellerOrdersPage": {
+    "currentProductInfoNotice": "Старый заказ: название товара взято из текущих данных; название на момент покупки не подтверждено.",
     "loginRequired": "Для просмотра заказов необходимо войти в систему.",
     "loginShort": "Пожалуйста, войдите",
     "loadFailed": "Не удалось загрузить заказы",
@@ -1596,6 +1598,8 @@ export default {
     "orderDistribution": "Распределение заказов",
     "latestActivity": "Последняя активность",
     "latestOrders": "Последние заказы",
+    "unitPrice": "Цена за единицу",
+    "currentProductInfoNotice": "Старый заказ: название товара взято из текущих данных; название на момент покупки не подтверждено.",
     "noOrders": "Нет заказов.",
     "manage": "Управление →",
     "chartOrder": "Заказ",

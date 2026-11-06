@@ -15,6 +15,12 @@ type Order = {
   totalAmount?: number | string;
   commissionAmount?: number | string;
   quantity?: number | null;
+  unitPriceSnapshot?: number | string | null;
+  productTitleSnapshot?: string | null;
+  productSkuSnapshot?: string | null;
+  unitTypeSnapshot?: string | null;
+  variantName?: string | null;
+  variantSku?: string | null;
 
   product?: {
     id?: string;
@@ -465,11 +471,41 @@ export default function BuyerOrdersPage() {
                   </div>
 
                   <h2 style={cardTitleStyle}>
-                    {o.product?.title ||
+                    {o.productTitleSnapshot ||
+                      o.product?.title ||
                       o.rfq?.product?.title ||
                       o.rfq?.title ||
                       t("buyerOrdersPage.buyingRequest")}
                   </h2>
+                  {!o.productTitleSnapshot && Boolean(o.product?.title) && (
+                    <p
+                      role="note"
+                      style={{
+                        color: "#92400e",
+                        fontSize: 12,
+                        lineHeight: 1.5,
+                        margin: "6px 0 0"
+                      }}
+                    >
+                      {t("buyerOrdersPage.currentProductInfoNotice")}
+                    </p>
+                  )}
+                  {(o.productSkuSnapshot || o.variantName || o.variantSku) && (
+                    <div style={{
+                      fontSize: 12,
+                      color: "#64748b",
+                      marginTop: 4,
+                      overflowWrap: "anywhere"
+                    }}>
+                      {[
+                        o.productSkuSnapshot
+                          ? `SKU: ${o.productSkuSnapshot}` : null,
+                        o.variantName,
+                        o.variantSku
+                          ? `V-SKU: ${o.variantSku}` : null
+                      ].filter(Boolean).join(" · ")}
+                    </div>
+                  )}
                 </div>
 
                 <span
@@ -487,7 +523,7 @@ export default function BuyerOrdersPage() {
                   label={t("buyerOrdersPage.quantity")}
                   value={
                     o.quantity
-                      ? `${o.quantity} ${unitLabel(o.product?.unitType, t)}`
+                      ? `${o.quantity} ${unitLabel(o.unitTypeSnapshot ?? o.product?.unitType, t)}`
                       : o.rfq?.quantity
                         ? `${o.rfq.quantity} ${unitLabel(o.rfq.unitType, t)}`
                         : "-"
@@ -497,11 +533,10 @@ export default function BuyerOrdersPage() {
                 <Info
                   label={t("buyerOrdersPage.unitPrice")}
                   value={`${Number(
-                    o.product?.basePrice ||
-                      o.quote?.unitPrice ||
-                      (o.quantity
+                    o.unitPriceSnapshot ??
+                      (o.quantity && Number(o.quantity) > 0
                         ? Number(o.totalAmount || 0) / Number(o.quantity)
-                        : 0)
+                        : (o.quote?.unitPrice ?? 0))
                   ).toLocaleString(locale)} ₺`}
                 />
 

@@ -395,6 +395,7 @@ export default {
     "pallet": "باليت"
   },
   "buyerOrdersPage": {
+    "currentProductInfoNotice": "طلب قديم: اسم المنتج مأخوذ من البيانات الحالية، ولا يمكن تأكيد اسمه وقت الشراء.",
     "loginRequired": "مطلوب تسجيل الدخول",
     "loadFailed": "تعذر تحميل الطلبات",
     "paymentSuccessMessage": "تم تأكيد الدفع بنجاح. تم تحديث حالة الطلب.",
@@ -1082,6 +1083,7 @@ export default {
     "pallet": "منصة"
   },
   "sellerOrdersPage": {
+    "currentProductInfoNotice": "طلب قديم: اسم المنتج مأخوذ من البيانات الحالية، ولا يمكن تأكيد اسمه وقت الشراء.",
     "loginRequired": "لعرض الطلبات، يجب عليك تسجيل الدخول.",
     "loginShort": "يرجى تسجيل الدخول",
     "loadFailed": "تعذر تحميل الطلبات",
@@ -1596,6 +1598,8 @@ export default {
     "orderDistribution": "توزيع الطلبات",
     "latestActivity": "آخر الأنشطة",
     "latestOrders": "أحدث الطلبات",
+    "unitPrice": "سعر الوحدة",
+    "currentProductInfoNotice": "طلب قديم: اسم المنتج مأخوذ من البيانات الحالية، ولا يمكن تأكيد اسمه وقت الشراء.",
     "noOrders": "لا توجد طلبات.",
     "manage": "إدارة →",
     "chartOrder": "طلب",
