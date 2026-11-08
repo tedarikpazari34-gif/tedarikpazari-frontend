@@ -5,6 +5,10 @@ type FlaggedMessage = {
   id: string;
   content: string;
   createdAt: string;
+  reviewedAt?: string | null;
+  reviewedById?: string | null;
+  reviewDecision?: string | null;
+  reviewNote?: string | null;
   sender?: {
     email?: string;
     role?: string;
@@ -31,8 +35,14 @@ export default function AdminChatModerationPage() {
 
   const [messages, setMessages] = useState<FlaggedMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [errorKey, setErrorKey] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const loadMessages = async () => {
+    setLoadError(false);
     try {
       const token = localStorage.getItem("token");
 
@@ -45,14 +55,92 @@ export default function AdminChatModerationPage() {
         }
       );
 
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
-      setMessages(Array.isArray(data) ? data : []);
+      if (!Array.isArray(data)) {
+        throw new Error("Unexpected flagged messages response");
+      }
+      setMessages(data);
     } catch (err) {
       console.error(err);
+      setLoadError(true);
       setMessages([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+
+  const reviewMessage = async (
+    message: FlaggedMessage,
+    decision: "VIOLATION_CONFIRMED" | "NO_VIOLATION"
+  ) => {
+    if (busyId || message.reviewedAt) return;
+
+    const note = (notes[message.id] || "").trim();
+
+    if (note.length > 500) {
+      setErrorKey("reviewNoteTooLong");
+      return;
+    }
+
+    const promptKey = decision === "VIOLATION_CONFIRMED"
+      ? "confirmViolationPrompt"
+      : "confirmNoViolationPrompt";
+
+    if (!window.confirm(t(`adminChatModerationPage.${promptKey}`))) {
+      return;
+    }
+
+    setBusyId(message.id);
+    setErrorKey(null);
+    setSuccess(false);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Missing authentication");
+
+      const response = await fetch(
+        `${API}/chat/admin/flagged/${encodeURIComponent(message.id)}/review`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ decision, note }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (
+        result?.id !== message.id ||
+        result?.reviewDecision !== decision ||
+        !result?.reviewedAt
+      ) {
+        throw new Error("Unexpected review response");
+      }
+
+      setMessages((current) =>
+        current.map((item) =>
+          item.id === message.id
+            ? { ...item, ...result }
+            : item
+        )
+      );
+
+      setSuccess(true);
+    } catch (error) {
+      console.error(error);
+      setErrorKey("reviewFailed");
+    } finally {
+      setBusyId(null);
     }
   };
 
@@ -74,9 +162,23 @@ export default function AdminChatModerationPage() {
         </div>
       </div>
 
+      {errorKey && (
+        <div role="alert" style={{ color: "#b91c1c", marginBottom: 12 }}>
+          {t(`adminChatModerationPage.${errorKey}`)}
+        </div>
+      )}
+      {success && (
+        <div role="status" style={{ color: "#166534", marginBottom: 12 }}>
+          {t("adminChatModerationPage.reviewSaved")}
+        </div>
+      )}
       {loading ? (
         <div style={emptyStyle}>
           {t("adminChatModerationPage.loading")}
+        </div>
+      ) : loadError ? (
+        <div role="alert" style={emptyStyle}>
+          {t("adminChatModerationPage.loadFailed")}
         </div>
       ) : messages.length === 0 ? (
         <div style={emptyStyle}>
@@ -91,7 +193,11 @@ export default function AdminChatModerationPage() {
             >
               <div style={topStyle}>
                 <span style={dangerBadgeStyle}>
-                  {t("adminChatModerationPage.flagged")}
+                  {t(
+                    msg.reviewedAt
+                      ? "adminChatModerationPage.reviewed"
+                      : "adminChatModerationPage.flagged"
+                  )}
                 </span>
 
                 <span style={dateStyle}>
@@ -125,6 +231,95 @@ export default function AdminChatModerationPage() {
               <div style={messageBoxStyle}>
                 {msg.content}
               </div>
+              {msg.reviewedAt ? (
+                <div style={{ marginTop: 16, lineHeight: 1.8 }}>
+                  <strong>
+                    {t(
+                      msg.reviewDecision === "VIOLATION_CONFIRMED"
+                        ? "adminChatModerationPage.violationConfirmed"
+                        : "adminChatModerationPage.noViolation"
+                    )}
+                  </strong>
+                  <div>
+                    {t("adminChatModerationPage.reviewedAt")}:{" "}
+                    {new Date(msg.reviewedAt).toLocaleString(locale)}
+                  </div>
+                  {msg.reviewedById && (
+                    <div>
+                      {t("adminChatModerationPage.reviewedBy")}:{" "}
+                      {msg.reviewedById.slice(0, 8)}
+                    </div>
+                  )}
+                  {msg.reviewNote && (
+                    <div style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
+                      {t("adminChatModerationPage.reviewNoteLabel")}:{" "}
+                      {msg.reviewNote}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
+                  <label htmlFor={`review-note-${msg.id}`}>
+                    {t("adminChatModerationPage.reviewNoteLabel")}
+                  </label>
+                  <textarea
+                    id={`review-note-${msg.id}`}
+                    rows={2}
+                    maxLength={500}
+                    value={notes[msg.id] || ""}
+                    placeholder={t("adminChatModerationPage.reviewNotePlaceholder")}
+                    disabled={busyId !== null}
+                    onChange={(event) =>
+                      setNotes((previous) => ({
+                        ...previous,
+                        [msg.id]: event.target.value,
+                      }))
+                    }
+                    style={{
+                      width: "100%",
+                      padding: 10,
+                      border: "1px solid #cbd5e1",
+                      borderRadius: 8,
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      disabled={busyId !== null}
+                      onClick={() =>
+                        void reviewMessage(msg, "VIOLATION_CONFIRMED")
+                      }
+                      style={{
+                        padding: "10px 14px",
+                        border: 0,
+                        borderRadius: 8,
+                        background: "#b91c1c",
+                        color: "white",
+                      }}
+                    >
+                      {t("adminChatModerationPage.confirmViolation")}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busyId !== null}
+                      onClick={() =>
+                        void reviewMessage(msg, "NO_VIOLATION")
+                      }
+                      style={{
+                        padding: "10px 14px",
+                        border: 0,
+                        borderRadius: 8,
+                        background: "#0f766e",
+                        color: "white",
+                      }}
+                    >
+                      {t("adminChatModerationPage.markNoViolation")}
+                    </button>
+                  </div>
+                </div>
+              )}
+
             </article>
           ))}
         </section>
