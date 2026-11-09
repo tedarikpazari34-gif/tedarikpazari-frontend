@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoiceApi, type InvoiceRecord } from "../lib/invoiceApi";
 import InvoiceList from "./InvoiceList";
@@ -14,7 +14,7 @@ export default function AdminInvoiceManager() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
-  async function reload() {
+  const reload = useCallback(async () => {
     setLoading(true);
     try {
       const data = await invoiceApi.admin();
@@ -25,9 +25,9 @@ export default function AdminInvoiceManager() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [t]);
 
-  useEffect(() => { void reload(); }, []);
+  useEffect(() => { void reload(); }, [reload]);
 
   async function inspectPdf(id: string) {
     if (openingId || busyId) return;

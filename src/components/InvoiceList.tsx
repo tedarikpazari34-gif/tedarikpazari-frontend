@@ -34,7 +34,7 @@ export default function InvoiceList({ role, orderId, refreshKey }: Props) {
       });
 
     return () => { active = false; };
-  }, [role, refreshKey]);
+  }, [role, refreshKey, t]);
 
   const visible = records.filter(
     record => !orderId || record.orderId === orderId,

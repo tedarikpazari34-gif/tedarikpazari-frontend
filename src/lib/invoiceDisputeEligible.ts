@@ -8,11 +8,13 @@ export interface InvoiceDisputeEligibility {
 export function invoiceDisputeEligible(
   dispute: InvoiceDisputeEligibility,
 ): boolean {
+  const orderStatus = dispute.order?.status;
   const active =
     (dispute.status === "OPEN" ||
       dispute.status === "SELLER_RESPONDED") &&
     dispute.resolution == null &&
-    dispute.resolvedAt == null;
+    dispute.resolvedAt == null &&
+    ["PAID", "PREPARING", "SHIPPED"].includes(orderStatus ?? "");
 
   const resolvedAt = dispute.resolvedAt;
 
