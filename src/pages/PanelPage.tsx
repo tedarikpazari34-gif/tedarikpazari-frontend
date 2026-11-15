@@ -151,8 +151,8 @@ export default function PanelPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const [email, setEmail] = useState("buyer@test.com");
-  const [password, setPassword] = useState("123456");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const [token, setToken] = useState<string>(getStoredToken());
   const [role, setRole] = useState<string>(getStoredRole());

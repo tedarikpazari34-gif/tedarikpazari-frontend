@@ -145,6 +145,12 @@ export default function LoginPage() {
           style={inputStyle}
         />
 
+        <div style={{ textAlign: "right", marginTop: 10, marginBottom: 14 }}>
+          <Link to="/forgot-password" style={{ color: "#0891b2" }}>
+            {t("passwordReset.forgotTitle")}
+          </Link>
+        </div>
+
         <button onClick={login} disabled={loading} style={buttonStyle}>
           {loading ? t("loginPage.loggingIn") : t("loginPage.login")}
         </button>

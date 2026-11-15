@@ -1,31 +1,32 @@
 import { io, type Socket } from "socket.io-client";
 
 const API =
-  import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
+  import.meta.env.VITE_API_URL ||
+  "https://tedarik-backend.onrender.com/api";
 
 const SOCKET_URL = API.replace(/\/api\/?$/, "");
 
 let socket: Socket | null = null;
-let connectedUserId = "";
+let connectedToken = "";
 
 export function getSocket(): Socket {
-  const userId = localStorage.getItem("userId") || "";
+  const token = localStorage.getItem("token") || "";
 
-  if (!socket || connectedUserId !== userId) {
+  if (!socket || connectedToken !== token) {
     socket?.disconnect();
 
-    connectedUserId = userId;
+    connectedToken = token;
 
     socket = io(SOCKET_URL, {
       transports: ["websocket"],
-      autoConnect: Boolean(userId),
-      query: {
-        userId,
+      autoConnect: Boolean(token),
+      auth: {
+        token,
       },
     });
   }
 
-  if (userId && !socket.connected) {
+  if (token && !socket.connected) {
     socket.connect();
   }
 
@@ -35,5 +36,5 @@ export function getSocket(): Socket {
 export function disconnectSocket() {
   socket?.disconnect();
   socket = null;
-  connectedUserId = "";
+  connectedToken = "";
 }

@@ -1,5 +1,6 @@
 import BuyerOrderFinancialSummary from "../components/buyer/BuyerOrderFinancialSummary";
 import BuyerQuickSkuSearch from "../components/buyer/BuyerQuickSkuSearch";
+import BuyerPanelNavigation from "../components/buyer/BuyerPanelNavigation";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { authFetch } from "../api";
@@ -107,23 +108,36 @@ export default function BuyerDashboardPage() {
             ? result.recentShippingOrders
             : [],
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Buyer dashboard error:", err);
-        setError(err?.message || t("buyerDashboard.loadError"));
+        setError(
+          err instanceof Error
+            ? err.message
+            : t("buyerDashboard.loadError")
+        );
       } finally {
         setLoading(false);
       }
     }
 
     load();
-  }, []);
+  }, [t]);
 
   if (loading) {
-    return <main style={pageStyle}>{t("buyerDashboard.loading")}</main>;
+    return (
+      <div style={{ display: "flex", minWidth: 0, background: "#f8fafc" }}>
+        <BuyerPanelNavigation />
+        <main style={{ ...pageStyle, flex: 1, minWidth: 0 }}>
+          {t("buyerDashboard.loading")}
+        </main>
+      </div>
+    );
   }
 
   return (
-    <main style={pageStyle}>
+    <div style={{ display: "flex", minWidth: 0, background: "#f8fafc" }}>
+      <BuyerPanelNavigation />
+      <main style={{ ...pageStyle, flex: 1, minWidth: 0 }}>
       <div style={headerStyle}>
         <div>
           <h1 style={titleStyle}>{t("buyerDashboard.title")}</h1>
@@ -251,6 +265,7 @@ export default function BuyerDashboardPage() {
         )}
       </section>
     </main>
+    </div>
   );
 }
 

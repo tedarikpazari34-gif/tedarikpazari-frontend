@@ -1,4 +1,27 @@
 export default {
+  passwordReset: {
+    forgotTitle: "Parolni unutdingizmi",
+    email: "Elektron pochta manzili",
+    sendLink: "Tiklash havolasini yuborish",
+    requestSent: "Manzil ro‘yxatdan o‘tgan bo‘lsa, tiklash havolasi yuboriladi.",
+    requestFailed: "So‘rov yuborilmadi. Qayta urinib ko‘ring.",
+    resetTitle: "Yangi parol o‘rnatish",
+    invalidLink: "Havola noto‘g‘ri yoki mavjud emas.",
+    resetSubmit: "Parolni tiklash",
+    resetSuccess: "Parolingiz o‘zgartirildi.",
+    resetFailed: "Parolni tiklab bo‘lmadi. Havola noto‘g‘ri yoki muddati tugagan bo‘lishi mumkin.",
+    backToLogin: "Kirishga qaytish",
+  },
+  accountSecurity: {
+    title: "Hisob xavfsizligi",
+    currentPassword: "Joriy parol",
+    newPassword: "Yangi parol",
+    confirmPassword: "Yangi parolni tasdiqlang",
+    submit: "Parolni o‘zgartirish",
+    passwordMismatch: "Parollar mos kelmaydi.",
+    passwordLength: "Parol 12–128 belgidan iborat bo‘lishi kerak.",
+    changeFailed: "Parolni o‘zgartirib bo‘lmadi.",
+  },
   "invoice":   {
     orderReference: "Buyurtma raqami",
     "title": "Hisob-fakturalar va hujjatlar",
@@ -1133,6 +1156,9 @@ export default {
     "cancelled": "Bekor qilindi"
   },
   "sellerProfilePage": {
+        "buyerEyebrow": "XARIDOR PANELI",
+        "buyerTitle": "Kompaniyam profili",
+        "buyerDescription": "Bu yerda kompaniyangizning aloqa, manzil va huquqiy ma'lumotlarini ko'rishingiz va yangilashingiz mumkin.",
     "loginRequired": "Kompaniya profilini ko'rish uchun tizimga kirishingiz kerak.",
     "loadFailed": "Kompaniya ma'lumotlarini olish imkoni bo'lmadi.",
     "loadError": "Kompaniya ma'lumotlarini yuklashda xato yuz berdi.",

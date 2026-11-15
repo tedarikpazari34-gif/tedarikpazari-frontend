@@ -208,7 +208,6 @@ export default function ShippingPage() {
                     {rfq.fromCity || "-"}
                     {rfq.fromDistrict ? ` / ${rfq.fromDistrict}` : ""}
                   </strong>
-                  <small>{rfq.fromOpenAddress || rfq.fromAddress || "-"}</small>
                 </div>
 
                 <span style={arrowStyle}>→</span>
@@ -221,7 +220,6 @@ export default function ShippingPage() {
                     {rfq.toCity || "-"}
                     {rfq.toDistrict ? ` / ${rfq.toDistrict}` : ""}
                   </strong>
-                  <small>{rfq.toOpenAddress || rfq.toAddress || "-"}</small>
                 </div>
               </div>
 
@@ -264,7 +262,7 @@ export default function ShippingPage() {
                 />
                 <Info
                   label={t("logisticsShippingPage.quoteCount")}
-                  value={rfq.quotes?.length || 0}
+                  value={rfq._count?.quotes ?? 0}
                 />
               </div>
 

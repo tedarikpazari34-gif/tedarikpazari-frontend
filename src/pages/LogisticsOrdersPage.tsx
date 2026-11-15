@@ -314,11 +314,11 @@ export default function LogisticsOrdersPage() {
               <div style={infoGridStyle}>
                 <Info
                   label={t("logisticsOrdersPage.buyer")}
-                  value={order.buyer?.name || "-"}
+                  value={t("logisticsOrdersPage.buyer")}
                 />
                 <Info
                   label={t("logisticsOrdersPage.seller")}
-                  value={order.seller?.name || "-"}
+                  value={t("logisticsOrdersPage.seller")}
                 />
                 <Info
                   label={t("logisticsOrdersPage.shippingPrice")}
@@ -338,7 +338,7 @@ export default function LogisticsOrdersPage() {
                 />
                 <Info
                   label={t("logisticsOrdersPage.shippingCompany")}
-                  value={order.shippingCompany || "-"}
+                  value={t("buyerShippingQuotesPage.logisticsCompany")}
                 />
               </div>
 

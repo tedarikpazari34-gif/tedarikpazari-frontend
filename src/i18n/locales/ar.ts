@@ -1,4 +1,27 @@
 export default {
+  passwordReset: {
+    forgotTitle: "نسيت كلمة المرور",
+    email: "البريد الإلكتروني",
+    sendLink: "إرسال رابط إعادة التعيين",
+    requestSent: "إذا كان البريد مسجلاً، فسيتم إرسال رابط إعادة التعيين.",
+    requestFailed: "تعذر إرسال الطلب. حاول مرة أخرى.",
+    resetTitle: "تعيين كلمة مرور جديدة",
+    invalidLink: "الرابط غير صالح أو مفقود.",
+    resetSubmit: "إعادة تعيين كلمة المرور",
+    resetSuccess: "تم تغيير كلمة المرور.",
+    resetFailed: "تعذرت إعادة التعيين. قد يكون الرابط غير صالح أو منتهي الصلاحية.",
+    backToLogin: "العودة لتسجيل الدخول",
+  },
+  accountSecurity: {
+    title: "أمان الحساب",
+    currentPassword: "كلمة المرور الحالية",
+    newPassword: "كلمة المرور الجديدة",
+    confirmPassword: "تأكيد كلمة المرور الجديدة",
+    submit: "تغيير كلمة المرور",
+    passwordMismatch: "كلمتا المرور غير متطابقتين.",
+    passwordLength: "يجب أن تتكون كلمة المرور من 12 إلى 128 حرفًا.",
+    changeFailed: "تعذر تغيير كلمة المرور.",
+  },
   "invoice":   {
     orderReference: "رقم الطلب",
     "title": "الفواتير والمستندات",
@@ -1133,6 +1156,9 @@ export default {
     "cancelled": "ملغى"
   },
   "sellerProfilePage": {
+        "buyerEyebrow": "لوحة المشتري",
+        "buyerTitle": "ملف شركتي",
+        "buyerDescription": "يمكنك هنا عرض وتحديث معلومات الاتصال والعنوان والبيانات القانونية لشركتك.",
     "loginRequired": "يجب عليك تسجيل الدخول لعرض ملف الشركة.",
     "loadFailed": "تعذر استرداد معلومات الشركة.",
     "loadError": "حدث خطأ أثناء تحميل معلومات الشركة.",

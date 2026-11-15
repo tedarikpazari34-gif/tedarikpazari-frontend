@@ -1,5 +1,7 @@
+import { disconnectSocket } from "../lib/socket";
 import { useEffect, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
+import PanelNavigation, { type PanelMenuGroup } from "./dashboard/PanelNavigation";
 
 export default function SellerLayout({
   children,
@@ -9,10 +11,10 @@ export default function SellerLayout({
   title?: string;
 }) {
   const { t } = useTranslation();
-  const path = window.location.pathname;
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
   );
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -24,6 +26,7 @@ export default function SellerLayout({
   }, []);
 
   const logout = () => {
+    disconnectSocket();
     const language = localStorage.getItem("language");
     localStorage.clear();
 
@@ -34,60 +37,57 @@ export default function SellerLayout({
     window.location.href = "/login";
   };
 
-  const menu = [
+  const groups: PanelMenuGroup[] = [
     {
-      label: t("sellerLayout.dashboard"),
-      href: "/seller/dashboard",
+      title: t("sellerLayout.dashboard"),
       icon: "📊",
+      items: [
+        { label: t("sellerLayout.dashboard"), path: "/seller/dashboard", icon: "📊" },
+      ],
     },
     {
-      label: t("sellerLayout.myProducts"),
-      href: "/seller/products",
+      title: t("sellerLayout.myProducts"),
       icon: "📦",
+      items: [
+        { label: t("sellerLayout.myProducts"), path: "/seller/products", icon: "📦" },
+        { label: t("sellerLayout.newProduct"), path: "/seller/products/new", icon: "➕" },
+        {
+          label: t("panelNavigation.bulkImport"),
+          path: "/seller/products/import",
+          icon: "📄",
+        },
+      ],
     },
     {
-      label: t("sellerLayout.newProduct"),
-      href: "/seller/products/new",
-      icon: "➕",
-    },
-    {
-      label: t("sellerLayout.bulkImport", {
-        defaultValue: "Excel / XML Ürün Yükleme",
-      }),
-      href: "/seller/products/import",
-      icon: "📄",
-    },
-    {
-      label: t("sellerLayout.orders"),
-      href: "/seller/orders",
+      title: t("sellerLayout.orders"),
       icon: "🧾",
+      items: [
+        { label: t("sellerLayout.orders"), path: "/seller/orders", icon: "🧾" },
+        ...(import.meta.env.VITE_CHARGEBACK_ENABLED === "true"
+          ? [{
+              label: t("sellerLayout.chargebacks", { defaultValue: "Harcama İtirazlarım" }),
+              path: "/seller/chargebacks",
+              icon: "🛡️",
+            }]
+          : []),
+      ],
     },
     {
-      label: t("sellerLayout.profile", { defaultValue: "Firma Profilim" }),
-      href: "/seller/profile",
-      icon: "🏢",
-    },
-    {
-      label: t("sellerLayout.wallet", { defaultValue: "Kazançlarım" }),
-      href: "/wallet",
+      title: t("panelNavigation.earnings"),
       icon: "💳",
+      items: [
+        { label: t("panelNavigation.earnings"), path: "/wallet", icon: "💳" },
+      ],
     },
     {
-      label: t("sellerLayout.messages", { defaultValue: "Mesajlar" }),
-      href: "/chat",
-      icon: "💬",
-    },
-    {
-      label: t("sellerLayout.notifications", { defaultValue: "Bildirimler" }),
-      href: "/notifications",
-      icon: "🔔",
-    },
-    {
-      label: t("sellerLayout.chargebacks", {
-        defaultValue: "Harcama İtirazlarım",
-      }),
-      href: "/seller/chargebacks",
-      icon: "🛡️",
+      title: t("panelNavigation.companyProfile"),
+      icon: "🏢",
+      items: [
+        { label: t("panelNavigation.companyProfile"), path: "/seller/profile", icon: "🏢" },
+        { label: t("accountSecurity.title"), path: "/seller/security", icon: "🔒" },
+        { label: t("panelNavigation.messages"), path: "/chat", icon: "💬" },
+        { label: t("panelNavigation.notifications"), path: "/notifications", icon: "🔔" },
+      ],
     },
   ];
 
@@ -110,28 +110,7 @@ export default function SellerLayout({
           </div>
         </div>
 
-        <nav style={menuWrap}>
-          {menu.filter((item) =>
-            item.href !== "/seller/chargebacks" ||
-            import.meta.env.VITE_CHARGEBACK_ENABLED === "true"
-          ).map((item) => {
-            const active = path === item.href;
-
-            return (
-              <a
-                key={item.href}
-                href={item.href}
-                style={{
-                  ...menuItem,
-                  ...(active ? activeMenuItem : {}),
-                }}
-              >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
-              </a>
-            );
-          })}
-        </nav>
+        <PanelNavigation groups={groups} title={t("sellerLayout.panelTitle")} />
 
         <button onClick={logout} style={logoutButton}>
           {t("sellerLayout.logout")}
@@ -182,6 +161,43 @@ export default function SellerLayout({
           </div>
         </header>
 
+        {isMobile && (
+          <div style={{ marginBottom: 18 }}>
+            <button
+              type="button"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="seller-mobile-navigation"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              style={{
+                background: "#0d9488",
+                color: "#ffffff",
+                border: 0,
+                borderRadius: 10,
+                padding: "12px 16px",
+                fontWeight: 700,
+                cursor: "pointer",
+                width: "100%",
+              }}
+            >
+              {mobileMenuOpen ? t("panelNavigation.closeMenu") : `☰ ${t("panelNavigation.sellerMenu")}`}
+            </button>
+            {mobileMenuOpen && (
+              <div id="seller-mobile-navigation" style={{ marginTop: 12 }}>
+                <PanelNavigation
+                  groups={groups}
+                  title={t("sellerLayout.panelTitle")}
+                />
+                <button
+                  type="button"
+                  onClick={logout}
+                  style={{ ...logoutButton, width: "100%", marginTop: 12 }}
+                >
+                  {t("sellerLayout.logout")}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
         <section>{children}</section>
       </main>
     </div>
@@ -196,8 +212,8 @@ const layout: CSSProperties = {
 
 const sidebar: CSSProperties = {
   width: 260,
-  background: "#0f172a",
-  color: "white",
+  background: "#ffffff",
+  color: "#0f172a",
   padding: 24,
   display: "flex",
   flexDirection: "column",
@@ -214,7 +230,7 @@ const brandIcon: CSSProperties = {
   width: 42,
   height: 42,
   borderRadius: 12,
-  background: "#2563eb",
+  background: "#0d9488",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -229,30 +245,7 @@ const brandText: CSSProperties = {
 
 const brandSub: CSSProperties = {
   fontSize: 12,
-  color: "#94a3b8",
-};
-
-const menuWrap: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 8,
-};
-
-const menuItem: CSSProperties = {
-  color: "#cbd5e1",
-  textDecoration: "none",
-  padding: "12px 14px",
-  borderRadius: 12,
-  display: "flex",
-  alignItems: "center",
-  gap: 10,
-  fontWeight: 700,
-  fontSize: 14,
-};
-
-const activeMenuItem: CSSProperties = {
-  background: "#2563eb",
-  color: "white",
+  color: "#64748b",
 };
 
 const logoutButton: CSSProperties = {
@@ -304,8 +297,8 @@ const avatar: CSSProperties = {
   width: 38,
   height: 38,
   borderRadius: "50%",
-  background: "#dbeafe",
-  color: "#2563eb",
+  background: "#ccfbf1",
+  color: "#0d9488",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",

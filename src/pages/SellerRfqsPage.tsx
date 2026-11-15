@@ -2,13 +2,6 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { unitLabel } from "../lib/unitLabel";
 
-type Quote = {
-  id: string;
-  unitPrice?: number | string;
-  deliveryDays?: number;
-  note?: string | null;
-};
-
 type RFQ = {
   id: string;
   quantity: number;
@@ -23,7 +16,7 @@ type RFQ = {
   buyer?: {
     name?: string;
   };
-  quotes?: Quote[];
+  _count?: { quotes: number };
 };
 
 const API = "https://tedarik-backend.onrender.com/api";
@@ -173,7 +166,7 @@ export default function SellerRfqsPage() {
                       : "-"
                   }
                 />
-                <Info label={t("sellerRfqsPage.existingQuotes")} value={rfq.quotes?.length || 0} />
+                <Info label={t("sellerRfqsPage.existingQuotes")} value={rfq._count?.quotes ?? 0} />
                 <Info label={t("sellerRfqsPage.status")} value={statusLabel(rfq.status, t)} />
               </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { disconnectSocket, getSocket } from "../lib/socket";
@@ -654,6 +654,7 @@ export default function Navbar() {
               </span>
             )}
           </Link>
+          <LanguageSwitcher />
         </nav>
 
         <button
@@ -884,42 +885,121 @@ export default function Navbar() {
         </div>
       )}
     </header>
+
   );
 }
-
 function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
   const { t, i18n } = useTranslation();
+  const menuRef = useRef<HTMLDetailsElement>(null);
   const currentLanguage = i18n.resolvedLanguage || i18n.language || "tr";
 
-  const visibleLanguages = SUPPORTED_LANGUAGES.filter(
-    (language) => ["tr", "en", "ka", "ru", "de", "ar", "uz"].includes(language.code)
+  const visibleLanguages = SUPPORTED_LANGUAGES.filter((language) =>
+    ["tr", "en", "ka", "ru", "de", "ar", "uz"].includes(language.code)
   );
 
+  const selectedLanguage = visibleLanguages.find((language) =>
+    currentLanguage.toLowerCase().startsWith(language.code)
+  );
+
+  useEffect(() => {
+    const closeOutside = (event: PointerEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        menuRef.current.open = false;
+      }
+    };
+    const closeEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && menuRef.current) {
+        menuRef.current.open = false;
+      }
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", closeEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("keydown", closeEscape);
+    };
+  }, []);
+
   const changeLanguage = (language: SupportedLanguageCode) => {
-    i18n.changeLanguage(language);
+    void i18n.changeLanguage(language);
+    if (menuRef.current) menuRef.current.open = false;
   };
 
   return (
-    <div style={mobile ? mobileLanguageStyle : languageStyle}>
-      <span style={languageGlobeStyle} aria-hidden="true">🌐</span>
-
-      <select
-        value={visibleLanguages.find((language) =>
-          currentLanguage.startsWith(language.code)
-        )?.code || "tr"}
-        onChange={(event) =>
-          changeLanguage(event.target.value as SupportedLanguageCode)
-        }
+    <details
+      ref={menuRef}
+      style={{
+        ...(mobile ? mobileLanguageStyle : languageStyle),
+        position: "relative",
+        background: "#F3F8FC",
+        border: "1px solid #C9D9E5",
+        color: "#0B3D6E",
+        zIndex: 100,
+      }}
+    >
+      <summary
         aria-label={t("common.languageSelection")}
-        style={languageSelectStyle}
+        style={{
+          ...languageSelectStyle,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 7,
+          color: "#0B3D6E",
+          maxWidth: "none",
+          listStyle: "none",
+          cursor: "pointer",
+          padding: "4px 6px",
+        }}
       >
-        {visibleLanguages.map((language) => (
-          <option key={language.code} value={language.code}>
-            {language.label} — {language.name}
-          </option>
-        ))}
-      </select>
-    </div>
+        <span style={languageGlobeStyle} aria-hidden="true">🌐</span>
+        <span>{selectedLanguage?.label || "TR"}</span>
+        <span aria-hidden="true">▾</span>
+      </summary>
+
+      <div
+        style={{
+          position: "absolute",
+          top: "calc(100% + 8px)",
+          right: 0,
+          width: mobile ? "100%" : 210,
+          minWidth: 180,
+          boxSizing: "border-box",
+          padding: 6,
+          background: "#FFFFFF",
+          border: "1px solid #C9D9E5",
+          borderRadius: 12,
+          boxShadow: "0 10px 28px rgba(11,61,110,0.16)",
+          zIndex: 200,
+        }}
+      >
+        {visibleLanguages.map((language) => {
+          const active = selectedLanguage?.code === language.code;
+          return (
+            <button
+              key={language.code}
+              type="button"
+              onClick={() => changeLanguage(language.code)}
+              aria-current={active ? "true" : undefined}
+              style={{
+                display: "block",
+                width: "100%",
+                padding: "10px 12px",
+                border: "none",
+                borderRadius: 8,
+                background: active ? "#E5F7F5" : "transparent",
+                color: "#0B3D6E",
+                textAlign: "left",
+                fontWeight: active ? 800 : 500,
+                cursor: "pointer",
+              }}
+            >
+              {language.label} — {language.name}
+            </button>
+          );
+        })}
+      </div>
+    </details>
   );
 }
 

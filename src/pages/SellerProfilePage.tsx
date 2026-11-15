@@ -412,11 +412,11 @@ export default function SellerProfilePage() {
     <main style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <div style={eyebrowStyle}>{t("sellerProfilePage.eyebrow")}</div>
-          <h1 style={heroTitleStyle}>{t("sellerProfilePage.title")}</h1>
+          <div style={eyebrowStyle}>{t(isBuyer ? "sellerProfilePage.buyerEyebrow" : "sellerProfilePage.eyebrow")}</div>
+          <h1 style={heroTitleStyle}>{t(isBuyer ? "sellerProfilePage.buyerTitle" : "sellerProfilePage.title")}</h1>
 
           <p style={heroTextStyle}>
-            {t("sellerProfilePage.description")}
+            {t(isBuyer ? "sellerProfilePage.buyerDescription" : "sellerProfilePage.description")}
           </p>
         </div>
 
@@ -928,6 +928,7 @@ export default function SellerProfilePage() {
           </button>
         </article>
 
+        {isSeller && (
         <aside
           style={{
             ...mediaCardStyle,
@@ -1021,6 +1022,7 @@ export default function SellerProfilePage() {
             </a>
           )}
         </aside>
+        )}
       </section>
     </main>
   );

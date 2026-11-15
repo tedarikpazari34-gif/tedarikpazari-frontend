@@ -1,4 +1,27 @@
 export default {
+  passwordReset: {
+    forgotTitle: "Passwort vergessen",
+    email: "E-Mail-Adresse",
+    sendLink: "Link zum Zurücksetzen senden",
+    requestSent: "Falls die Adresse registriert ist, wird ein Link gesendet.",
+    requestFailed: "Anfrage fehlgeschlagen. Bitte erneut versuchen.",
+    resetTitle: "Neues Passwort festlegen",
+    invalidLink: "Link ungültig oder fehlt.",
+    resetSubmit: "Passwort zurücksetzen",
+    resetSuccess: "Ihr Passwort wurde geändert.",
+    resetFailed: "Zurücksetzen fehlgeschlagen. Der Link ist möglicherweise ungültig oder abgelaufen.",
+    backToLogin: "Zur Anmeldung",
+  },
+  accountSecurity: {
+    title: "Kontosicherheit",
+    currentPassword: "Aktuelles Passwort",
+    newPassword: "Neues Passwort",
+    confirmPassword: "Neues Passwort bestätigen",
+    submit: "Passwort ändern",
+    passwordMismatch: "Passwörter stimmen nicht überein.",
+    passwordLength: "Das Passwort muss 12–128 Zeichen lang sein.",
+    changeFailed: "Passwort konnte nicht geändert werden.",
+  },
   "invoice":   {
     orderReference: "Bestellnummer",
     "title": "Rechnungen und Dokumente",
@@ -1133,6 +1156,9 @@ export default {
     "cancelled": "Storniert"
   },
   "sellerProfilePage": {
+        "buyerEyebrow": "KÄUFERBEREICH",
+        "buyerTitle": "Mein Unternehmensprofil",
+        "buyerDescription": "Hier können Sie die Kontakt-, Adress- und rechtlichen Angaben Ihres Unternehmens einsehen und aktualisieren.",
     "loginRequired": "Sie müssen sich anmelden, um das Unternehmensprofil anzusehen.",
     "loadFailed": "Die Unternehmensinformationen konnten nicht abgerufen werden.",
     "loadError": "Beim Laden der Unternehmensinformationen ist ein Fehler aufgetreten.",

@@ -1,4 +1,5 @@
 import AdminInvoiceManager from "../components/AdminInvoiceManager";
+import AdminIyzicoWebhookManager from "../components/AdminIyzicoWebhookManager";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import AdminSidebar from "../components/admin/AdminSidebar";
@@ -352,6 +353,8 @@ export default function AdminFinancePage() {
             </div>
           )}
         </section>
+
+        <AdminIyzicoWebhookManager />
 
         <section style={panelStyle}>
           <div style={panelHeaderStyle}>

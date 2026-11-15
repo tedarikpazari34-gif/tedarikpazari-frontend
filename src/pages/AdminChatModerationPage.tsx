@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
+import AdminChatFileReviews from "../components/AdminChatFileReviews";
 
 type FlaggedMessage = {
   id: string;
@@ -161,6 +162,11 @@ export default function AdminChatModerationPage() {
           </h1>
         </div>
       </div>
+
+      <AdminChatFileReviews
+        apiBase={API}
+        language={i18n.language}
+      />
 
       {errorKey && (
         <div role="alert" style={{ color: "#b91c1c", marginBottom: 12 }}>

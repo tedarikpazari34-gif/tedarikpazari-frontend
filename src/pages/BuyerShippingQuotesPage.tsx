@@ -193,9 +193,7 @@ export default function BuyerShippingQuotesPage() {
                   <div>
                     <div style={smallLabelStyle}>{t("buyerShippingQuotesPage.shippingQuote")}</div>
                     <h2 style={companyTitleStyle}>
-                      {quote.company?.name ||
-                        quote.company?.companyName ||
-                        t("buyerShippingQuotesPage.logisticsCompany")}
+                      {t("buyerShippingQuotesPage.logisticsCompany")}
                     </h2>
                   </div>
 

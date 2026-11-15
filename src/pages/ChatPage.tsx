@@ -1,3 +1,6 @@
+import SecureChatFile from "../components/SecureChatFile";
+import ChatMyFileReviews from "../components/ChatMyFileReviews";
+import { shouldRefreshChatFileReview } from "../lib/chatFileReviewRealtime";
 import {
   useEffect,
   useMemo,
@@ -34,9 +37,64 @@ type Thread = {
   messages?: Message[];
 };
 
+function ChatTranslatedText({
+  original,
+  translated,
+  language,
+}: {
+  original: string;
+  translated?: string | null;
+  language: string;
+}) {
+  const [showOriginal, setShowOriginal] = useState(false);
+
+  const labels: Record<string, [string, string]> = {
+    tr: ["Orijinali göster", "Çeviriyi göster"],
+    en: ["Show original", "Show translation"],
+    ka: ["ორიგინალის ჩვენება", "თარგმანის ჩვენება"],
+    ru: ["Показать оригинал", "Показать перевод"],
+    de: ["Original anzeigen", "Übersetzung anzeigen"],
+    ar: ["عرض النص الأصلي", "عرض الترجمة"],
+    uz: ["Aslini ko‘rsatish", "Tarjimani ko‘rsatish"],
+  };
+
+  if (!translated || translated === original) {
+    return <div>{original}</div>;
+  }
+
+  const lang = language.split("-")[0].toLowerCase();
+  const buttons = labels[lang] ?? labels.tr;
+
+  return (
+    <div>
+      <div>{showOriginal ? original : translated}</div>
+      <button
+        type="button"
+        aria-pressed={showOriginal}
+        onClick={() => setShowOriginal((value) => !value)}
+        style={{
+          display: "block",
+          marginTop: 6,
+          padding: 0,
+          border: "none",
+          background: "transparent",
+          color: "inherit",
+          opacity: 0.85,
+          textDecoration: "underline",
+          cursor: "pointer",
+          fontSize: 12,
+        }}
+      >
+        {showOriginal ? buttons[1] : buttons[0]}
+      </button>
+    </div>
+  );
+}
+
 type Message = {
   id: string;
   content: string;
+  translatedContent?: string | null;
   createdAt: string;
   isRead?: boolean;
   readAt?: string | null;
@@ -54,9 +112,12 @@ import { useTranslation } from "react-i18next";
 const API =
   import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
 
-const socket = getSocket();
+// Güvenlik ve içerik moderasyonu tamamlanmadan etkinleştirilmez.
+// Backend CHAT_FILE_UPLOADS_ENABLED kilidinden bağımsız olarak kapalıdır.
+const CHAT_FILE_UPLOADS_READY = false;
 
 export default function ChatPage() {
+  const socket = getSocket();
   const { t, i18n } = useTranslation();
   const locale = i18n.language.startsWith("en") ? "en-US" : "tr-TR";
 
@@ -96,20 +157,47 @@ export default function ChatPage() {
     }
   };
 
+  const messageRequestSeqRef = useRef(0);
+
   const loadMessages = async (threadId: string) => {
+    const requestSeq = ++messageRequestSeqRef.current;
+
     try {
-      const res = await fetch(`${API}/chat/threads/${threadId}/messages`, {
+      const res = await fetch(`${API}/chat/threads/${threadId}/messages?lang=${encodeURIComponent(i18n.language.split('-')[0].toLowerCase())}`, {
         headers,
       });
 
       const data = await res.json();
+
+      // Geciken eski istekler yeni mesaj listesini değiştiremez.
+      if (requestSeq !== messageRequestSeqRef.current) return;
+
       setMessages(Array.isArray(data) ? data : []);
       window.dispatchEvent(new Event("storage"));
     } catch (err) {
       console.error("MESSAGE LOAD ERROR:", err);
-      setMessages([]);
+
+      if (requestSeq === messageRequestSeqRef.current) {
+        setMessages([]);
+      }
     }
   };
+  const lastChatLanguageRef = useRef(
+    i18n.language.split("-")[0].toLowerCase()
+  );
+
+  useEffect(() => {
+    const language = i18n.language.split("-")[0].toLowerCase();
+
+    if (lastChatLanguageRef.current === language) return;
+
+    lastChatLanguageRef.current = language;
+
+    if (selectedThread?.id) {
+      void loadMessages(selectedThread.id);
+    }
+  }, [i18n.language, selectedThread?.id]);
+
   const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
   useEffect(() => {
     const handleResize = () => {
@@ -152,6 +240,7 @@ export default function ChatPage() {
     }
   };
   const sendFile = async (file: File) => {
+    if (!CHAT_FILE_UPLOADS_READY) return;
     if (!selectedThread) return;
 
     try {
@@ -187,54 +276,134 @@ export default function ChatPage() {
     loadThreads();
   }, []);
 
+  const [fileReviewRefreshKey, setFileReviewRefreshKey] = useState(0);
+  const activeThreadId = selectedThread?.id;
+
   useEffect(() => {
-    if (!selectedThread) return;
+    setIsTyping(false);
+    setOnlineUsers([]);
 
-    loadMessages(selectedThread.id);
+    if (!activeThreadId) return;
 
-    socket.emit("joinThread", {
-      threadId: selectedThread.id,
-    });
+    let active = true;
 
-    socket.on("newMessage", (message) => {
-      setMessages((prev) => [...prev, message]);
-      window.dispatchEvent(new Event("storage"));
-    });
+    let hasJoinedBefore = false;
+
+    const joinSelectedThread = () => {
+      if (!active || !socket.connected) return;
+
+      socket.emit("joinThread", {
+        threadId: activeThreadId,
+      });
+
+      // Reconnect: recover events missed while offline.
+      if (hasJoinedBefore) {
+        setFileReviewRefreshKey((value) => value + 1);
+        void loadMessages(activeThreadId);
+      }
+
+      hasJoinedBefore = true;
+    };
+
+    const handleNewMessage = (message: { threadId?: string }) => {
+      if (!active || message?.threadId !== activeThreadId) {
+        return;
+      }
+
+      // Mesaj içeriğini moderasyonlu API üzerinden al.
+      void loadMessages(activeThreadId);
+    };
+
+    const handleFileReviewChanged = (event: unknown) => {
+      if (
+        !active ||
+        !shouldRefreshChatFileReview(event, activeThreadId)
+      ) {
+        return;
+      }
+
+      // Refetch from authorized APIs; never trust socket file data.
+      setFileReviewRefreshKey((value) => value + 1);
+      void loadMessages(activeThreadId);
+    };
+
+    void loadMessages(activeThreadId);
+
+    socket.on("connect", joinSelectedThread);
+    socket.on("chatFileReviewChanged", handleFileReviewChanged);
+    socket.on("newMessage", handleNewMessage);
+
+    // Bağlantı zaten açıksa hemen katıl.
+    joinSelectedThread();
 
     return () => {
-      socket.off("newMessage");
-    };
-  }, [selectedThread?.id]);
-  useEffect(() => {
-    socket.on("typingStart", () => {
-      setIsTyping(true);
-    });
+      active = false;
 
-    socket.on("typingStop", () => {
-      setIsTyping(false);
-    });
+      socket.off("connect", joinSelectedThread);
+      socket.off("newMessage", handleNewMessage);
+      socket.off("chatFileReviewChanged", handleFileReviewChanged);
+
+      // Bağlantı kapalıysa sunucu odaları zaten temizler.
+      if (socket.connected) {
+        socket.emit("leaveThread", {
+          threadId: activeThreadId,
+        });
+      }
+    };
+  }, [activeThreadId, socket]);
+  useEffect(() => {
+    const handleTypingStart = (data: { threadId?: string }) => {
+      if (activeThreadId && data?.threadId === activeThreadId) {
+        setIsTyping(true);
+      }
+    };
+
+    const handleTypingStop = (data: { threadId?: string }) => {
+      if (activeThreadId && data?.threadId === activeThreadId) {
+        setIsTyping(false);
+      }
+    };
+
+    socket.on("typingStart", handleTypingStart);
+    socket.on("typingStop", handleTypingStop);
 
     return () => {
-      socket.off("typingStart");
-      socket.off("typingStop");
+      socket.off("typingStart", handleTypingStart);
+      socket.off("typingStop", handleTypingStop);
     };
-  }, []);
+  }, [socket, activeThreadId]);
   useEffect(() => {
-    socket.on("userOnline", ({ userId }) => {
+    const handleUserOnline = ({ userId }: { userId?: string }) => {
+      if (!userId) return;
+
       setOnlineUsers((prev) =>
         prev.includes(userId) ? prev : [...prev, userId],
       );
-    });
+    };
 
-    socket.on("userOffline", ({ userId }) => {
-      setOnlineUsers((prev) => prev.filter((id) => id !== userId));
-    });
+    const handleUserOffline = ({ userId }: { userId?: string }) => {
+      if (!userId) return;
+
+      setOnlineUsers((prev) =>
+        prev.filter((id) => id !== userId),
+      );
+    };
+
+    const handleDisconnect = () => {
+      setOnlineUsers([]);
+      setIsTyping(false);
+    };
+
+    socket.on("userOnline", handleUserOnline);
+    socket.on("userOffline", handleUserOffline);
+    socket.on("disconnect", handleDisconnect);
 
     return () => {
-      socket.off("userOnline");
-      socket.off("userOffline");
+      socket.off("userOnline", handleUserOnline);
+      socket.off("userOffline", handleUserOffline);
+      socket.off("disconnect", handleDisconnect);
     };
-  }, []);
+  }, [socket]);
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
@@ -379,6 +548,15 @@ export default function ChatPage() {
                 <span style={headerBadgeStyle}>{t("chatPage.internalCommunication")}</span>
               </div>
 
+              <ChatMyFileReviews
+                key={selectedThread.id}
+                apiBase={API}
+                token={token}
+                threadId={selectedThread.id}
+                language={i18n.language}
+                refreshSignal={fileReviewRefreshKey}
+              />
+
               <div style={messagesStyle}>
                 {messages.length === 0 ? (
                   <div style={noMessageStyle}>
@@ -407,31 +585,22 @@ export default function ChatPage() {
                         >
                           <>
                             {msg.fileUrl ? (
-                              msg.fileType?.startsWith("image/") ? (
-                                <img
-                                  src={`${API.replace("/api", "")}${msg.fileUrl}`}
-                                  alt={msg.fileName || "file"}
-                                  style={{
-                                    maxWidth: 240,
-                                    borderRadius: 12,
-                                    display: "block",
-                                  }}
-                                />
-                              ) : (
-                                <a
-                                  href={`${API.replace("/api", "")}${msg.fileUrl}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  style={{
-                                    color: mine ? "white" : "#2563eb",
-                                    fontWeight: 800,
-                                  }}
-                                >
-                                  📄 {msg.fileName || t("chatPage.file")}
-                                </a>
-                              )
+                              <SecureChatFile
+                                apiBase={API}
+                                token={token}
+                                threadId={selectedThread.id}
+                                messageId={msg.id}
+                                fileName={msg.fileName}
+                                isImage={msg.fileType?.startsWith("image/") === true}
+                                language={i18n.language}
+                                color={mine ? "white" : "#2563eb"}
+                              />
                             ) : (
-                              <div>{msg.content}</div>
+                              <ChatTranslatedText
+                                original={msg.content}
+                                translated={msg.translatedContent}
+                                language={i18n.language}
+                              />
                             )}
                           </>
 
@@ -471,6 +640,7 @@ export default function ChatPage() {
               </div>
 
               <div style={inputAreaStyle}>
+                {CHAT_FILE_UPLOADS_READY && (
                 <>
                   <input
                     ref={fileInputRef}
@@ -494,6 +664,7 @@ export default function ChatPage() {
                     📎
                   </button>
                 </>
+                )}
                 <input
                   value={content}
                   onChange={(e) => {

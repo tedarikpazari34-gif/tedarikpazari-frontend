@@ -1,4 +1,5 @@
 import i18n from "i18next";
+import { panelNavigationTranslations } from "./panelNavigationTranslations";
 import { initReactI18next } from "react-i18next";
 import ka from "./locales/ka";
 import ru from "./locales/ru";
@@ -7,13 +8,14 @@ import ar from "./locales/ar";
 import uz from "./locales/uz";
 
 const resources = {
-  ka: { translation: ka },
-  ru: { translation: ru },
-  de: { translation: de },
-  ar: { translation: ar },
-  uz: { translation: uz },
+  ka: { translation: { ...ka, panelNavigation: panelNavigationTranslations.ka } },
+  ru: { translation: { ...ru, panelNavigation: panelNavigationTranslations.ru } },
+  de: { translation: { ...de, panelNavigation: panelNavigationTranslations.de } },
+  ar: { translation: { ...ar, panelNavigation: panelNavigationTranslations.ar } },
+  uz: { translation: { ...uz, panelNavigation: panelNavigationTranslations.uz } },
   tr: {
     translation: {
+      panelNavigation: panelNavigationTranslations.tr,
       invoice: {
         orderReference: "Sipariş numarası",
         "title": "Faturalar ve Belgeler",
@@ -1179,6 +1181,9 @@ const resources = {
         cancelled: "İptal Edildi"
       },
       sellerProfilePage: {
+        buyerEyebrow: "ALICI PANELİ",
+        buyerTitle: "Firma Profilim",
+        buyerDescription: "Firmanızın iletişim, adres ve yasal bilgilerini buradan görüntüleyebilir ve güncelleyebilirsiniz.",
         loginRequired: "Firma profilini görmek için giriş yapmalısınız.",
         loadFailed: "Firma bilgileri alınamadı.",
         loadError: "Firma bilgileri yüklenirken hata oluştu.",
@@ -2604,6 +2609,30 @@ const resources = {
 
   en: {
     translation: {
+      passwordReset: {
+        forgotTitle: "Forgot Password",
+        email: "Email address",
+        sendLink: "Send Reset Link",
+        requestSent: "If the address is registered, a reset link will be sent.",
+        requestFailed: "Request failed. Please try again.",
+        resetTitle: "Set New Password",
+        invalidLink: "Invalid or missing link.",
+        resetSubmit: "Reset Password",
+        resetSuccess: "Your password has been changed.",
+        resetFailed: "Password reset failed. The link may be invalid or expired.",
+        backToLogin: "Back to Login",
+      },
+      accountSecurity: {
+        title: "Account Security",
+        currentPassword: "Current Password",
+        newPassword: "New Password",
+        confirmPassword: "Confirm New Password",
+        submit: "Change Password",
+        passwordMismatch: "Passwords do not match.",
+        passwordLength: "Password must be 12–128 characters.",
+        changeFailed: "Password could not be changed.",
+      },
+      panelNavigation: panelNavigationTranslations.en,
       common: {
         cart: "Cart",
         home: "Home",
@@ -3725,6 +3754,9 @@ const resources = {
         cancelled: "Cancelled"
       },
       sellerProfilePage: {
+        buyerEyebrow: "BUYER PANEL",
+        buyerTitle: "My Company Profile",
+        buyerDescription: "View and update your company's contact, address and legal information here.",
         loginRequired: "Please log in to view your company profile.",
         loadFailed: "Company information could not be retrieved.",
         loadError: "An error occurred while loading company information.",

@@ -8,6 +8,9 @@ import MobileBottomNav from "./components/MobileBottomNav";
 import HomePage from "./pages/HomePage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import AccountSecurityPage from "./pages/AccountSecurityPage";
 
 import CategoryPage from "./pages/CategoryPage";
 import AllCategoriesPage from "./pages/AllCategoriesPage";
@@ -47,12 +50,14 @@ import BuyerShippingRequestPage from "./pages/BuyerShippingRequestPage";
 import LogisticsOrdersPage from "./pages/LogisticsOrdersPage";
 import BuyerDashboardPage from "./pages/BuyerDashboardPage";
 import SellerDashboardPage from "./pages/SellerDashboardPage";
+import SellerLayout from "./components/SellerLayout";
 import LogisticsDashboardPage from "./pages/LogisticsDashboardPage";
 import PanelPage from "./pages/PanelPage";
 import LegalPage from "./pages/LegalPage";
 import CorporatePage from "./pages/CorporatePage";
 import CompanyVerificationPage from "./pages/CompanyVerificationPage";
 import AdminVerificationRequestsPage from "./pages/AdminVerificationRequestsPage";
+import RolePanelLayout from "./components/dashboard/RolePanelLayout";
 
 function PrivateRoute({
   children,
@@ -87,6 +92,8 @@ export default function App() {
         <Route path="/uyelik" element={<RegisterPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         {/* LEGAL */}
@@ -116,7 +123,7 @@ export default function App() {
           path="/buyer/orders"
           element={
             <PrivateRoute role="BUYER">
-              <BuyerOrdersPage />
+              <RolePanelLayout role="BUYER"><BuyerOrdersPage /></RolePanelLayout>
             </PrivateRoute>
           }
         />
@@ -136,7 +143,7 @@ export default function App() {
           path="/buyer/profile"
           element={
             <PrivateRoute role="BUYER">
-              <SellerProfilePage />
+              <RolePanelLayout role="BUYER"><SellerProfilePage /></RolePanelLayout>
             </PrivateRoute>
           }
         />
@@ -146,7 +153,7 @@ export default function App() {
           path="/seller/profile"
           element={
             <PrivateRoute role="SELLER">
-              <SellerProfilePage />
+              <SellerLayout><SellerProfilePage /></SellerLayout>
             </PrivateRoute>
           }
         />
@@ -155,7 +162,7 @@ export default function App() {
           path="/seller/orders"
           element={
             <PrivateRoute role="SELLER">
-              <SellerOrdersPage />
+              <SellerLayout><SellerOrdersPage /></SellerLayout>
             </PrivateRoute>
           }
         />
@@ -214,6 +221,20 @@ export default function App() {
           }
         />
 
+        <Route path="/buyer/security" element={
+          <PrivateRoute role="BUYER">
+            <RolePanelLayout role="BUYER"><AccountSecurityPage /></RolePanelLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/seller/security" element={
+          <PrivateRoute role="SELLER">
+            <SellerLayout><AccountSecurityPage /></SellerLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/admin/security" element={
+          <AdminRoute><AccountSecurityPage /></AdminRoute>
+        } />
+
         <Route
           path="/admin"
           element={
@@ -236,7 +257,7 @@ export default function App() {
           path="/admin/companies"
           element={
             <AdminRoute>
-              <AdminCompaniesPage />
+              <RolePanelLayout role="ADMIN"><AdminCompaniesPage /></RolePanelLayout>
             </AdminRoute>
           }
         />
@@ -245,7 +266,7 @@ export default function App() {
           path="/admin/verification-requests"
           element={
             <AdminRoute>
-              <AdminVerificationRequestsPage />
+              <RolePanelLayout role="ADMIN"><AdminVerificationRequestsPage /></RolePanelLayout>
             </AdminRoute>
           }
         />
@@ -315,7 +336,7 @@ export default function App() {
           path="/admin/chat-moderation"
           element={
             <AdminRoute>
-              <AdminChatModerationPage />
+              <RolePanelLayout role="ADMIN"><AdminChatModerationPage /></RolePanelLayout>
             </AdminRoute>
           }
         />
@@ -331,7 +352,7 @@ export default function App() {
           path="/buyer/shipping-quotes"
           element={
             <PrivateRoute role="BUYER">
-              <BuyerShippingQuotesPage />
+              <RolePanelLayout role="BUYER"><BuyerShippingQuotesPage /></RolePanelLayout>
             </PrivateRoute>
           }
         />
@@ -339,7 +360,7 @@ export default function App() {
           path="/buyer/shipping-request"
           element={
             <PrivateRoute role="BUYER">
-              <BuyerShippingRequestPage />
+              <RolePanelLayout role="BUYER"><BuyerShippingRequestPage /></RolePanelLayout>
             </PrivateRoute>
           }
         />
@@ -364,7 +385,7 @@ export default function App() {
           path="/seller/dashboard"
           element={
             <PrivateRoute role="SELLER">
-              <SellerDashboardPage />
+              <SellerLayout><SellerDashboardPage /></SellerLayout>
             </PrivateRoute>
           }
         />
