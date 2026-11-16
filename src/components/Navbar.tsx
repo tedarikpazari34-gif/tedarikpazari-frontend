@@ -117,8 +117,6 @@ const buyerLinks: NavItem[] = [
   { labelKey: "common.home", to: "/" },
   { labelKey: "common.products", to: "/products" },
   { labelKey: "common.myOrders", to: "/buyer/orders" },
-  { labelKey: "common.shippingQuotes", to: "/buyer/shipping-quotes" },
-  { labelKey: "buyerDashboard.shippingRequests", to: "/buyer/shipping-request" },
   { labelKey: "common.favorites", to: "/favorites" },
   { labelKey: "common.messages", to: "/chat" },
   { labelKey: "common.wallet", to: "/wallet" },
@@ -138,7 +136,6 @@ const sellerLinks: NavItem[] = [
 
 const logisticsLinks: NavItem[] = [
   { labelKey: "common.dashboard", to: "/logistics/dashboard" },
-  { labelKey: "common.openLoads", to: "/logistics/shipping" },
   { labelKey: "common.myShipments", to: "/logistics/orders" },
   { labelKey: "common.messages", to: "/chat" },
 ];

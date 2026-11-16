@@ -63,7 +63,6 @@ export default function BuyerShippingQuotesPage() {
   const [quotes, setQuotes] = useState<any[]>([]);
   const [shippingOrders, setShippingOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [acceptingId, setAcceptingId] = useState("");
 
   const load = async () => {
     try {
@@ -115,39 +114,6 @@ export default function BuyerShippingQuotesPage() {
   useEffect(() => {
     load();
   }, []);
-
-  const acceptQuote = async (quoteId: string) => {
-    try {
-      setAcceptingId(quoteId);
-
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(
-        `${API}/shipping/quote/${quoteId}/accept`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        alert(data?.message || t("buyerShippingQuotesPage.selectFailed"));
-        return;
-      }
-
-      alert(t("buyerShippingQuotesPage.selectSuccess"));
-      await load();
-    } catch (err) {
-      console.error("ACCEPT SHIPPING QUOTE ERROR:", err);
-      alert(t("buyerShippingQuotesPage.actionError"));
-    } finally {
-      setAcceptingId("");
-    }
-  };
 
   if (loading) {
     return (
@@ -244,22 +210,6 @@ export default function BuyerShippingQuotesPage() {
                   <strong>{t("buyerShippingQuotesPage.carrierNote")}</strong>
                   <p>{quote.note || t("buyerShippingQuotesPage.noNote")}</p>
                 </div>
-
-                {quote.status === "SENT" && (
-                  <button
-                    onClick={() => acceptQuote(quote.id)}
-                    disabled={acceptingId === quote.id}
-                    style={{
-                      ...acceptButtonStyle,
-                      opacity:
-                        acceptingId === quote.id ? 0.65 : 1,
-                    }}
-                  >
-                    {acceptingId === quote.id
-                      ? t("buyerShippingQuotesPage.selecting")
-                      : t("buyerShippingQuotesPage.selectCarrier")}
-                  </button>
-                )}
 
                 {quote.status === "ACCEPTED" && shippingOrder && (
                   <div style={trackingPanelStyle}>

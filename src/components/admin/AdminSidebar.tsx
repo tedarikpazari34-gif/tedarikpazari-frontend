@@ -15,6 +15,11 @@ export default function AdminSidebar() {
       items: [
         { label: t("adminSidebar.dashboard"), path: "/admin", icon: "📊" },
         {
+          label: t("adminOrdersPage.title"),
+          path: "/admin/orders",
+          icon: "📦",
+        },
+        {
           label: t("accountSecurity.title"),
           path: "/admin/security",
           icon: "🔒",

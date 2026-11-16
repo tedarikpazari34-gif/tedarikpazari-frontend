@@ -588,14 +588,14 @@ export default function BuyerOrdersPage() {
                       <div>
                         🚚{" "}
                         {o.shippingMethod === "FREIGHT"
-                          ? "Ambar / Nakliye"
-                          : "Kargo"}
+                          ? t("adminOrdersPage.freight")
+                          : t("adminOrdersPage.cargo")}
                         : {o.shippingCompany || "-"}
                       </div>
 
                       <div>
                         {o.shippingMethod === "FREIGHT"
-                          ? "Ambar Fiş / Gönderi No"
+                          ? t("adminOrdersPage.trackingNo")
                           : t("buyerOrdersPage.trackingNo")}
                         :{" "}
                         {o.shippingTrackingNo || "-"}
@@ -603,7 +603,7 @@ export default function BuyerOrdersPage() {
 
                       {o.shippingDispatchNo && (
                         <div>
-                          Sevk İrsaliyesi No: {o.shippingDispatchNo}
+                          {t("adminOrdersPage.dispatchNo")}: {o.shippingDispatchNo}
                         </div>
                       )}
 
@@ -653,20 +653,6 @@ export default function BuyerOrdersPage() {
   >
     💬 {t("buyerOrdersPage.message")}
   </button>
-
-  {["PAID", "PREPARING", "SHIPPED", "COMPLETED"].includes(
-    o.status
-  ) && (
-    <Link
-      to={`/buyer/shipping-request?orderId=${o.id}`}
-      style={{
-        ...shippingButtonStyle,
-        textDecoration: "none",
-      }}
-    >
-      🚚 {t("buyerOrdersPage.getShippingQuote")}
-    </Link>
-  )}
 
   {o.status === "PENDING_PAYMENT" && (
                   <button
@@ -888,19 +874,6 @@ const cancelButtonStyle: CSSProperties = {
   borderRadius: 12,
   cursor: "pointer",
   fontWeight: 900,
-};
-
-const shippingButtonStyle: CSSProperties = {
-  border: "none",
-  background: "#0f766e",
-  color: "white",
-  padding: "10px 14px",
-  borderRadius: 10,
-  cursor: "pointer",
-  fontWeight: 800,
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
 };
 
 const greenButtonStyle: CSSProperties = {

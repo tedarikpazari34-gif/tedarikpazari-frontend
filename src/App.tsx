@@ -27,6 +27,7 @@ import SellerProductBulkImportPage from "./pages/SellerProductBulkImportPage";
 import SellerProfilePage from "./pages/SellerProfilePage";
 
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminOrdersPage from "./pages/AdminOrdersPage";
 import AdminProductsPage from "./pages/AdminProductsPage";
 import AdminDisputesPage from "./pages/AdminDisputesPage";
 import AdminChargebacksPage from "./pages/AdminChargebacksPage";
@@ -245,6 +246,15 @@ export default function App() {
         />
 
         <Route
+          path="/admin/orders"
+          element={
+            <AdminRoute>
+              <AdminOrdersPage />
+            </AdminRoute>
+          }
+        />
+
+        <Route
           path="/admin/control-center"
           element={
             <AdminRoute>
@@ -343,8 +353,8 @@ export default function App() {
         <Route
           path="/logistics/shipping"
           element={
-            <PrivateRoute>
-              <LogisticsShippingPage />
+            <PrivateRoute role="LOGISTICS">
+              <Navigate to="/logistics/orders" replace />
             </PrivateRoute>
           }
         />
@@ -360,7 +370,7 @@ export default function App() {
           path="/buyer/shipping-request"
           element={
             <PrivateRoute role="BUYER">
-              <RolePanelLayout role="BUYER"><BuyerShippingRequestPage /></RolePanelLayout>
+              <Navigate to="/buyer/orders" replace />
             </PrivateRoute>
           }
         />

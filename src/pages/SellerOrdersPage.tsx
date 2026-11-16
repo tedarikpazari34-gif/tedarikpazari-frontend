@@ -11,6 +11,11 @@ type Order = {
   status: string;
   totalAmount?: number | string;
   commissionAmount?: number | string;
+  shippingMethod?: "CARGO" | "FREIGHT" | null;
+  shippingCompany?: string | null;
+  shippingTrackingNo?: string | null;
+  shippingDispatchNo?: string | null;
+  shippedAt?: string | null;
   quantity?: number | null;
   unitPriceSnapshot?: number | string | null;
   productTitleSnapshot?: string | null;
@@ -479,6 +484,52 @@ export default function SellerOrdersPage() {
                 <Info label={t("sellerOrdersPage.total")} value={formatPrice(o.totalAmount, locale)} />
               </div>
 
+              {["SHIPPED", "COMPLETED"].includes(o.status) && (
+                <section
+                  aria-label={t("adminOrdersPage.shippingInfo")}
+                  style={{
+                    marginBottom: 16,
+                    padding: 14,
+                    borderRadius: 12,
+                    background: "#f0fdfa",
+                    border: "1px solid #99f6e4",
+                    overflowWrap: "anywhere",
+                  }}
+                >
+                  <h3 style={{ margin: "0 0 10px", fontSize: 15 }}>
+                    {t("adminOrdersPage.shippingInfo")}
+                  </h3>
+                  <Info
+                    label={t("adminOrdersPage.shippingInfo")}
+                    value={o.shippingMethod === "FREIGHT"
+                      ? t("adminOrdersPage.freight")
+                      : o.shippingMethod === "CARGO"
+                        ? t("adminOrdersPage.cargo")
+                        : "-"}
+                  />
+                  <Info
+                    label={t("adminOrdersPage.carrier")}
+                    value={o.shippingCompany || "-"}
+                  />
+                  <Info
+                    label={t("adminOrdersPage.trackingNo")}
+                    value={o.shippingTrackingNo || "-"}
+                  />
+                  {o.shippingDispatchNo && (
+                    <Info
+                      label={t("adminOrdersPage.dispatchNo")}
+                      value={o.shippingDispatchNo}
+                    />
+                  )}
+                  <Info
+                    label={t("adminOrdersPage.shippedAt")}
+                    value={o.shippedAt && Number.isFinite(Date.parse(o.shippedAt))
+                      ? new Date(o.shippedAt).toLocaleString(i18n.language || "tr")
+                      : "-"}
+                  />
+                </section>
+              )}
+
               <div style={commissionBoxStyle}>
                 <span>{t("sellerOrdersPage.platformCommission")}</span>
                 <strong>{formatPrice(o.commissionAmount, locale)}</strong>
@@ -536,9 +587,9 @@ export default function SellerOrdersPage() {
             >
               <div style={modalHeaderStyle}>
                 <div>
-                  <div style={smallLabelStyle}>GÖNDERİM BİLGİLERİ</div>
+                  <div style={smallLabelStyle}>{t("adminOrdersPage.shippingInfo")}</div>
                   <h2 id="shipping-modal-title" style={modalTitleStyle}>
-                    Gönderim Bilgileri
+                    {t("adminOrdersPage.shippingInfo")}
                   </h2>
                 </div>
 
@@ -547,15 +598,14 @@ export default function SellerOrdersPage() {
                   onClick={closeShippingModal}
                   disabled={shippingSubmitting}
                   style={modalCloseButtonStyle}
-                  aria-label="Kapat"
+                  aria-label={t("adminOrdersPage.close")}
                 >
                   ×
                 </button>
               </div>
 
               <p style={modalDescriptionStyle}>
-                Siparişin hangi yöntemle gönderileceğini seçin ve gönderi
-                bilgilerini girin.
+                {t("shippingForm.description")}
               </p>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
@@ -572,9 +622,9 @@ export default function SellerOrdersPage() {
                     textAlign: "left",
                   }}
                 >
-                  <strong style={{ display: "block", marginBottom: 4 }}>Kargo</strong>
+                  <strong style={{ display: "block", marginBottom: 4 }}>{t("adminOrdersPage.cargo")}</strong>
                   <span style={{ fontSize: 12, color: "#64748b" }}>
-                    Standart kargo firması ile gönderim
+                    {t("shippingForm.cargoDescription")}
                   </span>
                 </button>
 
@@ -592,10 +642,10 @@ export default function SellerOrdersPage() {
                   }}
                 >
                   <strong style={{ display: "block", marginBottom: 4 }}>
-                    Ambar / Nakliye
+                    {t("adminOrdersPage.freight")}
                   </strong>
                   <span style={{ fontSize: 12, color: "#64748b" }}>
-                    Ambar, nakliye veya lojistik firması ile gönderim
+                    {t("shippingForm.freightDescription")}
                   </span>
                 </button>
               </div>
@@ -603,16 +653,16 @@ export default function SellerOrdersPage() {
               <label style={modalLabelStyle}>
                 <span>
                   {shippingMethod === "FREIGHT"
-                    ? "Ambar / Nakliye Firması"
-                    : "Kargo Firması"}
+                    ? t("shippingForm.freightCarrier")
+                    : t("shippingForm.cargoCarrier")}
                 </span>
                 <input
                   value={shippingCompany}
                   onChange={(e) => setShippingCompany(e.target.value)}
                   placeholder={
                     shippingMethod === "FREIGHT"
-                      ? "Örn. ABC Ambarı / XYZ Nakliyat"
-                      : "Örn. Yurtiçi Kargo"
+                      ? t("shippingForm.freightExample")
+                      : t("shippingForm.cargoExample")
                   }
                   maxLength={100}
                   autoFocus
@@ -623,16 +673,16 @@ export default function SellerOrdersPage() {
               <label style={modalLabelStyle}>
                 <span>
                   {shippingMethod === "FREIGHT"
-                    ? "Ambar Fiş / Gönderi No"
-                    : "Takip Numarası"}
+                    ? t("shippingForm.freightReference")
+                    : t("shippingForm.trackingNumber")}
                 </span>
                 <input
                   value={shippingTrackingNo}
                   onChange={(e) => setShippingTrackingNo(e.target.value)}
                   placeholder={
                     shippingMethod === "FREIGHT"
-                      ? "Ambar fişi veya gönderi referans numarası"
-                      : "Kargo takip numarası"
+                      ? t("shippingForm.freightReferenceExample")
+                      : t("shippingForm.trackingExample")
                   }
                   maxLength={150}
                   style={modalInputStyle}
@@ -640,19 +690,18 @@ export default function SellerOrdersPage() {
               </label>
 
               <label style={modalLabelStyle}>
-                <span>Sevk İrsaliyesi No (İsteğe Bağlı)</span>
+                <span>{t("shippingForm.optionalDispatch")}</span>
                 <input
                   value={shippingDispatchNo}
                   onChange={(e) => setShippingDispatchNo(e.target.value)}
-                  placeholder="Varsa sevk irsaliyesi numarası"
+                  placeholder={t("shippingForm.dispatchExample")}
                   maxLength={100}
                   style={modalInputStyle}
                 />
               </label>
 
               <div style={modalInfoStyle}>
-                Gönderim tarihi, gönderim onaylandığında sistem tarafından
-                otomatik kaydedilir.
+                {t("shippingForm.dateNotice")}
               </div>
 
               <div style={modalActionsStyle}>
@@ -662,7 +711,7 @@ export default function SellerOrdersPage() {
                   disabled={shippingSubmitting}
                   style={modalCancelButtonStyle}
                 >
-                  Vazgeç
+                  {t("shippingForm.cancel")}
                 </button>
 
                 <button
@@ -689,7 +738,7 @@ export default function SellerOrdersPage() {
                         : "pointer",
                   }}
                 >
-                  {shippingSubmitting ? "Kaydediliyor..." : "Gönderimi Onayla"}
+                  {shippingSubmitting ? t("shippingForm.saving") : t("shippingForm.confirm")}
                 </button>
               </div>
             </div>

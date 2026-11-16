@@ -133,9 +133,6 @@ export default function LogisticsDashboardPage() {
           </p>
         </div>
 
-        <Link to="/logistics/shipping" style={primaryLinkStyle}>
-          {t("logisticsDashboardPage.viewOpenLoads")}
-        </Link>
       </div>
 
       {error && <div style={errorStyle}>{error}</div>}
@@ -184,14 +181,6 @@ export default function LogisticsDashboardPage() {
       </div>
 
       <div style={quickGridStyle}>
-        <Link to="/logistics/shipping" style={quickCardStyle}>
-          <span style={quickIconStyle}>🔎</span>
-          <strong>{t("logisticsDashboardPage.openLoads")}</strong>
-          <small style={quickTextStyle}>
-            {t("logisticsDashboardPage.openLoadsText")}
-          </small>
-        </Link>
-
         <Link to="/logistics/orders" style={quickCardStyle}>
           <span style={quickIconStyle}>🚚</span>
           <strong>{t("logisticsDashboardPage.myTransports")}</strong>

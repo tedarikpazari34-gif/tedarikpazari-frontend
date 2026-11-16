@@ -45,16 +45,6 @@ export default function BuyerPanelNavigation() {
           path: "/buyer/orders",
           icon: "📦",
         },
-        {
-          label: t("common.shippingQuotes"),
-          path: "/buyer/shipping-quotes",
-          icon: "🚚",
-        },
-        {
-          label: t("buyerDashboard.shippingRequests"),
-          path: "/buyer/shipping-request",
-          icon: "📋",
-        },
       ],
     },
     {

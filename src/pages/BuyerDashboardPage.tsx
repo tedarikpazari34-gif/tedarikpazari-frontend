@@ -203,14 +203,6 @@ export default function BuyerDashboardPage() {
           </small>
         </Link>
 
-        <Link to="/buyer/shipping-quotes" style={quickCardStyle}>
-          <span style={quickIconStyle}>🚛</span>
-          <strong>{t("buyerDashboard.shippingQuotes")}</strong>
-          <small style={quickTextStyle}>
-            {t("buyerDashboard.shippingQuotesDesc")}
-          </small>
-        </Link>
-
         <Link to="/chat" style={quickCardStyle}>
           <span style={quickIconStyle}>💬</span>
           <strong>{t("buyerDashboard.messages")}</strong>

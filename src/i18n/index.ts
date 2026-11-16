@@ -1,5 +1,7 @@
+import { shippingFormTranslations } from "./shippingFormTranslations";
 import i18n from "i18next";
 import { panelNavigationTranslations } from "./panelNavigationTranslations";
+import { adminOrdersTranslations } from "./adminOrdersTranslations";
 import { initReactI18next } from "react-i18next";
 import ka from "./locales/ka";
 import ru from "./locales/ru";
@@ -8,13 +10,14 @@ import ar from "./locales/ar";
 import uz from "./locales/uz";
 
 const resources = {
-  ka: { translation: { ...ka, panelNavigation: panelNavigationTranslations.ka } },
-  ru: { translation: { ...ru, panelNavigation: panelNavigationTranslations.ru } },
-  de: { translation: { ...de, panelNavigation: panelNavigationTranslations.de } },
-  ar: { translation: { ...ar, panelNavigation: panelNavigationTranslations.ar } },
-  uz: { translation: { ...uz, panelNavigation: panelNavigationTranslations.uz } },
+  ka: { translation: { ...ka, panelNavigation: panelNavigationTranslations.ka, adminOrdersPage: adminOrdersTranslations.ka } },
+  ru: { translation: { ...ru, panelNavigation: panelNavigationTranslations.ru, adminOrdersPage: adminOrdersTranslations.ru } },
+  de: { translation: { ...de, panelNavigation: panelNavigationTranslations.de, adminOrdersPage: adminOrdersTranslations.de } },
+  ar: { translation: { ...ar, panelNavigation: panelNavigationTranslations.ar, adminOrdersPage: adminOrdersTranslations.ar } },
+  uz: { translation: { ...uz, panelNavigation: panelNavigationTranslations.uz, adminOrdersPage: adminOrdersTranslations.uz } },
   tr: {
     translation: {
+      adminOrdersPage: adminOrdersTranslations.tr,
       panelNavigation: panelNavigationTranslations.tr,
       invoice: {
         orderReference: "Sipariş numarası",
@@ -2609,6 +2612,7 @@ const resources = {
 
   en: {
     translation: {
+      adminOrdersPage: adminOrdersTranslations.en,
       passwordReset: {
         forgotTitle: "Forgot Password",
         email: "Email address",
@@ -5180,6 +5184,12 @@ const resources = {
     },
   },
 };
+
+Object.entries(shippingFormTranslations).forEach(([language, translations]) => {
+  Object.assign(resources[language as keyof typeof resources].translation, {
+    shippingForm: translations,
+  });
+});
 
 i18n.use(initReactI18next).init({
   resources,
