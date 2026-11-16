@@ -261,7 +261,7 @@ export default function SellerXmlFeedManager() {
     if (working) return;
     if (
       !window.confirm(
-        `"${feed.name}" şimdi senkronize edilecek. Ön kontrol hatası yoksa ürünler ayrıca onay istenmeden işlenir. İşlem sırasında hata olursa daha önce işlenen ürünlerde değişiklik yapılmış olabilir. Devam edilsin mi?`,
+        `"${feed.name}" şimdi senkronize edilecek. Ön kontrol hatası yoksa ürünler ayrıca onay istenmeden işlenir. Ürün değişiklikleri tek veritabanı işleminde uygulanır; işlem hata verirse bu işlemin veritabanı değişiklikleri geri alınır. Devam edilsin mi?`,
       )
     ) return;
 
