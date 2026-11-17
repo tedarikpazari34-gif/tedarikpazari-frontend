@@ -337,7 +337,7 @@ export default function App() {
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/compare" element={<CompareProductsPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/notifications" element={<PrivateRoute><NotificationsPage /></PrivateRoute>} />
         {/* FALLBACK */}
         <Route path="/reviews/new" element={<CreateReviewPage />} />
         <Route path="/store/:id" element={<SellerStorePage />} />

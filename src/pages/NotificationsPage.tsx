@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { resolveLegacyInvoiceNotificationRoute } from "../lib/legacyInvoiceNotificationRoute";
+import { resolveSafeNotificationRoute } from "../lib/safeNotificationRoute";
 
 type Notification = {
   id: string;
@@ -64,12 +64,16 @@ export default function NotificationsPage() {
     try {
       const token = localStorage.getItem("token");
 
-      await fetch(`${API}/notifications/${id}/read`, {
+      const response = await fetch(`${API}/notifications/${id}/read`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      if (!response.ok) {
+        throw new Error("Tekli bildirim okuma: " + response.status);
+      }
 
       setItems((prev) =>
         prev.map((item) =>
@@ -88,7 +92,7 @@ export default function NotificationsPage() {
     }
 
     if (item.link) {
-      navigate(resolveLegacyInvoiceNotificationRoute(item.link));
+      navigate(resolveSafeNotificationRoute(item.link));
     }
   };
 
@@ -96,12 +100,16 @@ export default function NotificationsPage() {
   try {
     const token = localStorage.getItem("token");
 
-    await fetch(`${API}/notifications/read-all`, {
+    const response = await fetch(`${API}/notifications/read-all`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
+
+    if (!response.ok) {
+      throw new Error("Tum bildirimleri okuma: " + response.status);
+    }
 
     setItems((prev) =>
       prev.map((item) => ({
