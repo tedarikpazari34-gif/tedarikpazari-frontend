@@ -1,7 +1,7 @@
 import BuyerDisputesPanel from "../components/buyer/BuyerDisputesPanel";
 import BuyerDisputeAction from "../components/buyer/BuyerDisputeAction";
 import InvoiceList from "../components/InvoiceList";
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
@@ -54,6 +54,61 @@ type Order = {
 const API =
   import.meta.env.VITE_API_URL ||
   "https://tedarik-backend.onrender.com/api";
+
+type AttemptResult =
+  | "SUCCESS"
+  | "FAILED"
+  | "REVIEW"
+  | "PENDING"
+  | "UNKNOWN";
+
+async function getBuyerAttemptStatus(
+  orderId: string,
+  attemptId: string
+): Promise<AttemptResult> {
+  const validId = /^[A-Za-z0-9_-]{1,128}$/;
+
+  if (!validId.test(orderId) || !validId.test(attemptId)) {
+    return "UNKNOWN";
+  }
+
+  const token = localStorage.getItem("token");
+  if (!token) return "UNKNOWN";
+
+  try {
+    const response = await fetch(
+      `${API}/payments/iyzico/attempts/${encodeURIComponent(attemptId)}/status`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) return "UNKNOWN";
+
+    const data = await response.json();
+
+    if (
+      data?.orderId !== orderId ||
+      data?.paymentAttemptId !== attemptId
+    ) {
+      return "UNKNOWN";
+    }
+
+    if (
+      data.status === "SUCCESS" ||
+      data.status === "FAILED" ||
+      data.status === "REVIEW" ||
+      data.status === "PENDING"
+    ) {
+      return data.status;
+    }
+
+    return "UNKNOWN";
+  } catch {
+    return "UNKNOWN";
+  }
+}
 
 function statusLabel(
   status: string,
@@ -130,8 +185,10 @@ export default function BuyerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [paymentLoadingId, setPaymentLoadingId] = useState("");
+  const [activePaymentAttemptId, setActivePaymentAttemptId] = useState("");
+  const paymentPopupRef = useRef<Window | null>(null);
   const [paymentNotice, setPaymentNotice] = useState<
-    { type: "success" | "error"; message: string } | null
+    { type: "success" | "error" | "info"; message: string } | null
   >(null);
   const [error, setError] = useState("");
 
@@ -183,54 +240,128 @@ export default function BuyerOrdersPage() {
 
   useEffect(() => {
     const payment = searchParams.get("payment");
-
     if (!payment) return;
 
-    const isSuccess = payment === "success";
+    const orderId = searchParams.get("orderId") || "";
+    const attemptId = searchParams.get("paymentAttemptId") || "";
+    let cancelled = false;
 
-    setPaymentNotice({
-      type: isSuccess ? "success" : "error",
-      message: isSuccess
-        ? t("buyerOrdersPage.paymentSuccessMessage")
-        : t("buyerOrdersPage.paymentFailedMessage"),
-    });
+    const applyResult = async () => {
+      const verifiedStatus =
+        await getBuyerAttemptStatus(orderId, attemptId);
 
-    loadOrders();
+      if (cancelled) return;
 
-    if (window.opener) {
-      window.opener.postMessage(
-        {
-          type: "IYZICO_PAYMENT_RESULT",
-          success: isSuccess,
-        },
-        window.location.origin
+      const verified = verifiedStatus === "SUCCESS";
+
+      setPaymentNotice(
+        verified
+          ? {
+              type: "success",
+              message: t("buyerOrdersPage.paymentSuccessMessage"),
+            }
+          : verifiedStatus === "FAILED"
+          ? {
+              type: "error",
+              message: t("buyerOrdersPage.paymentFailedMessage"),
+            }
+          : {
+              type: "info",
+              message: t(
+                verifiedStatus === "REVIEW"
+                  ? "buyerOrdersPage.paymentReviewMessage"
+                  : verifiedStatus === "PENDING"
+                  ? "buyerOrdersPage.paymentPendingMessage"
+                  : "buyerOrdersPage.paymentUnknownMessage"
+              ),
+            }
       );
 
-      window.setTimeout(() => window.close(), 900);
-    }
+      await loadOrders();
+      if (cancelled) return;
 
-    const next = new URLSearchParams(searchParams);
-    next.delete("payment");
-    setSearchParams(next, { replace: true });
+      if (window.opener) {
+        window.opener.postMessage(
+          {
+            type: "IYZICO_PAYMENT_RESULT",
+            orderId,
+            paymentAttemptId: attemptId,
+            payment: verifiedStatus === "SUCCESS"
+              ? "success"
+              : verifiedStatus === "FAILED"
+              ? "failed"
+              : "review",
+          },
+          window.location.origin
+        );
+
+        window.setTimeout(() => window.close(), 900);
+      }
+
+      const next = new URLSearchParams(searchParams);
+      next.delete("payment");
+      next.delete("orderId");
+      next.delete("paymentAttemptId");
+      setSearchParams(next, { replace: true });
+    };
+
+    void applyResult();
+
+    return () => {
+      cancelled = true;
+    };
   }, [searchParams, setSearchParams]);
 
   useEffect(() => {
-    const handlePaymentMessage = (event: MessageEvent) => {
+    const handlePaymentMessage = async (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
-
+      if (!paymentPopupRef.current ||
+          event.source !== paymentPopupRef.current) return;
       if (event.data?.type !== "IYZICO_PAYMENT_RESULT") return;
 
-      const isSuccess = Boolean(event.data.success);
+      const orderId = String(event.data?.orderId ?? "");
+      const attemptId = String(event.data?.paymentAttemptId ?? "");
 
-      setPaymentNotice({
-        type: isSuccess ? "success" : "error",
-        message: isSuccess
-          ? t("buyerOrdersPage.paymentSuccessMessage")
-          : t("buyerOrdersPage.paymentFailedShort"),
-      });
+      if (
+        !orderId ||
+        orderId !== paymentLoadingId ||
+        !attemptId ||
+        attemptId !== activePaymentAttemptId
+      ) {
+        return;
+      }
+
+      const verifiedStatus =
+        await getBuyerAttemptStatus(orderId, attemptId);
+
+      const verified = verifiedStatus === "SUCCESS";
+
+      setPaymentNotice(
+        verified
+          ? {
+              type: "success",
+              message: t("buyerOrdersPage.paymentSuccessMessage"),
+            }
+          : verifiedStatus === "FAILED"
+          ? {
+              type: "error",
+              message: t("buyerOrdersPage.paymentFailedShort"),
+            }
+          : {
+              type: "info",
+              message: t(
+                verifiedStatus === "REVIEW"
+                  ? "buyerOrdersPage.paymentReviewMessage"
+                  : verifiedStatus === "PENDING"
+                  ? "buyerOrdersPage.paymentPendingMessage"
+                  : "buyerOrdersPage.paymentUnknownMessage"
+              ),
+            }
+      );
 
       setPaymentLoadingId("");
-      loadOrders();
+      setActivePaymentAttemptId("");
+      await loadOrders();
     };
 
     window.addEventListener("message", handlePaymentMessage);
@@ -238,7 +369,7 @@ export default function BuyerOrdersPage() {
     return () => {
       window.removeEventListener("message", handlePaymentMessage);
     };
-  }, []);
+  }, [paymentLoadingId, activePaymentAttemptId]);
 
   const handleAction = async (
     orderId: string,
@@ -303,6 +434,16 @@ export default function BuyerOrdersPage() {
         return;
       }
 
+      const returnedAttemptId = String(data?.paymentAttemptId ?? "");
+
+      if (!/^[A-Za-z0-9_-]{1,128}$/.test(returnedAttemptId)) {
+        setPaymentLoadingId("");
+        alert(t("buyerOrdersPage.iyzicoStartFailed"));
+        return;
+      }
+
+      setActivePaymentAttemptId(returnedAttemptId);
+
       if (Capacitor.isNativePlatform()) {
         if (!data?.paymentPageUrl) {
           setPaymentLoadingId("");
@@ -343,6 +484,7 @@ export default function BuyerOrdersPage() {
         return;
       }
 
+      paymentPopupRef.current = paymentWindow;
       paymentWindow.document.open();
       paymentWindow.document.write(`
         <!doctype html>
@@ -431,13 +573,17 @@ export default function BuyerOrdersPage() {
             ...paymentNoticeStyle,
             ...(paymentNotice.type === "success"
               ? paymentSuccessStyle
-              : paymentErrorStyle),
+              : paymentNotice.type === "error"
+              ? paymentErrorStyle
+              : {}),
           }}
         >
           <strong>
             {paymentNotice.type === "success"
               ? t("buyerOrdersPage.paymentSuccess")
-              : t("buyerOrdersPage.paymentFailed")}
+              : paymentNotice.type === "error"
+              ? t("buyerOrdersPage.paymentFailed")
+              : t("buyerOrdersPage.paymentVerificationTitle")}
           </strong>
 
           <span>{paymentNotice.message}</span>

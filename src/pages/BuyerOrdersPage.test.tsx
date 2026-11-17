@@ -150,3 +150,153 @@ describe("BuyerOrdersPage gönderim geçmişi", () => {
     expect(document.body.textContent).not.toContain("IRS-789");
   });
 });
+
+
+function renderIyzicoResult(
+  serverStatus: string,
+  options: {
+    responseOrderId?: string;
+    responseAttemptId?: string;
+    httpOk?: boolean;
+    query?: string;
+  } = {}
+) {
+  const orderId = "order-payment-1";
+  const attemptId = "attempt-payment-1";
+
+  const fetchMock = vi.fn(async (input: unknown) => {
+    const url = String(input);
+
+    if (url.endsWith("/orders")) {
+      return {
+        ok: true,
+        json: async () => [{
+          id: orderId,
+          status: "PAID",
+          productTitleSnapshot: "PAYMENT TEST PRODUCT",
+          quantity: 1,
+          totalAmount: 100,
+        }],
+      };
+    }
+
+    if (url.endsWith(
+      `/payments/iyzico/attempts/${attemptId}/status`
+    )) {
+      return {
+        ok: options.httpOk !== false,
+        json: async () => ({
+          orderId: options.responseOrderId ?? orderId,
+          paymentAttemptId:
+            options.responseAttemptId ?? attemptId,
+          status: serverStatus,
+        }),
+      };
+    }
+
+    throw new Error("Unexpected test request: " + url);
+  });
+
+  vi.stubGlobal("fetch", fetchMock);
+
+  const query = options.query ??
+    `payment=success&orderId=${orderId}&paymentAttemptId=${attemptId}`;
+
+  render(
+    <MemoryRouter initialEntries={[
+      `/buyer/orders?${query}`
+    ]}>
+      <BuyerOrdersPage />
+    </MemoryRouter>
+  );
+
+  return fetchMock;
+}
+
+describe("BuyerOrdersPage iyzico ödeme sonucu güvenliği", () => {
+  it("yalnız doğrulanmış işlem için başarı gösterir", async () => {
+    renderIyzicoResult("SUCCESS");
+
+    await screen.findByText(String(
+      i18n.t("buyerOrdersPage.paymentSuccessMessage")
+    ));
+  });
+
+  it("sahte success URL'sini kabul etmez", async () => {
+    renderIyzicoResult("SUCCESS", {
+      query: "payment=success&orderId=order-payment-1",
+    });
+
+    await screen.findByText(String(
+      i18n.t("buyerOrdersPage.paymentUnknownMessage")
+    ));
+
+    expect(screen.queryByText(String(
+      i18n.t("buyerOrdersPage.paymentSuccessMessage")
+    ))).toBeNull();
+  });
+
+  it("başka siparişe ait başarıyı reddeder", async () => {
+    renderIyzicoResult("SUCCESS", {
+      responseOrderId: "different-order",
+    });
+
+    await screen.findByText(String(
+      i18n.t("buyerOrdersPage.paymentUnknownMessage")
+    ));
+
+    expect(screen.queryByText(String(
+      i18n.t("buyerOrdersPage.paymentSuccessMessage")
+    ))).toBeNull();
+  });
+
+  it("başka ödeme denemesinin sonucunu reddeder", async () => {
+    renderIyzicoResult("SUCCESS", {
+      responseAttemptId: "different-attempt",
+    });
+
+    await screen.findByText(String(
+      i18n.t("buyerOrdersPage.paymentUnknownMessage")
+    ));
+  });
+
+  it("yetkisiz API yanıtını başarı kabul etmez", async () => {
+    renderIyzicoResult("SUCCESS", { httpOk: false });
+
+    await screen.findByText(String(
+      i18n.t("buyerOrdersPage.paymentUnknownMessage")
+    ));
+  });
+
+  it("başarısız ödemeyi doğru gösterir", async () => {
+    renderIyzicoResult("FAILED");
+
+    await screen.findByText(String(
+      i18n.t("buyerOrdersPage.paymentFailedMessage")
+    ));
+  });
+
+  it("bekleyen ödemeyi başarısız göstermez", async () => {
+    renderIyzicoResult("PENDING");
+
+    await screen.findByText(String(
+      i18n.t("buyerOrdersPage.paymentPendingMessage")
+    ));
+  });
+
+  it.each(["tr", "en", "ka", "ru", "de", "ar", "uz"] as const)(
+    "REVIEW durumunu %s dilinde doğru gösterir",
+    async (language) => {
+      await i18n.changeLanguage(language);
+      renderIyzicoResult("REVIEW");
+
+      await screen.findByText(String(
+        i18n.t("buyerOrdersPage.paymentReviewMessage")
+      ));
+
+      expect(screen.queryByText(String(
+        i18n.t("buyerOrdersPage.paymentSuccessMessage")
+      ))).toBeNull();
+    }
+  );
+});

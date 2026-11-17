@@ -1,3 +1,4 @@
+import { getIyzicoPaymentStatusPath } from "../lib/iyzicoPaymentReturn";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -411,6 +412,21 @@ export default function CartPage() {
         return;
       }
 
+      const paymentStatusPath = getIyzicoPaymentStatusPath(
+        orderId,
+        paymentData
+      );
+
+      if (!paymentStatusPath) {
+        alert(t("cartPage.paymentStartFailed"));
+        navigate("/buyer/orders");
+        return;
+      }
+
+      const openPaymentStatus = () => {
+        navigate(paymentStatusPath);
+      };
+
       if (Capacitor.isNativePlatform()) {
         if (!paymentData?.paymentPageUrl) {
           alert(t("cartPage.paymentStartFailed"));
@@ -418,10 +434,23 @@ export default function CartPage() {
           return;
         }
 
-        await Browser.open({
-          url: paymentData.paymentPageUrl,
-          presentationStyle: "fullscreen",
-        });
+        const browserListener = await Browser.addListener(
+          "browserFinished",
+          () => {
+            void browserListener.remove();
+            openPaymentStatus();
+          }
+        );
+
+        try {
+          await Browser.open({
+            url: paymentData.paymentPageUrl,
+            presentationStyle: "fullscreen",
+          });
+        } catch (error) {
+          await browserListener.remove();
+          throw error;
+        }
 
         return;
       }
@@ -463,7 +492,7 @@ export default function CartPage() {
       const popupWatcher = window.setInterval(() => {
         if (paymentWindow.closed) {
           window.clearInterval(popupWatcher);
-          navigate("/buyer/orders");
+          openPaymentStatus();
         }
       }, 700);
     } catch (error) {
