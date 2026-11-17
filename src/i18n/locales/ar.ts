@@ -1160,6 +1160,17 @@ export default {
     "cancelled": "ملغى"
   },
   "sellerProfilePage": {
+    "iyzicoOnboardingTitle": "حساب الدفع iyzico",
+    "iyzicoActiveMessage": "حساب الدفع الخاص بك نشط. اكتمل تسجيلك في iyzico Marketplace.",
+    "iyzicoPendingMessage": "طلب iyzico الخاص بك قيد الانتظار. لا تبدأ طلباً جديداً قبل التأكيد. قد يحتاج المسؤول إلى إجراء المطابقة.",
+    "iyzicoInstruction": "أدخل رقم IBAN التركي الخاص بشركتك لاستلام مستحقات المبيعات.",
+    "iyzicoIbanHelp": "يُرسل رقم IBAN فقط لإنشاء حساب الدفع الخاص بك لدى iyzico.",
+    "iyzicoSaving": "جارٍ إنشاء حساب iyzico...",
+    "iyzicoActivate": "تفعيل حساب الدفع iyzico",
+    "iyzicoInvalidIban": "يرجى إدخال رقم IBAN تركي صالح.",
+    "iyzicoStartFailed": "تعذر إنشاء حساب الدفع لدى iyzico.",
+    "iyzicoSuccess": "تم إنشاء حساب الدفع لدى iyzico بنجاح.",
+    "iyzicoConnectionError": "حدث خطأ في الاتصال أثناء التسجيل لدى iyzico.",
         "buyerEyebrow": "لوحة المشتري",
         "buyerTitle": "ملف شركتي",
         "buyerDescription": "يمكنك هنا عرض وتحديث معلومات الاتصال والعنوان والبيانات القانونية لشركتك.",
@@ -1506,6 +1517,15 @@ export default {
     "completed": "✅ تم إكمال النقل بنجاح"
   },
   "adminCompaniesPage": {
+    "iyzicoReconcileConfirm": "سيتم التحقق من حساب بائع iyzico المعلق لدى مزود الخدمة. هل تريد المتابعة؟",
+    "iyzicoReconcileFailed": "تعذر إكمال مطابقة حساب iyzico.",
+    "iyzicoReconcileSuccess": "اكتملت مطابقة حساب iyzico.",
+    "iyzicoReconcileConnectionError": "حدث خطأ في الاتصال أثناء مطابقة حساب iyzico.",
+    "iyzicoActiveStatus": "اكتمل تسجيل حساب الدفع لدى iyzico.",
+    "iyzicoPendingStatus": "تسجيل iyzico معلق ويتطلب المطابقة.",
+    "iyzicoNotStartedStatus": "لم يبدأ تسجيل iyzico بعد.",
+    "iyzicoReconciling": "جارٍ إجراء المطابقة...",
+    "iyzicoReconcileAction": "مطابقة حساب iyzico",
     "roleBuyer": "المشتري",
     "roleSeller": "البائع",
     "roleLogistics": "اللوجستيات",

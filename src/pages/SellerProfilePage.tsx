@@ -9,6 +9,7 @@ import { TURKEY_CITIES } from "../constants/turkeyCities";
 import { COUNTRIES } from "../constants/countries";
 import { sectors } from "../data/sectors";
 import { useTranslation } from "react-i18next";
+import { isValidTurkishIban } from "../lib/turkishIban";
 
 type CompanyProfile = {
   id: string;
@@ -56,7 +57,7 @@ function resolveImageUrl(value?: string | null) {
 }
 
 export default function SellerProfilePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= 768
@@ -356,8 +357,8 @@ export default function SellerProfilePage() {
   const handleIyzicoOnboarding = async () => {
     const normalizedIban = iyzicoIban.replace(/\s+/g, "").toUpperCase();
 
-    if (!/^TR\d{24}$/.test(normalizedIban)) {
-      setError("Geçerli bir Türkiye IBAN giriniz.");
+    if (!isValidTurkishIban(normalizedIban)) {
+      setError(t("sellerProfilePage.iyzicoInvalidIban"));
       return;
     }
 
@@ -385,16 +386,21 @@ export default function SellerProfilePage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        setError(data?.message || "iyzico ödeme hesabı oluşturulamadı.");
+        setError(
+          i18n.language.startsWith("tr") &&
+          typeof data?.message === "string"
+            ? data.message
+            : t("sellerProfilePage.iyzicoStartFailed")
+        );
         return;
       }
 
       setIyzicoIban("");
       await loadProfile();
-      setSuccess("iyzico ödeme hesabınız başarıyla oluşturuldu.");
+      setSuccess(t("sellerProfilePage.iyzicoSuccess"));
     } catch (err) {
       console.error("IYZICO ONBOARDING ERROR:", err);
-      setError("iyzico ödeme hesabı oluşturulurken bağlantı hatası oluştu.");
+      setError(t("sellerProfilePage.iyzicoConnectionError"));
     } finally {
       setIyzicoSaving(false);
     }
@@ -850,24 +856,20 @@ export default function SellerProfilePage() {
 
           {isSeller ? (
           <div style={privateSectionStyle}>
-            <div style={privateTitleStyle}>iyzico Ödeme Hesabı</div>
+            <div style={privateTitleStyle}>{t("sellerProfilePage.iyzicoOnboardingTitle")}</div>
 
             {profile?.iyzicoOnboardingCompleted ? (
               <p style={successStyle}>
-                Ödeme hesabınız aktif. Satış ödemeleri için iyzico Marketplace
-                kaydınız tamamlandı.
+                {t("sellerProfilePage.iyzicoActiveMessage")}
               </p>
             ) : profile?.iyzicoOnboardingPending ? (
               <p style={privateTextStyle}>
-                iyzico ödeme hesabı oluşturma işleminiz başlatıldı. İşlem
-                kesinleşene kadar yeniden başlatılamaz. Gerekirse yönetici
-                tarafından ödeme sağlayıcısıyla mutabakat yapılacaktır.
+                {t("sellerProfilePage.iyzicoPendingMessage")}
               </p>
             ) : (
               <>
                 <p style={privateTextStyle}>
-                  Satışlardan ödeme alabilmek için şirketinize ait Türkiye
-                  IBAN'ını girerek iyzico Marketplace ödeme hesabınızı oluşturun.
+                  {t("sellerProfilePage.iyzicoInstruction")}
                 </p>
 
                 <label style={fieldStyle}>
@@ -888,8 +890,7 @@ export default function SellerProfilePage() {
                     placeholder="TR00 0000 0000 0000 0000 0000 00"
                   />
                   <small style={helperStyle}>
-                    IBAN yalnızca iyzico ödeme hesabınızı oluşturmak için
-                    gönderilir.
+                    {t("sellerProfilePage.iyzicoIbanHelp")}
                   </small>
                 </label>
 
@@ -904,8 +905,8 @@ export default function SellerProfilePage() {
                   }}
                 >
                   {iyzicoSaving
-                    ? "iyzico hesabı oluşturuluyor..."
-                    : "iyzico Ödeme Hesabını Etkinleştir"}
+                    ? t("sellerProfilePage.iyzicoSaving")
+                    : t("sellerProfilePage.iyzicoActivate")}
                 </button>
               </>
             )}

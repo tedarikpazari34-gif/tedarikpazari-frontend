@@ -1160,6 +1160,17 @@ export default {
     "cancelled": "Storniert"
   },
   "sellerProfilePage": {
+    "iyzicoOnboardingTitle": "iyzico-Zahlungskonto",
+    "iyzicoActiveMessage": "Ihr Zahlungskonto ist aktiv. Die Registrierung bei iyzico Marketplace ist abgeschlossen.",
+    "iyzicoPendingMessage": "Ihr iyzico-Antrag ist noch offen. Starten Sie ihn nicht erneut. Bei Bedarf führt ein Administrator einen Abgleich durch.",
+    "iyzicoInstruction": "Geben Sie die türkische IBAN Ihres Unternehmens ein, um Verkaufserlöse zu erhalten.",
+    "iyzicoIbanHelp": "Die IBAN wird nur zur Einrichtung Ihres iyzico-Zahlungskontos übermittelt.",
+    "iyzicoSaving": "iyzico-Konto wird erstellt...",
+    "iyzicoActivate": "iyzico-Zahlungskonto aktivieren",
+    "iyzicoInvalidIban": "Geben Sie eine gültige türkische IBAN ein.",
+    "iyzicoStartFailed": "Das iyzico-Zahlungskonto konnte nicht erstellt werden.",
+    "iyzicoSuccess": "Ihr iyzico-Zahlungskonto wurde erfolgreich erstellt.",
+    "iyzicoConnectionError": "Bei der iyzico-Registrierung ist ein Verbindungsfehler aufgetreten.",
         "buyerEyebrow": "KÄUFERBEREICH",
         "buyerTitle": "Mein Unternehmensprofil",
         "buyerDescription": "Hier können Sie die Kontakt-, Adress- und rechtlichen Angaben Ihres Unternehmens einsehen und aktualisieren.",
@@ -1506,6 +1517,15 @@ export default {
     "completed": "✅ Transport erfolgreich abgeschlossen"
   },
   "adminCompaniesPage": {
+    "iyzicoReconcileConfirm": "Das ausstehende iyzico-Verkäuferkonto wird beim Anbieter überprüft. Fortfahren?",
+    "iyzicoReconcileFailed": "Der iyzico-Abgleich konnte nicht abgeschlossen werden.",
+    "iyzicoReconcileSuccess": "Der iyzico-Abgleich wurde abgeschlossen.",
+    "iyzicoReconcileConnectionError": "Beim iyzico-Abgleich ist ein Verbindungsfehler aufgetreten.",
+    "iyzicoActiveStatus": "Die Registrierung des iyzico-Zahlungskontos ist abgeschlossen.",
+    "iyzicoPendingStatus": "Die iyzico-Registrierung ist ausstehend und erfordert einen Abgleich.",
+    "iyzicoNotStartedStatus": "Die iyzico-Registrierung wurde noch nicht gestartet.",
+    "iyzicoReconciling": "Abgleich läuft...",
+    "iyzicoReconcileAction": "iyzico-Abgleich",
     "roleBuyer": "Käufer",
     "roleSeller": "Verkäufer",
     "roleLogistics": "Logistik",

@@ -1160,6 +1160,17 @@ export default {
     "cancelled": "Bekor qilindi"
   },
   "sellerProfilePage": {
+    "iyzicoOnboardingTitle": "iyzico to'lov hisobi",
+    "iyzicoActiveMessage": "To'lov hisobingiz faol. iyzico Marketplace ro'yxatidan o'tish yakunlandi.",
+    "iyzicoPendingMessage": "iyzico arizangiz ko'rib chiqilmoqda. Tasdiqlanmaguncha qayta boshlamang. Zarur bo'lsa, administrator hisobni tekshiradi.",
+    "iyzicoInstruction": "Savdolardan to'lov olish uchun kompaniyangizning Turkiya IBAN raqamini kiriting.",
+    "iyzicoIbanHelp": "IBAN faqat iyzico to'lov hisobini yaratish uchun yuboriladi.",
+    "iyzicoSaving": "iyzico hisobi yaratilmoqda...",
+    "iyzicoActivate": "iyzico to'lov hisobini faollashtirish",
+    "iyzicoInvalidIban": "Yaroqli Turkiya IBAN raqamini kiriting.",
+    "iyzicoStartFailed": "iyzico to'lov hisobini yaratib bo'lmadi.",
+    "iyzicoSuccess": "iyzico to'lov hisobingiz muvaffaqiyatli yaratildi.",
+    "iyzicoConnectionError": "iyzico ro'yxatidan o'tishda ulanish xatosi yuz berdi.",
         "buyerEyebrow": "XARIDOR PANELI",
         "buyerTitle": "Kompaniyam profili",
         "buyerDescription": "Bu yerda kompaniyangizning aloqa, manzil va huquqiy ma'lumotlarini ko'rishingiz va yangilashingiz mumkin.",
@@ -1506,6 +1517,15 @@ export default {
     "completed": "✅ Tashish muvaffaqiyatli yakunlandi"
   },
   "adminCompaniesPage": {
+    "iyzicoReconcileConfirm": "Kutilayotgan iyzico sotuvchi hisobi provayder orqali tekshiriladi. Davom etilsinmi?",
+    "iyzicoReconcileFailed": "iyzico hisobini solishtirish yakunlanmadi.",
+    "iyzicoReconcileSuccess": "iyzico hisobini solishtirish yakunlandi.",
+    "iyzicoReconcileConnectionError": "iyzico hisobini solishtirishda ulanish xatosi yuz berdi.",
+    "iyzicoActiveStatus": "iyzico to'lov hisobi ro'yxatdan o'tkazildi.",
+    "iyzicoPendingStatus": "iyzico ro'yxatdan o'tishi kutilmoqda va solishtirishni talab qiladi.",
+    "iyzicoNotStartedStatus": "iyzico ro'yxatdan o'tishi hali boshlanmagan.",
+    "iyzicoReconciling": "Hisob solishtirilmoqda...",
+    "iyzicoReconcileAction": "iyzico hisobini solishtirish",
     "roleBuyer": "Xaridor",
     "roleSeller": "Sotuvchi",
     "roleLogistics": "Logistika",

@@ -1160,6 +1160,17 @@ export default {
     "cancelled": "Отменено"
   },
   "sellerProfilePage": {
+    "iyzicoOnboardingTitle": "Платёжный аккаунт iyzico",
+    "iyzicoActiveMessage": "Ваш платёжный аккаунт активен. Регистрация в iyzico Marketplace завершена.",
+    "iyzicoPendingMessage": "Ваша заявка iyzico ожидает подтверждения. Не запускайте её повторно. При необходимости администратор проведёт сверку.",
+    "iyzicoInstruction": "Введите турецкий IBAN вашей компании для получения оплаты за продажи.",
+    "iyzicoIbanHelp": "IBAN передаётся только для создания платёжного аккаунта iyzico.",
+    "iyzicoSaving": "Создание аккаунта iyzico...",
+    "iyzicoActivate": "Активировать платёжный аккаунт iyzico",
+    "iyzicoInvalidIban": "Введите действительный турецкий IBAN.",
+    "iyzicoStartFailed": "Не удалось создать платёжный аккаунт iyzico.",
+    "iyzicoSuccess": "Ваш платёжный аккаунт iyzico успешно создан.",
+    "iyzicoConnectionError": "При регистрации iyzico произошла ошибка соединения.",
         "buyerEyebrow": "ПАНЕЛЬ ПОКУПАТЕЛЯ",
         "buyerTitle": "Профиль моей компании",
         "buyerDescription": "Здесь вы можете просматривать и обновлять контактные данные, адрес и юридическую информацию вашей компании.",
@@ -1506,6 +1517,15 @@ export default {
     "completed": "✅ Транспортировка успешно завершена"
   },
   "adminCompaniesPage": {
+    "iyzicoReconcileConfirm": "Ожидающий аккаунт продавца iyzico будет проверен у провайдера. Продолжить?",
+    "iyzicoReconcileFailed": "Не удалось завершить сверку аккаунта iyzico.",
+    "iyzicoReconcileSuccess": "Сверка аккаунта iyzico завершена.",
+    "iyzicoReconcileConnectionError": "При сверке аккаунта iyzico произошла ошибка соединения.",
+    "iyzicoActiveStatus": "Регистрация платёжного аккаунта iyzico завершена.",
+    "iyzicoPendingStatus": "Регистрация iyzico ожидает сверки.",
+    "iyzicoNotStartedStatus": "Регистрация iyzico ещё не начата.",
+    "iyzicoReconciling": "Выполняется сверка...",
+    "iyzicoReconcileAction": "Сверка iyzico",
     "roleBuyer": "Покупатель",
     "roleSeller": "Продавец",
     "roleLogistics": "Логистика",

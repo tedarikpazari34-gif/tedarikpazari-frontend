@@ -1160,6 +1160,17 @@ export default {
     "cancelled": "გაუქმებულია"
   },
   "sellerProfilePage": {
+    "iyzicoOnboardingTitle": "iyzico გადახდის ანგარიში",
+    "iyzicoActiveMessage": "თქვენი გადახდის ანგარიში აქტიურია. iyzico Marketplace-ზე რეგისტრაცია დასრულებულია.",
+    "iyzicoPendingMessage": "თქვენი iyzico განაცხადი მოლოდინშია. დადასტურებამდე ხელახლა არ დაიწყოთ. საჭიროების შემთხვევაში ადმინისტრატორი შეამოწმებს ანგარიშს.",
+    "iyzicoInstruction": "გაყიდვებიდან თანხის მისაღებად შეიყვანეთ თქვენი კომპანიის თურქული IBAN.",
+    "iyzicoIbanHelp": "IBAN იგზავნება მხოლოდ iyzico გადახდის ანგარიშის შესაქმნელად.",
+    "iyzicoSaving": "iyzico ანგარიშის შექმნა მიმდინარეობს...",
+    "iyzicoActivate": "iyzico გადახდის ანგარიშის გააქტიურება",
+    "iyzicoInvalidIban": "შეიყვანეთ მოქმედი თურქული IBAN.",
+    "iyzicoStartFailed": "iyzico გადახდის ანგარიშის შექმნა ვერ მოხერხდა.",
+    "iyzicoSuccess": "თქვენი iyzico გადახდის ანგარიში წარმატებით შეიქმნა.",
+    "iyzicoConnectionError": "iyzico რეგისტრაციისას წარმოიშვა კავშირის შეცდომა.",
         "buyerEyebrow": "მყიდველის პანელი",
         "buyerTitle": "ჩემი კომპანიის პროფილი",
         "buyerDescription": "აქ შეგიძლიათ ნახოთ და განაახლოთ თქვენი კომპანიის საკონტაქტო, მისამართისა და იურიდიული ინფორმაცია.",
@@ -1506,6 +1517,15 @@ export default {
     "completed": "✅ ტრანსპორტირება წარმატებით დასრულდა"
   },
   "adminCompaniesPage": {
+    "iyzicoReconcileConfirm": "მოლოდინში მყოფი iyzico გამყიდველის ანგარიში გადამოწმდება პროვაიდერთან. გაგრძელდეს?",
+    "iyzicoReconcileFailed": "iyzico-ს ანგარიშის შეჯერება ვერ დასრულდა.",
+    "iyzicoReconcileSuccess": "iyzico-ს ანგარიშის შეჯერება დასრულდა.",
+    "iyzicoReconcileConnectionError": "iyzico-ს ანგარიშის შეჯერებისას კავშირის შეცდომა მოხდა.",
+    "iyzicoActiveStatus": "iyzico გადახდის ანგარიშის რეგისტრაცია დასრულდა.",
+    "iyzicoPendingStatus": "iyzico-ს რეგისტრაცია მოლოდინშია და შეჯერებას საჭიროებს.",
+    "iyzicoNotStartedStatus": "iyzico-ს რეგისტრაცია ჯერ არ დაწყებულა.",
+    "iyzicoReconciling": "ანგარიშის შეჯერება მიმდინარეობს...",
+    "iyzicoReconcileAction": "iyzico-ს ანგარიშის შეჯერება",
     "roleBuyer": "მყიდველი",
     "roleSeller": "გამყიდველი",
     "roleLogistics": "ლოგისტიკა",

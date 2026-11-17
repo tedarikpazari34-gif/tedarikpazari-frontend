@@ -1,8 +1,13 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 
-const API = "https://tedarik-backend.onrender.com/api/admin";
-const BACKEND = "https://tedarik-backend.onrender.com";
+const API_BASE = (
+  import.meta.env.VITE_API_URL ||
+  "https://tedarik-backend.onrender.com/api"
+).replace(/\/+$/, "");
+
+const API = `${API_BASE}/admin`;
+const BACKEND = API_BASE.replace(/\/api$/, "");
 
 function resolveImageUrl(url?: string | null) {
   if (!url) return "";
@@ -277,7 +282,7 @@ export default function AdminCompaniesPage() {
   const reconcileIyzicoSubMerchant = async (id: string) => {
     if (
       !window.confirm(
-        "Bekleyen iyzico satıcı hesabı sağlayıcıdan doğrulanacak. Devam edilsin mi?"
+        t("adminCompaniesPage.iyzicoReconcileConfirm")
       )
     ) {
       return;
@@ -293,7 +298,7 @@ export default function AdminCompaniesPage() {
       }
 
       const res = await fetch(
-        `https://tedarik-backend.onrender.com/api/payments/iyzico/submerchant/reconcile/${id}`,
+        `${API_BASE}/payments/iyzico/submerchant/reconcile/${encodeURIComponent(id)}`,
         {
           method: "POST",
           headers: {
@@ -305,7 +310,10 @@ export default function AdminCompaniesPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data?.message || "iyzico mutabakatı tamamlanamadı.");
+        alert(i18n.language.startsWith("tr") &&
+          typeof data?.message === "string"
+            ? data.message
+            : t("adminCompaniesPage.iyzicoReconcileFailed"));
         return;
       }
 
@@ -321,10 +329,13 @@ export default function AdminCompaniesPage() {
           : current
       );
 
-      alert(data?.message || "iyzico mutabakatı tamamlandı.");
+      alert(i18n.language.startsWith("tr") &&
+          typeof data?.message === "string"
+            ? data.message
+            : t("adminCompaniesPage.iyzicoReconcileSuccess"));
     } catch (err) {
       console.error("IYZICO SUBMERCHANT RECONCILE ERROR:", err);
-      alert("iyzico mutabakatı sırasında bağlantı hatası oluştu.");
+      alert(t("adminCompaniesPage.iyzicoReconcileConnectionError"));
     } finally {
       setActionId("");
     }
@@ -716,10 +727,10 @@ export default function AdminCompaniesPage() {
 
                 <div style={{ marginBottom: 12 }}>
                   {selectedCompany.iyzicoOnboardingCompleted
-                    ? "Ödeme hesabı aktif."
+                    ? t("adminCompaniesPage.iyzicoActiveStatus")
                     : selectedCompany.iyzicoOnboardingPending
-                    ? "Onboarding işlemi bekliyor ve mutabakat gerektiriyor."
-                    : "Onboarding henüz başlatılmadı."}
+                    ? t("adminCompaniesPage.iyzicoPendingStatus")
+                    : t("adminCompaniesPage.iyzicoNotStartedStatus")}
                 </div>
 
                 {selectedCompany.iyzicoOnboardingPending &&
@@ -741,8 +752,8 @@ export default function AdminCompaniesPage() {
                       }}
                     >
                       {actionId === selectedCompany.id
-                        ? "Mutabakat yapılıyor..."
-                        : "iyzico Mutabakat"}
+                        ? t("adminCompaniesPage.iyzicoReconciling")
+                        : t("adminCompaniesPage.iyzicoReconcileAction")}
                     </button>
                   )}
               </div>
