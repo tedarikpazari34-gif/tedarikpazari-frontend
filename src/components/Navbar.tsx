@@ -501,7 +501,21 @@ export default function Navbar() {
               : {}),
           }}
         >
-          <span style={searchIconStyle} aria-hidden="true">⌕</span>
+          <span style={searchIconStyle} aria-hidden="true">
+            <svg
+              width="21"
+              height="21"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="10.8" cy="10.8" r="6.8" />
+              <path d="m16 16 5 5" />
+            </svg>
+          </span>
           <input
             type="search"
             value={searchQuery}
@@ -664,9 +678,9 @@ export default function Navbar() {
                   display: "block",
                   marginLeft: "auto",
                   flexShrink: 0,
-                  background: "#F3F8FC",
-                  color: "#0B3D6E",
-                  border: "1px solid #C9D9E5",
+                  background: "#FFFFFF",
+                  color: "#15283F",
+                  border: "1px solid rgba(21,40,63,0.22)",
                 }
               : { display: "none" }),
           }}
@@ -928,9 +942,9 @@ function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
       style={{
         ...(mobile ? mobileLanguageStyle : languageStyle),
         position: "relative",
-        background: "#F3F8FC",
-        border: "1px solid #C9D9E5",
-        color: "#0B3D6E",
+        background: "#FFFFFF",
+        border: "1px solid rgba(21,40,63,0.22)",
+        color: "#15283F",
         zIndex: 100,
       }}
     >
@@ -942,7 +956,7 @@ function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
           alignItems: "center",
           justifyContent: "center",
           gap: 7,
-          color: "#0B3D6E",
+          color: "#15283F",
           maxWidth: "none",
           listStyle: "none",
           cursor: "pointer",
@@ -958,15 +972,15 @@ function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
         style={{
           position: "absolute",
           top: "calc(100% + 8px)",
-          right: 0,
+          insetInlineEnd: 0,
           width: mobile ? "100%" : 210,
           minWidth: 180,
           boxSizing: "border-box",
           padding: 6,
           background: "#FFFFFF",
-          border: "1px solid #C9D9E5",
+          border: "1px solid rgba(21,40,63,0.22)",
           borderRadius: 12,
-          boxShadow: "0 10px 28px rgba(11,61,110,0.16)",
+          boxShadow: "0 10px 28px rgba(21,40,63,0.16)",
           zIndex: 200,
         }}
       >
@@ -984,8 +998,9 @@ function LanguageSwitcher({ mobile = false }: { mobile?: boolean }) {
                 padding: "10px 12px",
                 border: "none",
                 borderRadius: 8,
-                background: active ? "#E5F7F5" : "transparent",
-                color: "#0B3D6E",
+                background: active ? "#15283F" : "transparent",
+                color: active ? "#FFFFFF" : "#15283F",
+                boxShadow: active ? "inset 0 0 0 2px #C76B43" : "none",
                 textAlign: "left",
                 fontWeight: active ? 800 : 500,
                 cursor: "pointer",
@@ -1044,7 +1059,7 @@ function MobileSection({
 }
 
 const trustBarStyle: React.CSSProperties = {
-  background: "linear-gradient(90deg, #062B4D 0%, #0B3D6E 100%)",
+  background: "#15283F",
   color: "#ffffff",
 };
 
@@ -1129,51 +1144,55 @@ const brandLogoStyle: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
-  minWidth: 190,
-  height: 63,
+  minWidth: 214,
+  height: 70,
   lineHeight: 1,
 };
 
 const brandNexStyle: React.CSSProperties = {
-  color: "#16B83E",
-  fontSize: 11,
+  color: "#C76B43",
+  fontSize: 12,
   fontWeight: 950,
-  letterSpacing: 2.4,
+  letterSpacing: 1.8,
   marginBottom: 5,
+  alignSelf: "flex-start",
+  padding: "4px 7px",
+  borderRadius: 6,
+  background: "#FFFFFF",
 };
 
 const brandNameStyle: React.CSSProperties = {
-  color: "#0B3D6E",
-  fontSize: 21,
+  color: "#15283F",
+  fontSize: 26,
   fontWeight: 900,
-  letterSpacing: -0.6,
+  letterSpacing: -0.8,
   whiteSpace: "nowrap",
 };
 
 const brandMarketStyle: React.CSSProperties = {
-  color: "#16B83E",
+  color: "#C76B43",
   fontWeight: 950,
 };
 
 
 
 const searchFormStyle: React.CSSProperties = {
-  flex: "1 1 420px",
-  maxWidth: 620,
+  flex: "1 1 520px",
+  maxWidth: 760,
   minWidth: 260,
-  height: 48,
+  height: 56,
   display: "flex",
   alignItems: "center",
   overflow: "hidden",
   background: "white",
-  border: "2px solid #C9D9E5",
-  borderRadius: 14,
-  boxShadow: "0 7px 20px rgba(11,61,110,0.07)",
+  border: "2px solid #CDD4DB",
+  borderRadius: 16,
+  boxShadow: "0 10px 28px rgba(19,38,62,0.10)",
 };
 
 const searchIconStyle: React.CSSProperties = {
   paddingLeft: 16,
-  color: "#16A34A",
+  color: "#A85637",
   fontSize: 24,
   fontWeight: 900,
   lineHeight: 1,
@@ -1188,19 +1207,19 @@ const searchInputStyle: React.CSSProperties = {
   outline: "none",
   background: "transparent",
   color: "#16324A",
-  fontSize: 14,
+  fontSize: 15,
   fontWeight: 600,
 };
 
 const searchButtonStyle: React.CSSProperties = {
   alignSelf: "stretch",
-  minWidth: 78,
+  minWidth: 92,
   border: "none",
-  padding: "0 20px",
-  background: "linear-gradient(135deg, #082F55 0%, #0B4C82 100%)",
+  padding: "0 23px",
+  background: "linear-gradient(135deg, #B45734 0%, #93401F 100%)",
   color: "white",
   cursor: "pointer",
-  fontSize: 13,
+  fontSize: 15,
   fontWeight: 900,
 };
 
@@ -1211,8 +1230,8 @@ const categoryGroupIconStyle: React.CSSProperties = {
   height: 25,
   flexShrink: 0,
   borderRadius: 8,
-  background: "linear-gradient(135deg, #E8F2FA, #E9FBEF)",
-  color: "#0B3D6E",
+  background: "linear-gradient(135deg, #FFFFFF 0%, rgba(199,107,67,0.14) 100%)",
+  color: "#15283F",
   fontSize: 16,
   fontWeight: 900,
 };
@@ -1229,7 +1248,7 @@ const categoryGroupButtonStyle: React.CSSProperties = {
   border: "none",
   borderRight: "1px solid #edf2f7",
   background: "#ffffff",
-  color: "#0B3D6E",
+  color: "#15283F",
   cursor: "pointer",
   fontSize: 12,
   fontWeight: 800,
@@ -1243,7 +1262,7 @@ const megaMenuStyle: React.CSSProperties = {
   top: "100%",
   zIndex: 200,
   background: "#ffffff",
-  borderTop: "3px solid #16B83E",
+  borderTop: "3px solid #C76B43",
   borderBottom: "1px solid #e2e8f0",
   boxShadow: "0 22px 45px rgba(11,31,58,0.14)",
 };
@@ -1305,14 +1324,15 @@ const megaMenuChildStyle: React.CSSProperties = {
 
 const categoryBarStyle: React.CSSProperties = {
   width: "100%",
-  background: "#ffffff",
+  background: "#FFFFFF",
   borderTop: "1px solid #edf2f7",
   borderBottom: "1px solid #e2e8f0",
+  boxShadow: "0 8px 20px rgba(19,38,62,0.05)",
 };
 
 const categoryBarInnerStyle: React.CSSProperties = {
   width: "min(1440px, calc(100% - 40px))",
-  minHeight: 46,
+  minHeight: 52,
   margin: "0 auto",
   display: "flex",
   alignItems: "stretch",
@@ -1325,10 +1345,10 @@ const allCategoriesLinkStyle: React.CSSProperties = {
   gap: 9,
   padding: "0 20px",
   flexShrink: 0,
-  background: "linear-gradient(135deg, #082F55 0%, #0B4C82 100%)",
+  background: "#15283F",
   color: "#ffffff",
   textDecoration: "none",
-  fontSize: 13,
+  fontSize: 14,
   fontWeight: 900,
 };
 
@@ -1347,7 +1367,7 @@ const categoryLinkStyle: React.CSSProperties = {
   padding: "0 18px",
   flex: "1 0 auto",
   borderRight: "1px solid #edf2f7",
-  color: "#123A63",
+  color: "#15283F",
   textDecoration: "none",
   fontSize: 13,
   fontWeight: 800,
@@ -1414,7 +1434,7 @@ const guestLoginButtonStyle: React.CSSProperties = {
   minHeight: 44,
   padding: "0 16px",
   borderRadius: 10,
-  background: "linear-gradient(135deg, #16B83E 0%, #22C55E 100%)",
+  background: "linear-gradient(135deg, #B45734 0%, #93401F 100%)",
   color: "#ffffff",
   textDecoration: "none",
   fontSize: 14,
@@ -1521,8 +1541,8 @@ const languageStyle: React.CSSProperties = {
   gap: 6,
   padding: "6px 8px",
   borderRadius: 10,
-  border: "1px solid rgba(255,255,255,0.14)",
-  background: "rgba(255,255,255,0.06)",
+  border: "1px solid rgba(21,40,63,0.22)",
+  background: "#FFFFFF",
 };
 
 const mobileLanguageStyle: React.CSSProperties = {
@@ -1541,7 +1561,7 @@ const languageSelectStyle: React.CSSProperties = {
   border: "none",
   outline: "none",
   background: "transparent",
-  color: "#e2e8f0",
+  color: "#15283F",
   cursor: "pointer",
   fontSize: 12,
   fontWeight: 800,
@@ -1662,7 +1682,7 @@ const mobileTitleStyle: React.CSSProperties = {
 };
 
 const mobileLinkStyle: React.CSSProperties = {
-  color: "#0B3D6E",
+  color: "#15283F",
   textDecoration: "none",
   fontWeight: 800,
   padding: "10px 0",
@@ -1673,7 +1693,7 @@ const mobileNotificationStyle: React.CSSProperties = {
   border: "1px solid #E2EAF0",
   borderRadius: 14,
   padding: "12px 14px",
-  color: "#0B3D6E",
+  color: "#15283F",
   textDecoration: "none",
   fontWeight: 900,
   display: "flex",

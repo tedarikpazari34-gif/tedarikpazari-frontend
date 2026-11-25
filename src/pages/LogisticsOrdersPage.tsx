@@ -122,7 +122,7 @@ function ShippingTimeline({
             <div style={timelineContentStyle}>
               <strong
                 style={{
-                  color: completed ? "#0f172a" : "#94a3b8",
+                  color: completed ? "#15283F" : "#94a3b8",
                 }}
               >
                 {step.label}
@@ -154,7 +154,6 @@ export default function LogisticsOrdersPage() {
 
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [busyId, setBusyId] = useState("");
 
   const load = async () => {
     try {
@@ -188,41 +187,6 @@ export default function LogisticsOrdersPage() {
   useEffect(() => {
     load();
   }, []);
-
-  const action = async (
-    id: string,
-    type: "pickup" | "transit" | "deliver"
-  ) => {
-    try {
-      setBusyId(id);
-
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(
-        `${API}/shipping/orders/${id}/${type}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        alert(data?.message || t("logisticsOrdersPage.actionFailed"));
-        return;
-      }
-
-      await load();
-    } catch (err) {
-      console.error("SHIPPING ACTION ERROR:", err);
-      alert(t("logisticsOrdersPage.actionError"));
-    } finally {
-      setBusyId("");
-    }
-  };
 
   if (loading) {
     return (
@@ -349,42 +313,6 @@ export default function LogisticsOrdersPage() {
                   {t("logisticsOrdersPage.shippingChat")}
                 </Link>
 
-                {order.status === "PENDING_PICKUP" && (
-                  <button
-                    disabled={busyId === order.id}
-                    onClick={() => action(order.id, "pickup")}
-                    style={primaryActionStyle}
-                  >
-                    {busyId === order.id
-                      ? t("logisticsOrdersPage.processing")
-                      : t("logisticsOrdersPage.confirmPickup")}
-                  </button>
-                )}
-
-                {order.status === "PICKED_UP" && (
-                  <button
-                    disabled={busyId === order.id}
-                    onClick={() => action(order.id, "transit")}
-                    style={warningActionStyle}
-                  >
-                    {busyId === order.id
-                      ? t("logisticsOrdersPage.processing")
-                      : t("logisticsOrdersPage.confirmTransit")}
-                  </button>
-                )}
-
-                {order.status === "IN_TRANSIT" && (
-                  <button
-                    disabled={busyId === order.id}
-                    onClick={() => action(order.id, "deliver")}
-                    style={successActionStyle}
-                  >
-                    {busyId === order.id
-                      ? t("logisticsOrdersPage.processing")
-                      : t("logisticsOrdersPage.confirmDelivered")}
-                  </button>
-                )}
-
                 {order.status === "DELIVERED" && (
                   <div style={deliveredStyle}>
                     {t("logisticsOrdersPage.completed")}
@@ -417,7 +345,7 @@ function Info({
 const pageStyle: CSSProperties = {
   minHeight: "100vh",
   padding: 40,
-  background: "#f8fafc",
+  background: "#FFFFFF",
 };
 
 const heroStyle: CSSProperties = {
@@ -430,12 +358,12 @@ const heroStyle: CSSProperties = {
   alignItems: "center",
   gap: 20,
   color: "#ffffff",
-  background: "linear-gradient(135deg, #0f172a, #0f766e)",
+  background: "linear-gradient(135deg, #15283F, #294562)",
   boxShadow: "0 22px 48px rgba(15,23,42,0.18)",
 };
 
 const eyebrowStyle: CSSProperties = {
-  color: "#99f6e4",
+  color: "#FFD2BD",
   fontSize: 12,
   fontWeight: 900,
   marginBottom: 8,
@@ -450,7 +378,7 @@ const heroTitleStyle: CSSProperties = {
 const heroTextStyle: CSSProperties = {
   maxWidth: 650,
   margin: 0,
-  color: "#ccfbf1",
+  color: "#F4F7FA",
   lineHeight: 1.6,
 };
 
@@ -488,7 +416,7 @@ const cardHeaderStyle: CSSProperties = {
 };
 
 const smallLabelStyle: CSSProperties = {
-  color: "#0f766e",
+  color: "#985030",
   fontSize: 12,
   fontWeight: 900,
   marginBottom: 5,
@@ -496,7 +424,7 @@ const smallLabelStyle: CSSProperties = {
 
 const productTitleStyle: CSSProperties = {
   margin: 0,
-  color: "#0f172a",
+  color: "#15283F",
   fontSize: 25,
   fontWeight: 900,
 };
@@ -517,21 +445,21 @@ const routeStyle: CSSProperties = {
   alignItems: "center",
   gap: 14,
   borderRadius: 18,
-  background: "#f0fdfa",
-  border: "1px solid #99f6e4",
-  color: "#134e4a",
+  background: "#FFF3ED",
+  border: "1px solid #E7BCA8",
+  color: "#15283F",
 };
 
 const routeLabelStyle: CSSProperties = {
   display: "block",
   marginBottom: 4,
-  color: "#0f766e",
+  color: "#985030",
   fontSize: 11,
   fontWeight: 900,
 };
 
 const routeArrowStyle: CSSProperties = {
-  color: "#0f766e",
+  color: "#985030",
   fontSize: 24,
   fontWeight: 900,
 };
@@ -549,7 +477,7 @@ const infoStyle: CSSProperties = {
   display: "grid",
   gap: 5,
   borderRadius: 14,
-  background: "#f8fafc",
+  background: "#FFFFFF",
   border: "1px solid #e2e8f0",
   color: "#64748b",
   fontSize: 12,
@@ -559,7 +487,7 @@ const timelineStyle: CSSProperties = {
   marginBottom: 22,
   padding: 18,
   borderRadius: 18,
-  background: "#f8fafc",
+  background: "#FFFFFF",
   border: "1px solid #e2e8f0",
 };
 
@@ -633,21 +561,6 @@ const chatButtonStyle: CSSProperties = {
   color: "#1d4ed8",
   background: "#eff6ff",
   border: "1px solid #bfdbfe",
-};
-
-const primaryActionStyle: CSSProperties = {
-  ...baseButtonStyle,
-  background: "#2563eb",
-};
-
-const warningActionStyle: CSSProperties = {
-  ...baseButtonStyle,
-  background: "#d97706",
-};
-
-const successActionStyle: CSSProperties = {
-  ...baseButtonStyle,
-  background: "#16a34a",
 };
 
 const deliveredStyle: CSSProperties = {

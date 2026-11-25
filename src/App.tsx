@@ -53,7 +53,6 @@ import BuyerDashboardPage from "./pages/BuyerDashboardPage";
 import SellerDashboardPage from "./pages/SellerDashboardPage";
 import SellerLayout from "./components/SellerLayout";
 import LogisticsDashboardPage from "./pages/LogisticsDashboardPage";
-import PanelPage from "./pages/PanelPage";
 import LegalPage from "./pages/LegalPage";
 import CorporatePage from "./pages/CorporatePage";
 import CompanyVerificationPage from "./pages/CompanyVerificationPage";
@@ -79,6 +78,26 @@ function PrivateRoute({
   }
 
   return children;
+}
+
+function FirstReleasePanelRedirect() {
+  const role = String(
+    localStorage.getItem("role") || ""
+  ).toUpperCase();
+
+  const destinations: Record<string, string> = {
+    BUYER: "/buyer/dashboard",
+    SELLER: "/seller/dashboard",
+    ADMIN: "/admin",
+    LOGISTICS: "/logistics/dashboard",
+  };
+
+  return (
+    <Navigate
+      to={destinations[role] || "/login"}
+      replace
+    />
+  );
 }
 
 export default function App() {
@@ -417,7 +436,7 @@ export default function App() {
           path="/panel"
           element={
             <PrivateRoute>
-              <PanelPage />
+              <FirstReleasePanelRedirect />
             </PrivateRoute>
           }
         />

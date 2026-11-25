@@ -2,6 +2,11 @@ import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import NexHomeHero from "../components/home/NexHomeHero";
+import { getPopularCategoryCopy } from "../components/home/NexHomePopularCategories.copy";
+import { getHeroCopy } from "../components/home/NexHomeHero.copy";
+import "../components/home/NexHomeCatalog.css";
+import { getNexCatalogCopy } from "../components/home/NexHomeCatalog.copy";
 
 type Sector = {
   title: string;
@@ -81,7 +86,7 @@ const sectors: Sector[] = [
 
 const primaryButtonStyle: React.CSSProperties = {
   textDecoration: "none",
-  background: "linear-gradient(135deg, var(--nex-turquoise-700), var(--nex-turquoise-500))",
+  background: "linear-gradient(135deg, #A85637, #C76B43)",
   color: "#fff",
   padding: "13px 20px",
   borderRadius: 12,
@@ -92,7 +97,7 @@ const primaryButtonStyle: React.CSSProperties = {
 const secondaryButtonStyle: React.CSSProperties = {
   textDecoration: "none",
   background: "#ffffff",
-  color: "#0B3D6E",
+  color: "#15283F",
   padding: "13px 20px",
   borderRadius: 12,
   fontWeight: 700,
@@ -189,13 +194,32 @@ function mapApiProductToCard(product: ApiProduct, fallbackCategory: string, fall
   };
 }
 
+const SHOW_HOME_FEATURED_PRODUCTS = false;
+
 export default function HomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const catalog = getNexCatalogCopy(i18n.resolvedLanguage || i18n.language || "tr");
+  const popularCopy = getPopularCategoryCopy(i18n.resolvedLanguage || i18n.language || "tr");
+  const heroLabels = getHeroCopy(i18n.resolvedLanguage || i18n.language || "tr");
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] =
   useState<ProductCard[]>([]);
   const [search, setSearch] = useState("");
   const [homeCategories, setHomeCategories] = useState<HomeCategory[]>([]);
+
+  const resolveHomeCategoryHref = (categoryName: string): string => {
+    const normalizedName = categoryName.trim().toLocaleLowerCase("tr-TR");
+
+    const category = homeCategories.find(
+      (item) =>
+        item.name.trim().toLocaleLowerCase("tr-TR") === normalizedName
+    );
+
+    return category?.id
+      ? `/category/${encodeURIComponent(category.id)}`
+      : "/categories";
+  };
+
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 700 : false
   );
@@ -249,7 +273,7 @@ export default function HomePage() {
   }, []);
   useEffect(() => {
     const api = import.meta.env.VITE_API_URL || "https://tedarik-backend.onrender.com/api";
-    fetch(`${api}/categories`)
+    fetch(`${api}/categories?lang=tr`)
       .then((res) => {
         if (!res.ok) throw new Error(`Kategoriler alınamadı: ${res.status}`);
         return res.json();
@@ -289,7 +313,7 @@ export default function HomePage() {
           width: "100%",
           overflowX: "hidden",
           background: "linear-gradient(180deg, #FFFFFF 0%, #F7FAFC 18%, #F3F7FA 100%)",
-          color: "#0B3D6E",
+          color: "#15283F",
         }}
       >
         <div
@@ -302,391 +326,246 @@ export default function HomePage() {
           }}
         >
 
-          <section
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr",
-              gap: isMobile ? 24 : 30,
-              alignItems: "center",
-              padding: isMobile ? "24px 0 30px" : "36px 0 46px",
-            }}
-          >
-            <div style={{ position: "relative", minWidth: 0 }}>
+          <NexHomeHero />
+
+          {SHOW_HOME_FEATURED_PRODUCTS && featuredProducts.length > 0 && (
+            <section className="nex-home-featured" style={{ marginBottom: isMobile ? 28 : 42 }}>
               <div
                 style={{
-                  position: "absolute",
-                  width: isMobile ? 180 : 300,
-                  height: isMobile ? 180 : 300,
-                  right: isMobile ? -70 : -70,
-                  top: isMobile ? -50 : -70,
-                  borderRadius: "50%",
-                  background: "rgba(22,184,62,0.09)",
-                  pointerEvents: "none",
-                }}
-              />
-
-              <div
-                style={{
-                  position: "relative",
-                  overflow: "hidden",
-                  borderRadius: isMobile ? 22 : 30,
-                  border: "1px solid #D5E5EA",
-                  background: "#F8FAFC",
-                  boxShadow:
-                    "0 28px 70px rgba(11,61,110,0.14), 0 10px 28px rgba(15,23,42,0.08)",
-                }}
-              >
-                <img
-                  src="/images/nex-hero-b2b.jpg"
-                  alt="Nex Tedarik Pazarı B2B tedarik, depo ve lojistik ağı"
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    height: isMobile ? "auto" : 270,
-                    aspectRatio: isMobile ? "16 / 9" : undefined,
-                    objectFit: "cover",
-                  }}
-                />
-
-                <div
-                  style={{
-                    position: "absolute",
-                    left: isMobile ? 12 : 18,
-                    bottom: isMobile ? 12 : 18,
-                    display: "flex",
-                    gap: 7,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  {["Gıda", "Temizlik", "Ambalaj", "Hırdavat", "Otomotiv"].map(
-                    (item, index) => (
-                      <span
-                        key={item}
-                        style={{
-                          padding: "8px 11px",
-                          borderRadius: 999,
-                          background:
-                            index === 0
-                              ? "rgba(22,184,62,0.96)"
-                              : "rgba(255,255,255,0.94)",
-                          color: index === 0 ? "#ffffff" : "#0B3D6E",
-                          border: "1px solid rgba(255,255,255,0.72)",
-                          fontSize: 11,
-                          fontWeight: 800,
-                          boxShadow: "0 7px 18px rgba(15,23,42,0.14)",
-                        }}
-                      >
-                        {item}
-                      </span>
-                    )
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  padding: "8px 13px",
-                  borderRadius: 999,
-                  background: "linear-gradient(135deg, #E9FBEF, #F5FBFF)",
-                  border: "1px solid #BFE8CD",
-                  color: "#128A35",
-                  fontSize: 12,
-                  fontWeight: 900,
-                  letterSpacing: 0.4,
+                  display: "flex",
+                  alignItems: "end",
+                  justifyContent: "space-between",
+                  gap: 16,
+                  flexWrap: "wrap",
                   marginBottom: 18,
                 }}
               >
-                TEDARİK PAZARI • TÜRKİYE B2B PAZARYERİ
-              </div>
+                <div>
+                  <div
+                    style={{
+                      color: "#A85637",
+                      fontSize: 12,
+                      fontWeight: 900,
+                      letterSpacing: 0.5,
+                      marginBottom: 6,
+                    }}
+                  >
+                    {catalog.productHeading[0]}
+                  </div>
 
-              <h1
-                style={{
-                  margin: "0 0 18px",
-                  color: "#0B3D6E",
-                  fontSize: isMobile ? 38 : 56,
-                  lineHeight: 1.04,
-                  letterSpacing: isMobile ? -1.2 : -2.2,
-                  fontWeight: 900,
-                }}
-              >
-                Toptan Ticaretin{" "}
-                <span style={{ color: "#16B83E" }}>Yeni Adresi</span>
-              </h1>
+                  <h2
+                    style={{
+                      margin: 0,
+                      color: "#15283F",
+                      fontSize: isMobile ? 24 : 30,
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {catalog.productHeading[1]}
+                  </h2>
+                </div>
 
-              <p
-                style={{
-                  margin: "0 0 25px",
-                  maxWidth: 610,
-                  color: "#475569",
-                  fontSize: isMobile ? 16 : 18,
-                  lineHeight: 1.7,
-                  fontWeight: 500,
-                }}
-              >
-                Doğrulanmış firmalarla güvenli, hızlı ve profesyonel B2B ticaret.
-              </p>
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  flexWrap: "wrap",
-                  marginBottom: 24,
-                }}
-              >
                 <Link
                   to="/products"
                   style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minHeight: 46,
-                    padding: "0 20px",
-                    borderRadius: 13,
-                    background:
-                      "linear-gradient(135deg, #082F55 0%, #0B4C82 100%)",
-                    color: "#ffffff",
+                    color: "#15283F",
                     textDecoration: "none",
-                    fontWeight: 850,
-                    fontSize: 14,
-                    boxShadow: "0 9px 20px rgba(11,61,110,0.18)",
+                    fontSize: 13,
+                    fontWeight: 900,
                   }}
                 >
-                  Tüm Ürünleri İncele
-                </Link>
-
-                <Link
-                  to="/register?role=SELLER"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minHeight: 46,
-                    padding: "0 20px",
-                    borderRadius: 13,
-                    background:
-                      "linear-gradient(135deg, #16B83E 0%, #22C55E 100%)",
-                    border: "1px solid #16B83E",
-                    color: "#ffffff",
-                    textDecoration: "none",
-                    fontWeight: 850,
-                    fontSize: 14,
-                    boxShadow: "0 9px 20px rgba(22,184,62,0.18)",
-                  }}
-                >
-                  Satıcı Olarak Başla
+                  {catalog.product[0]} →
                 </Link>
               </div>
 
               <div
                 style={{
-                  display: "flex",
-                  gap: isMobile ? 10 : 18,
-                  flexWrap: "wrap",
-                  color: "#475569",
-                  fontSize: 13,
-                  fontWeight: 700,
+                  display: isMobile ? "flex" : "grid",
+                  gridTemplateColumns: isMobile
+                    ? undefined
+                    : "repeat(4, minmax(0, 1fr))",
+                  gap: 12,
+                  overflowX: isMobile ? "auto" : "visible",
+                  paddingBottom: isMobile ? 8 : 0,
+                  scrollSnapType: isMobile ? "x mandatory" : undefined,
+                  WebkitOverflowScrolling: "touch",
                 }}
               >
-                <span>✓ Doğrulanmış firmalar</span>
-                <span>✓ Güvenli ödeme</span>
-                <span>✓ Toptan satın alma</span>
-                <span>✓ Türkiye geneli ticaret</span>
+                {featuredProducts.map((product) => (
+                  <Link className="nex-home-product-tile"
+                    key={product.id}
+                    to={`/product/${product.id}`}
+                    style={{
+                      minWidth: isMobile ? 220 : 0,
+                      flex: isMobile ? "0 0 220px" : undefined,
+                      scrollSnapAlign: isMobile ? "start" : undefined,
+                      display: "flex",
+                      flexDirection: "column",
+                      overflow: "hidden",
+                      borderRadius: 18,
+                      border: "1px solid #DCE6EE",
+                      background: "#ffffff",
+                      color: "#15283F",
+                      textDecoration: "none",
+                      boxShadow:
+                        "0 10px 28px rgba(11,61,110,0.08), 0 2px 5px rgba(15,23,42,0.03)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "relative",
+                        aspectRatio: "4 / 3",
+                        overflow: "hidden",
+                        background:
+                          "linear-gradient(180deg, #FFFFFF 0%, #F4F8FA 100%)",
+                        borderBottom: "1px solid #E7EEF3",
+                      }}
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.title}
+                        loading="lazy"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          display: "block",
+                          objectFit: "contain",
+                          padding: 8,
+                          boxSizing: "border-box",
+                        }}
+                      />
+
+                      {product.moq ? (
+                        <span
+                          style={{
+                            position: "absolute",
+                            left: 10,
+                            bottom: 10,
+                            padding: "6px 9px",
+                            borderRadius: 9,
+                            background: "rgba(11,61,110,0.95)",
+                            color: "#ffffff",
+                            fontSize: 10,
+                            fontWeight: 850,
+                            boxShadow: "0 4px 12px rgba(11,61,110,0.18)",
+                          }}
+                        >
+                          {catalog.product[1]} {product.moq} {product.unitType || catalog.product[2]}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div
+                      style={{
+                        padding: 11,
+                        display: "flex",
+                        flexDirection: "column",
+                        flex: 1,
+                      }}
+                    >
+                      <div
+                        style={{
+                          color: "#A85637",
+                          fontSize: 10,
+                          fontWeight: 850,
+                          letterSpacing: 0.25,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {product.category}
+                      </div>
+
+                      <div
+                        style={{
+                          minHeight: 42,
+                          color: "#16324A",
+                          fontSize: 13,
+                          fontWeight: 800,
+                          lineHeight: 1.35,
+                          marginBottom: 9,
+                        }}
+                      >
+                        {product.title}
+                      </div>
+
+                      <div style={{ marginTop: "auto" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "baseline",
+                            gap: 5,
+                            marginBottom: 6,
+                          }}
+                        >
+                          <strong
+                            style={{
+                              color: "#15283F",
+                              fontSize: 20,
+                              fontWeight: 950,
+                              letterSpacing: -0.3,
+                            }}
+                          >
+                            {product.price}
+                          </strong>
+                          <span
+                            style={{
+                              color: "#64748b",
+                              fontSize: 11,
+                              fontWeight: 700,
+                            }}
+                          >
+                            / {product.unitType || catalog.product[2]}
+                          </span>
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: 8,
+                            color: "#64748b",
+                            fontSize: 10,
+                            fontWeight: 650,
+                            paddingTop: 7,
+                            borderTop: "1px solid #EDF2F5",
+                            marginBottom: 10,
+                          }}
+                        >
+                          <span>
+                            {product.vatRate != null
+                              ? `${catalog.product[3]} %${product.vatRate}`
+                              : catalog.product[4]}
+                          </span>
+                          {product.leadTimeDays != null && (
+                            <span>{product.leadTimeDays} gün teslim</span>
+                          )}
+                        </div>
+
+                        <div
+                          style={{
+                            minHeight: 36,
+                            display: "grid",
+                            placeItems: "center",
+                            borderRadius: 10,
+                            background:
+                              "linear-gradient(135deg, #A85637 0%, #C76B43 100%)",
+                            color: "#ffffff",
+                            fontSize: 12,
+                            fontWeight: 900,
+                            boxShadow: "0 7px 16px rgba(199,107,67,0.18)",
+                          }}
+                        >
+                          Ürünü İncele
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
               </div>
-            </div>
+            </section>
+          )}
 
-          </section>
-
-          <section
-            style={{
-              display: "grid",
-              gridTemplateColumns: isMobile
-                ? "repeat(2, minmax(0, 1fr))"
-                : "repeat(4, minmax(0, 1fr))",
-              gap: 12,
-              marginBottom: isMobile ? 28 : 40,
-            }}
-          >
-            {[
-              ["✓", "Doğrulanmış Firmalar", "Kurumsal alıcı ve satıcı ağı"],
-              ["₺", "Güvenli Ödeme", "Kontrollü ödeme altyapısı"],
-              ["□", "Toptan Ticaret", "MOQ ve toplu satın alma"],
-              ["→", "Lojistik", "Türkiye geneli sevkiyat süreci"],
-            ].map(([icon, title, text], index) => (
-              <div
-                key={title}
-                style={{
-                  padding: isMobile ? 14 : 18,
-                  borderRadius: 18,
-                  background: "#ffffff",
-                  border: "1px solid #DCE6EE",
-                  borderTop: "3px solid #0B3D6E",
-                  boxShadow:
-                    "0 10px 28px rgba(11,61,110,0.07), 0 2px 5px rgba(15,23,42,0.03)",
-                }}
-              >
-                <div
-                  style={{
-                    width: 38,
-                    height: 38,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 12,
-                    marginBottom: 10,
-                    background:
-                      "linear-gradient(135deg, #E8F2FA 0%, #E9FBEF 100%)",
-                    border: "1px solid #D5E8E0",
-                    color: "#0B3D6E",
-                    fontWeight: 900,
-                    fontSize: 17,
-                  }}
-                >
-                  {icon}
-                </div>
-                <div
-                  style={{
-                    color: "#0B3D6E",
-                    fontWeight: 900,
-                    fontSize: isMobile ? 13 : 15,
-                    marginBottom: 4,
-                  }}
-                >
-                  {title}
-                </div>
-                <div
-                  style={{
-                    color: "#64748b",
-                    fontSize: isMobile ? 11 : 13,
-                    lineHeight: 1.45,
-                  }}
-                >
-                  {text}
-                </div>
-              </div>
-            ))}
-          </section>
-
-          <section
-            style={{
-              display: "grid",
-              gridTemplateColumns: isMobile
-                ? "repeat(2, minmax(0, 1fr))"
-                : "repeat(4, minmax(0, 1fr))",
-              gap: isMobile ? 10 : 14,
-              marginBottom: isMobile ? 28 : 36,
-            }}
-          >
-            {[
-              {
-                icon: "↗️",
-                eyebrow: "YENİ GELENLER",
-                title: "Yeni Ürünler",
-                text: "Pazaryerine yeni eklenen ürünleri keşfet.",
-                to: "/products",
-              },
-              {
-                icon: "□",
-                eyebrow: "TOPLU ALIM",
-                title: "Toptan Ürünler",
-                text: "MOQ ve toptan fiyatlarla satın al.",
-                to: "/products",
-              },
-              {
-                icon: "▦",
-                eyebrow: "KEŞFET",
-                title: "Popüler Kategoriler",
-                text: "İşletmen için ürünleri kategorilere göre bul.",
-                to: "/categories",
-              },
-              {
-                icon: "♡",
-                eyebrow: "KAYDETTİKLERİN",
-                title: "Favorilerim",
-                text: "Beğendiğin ürünlere hızlıca yeniden ulaş.",
-                to: "/favorites",
-              },
-            ].map((item, index) => (
-              <Link
-                key={item.title}
-                to={item.to}
-                style={{
-                  position: "relative",
-                  overflow: "hidden",
-                  minHeight: isMobile ? 142 : 164,
-                  padding: isMobile ? 14 : 18,
-                  boxSizing: "border-box",
-                  borderRadius: 18,
-                  border: "1px solid #DCE6EE",
-                  borderTop: "3px solid #16B83E",
-                  background:
-                    "linear-gradient(145deg, #FFFFFF 0%, #FBFDFE 100%)",
-                  color: "#0B3D6E",
-                  textDecoration: "none",
-                  boxShadow:
-                    "0 10px 28px rgba(11,61,110,0.08), 0 2px 6px rgba(15,23,42,0.03)",
-                }}
-              >
-                <div
-                  style={{
-                    width: isMobile ? 36 : 42,
-                    height: isMobile ? 36 : 42,
-                    display: "grid",
-                    placeItems: "center",
-                    borderRadius: 12,
-                    background:
-                      "linear-gradient(135deg, #E8F2FA 0%, #E9FBEF 100%)",
-                    border: "1px solid #D5E8E0",
-                    color: "#0B3D6E",
-                    fontSize: isMobile ? 17 : 20,
-                    fontWeight: 900,
-                    marginBottom: 12,
-                  }}
-                >
-                  {item.icon}
-                </div>
-
-                <div
-                  style={{
-                    color: "#16A34A",
-                    fontSize: 9,
-                    fontWeight: 900,
-                    letterSpacing: 0.8,
-                    marginBottom: 5,
-                  }}
-                >
-                  {item.eyebrow}
-                </div>
-
-                <div
-                  style={{
-                    color: "#0B3D6E",
-                    fontSize: isMobile ? 14 : 17,
-                    fontWeight: 900,
-                    marginBottom: 6,
-                  }}
-                >
-                  {item.title}
-                </div>
-
-                <div
-                  style={{
-                    color: "#64748b",
-                    fontSize: isMobile ? 10 : 12,
-                    lineHeight: 1.45,
-                  }}
-                >
-                  {item.text}
-                </div>
-              </Link>
-            ))}
-          </section>
-
-          <section style={{ marginBottom: isMobile ? 24 : 36 }}>
+          <section className="nex-home-sector" style={{ marginBottom: isMobile ? 24 : 36 }}>
             <div
               style={{
                 display: "flex",
@@ -699,25 +578,25 @@ export default function HomePage() {
               <div>
                 <div
                   style={{
-                    color: "#16B83E",
+                    color: "#A85637",
                     fontSize: 12,
                     fontWeight: 900,
                     letterSpacing: 0.7,
                     marginBottom: 6,
                   }}
                 >
-                  SEKTÖRLERE GÖRE KEŞFET
+                  {catalog.heading[0]}
                 </div>
                 <h2
                   style={{
                     margin: 0,
-                    color: "#0B3D6E",
+                    color: "#15283F",
                     fontSize: isMobile ? 24 : 30,
                     lineHeight: 1.2,
                     fontWeight: 900,
                   }}
                 >
-                  İşletmeniz İçin Sektörleri Keşfedin
+                  {catalog.heading[1]}
                 </h2>
               </div>
 
@@ -725,13 +604,13 @@ export default function HomePage() {
                 <Link
                   to="/categories"
                   style={{
-                    color: "#0B3D6E",
+                    color: "#15283F",
                     textDecoration: "none",
                     fontSize: 13,
                     fontWeight: 900,
                   }}
                 >
-                  Tüm sektörler →
+                  {catalog.heading[2]} →
                 </Link>
               )}
             </div>
@@ -751,51 +630,39 @@ export default function HomePage() {
             >
               {[
                 {
-                  title: "Ev, Yaşam & Ofis",
+                  title: catalog.sectors[0],
                   image: "/images/discover-ev-yasam.jpeg",
                   categoryName: "Mobilya ve Ofis",
                 },
                 {
-                  title: "Kozmetik & Kişisel Bakım",
+                  title: catalog.sectors[1],
                   image: "/images/discover-kozmetik.jpeg",
                   categoryName: "Kozmetik ve Kuaför",
                 },
                 {
-                  title: "Bahçe & Yapı Malzemeleri",
+                  title: catalog.sectors[2],
                   image: "/images/discover-bahce-yapi.jpeg",
                   categoryName: "İnşaat ve Yapı Malzemeleri",
                 },
                 {
-                  title: "Gıda & Horeca",
+                  title: catalog.sectors[3],
                   image: "/images/discover-gida-horeca.jpeg",
                   categoryName: "Gıda ve Horeca",
                 },
                 {
-                  title: "Temizlik & Hijyen",
+                  title: catalog.sectors[4],
                   image: "/images/discover-temizlik-hijyen.jpeg",
                   categoryName: "Temizlik ve Hijyen",
                 },
                 {
-                  title: "Sanayi & Üretim",
+                  title: catalog.sectors[5],
                   image: "/images/discover-sanayi.jpeg",
                   categoryName: "Maden ve Endüstriyel Üretim",
                 },
               ].map((item) => (
-                <Link
+                <Link className="nex-home-sector-tile"
                   key={item.title}
-                  to={
-                    homeCategories.find(
-                      (category) =>
-                        category.name.toLocaleLowerCase("tr-TR") ===
-                        item.categoryName.toLocaleLowerCase("tr-TR")
-                    )?.id
-                      ? `/category/${homeCategories.find(
-                          (category) =>
-                            category.name.toLocaleLowerCase("tr-TR") ===
-                            item.categoryName.toLocaleLowerCase("tr-TR")
-                        )!.id}`
-                      : "/categories"
-                  }
+                  to={resolveHomeCategoryHref(item.categoryName)}
                   style={{
                     position: "relative",
                     minWidth: isMobile ? 270 : 0,
@@ -863,11 +730,11 @@ export default function HomePage() {
                         display: "grid",
                         placeItems: "center",
                         borderRadius: 11,
-                        background: "#16B83E",
+                        background: "#A85637",
                         color: "#ffffff",
                         fontSize: 17,
                         fontWeight: 900,
-                        boxShadow: "0 7px 18px rgba(22,184,62,0.30)",
+                        boxShadow: "0 7px 18px rgba(199,107,67,0.30)",
                       }}
                     >
                       →
@@ -878,7 +745,7 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section style={{ marginBottom: isMobile ? 28 : 40 }}>
+          <section className="nex-home-popular" style={{ marginBottom: isMobile ? 28 : 40 }}>
             <div
               style={{
                 display: "flex",
@@ -892,25 +759,25 @@ export default function HomePage() {
               <div>
                 <div
                   style={{
-                    color: "#16B83E",
+                    color: "#A85637",
                     fontSize: 11,
                     fontWeight: 900,
                     letterSpacing: 0.6,
                     marginBottom: 6,
                   }}
                 >
-                  ALIŞVERİŞE BAŞLA
+                  {popularCopy.eyebrow}
                 </div>
 
                 <h2
                   style={{
                     margin: 0,
-                    color: "#0B3D6E",
+                    color: "#15283F",
                     fontSize: isMobile ? 24 : 30,
                     lineHeight: 1.2,
                   }}
                 >
-                  Popüler Kategoriler
+                  {catalog.quick[2][1]}
                 </h2>
               </div>
 
@@ -918,12 +785,12 @@ export default function HomePage() {
                 to="/categories"
                 style={{
                   textDecoration: "none",
-                  color: "#0B3D6E",
+                  color: "#15283F",
                   fontSize: 13,
                   fontWeight: 900,
                 }}
               >
-                Tüm kategoriler →
+                {heroLabels.categories} →
               </Link>
             </div>
 
@@ -940,10 +807,10 @@ export default function HomePage() {
                 WebkitOverflowScrolling: "touch",
               }}
             >
-              {sectors.map((sector) => (
+              {sectors.slice(0, 6).map((sector) => (
                 <Link
                   key={sector.title}
-                  to={homeCategories.find((category) => category.name.toLocaleLowerCase("tr-TR") === sector.title.toLocaleLowerCase("tr-TR"))?.id ? `/category/${homeCategories.find((category) => category.name.toLocaleLowerCase("tr-TR") === sector.title.toLocaleLowerCase("tr-TR"))!.id}` : "/categories"}
+                  to={resolveHomeCategoryHref(sector.title)}
                   style={{
                     minWidth: isMobile ? 155 : 0,
                     flex: isMobile ? "0 0 155px" : undefined,
@@ -952,7 +819,7 @@ export default function HomePage() {
                     borderRadius: 18,
                     border: "1px solid #DCE6EE",
                     background: "#ffffff",
-                    color: "#0B3D6E",
+                    color: "#15283F",
                     textDecoration: "none",
                     boxShadow:
                       "0 10px 28px rgba(11,61,110,0.08), 0 2px 5px rgba(15,23,42,0.03)",
@@ -968,7 +835,7 @@ export default function HomePage() {
                   >
                     <img
                       src={sector.image}
-                      alt={sector.title}
+                      alt={popularCopy.names[sector.title] || sector.title}
                       loading="lazy"
                       style={{
                         display: "block",
@@ -994,13 +861,13 @@ export default function HomePage() {
                   >
                     <strong
                       style={{
-                        color: "#0B3D6E",
+                        color: "#15283F",
                         fontSize: isMobile ? 12 : 14,
                         lineHeight: 1.3,
                         fontWeight: 850,
                       }}
                     >
-                      {sector.title}
+                      {popularCopy.names[sector.title] || sector.title}
                     </strong>
 
                     <span
@@ -1013,10 +880,10 @@ export default function HomePage() {
                         placeItems: "center",
                         borderRadius: 9,
                         color: "#ffffff",
-                        background: "#16B83E",
+                        background: "#A85637",
                         fontWeight: 900,
                         fontSize: 14,
-                        boxShadow: "0 5px 12px rgba(22,184,62,0.20)",
+                        boxShadow: "0 5px 12px rgba(199,107,67,0.20)",
                       }}
                     >
                       →
@@ -1027,303 +894,54 @@ export default function HomePage() {
             </div>
           </section>
 
-          {featuredProducts.length > 0 && (
-            <section style={{ marginBottom: isMobile ? 28 : 42 }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "end",
-                  justifyContent: "space-between",
-                  gap: 16,
-                  flexWrap: "wrap",
-                  marginBottom: 18,
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      color: "#16B83E",
-                      fontSize: 12,
-                      fontWeight: 900,
-                      letterSpacing: 0.5,
-                      marginBottom: 6,
-                    }}
-                  >
-                    TOPTAN ALIŞVERİŞ
-                  </div>
-
-                  <h2
-                    style={{
-                      margin: 0,
-                      color: "#0B3D6E",
-                      fontSize: isMobile ? 24 : 30,
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    Yeni Eklenen Ürünler
-                  </h2>
-                </div>
-
+          <section className="nex-home-shortcuts"
+            aria-label={catalog.quick[2][1]}>
+            <nav className="nex-home-shortcuts-links">
+              {[
+                {
+                  icon: "↗",
+                  eyebrow: catalog.quick[0][0],
+                  title: catalog.quick[0][1],
+                  description: catalog.quick[0][2],
+                  to: "/products",
+                },
+                {
+                  icon: "□",
+                  eyebrow: catalog.quick[1][0],
+                  title: catalog.quick[1][1],
+                  description: catalog.quick[1][2],
+                  to: "/products",
+                },
+                {
+                  icon: "▦",
+                  eyebrow: catalog.quick[2][0],
+                  title: catalog.quick[2][1],
+                  description: catalog.quick[2][2],
+                  to: "/categories",
+                },
+                {
+                  icon: "♡",
+                  eyebrow: catalog.quick[3][0],
+                  title: catalog.quick[3][1],
+                  description: catalog.quick[3][2],
+                  to: "/favorites",
+                },
+              ].map((item) => (
                 <Link
-                  to="/products"
-                  style={{
-                    color: "#0B3D6E",
-                    textDecoration: "none",
-                    fontSize: 13,
-                    fontWeight: 900,
-                  }}
+                  key={item.title}
+                  className="nex-home-quick-card"
+                  to={item.to}
+                  title={item.description}
                 >
-                  Tüm ürünleri gör →
+                  <span aria-hidden="true">{item.icon}</span>
+                  <strong>{item.title}</strong>
+                  <span aria-hidden="true">→</span>
                 </Link>
-              </div>
-
-              <div
-                style={{
-                  display: isMobile ? "flex" : "grid",
-                  gridTemplateColumns: isMobile
-                    ? undefined
-                    : "repeat(4, minmax(0, 1fr))",
-                  gap: 12,
-                  overflowX: isMobile ? "auto" : "visible",
-                  paddingBottom: isMobile ? 8 : 0,
-                  scrollSnapType: isMobile ? "x mandatory" : undefined,
-                  WebkitOverflowScrolling: "touch",
-                }}
-              >
-                {featuredProducts.map((product) => (
-                  <Link
-                    key={product.id}
-                    to={`/product/${product.id}`}
-                    style={{
-                      minWidth: isMobile ? 220 : 0,
-                      flex: isMobile ? "0 0 220px" : undefined,
-                      scrollSnapAlign: isMobile ? "start" : undefined,
-                      display: "flex",
-                      flexDirection: "column",
-                      overflow: "hidden",
-                      borderRadius: 18,
-                      border: "1px solid #DCE6EE",
-                      background: "#ffffff",
-                      color: "#0B3D6E",
-                      textDecoration: "none",
-                      boxShadow:
-                        "0 10px 28px rgba(11,61,110,0.08), 0 2px 5px rgba(15,23,42,0.03)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: "relative",
-                        aspectRatio: "4 / 3",
-                        overflow: "hidden",
-                        background:
-                          "linear-gradient(180deg, #FFFFFF 0%, #F4F8FA 100%)",
-                        borderBottom: "1px solid #E7EEF3",
-                      }}
-                    >
-                      <img
-                        src={product.image}
-                        alt={product.title}
-                        loading="lazy"
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          display: "block",
-                          objectFit: "contain",
-                          padding: 8,
-                          boxSizing: "border-box",
-                        }}
-                      />
-
-                      {product.moq ? (
-                        <span
-                          style={{
-                            position: "absolute",
-                            left: 10,
-                            bottom: 10,
-                            padding: "6px 9px",
-                            borderRadius: 9,
-                            background: "rgba(11,61,110,0.95)",
-                            color: "#ffffff",
-                            fontSize: 10,
-                            fontWeight: 850,
-                            boxShadow: "0 4px 12px rgba(11,61,110,0.18)",
-                          }}
-                        >
-                          Min. {product.moq} {product.unitType || "adet"}
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <div
-                      style={{
-                        padding: 11,
-                        display: "flex",
-                        flexDirection: "column",
-                        flex: 1,
-                      }}
-                    >
-                      <div
-                        style={{
-                          color: "#16A34A",
-                          fontSize: 10,
-                          fontWeight: 850,
-                          letterSpacing: 0.25,
-                          marginBottom: 6,
-                        }}
-                      >
-                        {product.category}
-                      </div>
-
-                      <div
-                        style={{
-                          minHeight: 42,
-                          color: "#16324A",
-                          fontSize: 13,
-                          fontWeight: 800,
-                          lineHeight: 1.35,
-                          marginBottom: 9,
-                        }}
-                      >
-                        {product.title}
-                      </div>
-
-                      <div style={{ marginTop: "auto" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "baseline",
-                            gap: 5,
-                            marginBottom: 6,
-                          }}
-                        >
-                          <strong
-                            style={{
-                              color: "#0B3D6E",
-                              fontSize: 20,
-                              fontWeight: 950,
-                              letterSpacing: -0.3,
-                            }}
-                          >
-                            {product.price}
-                          </strong>
-                          <span
-                            style={{
-                              color: "#64748b",
-                              fontSize: 11,
-                              fontWeight: 700,
-                            }}
-                          >
-                            / {product.unitType || "adet"}
-                          </span>
-                        </div>
-
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            gap: 8,
-                            color: "#64748b",
-                            fontSize: 10,
-                            fontWeight: 650,
-                            paddingTop: 7,
-                            borderTop: "1px solid #EDF2F5",
-                            marginBottom: 10,
-                          }}
-                        >
-                          <span>
-                            {product.vatRate != null
-                              ? `KDV %${product.vatRate}`
-                              : "KDV bilgisi üründe"}
-                          </span>
-                          {product.leadTimeDays != null && (
-                            <span>{product.leadTimeDays} gün teslim</span>
-                          )}
-                        </div>
-
-                        <div
-                          style={{
-                            minHeight: 36,
-                            display: "grid",
-                            placeItems: "center",
-                            borderRadius: 10,
-                            background:
-                              "linear-gradient(135deg, #16B83E 0%, #22C55E 100%)",
-                            color: "#ffffff",
-                            fontSize: 12,
-                            fontWeight: 900,
-                            boxShadow: "0 7px 16px rgba(22,184,62,0.18)",
-                          }}
-                        >
-                          Ürünü İncele
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-
-          
-
-                    <section
-            style={{
-              display: "grid",
-              gridTemplateColumns: isMobile
-                ? "1fr"
-                : "repeat(3, minmax(0, 1fr))",
-              border: "1px solid #e2e8f0",
-              borderRadius: 16,
-              overflow: "hidden",
-              background: "#ffffff",
-              marginBottom: isMobile ? 20 : 28,
-            }}
-          >
-            {[
-              ["✓", "Doğrulanmış Firmalar"],
-              ["🔒", "Güvenli Ödeme"],
-              ["🛡️", "Kontrollü Ticaret"],
-            ].map(([icon, title], index) => (
-              <div
-                key={title}
-                style={{
-                  minHeight: isMobile ? 52 : 64,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 9,
-                  padding: "10px 14px",
-                  borderRight:
-                    !isMobile && index < 2 ? "1px solid #e2e8f0" : undefined,
-                  borderBottom:
-                    isMobile && index < 2 ? "1px solid #e2e8f0" : undefined,
-                  boxSizing: "border-box",
-                }}
-              >
-                <span
-                  style={{
-                    color: "#16B83E",
-                    fontSize: 17,
-                    fontWeight: 900,
-                  }}
-                >
-                  {icon}
-                </span>
-                <strong
-                  style={{
-                    color: "#0B3D6E",
-                    fontSize: isMobile ? 12 : 14,
-                  }}
-                >
-                  {title}
-                </strong>
-              </div>
-            ))}
+              ))}
+            </nav>
           </section>
 
-
-
-          <section
+          <section className="nex-home-cta"
             style={{
               position: "relative",
               overflow: "hidden",
@@ -1374,20 +992,20 @@ export default function HomePage() {
                 to="/register?role=BUYER"
                 style={{
                   textDecoration: "none",
-                  background: "linear-gradient(135deg, #16B83E, #22C55E)",
+                  background: "linear-gradient(135deg, #A85637, #C76B43)",
                   color: "#ffffff",
                   padding: isMobile ? "10px 13px" : "13px 20px",
                   borderRadius: 12,
                   fontWeight: 800,
                   fontSize: isMobile ? 13 : 16,
-                  boxShadow: "0 10px 24px rgba(34,197,94,0.24)",
+                  boxShadow: "0 10px 24px rgba(199,107,67,0.24)",
                   width: isMobile ? "100%" : "auto",
                   maxWidth: isMobile ? 360 : "none",
                   boxSizing: "border-box",
                   textAlign: "center",
                 }}
               >
-                Alıcı Olarak Üye Ol
+                {catalog.register[0]}
               </Link>
               <Link
                 to="/register?role=SELLER"
@@ -1407,7 +1025,7 @@ export default function HomePage() {
                   backdropFilter: "blur(8px)",
                 }}
               >
-                Satıcı Olarak Başla
+                {catalog.register[1]}
               </Link>
             </div>
           </section>

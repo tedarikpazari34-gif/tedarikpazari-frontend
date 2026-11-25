@@ -1,0 +1,186 @@
+
+/* Nex Tedarik Pazarı — dengeli ve sade katalog */
+
+.nex-home-featured {
+  margin: 12px 0 38px !important;
+}
+
+.nex-home-product-tile {
+  overflow: hidden;
+  background: #FFFFFF !important;
+  border: 1px solid #E3E7EB !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 22px rgba(21,40,63,.07) !important;
+  transition: transform .2s ease;
+}
+
+.nex-home-popular {
+  margin-bottom: 40px !important;
+}
+
+.nex-home-popular > div:nth-child(2) > a {
+  overflow: hidden;
+  border-radius: 16px !important;
+  border: 1px solid #E3E7EB !important;
+  box-shadow: 0 8px 22px rgba(21,40,63,.07) !important;
+  background: #FFFFFF !important;
+  transition: transform .2s ease;
+}
+
+
+/* Fotoğraflı sektör vitrini */
+.nex-home-sector {
+  margin-bottom: 36px !important;
+  padding: 24px 0 10px;
+  background: #FFFFFF;
+  color: #15283F;
+}
+
+.nex-home-sector > div:first-child {
+  margin-bottom: 18px;
+}
+
+.nex-home-sector > div:first-child a {
+  color: #15283F;
+}
+
+.nex-home-sector-tile {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 18px !important;
+  border: 1px solid #E3E7EB !important;
+  background: #FFFFFF;
+  box-shadow: 0 9px 24px rgba(21,40,63,.09);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.nex-home-sector-tile > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .3s ease;
+}
+
+.nex-home-shortcuts {
+  padding: 12px 0;
+  margin: 0 0 28px;
+  border-bottom: 1px solid #E3E7EB;
+}
+
+.nex-home-shortcuts-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+}
+
+.nex-home-quick-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 4px;
+  color: #15283F;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.nex-home-quick-card span {
+  color: #A85637;
+}
+
+/* Uyelik alani: footer'dan farkli, saf beyaz */
+.nex-home-cta {
+  background: #FFFFFF !important;
+  background-image: none !important;
+  border: 1px solid #E3E7EB !important;
+  box-shadow: none !important;
+  color: #15283F !important;
+}
+
+.nex-home-cta h1,
+.nex-home-cta h2,
+.nex-home-cta h3,
+.nex-home-cta p {
+  color: #15283F !important;
+  text-shadow: none !important;
+}
+
+.nex-home-cta a[href*="role=BUYER"] {
+  background: #A85637 !important;
+  color: #FFFFFF !important;
+  border-color: #A85637 !important;
+}
+
+.nex-home-cta a[href*="role=SELLER"] {
+  background: #FFFFFF !important;
+  color: #15283F !important;
+  border: 1px solid #15283F !important;
+}
+
+.nex-home-sector-tile:focus-visible,
+.nex-home-quick-card:focus-visible,
+.nex-home-product-tile:focus-visible,
+.nex-home-popular a:focus-visible {
+  outline: 3px solid #C76B43;
+  outline-offset: 3px;
+}
+
+@media (min-width: 901px) {
+  .nex-home-popular > div:nth-child(2) {
+    grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+    gap: 16px !important;
+  }
+
+  .nex-home-popular > div:nth-child(2) > a {
+    grid-column: auto !important;
+  }
+
+  .nex-home-popular > div:nth-child(2) > a > div:first-child {
+    height: 130px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .nex-home-sector-tile {
+    border-radius: 16px !important;
+  }
+
+  .nex-home-shortcuts-links {
+    justify-content: flex-start;
+    gap: 6px 16px;
+  }
+
+  .nex-home-quick-card {
+    font-size: 12px;
+  }
+}
+
+@media (hover: hover) {
+  .nex-home-product-tile:hover,
+  .nex-home-popular > div:nth-child(2) > a:hover {
+    transform: translateY(-3px);
+  }
+
+  .nex-home-sector-tile:hover {
+    background: #F5F6F8;
+  }
+
+  .nex-home-quick-card:hover {
+    color: #A85637;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nex-home-product-tile,
+  .nex-home-popular > div:nth-child(2) > a,
+  .nex-home-sector-tile {
+    transition: none;
+  }
+}

@@ -62,3 +62,54 @@ test('standart kargo ve sipariş rotaları korunuyor', () => {
   assert.match(app, /path="\/buyer\/orders"/);
   assert.match(app, /path="\/seller\/orders"/);
 });
+
+// 2859-CT-DESIGN-FV-I
+
+test('lojistik gecmis siparis ekrani salt okunur', () => {
+  const source = read('src/pages/LogisticsOrdersPage.tsx');
+
+  assert.match(
+    source,
+    /fetch\(\s*`\$\{API\}\/shipping\/orders`/
+  );
+
+  assert.doesNotMatch(
+    source,
+    /\/shipping\/orders\/\$\{[^}]+\}\/(?:pickup|transit|deliver)/
+  );
+
+  assert.doesNotMatch(
+    source,
+    /\bmethod\s*:\s*["'`](?:POST|PUT|PATCH|DELETE)["'`]/i
+  );
+
+  assert.doesNotMatch(
+    source,
+    /onClick\s*=\s*\{\s*\(\)\s*=>\s*action\s*\(/
+  );
+
+  assert.doesNotMatch(
+    source,
+    /\bconst action\s*=\s*async\b/
+  );
+});
+
+test('lojistik gecmis bilgileri ve sohbet korunur', () => {
+  const source = read('src/pages/LogisticsOrdersPage.tsx');
+
+  assert.match(source, /function ShippingTimeline\(/);
+  assert.match(source, /<ShippingTimeline order=\{order\}/);
+  assert.match(source, /to="\/chat"/);
+  assert.match(source, /order\.trackingNo/);
+  assert.match(source, /order\.shippingRfq\?\.fromAddress/);
+  assert.match(source, /order\.shippingQuote\?\.price/);
+
+  for (const status of [
+    'PENDING_PICKUP',
+    'PICKED_UP',
+    'IN_TRANSIT',
+    'DELIVERED',
+  ]) {
+    assert.ok(source.includes(status));
+  }
+});

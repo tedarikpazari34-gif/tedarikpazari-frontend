@@ -1,3 +1,4 @@
+import "./NexFooterPalette.css";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -19,7 +20,7 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer
+    <footer className="nex-brand-footer"
       style={{
         ...footerStyle,
         padding: isMobile ? "28px 18px 120px" : "56px 24px 22px",
@@ -227,8 +228,6 @@ const footerStyle: CSSProperties = {
   boxSizing: "border-box",
   padding: "56px 24px 22px",
   color: "#e2e8f0",
-  background:
-    "linear-gradient(135deg, #082F55 0%, #0B3D6E 52%, #123A63 100%)",
 };
 
 const mainStyle: CSSProperties = {
@@ -256,8 +255,8 @@ const logoStyle: CSSProperties = {
   placeItems: "center",
   color: "#ffffff",
   fontWeight: 900,
-  background: "linear-gradient(135deg, #16B83E, #22C55E)",
-  boxShadow: "0 10px 24px rgba(22,184,62,0.24)",
+  background: "linear-gradient(135deg, #B45734, #93401F)",
+  boxShadow: "0 10px 24px rgba(181,87,52,0.22)",
 };
 
 const brandStyle: CSSProperties = {
