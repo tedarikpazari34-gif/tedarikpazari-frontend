@@ -78,12 +78,22 @@ export default function Footer() {
           ]}
         />
 
-        <div style={columnStyle}>
+        <div
+          style={{
+            ...columnStyle,
+            gridColumn: isMobile ? "1 / -1" : undefined,
+          }}
+        >
           <strong style={columnTitleStyle}>{t("footer.support")}</strong>
 
           <a
             href="mailto:tedarikpazari34@gmail.com"
-            style={linkStyle}
+            style={{
+              ...linkStyle,
+              whiteSpace: "nowrap",
+              overflowWrap: "normal",
+              wordBreak: "normal",
+            }}
           >
             tedarikpazari34@gmail.com
           </a>
