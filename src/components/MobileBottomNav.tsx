@@ -35,14 +35,14 @@ export default function MobileBottomNav() {
             to={item.to}
             style={{
               ...itemStyle,
-              color: active ? "#2563eb" : "#64748b",
+              color: active ? "#C76B43" : "#64748b",
             }}
           >
             <span
               style={{
                 ...iconStyle,
-                background: active ? "#eff6ff" : "transparent",
-                color: active ? "#2563eb" : "#64748b",
+                background: active ? "#F9EDE6" : "transparent",
+                color: active ? "#C76B43" : "#64748b",
               }}
             >
               {item.icon}
