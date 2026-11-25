@@ -567,7 +567,7 @@ export default function ProductDetailPage() {
                     }}
                     style={{
                       ...thumbButtonStyle,
-                      borderColor: active ? "#2563eb" : "#e2e8f0",
+                      borderColor: active ? "#C76B43" : "#e2e8f0",
                     }}
                   >
                     {thumbUrl && !thumbErrors[thumbKey] ? (
@@ -653,7 +653,7 @@ export default function ProductDetailPage() {
                   style={{
                     width: "100%",
                     padding: 13,
-                    border: "1px solid #0f766e",
+                    border: "1px solid #C76B43",
                     borderRadius: 10,
                     background: "#fff",
                     fontSize: 15,
@@ -1175,7 +1175,7 @@ function InfoBox({
 
 const pageStyle: CSSProperties = {
   minHeight: "100vh",
-  background: "#f7f9fb",
+  background: "#FFFFFF",
   padding: window.innerWidth < 700 ? "18px 12px" : "30px 24px 48px",
   width: "100%",
   maxWidth: "100%",
@@ -1285,7 +1285,7 @@ const infoSectionStyle: CSSProperties = {
 };
 
 const categoryStyle: CSSProperties = {
-  color: "#16A34A",
+  color: "#C76B43",
   fontSize: 13,
   fontWeight: 900,
   marginBottom: 10,
@@ -1320,7 +1320,7 @@ const titleStyle: CSSProperties = {
   lineHeight: 1.18,
   fontWeight: 900,
   margin: "0 0 12px",
-  color: "#0B3D6E",
+  color: "#15283F",
   letterSpacing: -0.5,
 };
 
@@ -1342,7 +1342,7 @@ const priceLabelStyle: CSSProperties = {
 };
 
 const priceStyle: CSSProperties = {
-  color: "#2563eb",
+  color: "#15283F",
   fontSize: 38,
   fontWeight: 900,
 };
@@ -1379,9 +1379,9 @@ const infoValueStyle: CSSProperties = {
 };
 
 const noticeStyle: CSSProperties = {
-  background: "#eff6ff",
-  border: "1px solid #bfdbfe",
-  color: "#1e3a8a",
+  background: "#FFFFFF",
+  border: "1px solid #E8D9D1",
+  color: "#15283F",
   borderRadius: 20,
   padding: 18,
   lineHeight: 1.6,
@@ -1401,12 +1401,12 @@ const primaryButtonStyle: CSSProperties = {
   height: 54,
   border: "none",
   borderRadius: 12,
-  background: "linear-gradient(135deg, #16B83E 0%, #22C55E 100%)",
+  background: "#C76B43",
   color: "#ffffff",
   fontSize: 16,
   fontWeight: 900,
   cursor: "pointer",
-  boxShadow: "0 8px 18px rgba(22,184,62,0.20)",
+  boxShadow: "0 8px 18px rgba(199,107,67,0.20)",
 };
 
 const secondaryButtonStyle: CSSProperties = {
@@ -1503,7 +1503,7 @@ const collectionBodyStyle: CSSProperties = {
 };
 
 const collectionCategoryStyle: CSSProperties = {
-  color: "#2563eb",
+  color: "#C76B43",
   fontSize: 11,
   fontWeight: 900,
   textTransform: "uppercase",
@@ -1523,7 +1523,7 @@ const collectionFooterStyle: CSSProperties = {
 };
 
 const collectionPriceStyle: CSSProperties = {
-  color: "#2563eb",
+  color: "#15283F",
   fontSize: 18,
 };
 
@@ -1616,10 +1616,10 @@ const buyNowButtonStyle: CSSProperties = {
   flex: 1,
   minWidth: 190,
   height: 54,
-  border: "1.5px solid #0B3D6E",
+  border: "1.5px solid #15283F",
   borderRadius: 12,
   background: "#ffffff",
-  color: "#0B3D6E",
+  color: "#15283F",
   fontSize: 16,
   fontWeight: 900,
   cursor: "pointer",
@@ -1643,7 +1643,7 @@ const productDetailsHeaderStyle: CSSProperties = {
 const productDetailsEyebrowStyle: CSSProperties = {
   display: "block",
   marginBottom: 7,
-  color: "#16A34A",
+  color: "#C76B43",
   fontSize: 11,
   fontWeight: 900,
   letterSpacing: 1.2,
@@ -1651,7 +1651,7 @@ const productDetailsEyebrowStyle: CSSProperties = {
 
 const productDetailsTitleStyle: CSSProperties = {
   margin: 0,
-  color: "#0B3D6E",
+  color: "#15283F",
   fontSize: window.innerWidth < 700 ? 24 : 28,
   lineHeight: 1.2,
   fontWeight: 900,
@@ -1711,7 +1711,7 @@ const productSpecLabelStyle: CSSProperties = {
 };
 
 const productSpecValueStyle: CSSProperties = {
-  color: "#0B3D6E",
+  color: "#15283F",
   fontSize: 14,
   fontWeight: 900,
 };

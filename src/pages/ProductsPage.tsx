@@ -740,7 +740,7 @@ const res = await fetch(`${API}/products?${query.toString()}`);
                         ...addToCartButton,
                         background: addedCartIds.has(product.id)
                           ? "#047857"
-                          : "#16B83E",
+                          : "#C76B43",
                       }}
                     >
                       {addedCartIds.has(product.id)
@@ -813,22 +813,22 @@ const res = await fetch(`${API}/products?${query.toString()}`);
 
 const page: CSSProperties = {
   minHeight: "100vh",
-  background: "#f7f9fb",
+  background: "#FFFFFF",
   padding: window.innerWidth < 700 ? "18px 12px 40px" : "28px 24px 56px",
 };
 
 const hero: CSSProperties = {
   maxWidth: 1360,
   margin: "0 auto 22px",
-  background: "linear-gradient(135deg, #082f57 0%, #0B3D6E 62%, #11558f 100%)",
+  background: "#15283F",
   color: "#ffffff",
   borderRadius: 18,
   padding: window.innerWidth < 700 ? 22 : 30,
-  boxShadow: "0 12px 30px rgba(11,61,110,0.14)",
+  boxShadow: "0 12px 30px rgba(21,40,63,0.14)",
 };
 
 const eyebrow: CSSProperties = {
-  color: "#86efac",
+  color: "#F4BEA7",
   fontSize: 13,
   fontWeight: 900,
   marginBottom: 8,
@@ -866,13 +866,13 @@ const searchInput: CSSProperties = {
 
 const searchButton: CSSProperties = {
   border: "none",
-  background: "linear-gradient(135deg, #16B83E 0%, #22C55E 100%)",
+  background: "#C76B43",
   color: "#ffffff",
   padding: "13px 28px",
   borderRadius: 12,
   fontWeight: 900,
   cursor: "pointer",
-  boxShadow: "0 6px 14px rgba(22,184,62,0.18)",
+  boxShadow: "0 6px 14px rgba(199,107,67,0.18)",
 };
 
 const catalogLayoutStyle: CSSProperties = {
@@ -903,14 +903,14 @@ const filterHeaderStyle: CSSProperties = {
 };
 
 const filterEyebrowStyle: CSSProperties = {
-  color: "#16A34A",
+  color: "#C76B43",
   fontSize: 10,
   fontWeight: 900,
   letterSpacing: 0.8,
 };
 
 const filterTitleStyle: CSSProperties = {
-  color: "#0B3D6E",
+  color: "#15283F",
   fontSize: 18,
   fontWeight: 900,
 };
@@ -976,7 +976,7 @@ const placeholder: CSSProperties = {
 };
 
 const category: CSSProperties = {
-  color: "#16A34A",
+  color: "#C76B43",
   fontSize: 13,
   fontWeight: 900,
   marginBottom: 8,
@@ -988,7 +988,7 @@ const productTitle: CSSProperties = {
   fontSize: 17,
   lineHeight: 1.35,
   fontWeight: 800,
-  color: "#0B3D6E",
+  color: "#15283F",
 };
 
 const supplierBadge: CSSProperties = {
@@ -1011,7 +1011,7 @@ const priceRow: CSSProperties = {
 
 const priceText: CSSProperties = {
   fontSize: 20,
-  color: "#0f172a",
+  color: "#15283F",
 };
 
 const moqText: CSSProperties = {
@@ -1029,8 +1029,8 @@ const detailBtn: CSSProperties = {
   flex: 1,
   textAlign: "center",
   textDecoration: "none",
-  background: "#e0f2fe",
-  color: "#0369a1",
+  background: "#F9EDE6",
+  color: "#15283F",
   padding: "10px 14px",
   borderRadius: 10,
   fontWeight: 900,
@@ -1112,7 +1112,7 @@ const clearButton: CSSProperties = {
   borderRadius: 10,
   padding: "0 14px",
   background: "#f8fafc",
-  color: "#0B3D6E",
+  color: "#15283F",
   fontSize: 14,
   fontWeight: 800,
   cursor: "pointer",
@@ -1190,7 +1190,7 @@ const compareGoButtonStyle: CSSProperties = {
   padding: "10px 15px",
   borderRadius: 10,
   color: "#ffffff",
-  background: "#2563eb",
+  background: "#C76B43",
   textDecoration: "none",
   fontWeight: 900,
 };
@@ -1203,10 +1203,10 @@ const newBadge: CSSProperties = {
   padding: "7px 11px",
   borderRadius: 999,
   color: "#ffffff",
-  background: "#16B83E",
+  background: "#C76B43",
   fontSize: 12,
   fontWeight: 900,
-  boxShadow: "0 6px 14px rgba(22,184,62,0.22)",
+  boxShadow: "0 6px 14px rgba(199,107,67,0.22)",
 };
 
 const sellerRow: CSSProperties = {
@@ -1318,7 +1318,7 @@ const professionalPriceLine: CSSProperties = {
 };
 
 const professionalPriceText: CSSProperties = {
-  color: "#0B3D6E",
+  color: "#15283F",
   fontSize: 24,
   lineHeight: 1.15,
   fontWeight: 800,
